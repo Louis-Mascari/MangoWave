@@ -1,0 +1,6 @@
+name: Deploy
+
+# TODO: Configure OIDC AWS deployment and CloudFront sync workflow
+# Triggers: push to main
+# Jobs: cdk-deploy, cloudfront-invalidation
+# Auth: AWS IAM OIDC (no long-lived secret keys)

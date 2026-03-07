@@ -1,0 +1,5 @@
+name: CI
+
+# TODO: Configure PR linting and testing workflow
+# Triggers: pull_request to main
+# Jobs: lint, typecheck, test (Vitest + React Testing Library)

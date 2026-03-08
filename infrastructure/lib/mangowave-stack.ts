@@ -295,6 +295,10 @@ export class MangoWaveStack extends cdk.Stack {
     });
 
     // IAM role for AWS Budgets to apply the kill-switch policy
+    const lambdaRoleArns = lambdaFunctions
+      .map(({ fn }) => fn.role?.roleArn)
+      .filter((arn): arn is string => arn !== undefined);
+
     const budgetActionRole = new iam.Role(this, 'BudgetActionRole', {
       roleName: 'MangoWave-BudgetActionRole',
       assumedBy: new iam.ServicePrincipal('budgets.amazonaws.com'),
@@ -302,15 +306,8 @@ export class MangoWaveStack extends cdk.Stack {
         AttachPolicy: new iam.PolicyDocument({
           statements: [
             new iam.PolicyStatement({
-              actions: [
-                'iam:AttachGroupPolicy',
-                'iam:DetachGroupPolicy',
-                'iam:AttachRolePolicy',
-                'iam:DetachRolePolicy',
-                'iam:AttachUserPolicy',
-                'iam:DetachUserPolicy',
-              ],
-              resources: ['*'],
+              actions: ['iam:AttachRolePolicy', 'iam:DetachRolePolicy'],
+              resources: lambdaRoleArns,
             }),
           ],
         }),
@@ -318,7 +315,11 @@ export class MangoWaveStack extends cdk.Stack {
     });
 
     // Budget action: automatically attach deny policy when budget is breached
-    new cdk.CfnResource(this, 'BudgetKillSwitchAction', {
+    const lambdaRoleNames = lambdaFunctions
+      .map(({ fn }) => fn.role?.roleName)
+      .filter((name): name is string => name !== undefined);
+
+    const killSwitchAction = new cdk.CfnResource(this, 'BudgetKillSwitchAction', {
       type: 'AWS::Budgets::BudgetsAction',
       properties: {
         BudgetName: 'MangoWave-FreeTierGuard',
@@ -333,10 +334,7 @@ export class MangoWaveStack extends cdk.Stack {
         Definition: {
           IamActionDefinition: {
             PolicyArn: killSwitchPolicy.managedPolicyArn,
-            Roles: lambdaFunctions.map(({ fn }) => {
-              const role = fn.role;
-              return role ? role.roleName : '';
-            }),
+            Roles: lambdaRoleNames,
           },
         },
         Subscribers: [
@@ -347,6 +345,9 @@ export class MangoWaveStack extends cdk.Stack {
         ],
       },
     });
+
+    // Ensure budget is created before the action that references it
+    killSwitchAction.addDependency(this.node.findChild('FreeTierBudget') as cdk.CfnResource);
 
     // ─── Outputs ──────────────────────────────────────────────────
     new cdk.CfnOutput(this, 'ApiUrl', {

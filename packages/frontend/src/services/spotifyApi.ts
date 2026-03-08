@@ -162,6 +162,46 @@ export async function controlPlayback(
   }
 }
 
+export interface CloudSettings {
+  theme: string;
+  transitionTime: number;
+  eqSettings: {
+    preAmpGain: number;
+    bandGains: number[];
+  };
+  blockedPresets: string[];
+  favoritePresets: string[];
+}
+
+export async function saveSettings(sessionId: string, settings: CloudSettings): Promise<void> {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const response = await fetch(`${apiUrl}/settings/save`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sessionId, settings }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to save settings');
+  }
+}
+
+export async function loadSettings(sessionId: string): Promise<CloudSettings | null> {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const response = await fetch(`${apiUrl}/settings/load`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sessionId }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to load settings');
+  }
+
+  const data = await response.json();
+  return data.settings ?? null;
+}
+
 export class TokenExpiredError extends Error {
   constructor() {
     super('Access token expired');

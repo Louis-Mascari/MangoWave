@@ -74,3 +74,53 @@ export async function updateSessionToken(sessionId: string, refreshToken: string
     }),
   );
 }
+
+export interface UserSettings {
+  theme: string;
+  transitionTime: number;
+  eqSettings: {
+    preAmpGain: number;
+    bandGains: number[];
+  };
+  blockedPresets: string[];
+  favoritePresets: string[];
+}
+
+export async function storeUserSettings(
+  spotifyUserId: string,
+  settings: UserSettings,
+): Promise<void> {
+  await docClient.send(
+    new PutCommand({
+      TableName: getTableName(),
+      Item: {
+        PK: `USER#${spotifyUserId}`,
+        SK: 'SETTINGS',
+        ...settings,
+        updatedAt: new Date().toISOString(),
+      },
+    }),
+  );
+}
+
+export async function getUserSettings(spotifyUserId: string): Promise<UserSettings | null> {
+  const result = await docClient.send(
+    new GetCommand({
+      TableName: getTableName(),
+      Key: {
+        PK: `USER#${spotifyUserId}`,
+        SK: 'SETTINGS',
+      },
+    }),
+  );
+
+  if (!result.Item) return null;
+
+  return {
+    theme: result.Item.theme as string,
+    transitionTime: result.Item.transitionTime as number,
+    eqSettings: result.Item.eqSettings as UserSettings['eqSettings'],
+    blockedPresets: result.Item.blockedPresets as string[],
+    favoritePresets: result.Item.favoritePresets as string[],
+  };
+}

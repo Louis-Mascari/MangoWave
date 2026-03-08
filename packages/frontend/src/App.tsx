@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { useAudioCapture } from './hooks/useAudioCapture.ts';
 import { useSpotifyAuth } from './hooks/useSpotifyAuth.ts';
+import { useSettingsSync } from './hooks/useSettingsSync.ts';
 import { Visualizer } from './components/Visualizer.tsx';
 import { ControlBar } from './components/ControlBar.tsx';
 import { PresetNotification } from './components/PresetNotification.tsx';
@@ -10,6 +11,7 @@ import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
 
 function App() {
   useSpotifyAuth();
+  useSettingsSync();
 
   const { audioEngine, isCapturing, error, startCapture, stopCapture } = useAudioCapture();
   const rendererRef = useRef<VisualizerRenderer | null>(null);

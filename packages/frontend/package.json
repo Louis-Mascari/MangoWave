@@ -12,8 +12,10 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@sentry/react": "^10.42.0",
     "butterchurn": "^2.6.7",
     "butterchurn-presets": "^2.4.7",
+    "posthog-js": "^1.359.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "zustand": "^5.0.11"

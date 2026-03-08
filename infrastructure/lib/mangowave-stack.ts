@@ -9,6 +9,9 @@ import * as budgets from 'aws-cdk-lib/aws-budgets';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as logs from 'aws-cdk-lib/aws-logs';
+import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
+import * as cloudwatchActions from 'aws-cdk-lib/aws-cloudwatch-actions';
 import * as path from 'path';
 
 interface MangoWaveStackProps extends cdk.StackProps {
@@ -138,6 +141,27 @@ export class MangoWaveStack extends cdk.Stack {
       throttlingRateLimit: 10,
     };
 
+    // ─── API Gateway Access Logging (CloudWatch) ──────────────────
+    const apiLogGroup = new logs.LogGroup(this, 'ApiAccessLogs', {
+      logGroupName: '/mangowave/api-gateway',
+      retention: logs.RetentionDays.ONE_MONTH,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    defaultStage.accessLogSettings = {
+      destinationArn: apiLogGroup.logGroupArn,
+      format: JSON.stringify({
+        requestId: '$context.requestId',
+        ip: '$context.identity.sourceIp',
+        method: '$context.httpMethod',
+        path: '$context.path',
+        status: '$context.status',
+        responseLength: '$context.responseLength',
+        latency: '$context.responseLatency',
+        errorMessage: '$context.error.message',
+      }),
+    };
+
     // Routes
     httpApi.addRoutes({
       path: '/auth/callback',
@@ -163,14 +187,51 @@ export class MangoWaveStack extends cdk.Stack {
       integration: new HttpLambdaIntegration('SettingsLoadInt', settingsLoadFn),
     });
 
-    // ─── Budget alarm (cost guard) ───────────────────────────────
+    // ─── CloudWatch: Lambda error alarms ──────────────────────────
     const alertEmail = props?.alertEmail ?? 'PLACEHOLDER@example.com';
 
-    const budgetTopic = new sns.Topic(this, 'BudgetAlertTopic', {
-      topicName: 'MangoWave-BudgetAlert',
+    const alertTopic = new sns.Topic(this, 'AlertTopic', {
+      topicName: 'MangoWave-Alerts',
     });
-    budgetTopic.addSubscription(new snsSubscriptions.EmailSubscription(alertEmail));
+    alertTopic.addSubscription(new snsSubscriptions.EmailSubscription(alertEmail));
 
+    const lambdaFunctions = [
+      { name: 'AuthCallback', fn: authCallbackFn },
+      { name: 'AuthRefresh', fn: authRefreshFn },
+      { name: 'SettingsSave', fn: settingsSaveFn },
+      { name: 'SettingsLoad', fn: settingsLoadFn },
+    ];
+
+    for (const { name, fn } of lambdaFunctions) {
+      const errorAlarm = new cloudwatch.Alarm(this, `${name}ErrorAlarm`, {
+        alarmName: `MangoWave-${name}-Errors`,
+        metric: fn.metricErrors({ period: cdk.Duration.minutes(5) }),
+        threshold: 3,
+        evaluationPeriods: 1,
+        treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+      });
+      errorAlarm.addAlarmAction(new cloudwatchActions.SnsAction(alertTopic));
+    }
+
+    // API Gateway 4xx/5xx throttle alarm (monitors access logs)
+    const throttleMetric = new cloudwatch.Metric({
+      namespace: 'AWS/ApiGateway',
+      metricName: '5xx',
+      dimensionsMap: { ApiId: httpApi.httpApiId },
+      statistic: 'Sum',
+      period: cdk.Duration.minutes(5),
+    });
+
+    const apiErrorAlarm = new cloudwatch.Alarm(this, 'Api5xxAlarm', {
+      alarmName: 'MangoWave-API-5xx',
+      metric: throttleMetric,
+      threshold: 5,
+      evaluationPeriods: 1,
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+    });
+    apiErrorAlarm.addAlarmAction(new cloudwatchActions.SnsAction(alertTopic));
+
+    // ─── Budget alarm + kill-switch (cost guard) ──────────────────
     new budgets.CfnBudget(this, 'FreeTierBudget', {
       budget: {
         budgetName: 'MangoWave-FreeTierGuard',
@@ -192,7 +253,7 @@ export class MangoWaveStack extends cdk.Stack {
           subscribers: [
             {
               subscriptionType: 'SNS',
-              address: budgetTopic.topicArn,
+              address: alertTopic.topicArn,
             },
           ],
         },
@@ -206,11 +267,85 @@ export class MangoWaveStack extends cdk.Stack {
           subscribers: [
             {
               subscriptionType: 'SNS',
-              address: budgetTopic.topicArn,
+              address: alertTopic.topicArn,
             },
           ],
         },
       ],
+    });
+
+    // Budget kill-switch: IAM policy that denies API Gateway + Lambda invoke
+    // Applied via budget action when spending exceeds threshold
+    const killSwitchPolicy = new iam.ManagedPolicy(this, 'BudgetKillSwitch', {
+      managedPolicyName: 'MangoWave-BudgetKillSwitch',
+      statements: [
+        new iam.PolicyStatement({
+          sid: 'DenyApiGatewayOnBudgetBreach',
+          effect: iam.Effect.DENY,
+          actions: ['execute-api:Invoke', 'execute-api:ManageConnections'],
+          resources: ['*'],
+        }),
+        new iam.PolicyStatement({
+          sid: 'DenyLambdaInvokeOnBudgetBreach',
+          effect: iam.Effect.DENY,
+          actions: ['lambda:InvokeFunction'],
+          resources: ['*'],
+        }),
+      ],
+    });
+
+    // IAM role for AWS Budgets to apply the kill-switch policy
+    const budgetActionRole = new iam.Role(this, 'BudgetActionRole', {
+      roleName: 'MangoWave-BudgetActionRole',
+      assumedBy: new iam.ServicePrincipal('budgets.amazonaws.com'),
+      inlinePolicies: {
+        AttachPolicy: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              actions: [
+                'iam:AttachGroupPolicy',
+                'iam:DetachGroupPolicy',
+                'iam:AttachRolePolicy',
+                'iam:DetachRolePolicy',
+                'iam:AttachUserPolicy',
+                'iam:DetachUserPolicy',
+              ],
+              resources: ['*'],
+            }),
+          ],
+        }),
+      },
+    });
+
+    // Budget action: automatically attach deny policy when budget is breached
+    new cdk.CfnResource(this, 'BudgetKillSwitchAction', {
+      type: 'AWS::Budgets::BudgetsAction',
+      properties: {
+        BudgetName: 'MangoWave-FreeTierGuard',
+        ActionType: 'APPLY_IAM_POLICY',
+        ActionThreshold: {
+          Value: 100,
+          Type: 'PERCENTAGE',
+        },
+        ApprovalModel: 'AUTOMATIC',
+        ExecutionRoleArn: budgetActionRole.roleArn,
+        NotificationType: 'ACTUAL',
+        Definition: {
+          IamActionDefinition: {
+            PolicyArn: killSwitchPolicy.managedPolicyArn,
+            Roles: lambdaFunctions.map(({ fn }) => {
+              const role = fn.role;
+              return role ? role.roleName : '';
+            }),
+          },
+        },
+        Subscribers: [
+          {
+            Type: 'SNS',
+            Address: alertTopic.topicArn,
+          },
+        ],
+      },
     });
 
     // ─── Outputs ──────────────────────────────────────────────────

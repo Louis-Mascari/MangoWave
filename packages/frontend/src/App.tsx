@@ -1,14 +1,40 @@
+import { useCallback, useRef } from 'react';
 import { useAudioCapture } from './hooks/useAudioCapture.ts';
 import { Visualizer } from './components/Visualizer.tsx';
+import { ControlBar } from './components/ControlBar.tsx';
+import { useSettingsStore } from './store/useSettingsStore.ts';
+import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
 
 function App() {
   const { audioEngine, isCapturing, error, startCapture, stopCapture } = useAudioCapture();
+  const rendererRef = useRef<VisualizerRenderer | null>(null);
+  const blockedPresets = useSettingsStore((s) => s.blockedPresets);
+  const transitionTime = useSettingsStore((s) => s.transitionTime);
+
+  const handleNextPreset = useCallback(() => {
+    rendererRef.current?.nextPreset(new Set(blockedPresets), transitionTime);
+  }, [blockedPresets, transitionTime]);
+
+  const handleToggleFullscreen = useCallback(() => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      document.documentElement.requestFullscreen();
+    }
+  }, []);
 
   return (
     <div className="h-screen w-screen bg-black">
-      {isCapturing && audioEngine ? <Visualizer audioEngine={audioEngine} /> : null}
-
-      {!isCapturing && (
+      {isCapturing && audioEngine ? (
+        <>
+          <Visualizer audioEngine={audioEngine} rendererRef={rendererRef} />
+          <ControlBar
+            onNextPreset={handleNextPreset}
+            onStop={stopCapture}
+            onToggleFullscreen={handleToggleFullscreen}
+          />
+        </>
+      ) : (
         <div className="flex h-full flex-col items-center justify-center font-sans text-white">
           <h1 className="text-4xl font-bold">MangoWave</h1>
           <p className="mb-6 opacity-60">Click below to share a tab and start visualizing audio</p>
@@ -20,15 +46,6 @@ function App() {
           </button>
           {error && <p className="mt-4 text-red-500">{error}</p>}
         </div>
-      )}
-
-      {isCapturing && (
-        <button
-          onClick={stopCapture}
-          className="fixed top-4 right-4 z-50 cursor-pointer rounded-md border-none bg-white/15 px-4 py-2 text-sm text-white hover:bg-white/25"
-        >
-          Stop
-        </button>
       )}
     </div>
   );

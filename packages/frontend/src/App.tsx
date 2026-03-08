@@ -1,7 +1,8 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useAudioCapture } from './hooks/useAudioCapture.ts';
 import { Visualizer } from './components/Visualizer.tsx';
 import { ControlBar } from './components/ControlBar.tsx';
+import { PresetNotification } from './components/PresetNotification.tsx';
 import { useSettingsStore } from './store/useSettingsStore.ts';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
 
@@ -10,10 +11,27 @@ function App() {
   const rendererRef = useRef<VisualizerRenderer | null>(null);
   const blockedPresets = useSettingsStore((s) => s.blockedPresets);
   const transitionTime = useSettingsStore((s) => s.transitionTime);
+  const [currentPreset, setCurrentPreset] = useState('');
+  const [presetList, setPresetList] = useState<string[]>([]);
+
+  const handlePresetChange = useCallback((name: string) => {
+    setCurrentPreset(name);
+  }, []);
+
+  const handlePresetsLoaded = useCallback((presets: string[]) => {
+    setPresetList(presets);
+  }, []);
 
   const handleNextPreset = useCallback(() => {
     rendererRef.current?.nextPreset(new Set(blockedPresets), transitionTime);
   }, [blockedPresets, transitionTime]);
+
+  const handleSelectPreset = useCallback(
+    (name: string) => {
+      rendererRef.current?.loadPreset(name, transitionTime);
+    },
+    [transitionTime],
+  );
 
   const handleToggleFullscreen = useCallback(() => {
     if (document.fullscreenElement) {
@@ -27,11 +45,20 @@ function App() {
     <div className="h-screen w-screen bg-black">
       {isCapturing && audioEngine ? (
         <>
-          <Visualizer audioEngine={audioEngine} rendererRef={rendererRef} />
+          <Visualizer
+            audioEngine={audioEngine}
+            rendererRef={rendererRef}
+            onPresetChange={handlePresetChange}
+            onPresetsLoaded={handlePresetsLoaded}
+          />
+          <PresetNotification message={currentPreset} />
           <ControlBar
             onNextPreset={handleNextPreset}
+            onSelectPreset={handleSelectPreset}
             onStop={stopCapture}
             onToggleFullscreen={handleToggleFullscreen}
+            presetList={presetList}
+            currentPreset={currentPreset}
           />
         </>
       ) : (

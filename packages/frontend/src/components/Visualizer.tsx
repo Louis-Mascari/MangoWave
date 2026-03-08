@@ -1,22 +1,23 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { VisualizerRenderer } from '../engine/VisualizerRenderer.ts';
 import type { AudioEngine } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
-import { PresetNotification } from './PresetNotification.tsx';
 
 interface VisualizerProps {
   audioEngine: AudioEngine;
   rendererRef: React.RefObject<VisualizerRenderer | null>;
+  onPresetChange: (name: string) => void;
+  onPresetsLoaded: (presets: string[]) => void;
 }
 
-export function Visualizer({ audioEngine, rendererRef }: VisualizerProps) {
+export function Visualizer({
+  audioEngine,
+  rendererRef,
+  onPresetChange,
+  onPresetsLoaded,
+}: VisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [presetName, setPresetName] = useState('');
   const { performance, eq } = useSettingsStore();
-
-  const handlePresetChange = useCallback((name: string) => {
-    setPresetName(name);
-  }, []);
 
   // Initialize renderer
   useEffect(() => {
@@ -38,8 +39,9 @@ export function Visualizer({ audioEngine, rendererRef }: VisualizerProps) {
     };
 
     updateSize();
-    renderer.init(canvas, ctx, analyser, handlePresetChange);
+    renderer.init(canvas, ctx, analyser, onPresetChange);
     renderer.start();
+    onPresetsLoaded(renderer.presetList);
 
     window.addEventListener('resize', updateSize);
 
@@ -83,10 +85,5 @@ export function Visualizer({ audioEngine, rendererRef }: VisualizerProps) {
     });
   }, [audioEngine, eq.bandGains]);
 
-  return (
-    <>
-      <canvas ref={canvasRef} className="fixed top-0 left-0 block h-screen w-screen" />
-      <PresetNotification message={presetName} />
-    </>
-  );
+  return <canvas ref={canvasRef} className="fixed top-0 left-0 block h-screen w-screen" />;
 }

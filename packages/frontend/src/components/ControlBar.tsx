@@ -2,16 +2,27 @@ import { useState } from 'react';
 import { useIdleTimer } from '../hooks/useIdleTimer.ts';
 import { EQPanel } from './EQPanel.tsx';
 import { PerformancePanel } from './PerformancePanel.tsx';
+import { PresetBrowser } from './PresetBrowser.tsx';
 
 interface ControlBarProps {
   onNextPreset: () => void;
+  onSelectPreset: (name: string) => void;
   onStop: () => void;
   onToggleFullscreen: () => void;
+  presetList: string[];
+  currentPreset: string;
 }
 
-type PanelView = 'none' | 'eq' | 'performance';
+type PanelView = 'none' | 'eq' | 'performance' | 'presets';
 
-export function ControlBar({ onNextPreset, onStop, onToggleFullscreen }: ControlBarProps) {
+export function ControlBar({
+  onNextPreset,
+  onSelectPreset,
+  onStop,
+  onToggleFullscreen,
+  presetList,
+  currentPreset,
+}: ControlBarProps) {
   const isIdle = useIdleTimer(3000);
   const [activePanel, setActivePanel] = useState<PanelView>('none');
 
@@ -29,12 +40,22 @@ export function ControlBar({ onNextPreset, onStop, onToggleFullscreen }: Control
         <div className="mx-4 mb-2">
           {activePanel === 'eq' && <EQPanel />}
           {activePanel === 'performance' && <PerformancePanel />}
+          {activePanel === 'presets' && (
+            <PresetBrowser
+              presetList={presetList}
+              currentPreset={currentPreset}
+              onSelectPreset={onSelectPreset}
+            />
+          )}
         </div>
       )}
 
       <div className="flex items-center justify-between bg-black/50 px-4 py-2 backdrop-blur-sm">
         <div className="flex gap-2">
           <BarButton onClick={onNextPreset}>Next Preset</BarButton>
+          <BarButton onClick={() => togglePanel('presets')} active={activePanel === 'presets'}>
+            Presets
+          </BarButton>
           <BarButton onClick={() => togglePanel('eq')} active={activePanel === 'eq'}>
             EQ
           </BarButton>

@@ -7,6 +7,12 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "typescript": "^5"
+    "@types/aws-lambda": "^8.10.161",
+    "typescript": "^5",
+    "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1004.0",
+    "@aws-sdk/lib-dynamodb": "^3.1004.0"
   }
 }

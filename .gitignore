@@ -46,3 +46,4 @@ logs/
 # Local project planning docs (not for version control)
 MangoWave Plan.md
 CLAUDE.md
+settings.local.json

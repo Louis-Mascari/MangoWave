@@ -1,16 +1,44 @@
+import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
 import type { SpotifyTokenResponse, SpotifyUserProfile } from '../types/spotify';
 
 const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
 const SPOTIFY_API_BASE = 'https://api.spotify.com/v1';
 
-function getCredentials(): { clientId: string; clientSecret: string; redirectUri: string } {
-  const clientId = process.env.SPOTIFY_CLIENT_ID;
-  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-  const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
+const ssmClient = new SSMClient({});
+const paramCache: Record<string, string> = {};
 
-  if (!clientId || !clientSecret || !redirectUri) {
-    throw new Error('Missing Spotify environment variables');
+async function getSsmParam(name: string): Promise<string> {
+  if (paramCache[name]) return paramCache[name];
+
+  const result = await ssmClient.send(
+    new GetParameterCommand({ Name: name, WithDecryption: true }),
+  );
+
+  const value = result.Parameter?.Value;
+  if (!value) throw new Error(`SSM parameter ${name} not found or empty`);
+
+  paramCache[name] = value;
+  return value;
+}
+
+async function getCredentials(): Promise<{
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+}> {
+  const clientIdParam = process.env.SSM_SPOTIFY_CLIENT_ID;
+  const clientSecretParam = process.env.SSM_SPOTIFY_CLIENT_SECRET;
+  const redirectUriParam = process.env.SSM_SPOTIFY_REDIRECT_URI;
+
+  if (!clientIdParam || !clientSecretParam || !redirectUriParam) {
+    throw new Error('Missing SSM_SPOTIFY_* environment variables');
   }
+
+  const [clientId, clientSecret, redirectUri] = await Promise.all([
+    getSsmParam(clientIdParam),
+    getSsmParam(clientSecretParam),
+    getSsmParam(redirectUriParam),
+  ]);
 
   return { clientId, clientSecret, redirectUri };
 }
@@ -20,7 +48,7 @@ function basicAuth(clientId: string, clientSecret: string): string {
 }
 
 export async function exchangeCodeForTokens(code: string): Promise<SpotifyTokenResponse> {
-  const { clientId, clientSecret, redirectUri } = getCredentials();
+  const { clientId, clientSecret, redirectUri } = await getCredentials();
 
   const response = await fetch(SPOTIFY_TOKEN_URL, {
     method: 'POST',
@@ -44,7 +72,7 @@ export async function exchangeCodeForTokens(code: string): Promise<SpotifyTokenR
 }
 
 export async function refreshAccessToken(refreshToken: string): Promise<SpotifyTokenResponse> {
-  const { clientId, clientSecret } = getCredentials();
+  const { clientId, clientSecret } = await getCredentials();
 
   const response = await fetch(SPOTIFY_TOKEN_URL, {
     method: 'POST',

@@ -1,14 +1,19 @@
 import { useState } from 'react';
 import { useIdleTimer } from '../hooks/useIdleTimer.ts';
+import { useSpotifyStore } from '../store/useSpotifyStore.ts';
+import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { EQPanel } from './EQPanel.tsx';
 import { PerformancePanel } from './PerformancePanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
+import { PlaybackControls } from './PlaybackControls.tsx';
 
 interface ControlBarProps {
   onNextPreset: () => void;
   onSelectPreset: (name: string) => void;
   onStop: () => void;
   onToggleFullscreen: () => void;
+  onToggleNowPlaying: () => void;
+  showNowPlaying: boolean;
   presetList: string[];
   currentPreset: string;
 }
@@ -20,14 +25,25 @@ export function ControlBar({
   onSelectPreset,
   onStop,
   onToggleFullscreen,
+  onToggleNowPlaying,
+  showNowPlaying,
   presetList,
   currentPreset,
 }: ControlBarProps) {
   const isIdle = useIdleTimer(3000);
   const [activePanel, setActivePanel] = useState<PanelView>('none');
+  const accessToken = useSpotifyStore((s) => s.accessToken);
+  const user = useSpotifyStore((s) => s.user);
+  const logout = useSpotifyStore((s) => s.logout);
+
+  const isSpotifyConnected = !!accessToken;
 
   const togglePanel = (panel: PanelView) => {
     setActivePanel((current) => (current === panel ? 'none' : panel));
+  };
+
+  const handleSpotifyConnect = () => {
+    window.location.href = buildSpotifyAuthUrl();
   };
 
   return (
@@ -51,7 +67,7 @@ export function ControlBar({
       )}
 
       <div className="flex items-center justify-between bg-black/50 px-4 py-2 backdrop-blur-sm">
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <BarButton onClick={onNextPreset}>Next Preset</BarButton>
           <BarButton onClick={() => togglePanel('presets')} active={activePanel === 'presets'}>
             Presets
@@ -65,9 +81,26 @@ export function ControlBar({
           >
             Performance
           </BarButton>
+
+          <div className="mx-1 h-5 w-px bg-white/20" />
+
+          <PlaybackControls />
+
+          {isSpotifyConnected && (
+            <BarButton onClick={onToggleNowPlaying} active={showNowPlaying}>
+              Now Playing
+            </BarButton>
+          )}
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          {isSpotifyConnected ? (
+            <BarButton onClick={logout}>
+              {user?.displayName ? `${user.displayName} ×` : 'Disconnect'}
+            </BarButton>
+          ) : (
+            <BarButton onClick={handleSpotifyConnect}>Connect Spotify</BarButton>
+          )}
           <BarButton onClick={onToggleFullscreen}>Fullscreen</BarButton>
           <BarButton onClick={onStop}>Stop</BarButton>
         </div>

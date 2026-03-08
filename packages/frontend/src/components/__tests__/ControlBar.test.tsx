@@ -8,6 +8,8 @@ const defaultProps = {
   onSelectPreset: vi.fn(),
   onStop: vi.fn(),
   onToggleFullscreen: vi.fn(),
+  onToggleNowPlaying: vi.fn(),
+  showNowPlaying: false,
   presetList: ['Preset A', 'Preset B'],
   currentPreset: 'Preset A',
 };

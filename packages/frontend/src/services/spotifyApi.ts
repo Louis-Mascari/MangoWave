@@ -1,0 +1,177 @@
+const SPOTIFY_API_BASE = 'https://api.spotify.com/v1';
+
+export interface SpotifyUser {
+  id: string;
+  displayName: string | null;
+  imageUrl: string | null;
+  product: string | null; // "premium", "free", "open"
+}
+
+export interface NowPlayingTrack {
+  title: string;
+  artist: string;
+  albumName: string;
+  albumArtUrl: string | null;
+  isPlaying: boolean;
+  progressMs: number;
+  durationMs: number;
+}
+
+export interface SpotifyAuthResponse {
+  accessToken: string;
+  expiresIn: number;
+  sessionId: string;
+  user: SpotifyUser;
+}
+
+const SCOPES = [
+  'user-read-currently-playing',
+  'user-read-playback-state',
+  'user-modify-playback-state',
+].join(' ');
+
+export function buildSpotifyAuthUrl(): string {
+  const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+  const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
+
+  if (!clientId || !redirectUri) {
+    throw new Error('Missing VITE_SPOTIFY_CLIENT_ID or VITE_SPOTIFY_REDIRECT_URI env vars');
+  }
+
+  const state = crypto.randomUUID();
+  sessionStorage.setItem('spotify_auth_state', state);
+
+  const params = new URLSearchParams({
+    client_id: clientId,
+    response_type: 'code',
+    redirect_uri: redirectUri,
+    scope: SCOPES,
+    state,
+  });
+
+  return `https://accounts.spotify.com/authorize?${params.toString()}`;
+}
+
+export async function exchangeCode(code: string): Promise<SpotifyAuthResponse> {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const response = await fetch(`${apiUrl}/auth/callback`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code }),
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error || 'Failed to exchange code');
+  }
+
+  return response.json() as Promise<SpotifyAuthResponse>;
+}
+
+export async function refreshToken(
+  sessionId: string,
+): Promise<{ accessToken: string; expiresIn: number }> {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const response = await fetch(`${apiUrl}/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sessionId }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to refresh token');
+  }
+
+  return response.json() as Promise<{ accessToken: string; expiresIn: number }>;
+}
+
+export async function getNowPlaying(accessToken: string): Promise<NowPlayingTrack | null> {
+  const response = await fetch(`${SPOTIFY_API_BASE}/me/player/currently-playing`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (response.status === 204 || response.status === 404) {
+    return null; // Nothing playing
+  }
+
+  if (response.status === 401) {
+    throw new TokenExpiredError();
+  }
+
+  if (!response.ok) {
+    throw new Error(`Spotify API error (${response.status})`);
+  }
+
+  const data = await response.json();
+  if (!data.item || data.currently_playing_type !== 'track') {
+    return null; // Podcast or other non-track content
+  }
+
+  return {
+    title: data.item.name,
+    artist: data.item.artists.map((a: { name: string }) => a.name).join(', '),
+    albumName: data.item.album.name,
+    albumArtUrl: data.item.album.images?.[0]?.url ?? null,
+    isPlaying: data.is_playing,
+    progressMs: data.progress_ms ?? 0,
+    durationMs: data.item.duration_ms,
+  };
+}
+
+export async function controlPlayback(
+  accessToken: string,
+  action: 'play' | 'pause' | 'next' | 'previous',
+): Promise<void> {
+  let url: string;
+  let method: string;
+
+  switch (action) {
+    case 'play':
+      url = `${SPOTIFY_API_BASE}/me/player/play`;
+      method = 'PUT';
+      break;
+    case 'pause':
+      url = `${SPOTIFY_API_BASE}/me/player/pause`;
+      method = 'PUT';
+      break;
+    case 'next':
+      url = `${SPOTIFY_API_BASE}/me/player/next`;
+      method = 'POST';
+      break;
+    case 'previous':
+      url = `${SPOTIFY_API_BASE}/me/player/previous`;
+      method = 'POST';
+      break;
+  }
+
+  const response = await fetch(url, {
+    method,
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (response.status === 403) {
+    throw new PremiumRequiredError();
+  }
+
+  if (response.status === 401) {
+    throw new TokenExpiredError();
+  }
+
+  if (!response.ok) {
+    throw new Error(`Playback control failed (${response.status})`);
+  }
+}
+
+export class TokenExpiredError extends Error {
+  constructor() {
+    super('Access token expired');
+    this.name = 'TokenExpiredError';
+  }
+}
+
+export class PremiumRequiredError extends Error {
+  constructor() {
+    super('Spotify Premium is required for playback controls');
+    this.name = 'PremiumRequiredError';
+  }
+}

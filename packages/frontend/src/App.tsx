@@ -1,18 +1,23 @@
 import { useCallback, useRef, useState } from 'react';
 import { useAudioCapture } from './hooks/useAudioCapture.ts';
+import { useSpotifyAuth } from './hooks/useSpotifyAuth.ts';
 import { Visualizer } from './components/Visualizer.tsx';
 import { ControlBar } from './components/ControlBar.tsx';
 import { PresetNotification } from './components/PresetNotification.tsx';
+import { NowPlaying } from './components/NowPlaying.tsx';
 import { useSettingsStore } from './store/useSettingsStore.ts';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
 
 function App() {
+  useSpotifyAuth();
+
   const { audioEngine, isCapturing, error, startCapture, stopCapture } = useAudioCapture();
   const rendererRef = useRef<VisualizerRenderer | null>(null);
   const blockedPresets = useSettingsStore((s) => s.blockedPresets);
   const transitionTime = useSettingsStore((s) => s.transitionTime);
   const [currentPreset, setCurrentPreset] = useState('');
   const [presetList, setPresetList] = useState<string[]>([]);
+  const [showNowPlaying, setShowNowPlaying] = useState(false);
 
   const handlePresetChange = useCallback((name: string) => {
     setCurrentPreset(name);
@@ -41,6 +46,10 @@ function App() {
     }
   }, []);
 
+  const handleToggleNowPlaying = useCallback(() => {
+    setShowNowPlaying((prev) => !prev);
+  }, []);
+
   return (
     <div className="h-screen w-screen bg-black">
       {isCapturing && audioEngine ? (
@@ -52,11 +61,14 @@ function App() {
             onPresetsLoaded={handlePresetsLoaded}
           />
           <PresetNotification message={currentPreset} />
+          <NowPlaying visible={showNowPlaying} />
           <ControlBar
             onNextPreset={handleNextPreset}
             onSelectPreset={handleSelectPreset}
             onStop={stopCapture}
             onToggleFullscreen={handleToggleFullscreen}
+            onToggleNowPlaying={handleToggleNowPlaying}
+            showNowPlaying={showNowPlaying}
             presetList={presetList}
             currentPreset={currentPreset}
           />

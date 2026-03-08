@@ -23,6 +23,8 @@ export function PerformancePanel() {
   const audio = useSettingsStore((s) => s.audio);
   const setSmoothingConstant = useSettingsStore((s) => s.setSmoothingConstant);
   const setFftSize = useSettingsStore((s) => s.setFftSize);
+  const showPresetName = useSettingsStore((s) => s.showPresetName);
+  const setShowPresetName = useSettingsStore((s) => s.setShowPresetName);
   const autopilot = useSettingsStore((s) => s.autopilot);
   const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
   const setAutopilotInterval = useSettingsStore((s) => s.setAutopilotInterval);
@@ -79,7 +81,7 @@ export function PerformancePanel() {
       <div className="flex flex-col gap-1">
         <label className="flex items-center text-xs text-white/60">
           Audio Smoothing: {audio.smoothingConstant.toFixed(2)}
-          <Tooltip text="Lower = snappier reaction to beats, higher = smoother movement" />
+          <Tooltip text="Lower = snappier reaction to beats, higher = smoother movement. Effect is subtle — presets apply their own internal smoothing" />
         </label>
         <input
           type="range"
@@ -95,7 +97,7 @@ export function PerformancePanel() {
       <div className="flex flex-col gap-1">
         <label className="flex items-center text-xs text-white/60">
           FFT Size
-          <Tooltip text="Higher = more frequency detail but more latency" />
+          <Tooltip text="Higher = more frequency detail but more latency. Effect is subtle — the engine maps to fixed internal frequency bands" />
         </label>
         <div className="flex gap-2">
           {FFT_OPTIONS.map((size) => (
@@ -113,6 +115,16 @@ export function PerformancePanel() {
           ))}
         </div>
       </div>
+
+      <label className="flex items-center gap-2 text-xs text-white/60">
+        <input
+          type="checkbox"
+          checked={showPresetName}
+          onChange={(e) => setShowPresetName(e.target.checked)}
+          className="accent-orange-500"
+        />
+        Show preset name
+      </label>
 
       <div className="mt-1 border-t border-white/10 pt-3">
         <div className="flex items-center justify-between">

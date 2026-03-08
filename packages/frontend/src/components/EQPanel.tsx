@@ -15,7 +15,10 @@ export function EQPanel() {
   return (
     <div className="flex flex-col gap-3 rounded-lg bg-black/60 p-4 backdrop-blur-sm">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-white">Equalizer</h3>
+        <h3 className="flex items-center text-sm font-semibold text-white">
+          Equalizer
+          <Tooltip text="Shapes which frequencies drive the visuals — does not change audio output. Boost bass for more intense movement, cut highs to calm treble reactions" />
+        </h3>
         <button
           onClick={resetEQ}
           className="cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-xs text-white/70 hover:bg-white/20"
@@ -27,7 +30,7 @@ export function EQPanel() {
       <div className="flex flex-col gap-1">
         <label className="flex items-center text-xs text-white/60">
           Pre-Amp
-          <Tooltip text="Boost or cut the overall input signal before the EQ bands" />
+          <Tooltip text="Scales the overall signal — higher makes visuals more reactive, lower calms them. Purely visual, does not affect audio output" />
         </label>
         <input
           type="range"

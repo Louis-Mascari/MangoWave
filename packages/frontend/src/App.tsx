@@ -28,6 +28,7 @@ function App() {
   const transitionTime = useSettingsStore((s) => s.transitionTime);
   const autopilot = useSettingsStore((s) => s.autopilot);
   const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
+  const showPresetName = useSettingsStore((s) => s.showPresetName);
   const [currentPreset, setCurrentPreset] = useState('');
   const [presetList, setPresetList] = useState<string[]>([]);
   const [showNowPlaying, setShowNowPlaying] = useState(false);
@@ -120,7 +121,7 @@ function App() {
             onPresetChange={handlePresetChange}
             onPresetsLoaded={handlePresetsLoaded}
           />
-          <PresetNotification message={currentPreset} />
+          {showPresetName && <PresetNotification message={currentPreset} />}
           <NowPlaying visible={showNowPlaying} />
           <ControlBar
             onNextPreset={handleNextPreset}

@@ -53,6 +53,10 @@ export interface SettingsState {
   unblockPreset: (name: string) => void;
   toggleFavoritePreset: (name: string) => void;
 
+  // Display
+  showPresetName: boolean;
+  setShowPresetName: (show: boolean) => void;
+
   // Transitions
   transitionTime: number; // seconds for preset blend
   setTransitionTime: (seconds: number) => void;
@@ -151,6 +155,10 @@ export const useSettingsStore = create<SettingsState>()(
             ? state.favoritePresets.filter((p) => p !== name)
             : [...state.favoritePresets, name],
         })),
+
+      // Display
+      showPresetName: true,
+      setShowPresetName: (show) => set({ showPresetName: show }),
 
       // Transitions
       transitionTime: 2.0,

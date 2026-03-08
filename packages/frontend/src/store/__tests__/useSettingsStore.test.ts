@@ -16,6 +16,7 @@ describe('useSettingsStore', () => {
       result.current.setAutopilotEnabled(true);
       result.current.setAutopilotInterval(15);
       result.current.setAutopilotFavoritesOnly(false);
+      result.current.setShowPresetName(true);
       // Clear presets
       result.current.blockedPresets.forEach((p) => result.current.unblockPreset(p));
       result.current.favoritePresets.forEach((p) => result.current.toggleFavoritePreset(p));
@@ -165,6 +166,19 @@ describe('useSettingsStore', () => {
       const { result } = renderHook(() => useSettingsStore());
       act(() => result.current.setAutopilotFavoritesOnly(true));
       expect(result.current.autopilot.favoritesOnly).toBe(true);
+    });
+  });
+
+  describe('showPresetName', () => {
+    it('defaults to true', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      expect(result.current.showPresetName).toBe(true);
+    });
+
+    it('toggles off', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setShowPresetName(false));
+      expect(result.current.showPresetName).toBe(false);
     });
   });
 

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useAudioCapture } from './hooks/useAudioCapture.ts';
 import { useSpotifyAuth } from './hooks/useSpotifyAuth.ts';
 import { useSettingsSync } from './hooks/useSettingsSync.ts';
@@ -7,9 +7,11 @@ import { ControlBar } from './components/ControlBar.tsx';
 import { PresetNotification } from './components/PresetNotification.tsx';
 import { NowPlaying } from './components/NowPlaying.tsx';
 import { useSettingsStore } from './store/useSettingsStore.ts';
+import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
 
 function App() {
+  const webgl2 = useMemo(() => isWebGL2Supported(), []);
   useSpotifyAuth();
   useSettingsSync();
 
@@ -51,6 +53,18 @@ function App() {
   const handleToggleNowPlaying = useCallback(() => {
     setShowNowPlaying((prev) => !prev);
   }, []);
+
+  if (!webgl2) {
+    return (
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-black font-sans text-white">
+        <h1 className="mb-2 text-3xl font-bold text-red-500">WebGL 2 Not Supported</h1>
+        <p className="max-w-md text-center opacity-60">
+          MangoWave requires WebGL 2 to render visualizations. Please try a modern browser such as
+          Chrome, Firefox, or Edge.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen w-screen bg-black">

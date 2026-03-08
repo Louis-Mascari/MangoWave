@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib/core';
-import { Template } from 'aws-cdk-lib/assertions';
+import { Template, Match } from 'aws-cdk-lib/assertions';
 import { MangoWaveStack } from '../lib/mangowave-stack';
 
 describe('MangoWaveStack', () => {
@@ -64,9 +64,9 @@ describe('MangoWaveStack', () => {
     });
   });
 
-  it('creates an SNS topic for budget alerts', () => {
+  it('creates a unified SNS alert topic', () => {
     template.hasResourceProperties('AWS::SNS::Topic', {
-      TopicName: 'MangoWave-BudgetAlert',
+      TopicName: 'MangoWave-Alerts',
     });
   });
 
@@ -80,7 +80,82 @@ describe('MangoWaveStack', () => {
   it('grants DynamoDB access to all Lambda functions', () => {
     const policies = template.findResources('AWS::IAM::Policy');
     const policyKeys = Object.keys(policies);
-    // Each Lambda gets a service role + policy for DynamoDB access
     expect(policyKeys.length).toBeGreaterThanOrEqual(4);
+  });
+
+  // --- CloudWatch alarms (Section 7) ---
+
+  it('creates Lambda error alarms for all 4 functions', () => {
+    const alarms = template.findResources('AWS::CloudWatch::Alarm');
+    const errorAlarmKeys = Object.keys(alarms).filter((k) =>
+      alarms[k].Properties?.AlarmName?.startsWith('MangoWave-'),
+    );
+    // 4 Lambda error alarms + 1 API 5xx alarm = 5 total
+    expect(errorAlarmKeys.length).toBe(5);
+  });
+
+  it('creates an API 5xx alarm', () => {
+    template.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      AlarmName: 'MangoWave-API-5xx',
+      Threshold: 5,
+      EvaluationPeriods: 1,
+    });
+  });
+
+  it('creates API Gateway access log group', () => {
+    template.hasResourceProperties('AWS::Logs::LogGroup', {
+      LogGroupName: '/mangowave/api-gateway',
+      RetentionInDays: 30,
+    });
+  });
+
+  // --- Budget kill-switch (Section 6) ---
+
+  it('creates budget kill-switch deny policy', () => {
+    template.hasResourceProperties('AWS::IAM::ManagedPolicy', {
+      ManagedPolicyName: 'MangoWave-BudgetKillSwitch',
+      PolicyDocument: Match.objectLike({
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Effect: 'Deny',
+            Action: ['execute-api:Invoke', 'execute-api:ManageConnections'],
+          }),
+          Match.objectLike({
+            Effect: 'Deny',
+            Action: 'lambda:InvokeFunction',
+          }),
+        ]),
+      }),
+    });
+  });
+
+  it('creates a budget action role for AWS Budgets service', () => {
+    template.hasResourceProperties('AWS::IAM::Role', {
+      RoleName: 'MangoWave-BudgetActionRole',
+      AssumeRolePolicyDocument: Match.objectLike({
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Principal: { Service: 'budgets.amazonaws.com' },
+          }),
+        ]),
+      }),
+    });
+  });
+
+  it('creates the budget kill-switch action', () => {
+    template.hasResourceProperties('AWS::Budgets::BudgetsAction', {
+      ActionType: 'APPLY_IAM_POLICY',
+      ApprovalModel: 'AUTOMATIC',
+      NotificationType: 'ACTUAL',
+      ActionThreshold: {
+        Value: 100,
+        Type: 'PERCENTAGE',
+      },
+    });
+  });
+
+  it('throws when alertEmail is missing', () => {
+    const app = new cdk.App();
+    expect(() => new MangoWaveStack(app, 'NoEmailStack')).toThrow('alertEmail prop is required');
   });
 });

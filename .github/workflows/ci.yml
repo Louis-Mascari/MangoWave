@@ -1,5 +1,49 @@
 name: CI
 
-# TODO: Configure PR linting and testing workflow
-# Triggers: pull_request to main
-# Jobs: lint, typecheck, test (Vitest + React Testing Library)
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Prettier check
+        run: npm run format:check
+
+      - name: ESLint (frontend)
+        run: npm run lint --workspace=packages/frontend
+
+      - name: Typecheck (frontend)
+        run: npx tsc -b --noEmit
+        working-directory: packages/frontend
+
+      - name: Typecheck (backend)
+        run: npx tsc --noEmit
+        working-directory: packages/backend
+
+      - name: Typecheck (infrastructure)
+        run: npx tsc --noEmit
+        working-directory: infrastructure
+
+      - name: Test (frontend)
+        run: npm run test --workspace=packages/frontend
+
+      - name: Test (backend)
+        run: npm run test --workspace=packages/backend
+
+      - name: Test (infrastructure)
+        run: npm run test --workspace=infrastructure

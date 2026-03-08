@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MangoWave — Audio-Reactive Visualizer</title>
+    <meta
+      name="description"
+      content="Browser-based audio-reactive visualizer inspired by Winamp and MilkDrop. Capture any audio and watch it come alive."
+    />
+    <meta property="og:title" content="MangoWave — Audio-Reactive Visualizer" />
+    <meta
+      property="og:description"
+      content="Browser-based audio-reactive visualizer inspired by Winamp and MilkDrop. Capture any audio and watch it come alive."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://mangowave.app" />
+    <meta property="og:image" content="https://mangowave.app/landing/logo.png" />
+    <link rel="icon" href="/landing/favicon.ico" />
+    <style>
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+        background: #0a0a0a;
+        color: #e0e0e0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        overflow-x: hidden;
+      }
+
+      .bg-glow {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 800px;
+        height: 800px;
+        background: radial-gradient(
+          circle,
+          rgba(255, 140, 50, 0.1) 0%,
+          rgba(200, 50, 200, 0.05) 35%,
+          transparent 65%
+        );
+        pointer-events: none;
+        z-index: 0;
+        animation: glow-pulse 8s ease-in-out infinite alternate;
+      }
+
+      @keyframes glow-pulse {
+        from {
+          opacity: 0.6;
+          transform: translate(-50%, -50%) scale(1);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1.15);
+        }
+      }
+
+      .content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.75rem;
+        max-width: 620px;
+        text-align: center;
+      }
+
+      .logo {
+        width: 200px;
+        height: 200px;
+        border-radius: 28px;
+        filter: drop-shadow(0 0 48px rgba(255, 140, 50, 0.35));
+        transition: filter 0.3s;
+      }
+
+      .logo:hover {
+        filter: drop-shadow(0 0 64px rgba(255, 140, 50, 0.5));
+      }
+
+      h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #ff8c32 0%, #e050e0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.1;
+      }
+
+      .tagline {
+        font-size: 1.2rem;
+        color: #999;
+        line-height: 1.7;
+        max-width: 480px;
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        width: 100%;
+        margin: 0.75rem 0;
+      }
+
+      .feature {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 16px;
+        padding: 1.25rem 0.75rem;
+        transition:
+          background 0.2s,
+          border-color 0.2s;
+      }
+
+      .feature:hover {
+        background: rgba(255, 255, 255, 0.07);
+        border-color: rgba(255, 255, 255, 0.12);
+      }
+
+      .feature svg {
+        width: 28px;
+        height: 28px;
+        flex-shrink: 0;
+      }
+
+      .feature span {
+        font-size: 0.82rem;
+        color: #aaa;
+        font-weight: 500;
+      }
+
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-top: 0.5rem;
+        padding: 1rem 2.75rem;
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #fff;
+        background: linear-gradient(135deg, #ff8c32, #e050e0);
+        border: none;
+        border-radius: 14px;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease;
+        box-shadow: 0 4px 28px rgba(255, 140, 50, 0.3);
+      }
+
+      .cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 40px rgba(255, 140, 50, 0.45);
+      }
+
+      .cta:active {
+        transform: translateY(0);
+      }
+
+      .cta svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .links {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        margin-top: 0.5rem;
+      }
+
+      .links a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: #666;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: color 0.15s;
+      }
+
+      .links a:hover {
+        color: #bbb;
+      }
+
+      .links a svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      @media (max-width: 560px) {
+        h1 {
+          font-size: 2.2rem;
+        }
+        .logo {
+          width: 150px;
+          height: 150px;
+          border-radius: 22px;
+        }
+        .tagline {
+          font-size: 1rem;
+        }
+        .features {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .cta {
+          padding: 0.85rem 2rem;
+          font-size: 1.05rem;
+        }
+      }
+
+      @media (max-width: 360px) {
+        .features {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-glow"></div>
+    <div class="content">
+      <img src="/landing/logo.png" alt="MangoWave logo" class="logo" />
+      <h1>MangoWave</h1>
+      <p class="tagline">
+        A browser-based audio-reactive visualizer inspired by Winamp and MilkDrop. Capture any audio
+        playing on your system and watch it come alive.
+      </p>
+
+      <div class="features">
+        <!-- MilkDrop Presets -->
+        <div class="feature">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#ff8c32"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path
+              d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+            />
+            <path d="M2 12h20" />
+          </svg>
+          <span>200+ Presets</span>
+        </div>
+
+        <!-- 10-Band EQ -->
+        <div class="feature">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#c850c8"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          >
+            <line x1="4" y1="21" x2="4" y2="14" />
+            <line x1="8" y1="21" x2="8" y2="7" />
+            <line x1="12" y1="21" x2="12" y2="10" />
+            <line x1="16" y1="21" x2="16" y2="4" />
+            <line x1="20" y1="21" x2="20" y2="12" />
+          </svg>
+          <span>10-Band EQ</span>
+        </div>
+
+        <!-- Spotify -->
+        <div class="feature">
+          <svg viewBox="0 0 24 24" fill="#1DB954">
+            <path
+              d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"
+            />
+          </svg>
+          <span>Spotify Integration</span>
+        </div>
+
+        <!-- WebGL 2 -->
+        <div class="feature">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#50b0ff"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
+            <line x1="12" y1="22" x2="12" y2="15.5" />
+            <polyline points="22 8.5 12 15.5 2 8.5" />
+            <polyline points="2 15.5 12 8.5 22 15.5" />
+            <line x1="12" y1="2" x2="12" y2="8.5" />
+          </svg>
+          <span>WebGL 2</span>
+        </div>
+
+        <!-- Real-time FFT -->
+        <div class="feature">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#ff6090"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+          <span>Real-Time FFT</span>
+        </div>
+
+        <!-- Zero Install -->
+        <div class="feature">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#50dda0"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="16 12 12 8 8 12" />
+            <line x1="12" y1="16" x2="12" y2="8" />
+          </svg>
+          <span>Zero Install</span>
+        </div>
+      </div>
+
+      <a href="https://play.mangowave.app" class="cta">
+        Launch App
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </svg>
+      </a>
+
+      <div class="links">
+        <a href="https://github.com/Louis-Mascari/MangoWave" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"
+            />
+          </svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+  </body>
+</html>

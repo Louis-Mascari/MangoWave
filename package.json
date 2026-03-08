@@ -9,9 +9,32 @@
   ],
   "scripts": {
     "test": "npm run test --workspaces --if-present",
-    "build": "npm run build --workspaces --if-present"
+    "build": "npm run build --workspaces --if-present",
+    "prepare": "husky",
+    "lint": "npm run lint --workspaces --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "lint-staged": {
+    "packages/frontend/**/*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --fix --config packages/frontend/eslint.config.js"
+    ],
+    "packages/backend/**/*.{ts,tsx}": [
+      "prettier --write"
+    ],
+    "infrastructure/**/*.ts": [
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.3.2"
   }
 }

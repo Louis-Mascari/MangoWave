@@ -15,237 +15,24 @@
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://mangowave.app" />
-    <meta property="og:image" content="https://mangowave.app/landing/logo.png" />
+    <meta property="og:image" content="https://mangowave.app/landing/baby_mango.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MangoWave — Audio-Reactive Visualizer" />
+    <meta
+      name="twitter:description"
+      content="Browser-based audio-reactive visualizer inspired by Winamp and MilkDrop. Capture any audio and watch it come alive."
+    />
+    <meta name="twitter:image" content="https://mangowave.app/landing/baby_mango.png" />
     <link rel="icon" href="/landing/favicon.ico" />
-    <style>
-      *,
-      *::before,
-      *::after {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family:
-          -apple-system,
-          BlinkMacSystemFont,
-          'Segoe UI',
-          Roboto,
-          Helvetica,
-          Arial,
-          sans-serif;
-        background: #0a0a0a;
-        color: #e0e0e0;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem;
-        overflow-x: hidden;
-      }
-
-      .bg-glow {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 800px;
-        height: 800px;
-        background: radial-gradient(
-          circle,
-          rgba(255, 140, 50, 0.1) 0%,
-          rgba(200, 50, 200, 0.05) 35%,
-          transparent 65%
-        );
-        pointer-events: none;
-        z-index: 0;
-        animation: glow-pulse 8s ease-in-out infinite alternate;
-      }
-
-      @keyframes glow-pulse {
-        from {
-          opacity: 0.6;
-          transform: translate(-50%, -50%) scale(1);
-        }
-        to {
-          opacity: 1;
-          transform: translate(-50%, -50%) scale(1.15);
-        }
-      }
-
-      .content {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1.75rem;
-        max-width: 620px;
-        text-align: center;
-      }
-
-      .logo {
-        width: 200px;
-        height: 200px;
-        border-radius: 28px;
-        filter: drop-shadow(0 0 48px rgba(255, 140, 50, 0.35));
-        transition: filter 0.3s;
-      }
-
-      .logo:hover {
-        filter: drop-shadow(0 0 64px rgba(255, 140, 50, 0.5));
-      }
-
-      h1 {
-        font-size: 3rem;
-        font-weight: 800;
-        letter-spacing: -0.02em;
-        background: linear-gradient(135deg, #ff8c32 0%, #e050e0 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        line-height: 1.1;
-      }
-
-      .tagline {
-        font-size: 1.2rem;
-        color: #999;
-        line-height: 1.7;
-        max-width: 480px;
-      }
-
-      .features {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1rem;
-        width: 100%;
-        margin: 0.75rem 0;
-      }
-
-      .feature {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        border-radius: 16px;
-        padding: 1.25rem 0.75rem;
-        transition:
-          background 0.2s,
-          border-color 0.2s;
-      }
-
-      .feature:hover {
-        background: rgba(255, 255, 255, 0.07);
-        border-color: rgba(255, 255, 255, 0.12);
-      }
-
-      .feature svg {
-        width: 28px;
-        height: 28px;
-        flex-shrink: 0;
-      }
-
-      .feature span {
-        font-size: 0.82rem;
-        color: #aaa;
-        font-weight: 500;
-      }
-
-      .cta {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.6rem;
-        margin-top: 0.5rem;
-        padding: 1rem 2.75rem;
-        font-size: 1.15rem;
-        font-weight: 600;
-        color: #fff;
-        background: linear-gradient(135deg, #ff8c32, #e050e0);
-        border: none;
-        border-radius: 14px;
-        text-decoration: none;
-        cursor: pointer;
-        transition:
-          transform 0.15s ease,
-          box-shadow 0.15s ease;
-        box-shadow: 0 4px 28px rgba(255, 140, 50, 0.3);
-      }
-
-      .cta:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 40px rgba(255, 140, 50, 0.45);
-      }
-
-      .cta:active {
-        transform: translateY(0);
-      }
-
-      .cta svg {
-        width: 20px;
-        height: 20px;
-      }
-
-      .links {
-        display: flex;
-        align-items: center;
-        gap: 2rem;
-        margin-top: 0.5rem;
-      }
-
-      .links a {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        color: #666;
-        text-decoration: none;
-        font-size: 0.9rem;
-        font-weight: 500;
-        transition: color 0.15s;
-      }
-
-      .links a:hover {
-        color: #bbb;
-      }
-
-      .links a svg {
-        width: 18px;
-        height: 18px;
-      }
-
-      @media (max-width: 560px) {
-        h1 {
-          font-size: 2.2rem;
-        }
-        .logo {
-          width: 150px;
-          height: 150px;
-          border-radius: 22px;
-        }
-        .tagline {
-          font-size: 1rem;
-        }
-        .features {
-          grid-template-columns: repeat(2, 1fr);
-        }
-        .cta {
-          padding: 0.85rem 2rem;
-          font-size: 1.05rem;
-        }
-      }
-
-      @media (max-width: 360px) {
-        .features {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
+    <link rel="apple-touch-icon" href="/landing/apple-touch-icon.png" />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <video class="bg-video" autoplay loop muted playsinline poster="logo.png">
+      <source src="preview-loop.webm" type="video/webm" />
+    </video>
     <div class="bg-glow"></div>
+    <img src="howling.png" class="bg-howling" aria-hidden="true" alt="" />
     <div class="content">
       <img src="/landing/logo.png" alt="MangoWave logo" class="logo" />
       <h1>MangoWave</h1>
@@ -377,6 +164,14 @@
             />
           </svg>
           GitHub
+        </a>
+        <a href="https://ko-fi.com/louismascari" target="_blank" rel="noopener" class="treat-link">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+            <path
+              d="M3.5 9.5a1.5 1.5 0 0 1 3 0v5a1.5 1.5 0 0 1-3 0v-5zM17.5 9.5a1.5 1.5 0 0 1 3 0v5a1.5 1.5 0 0 1-3 0v-5zM7 7a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v10a5 5 0 0 1-10 0V7zM10.5 3a1.5 1.5 0 0 1 3 0v2h-3V3z"
+            />
+          </svg>
+          Buy Mango a Treat
         </a>
       </div>
     </div>

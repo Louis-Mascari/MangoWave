@@ -1,5 +1,10 @@
 import butterchurn from 'butterchurn';
 import butterchurnPresets from 'butterchurn-presets';
+import butterchurnPresetsExtra from 'butterchurn-presets/lib/butterchurnPresetsExtra.min';
+import butterchurnPresetsExtra2 from 'butterchurn-presets/lib/butterchurnPresetsExtra2.min';
+import butterchurnPresetsMD1 from 'butterchurn-presets/lib/butterchurnPresetsMD1.min';
+import butterchurnPresetsNonMinimal from 'butterchurn-presets/lib/butterchurnPresetsNonMinimal.min';
+import butterchurnPresetsMinimal from 'butterchurn-presets/lib/butterchurnPresetsMinimal.min';
 
 export class VisualizerRenderer {
   private visualizer: ReturnType<typeof butterchurn.createVisualizer> | null = null;
@@ -35,7 +40,14 @@ export class VisualizerRenderer {
 
     this.visualizer.connectAudio(analyserNode);
 
-    this.presets = butterchurnPresets.getPresets();
+    this.presets = {
+      ...butterchurnPresets.getPresets(),
+      ...butterchurnPresetsExtra.getPresets(),
+      ...butterchurnPresetsExtra2.getPresets(),
+      ...butterchurnPresetsMD1.getPresets(),
+      ...butterchurnPresetsNonMinimal.getPresets(),
+      ...butterchurnPresetsMinimal.getPresets(),
+    };
     this.presetKeys = Object.keys(this.presets);
 
     // Load a random initial preset

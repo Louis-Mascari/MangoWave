@@ -24,6 +24,22 @@ vi.mock('butterchurn-presets', () => ({
   },
 }));
 
+vi.mock('butterchurn-presets/lib/butterchurnPresetsExtra.min', () => ({
+  default: { getPresets: () => ({}) },
+}));
+vi.mock('butterchurn-presets/lib/butterchurnPresetsExtra2.min', () => ({
+  default: { getPresets: () => ({}) },
+}));
+vi.mock('butterchurn-presets/lib/butterchurnPresetsMD1.min', () => ({
+  default: { getPresets: () => ({}) },
+}));
+vi.mock('butterchurn-presets/lib/butterchurnPresetsNonMinimal.min', () => ({
+  default: { getPresets: () => ({}) },
+}));
+vi.mock('butterchurn-presets/lib/butterchurnPresetsMinimal.min', () => ({
+  default: { getPresets: () => ({}) },
+}));
+
 describe('VisualizerRenderer', () => {
   let renderer: VisualizerRenderer;
 

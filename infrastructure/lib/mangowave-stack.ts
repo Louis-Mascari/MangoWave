@@ -188,7 +188,10 @@ export class MangoWaveStack extends cdk.Stack {
     });
 
     // ─── CloudWatch: Lambda error alarms ──────────────────────────
-    const alertEmail = props?.alertEmail ?? 'PLACEHOLDER@example.com';
+    const alertEmail = props?.alertEmail;
+    if (!alertEmail) {
+      throw new Error('alertEmail prop is required — pass it in MangoWaveStack props');
+    }
 
     const alertTopic = new sns.Topic(this, 'AlertTopic', {
       topicName: 'MangoWave-Alerts',

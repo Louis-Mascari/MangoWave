@@ -16,7 +16,7 @@ export function useIdleTimer(timeoutMs: number): boolean {
 
   useEffect(() => {
     const events = ['mousemove', 'mousedown', 'keydown', 'touchstart'] as const;
-    events.forEach((event) => window.addEventListener(event, resetTimer));
+    events.forEach((event) => window.addEventListener(event, resetTimer, { passive: true }));
 
     // Start initial timer via timeout to avoid synchronous setState in effect
     const initialTimer = setTimeout(resetTimer, 0);

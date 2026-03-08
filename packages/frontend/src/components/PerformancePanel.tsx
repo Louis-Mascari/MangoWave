@@ -14,7 +14,9 @@ const RESOLUTION_OPTIONS = [
 ];
 
 export function PerformancePanel() {
-  const { performance, setFpsCap, setResolutionScale } = useSettingsStore();
+  const performance = useSettingsStore((s) => s.performance);
+  const setFpsCap = useSettingsStore((s) => s.setFpsCap);
+  const setResolutionScale = useSettingsStore((s) => s.setResolutionScale);
 
   return (
     <div className="flex flex-col gap-3 rounded-lg bg-black/60 p-4 backdrop-blur-sm">

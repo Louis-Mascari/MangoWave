@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 
 interface PresetBrowserProps {
@@ -8,19 +8,27 @@ interface PresetBrowserProps {
 }
 
 export function PresetBrowser({ presetList, currentPreset, onSelectPreset }: PresetBrowserProps) {
-  const { blockedPresets, favoritePresets, blockPreset, unblockPreset, toggleFavoritePreset } =
-    useSettingsStore();
+  const blockedPresets = useSettingsStore((s) => s.blockedPresets);
+  const favoritePresets = useSettingsStore((s) => s.favoritePresets);
+  const blockPreset = useSettingsStore((s) => s.blockPreset);
+  const unblockPreset = useSettingsStore((s) => s.unblockPreset);
+  const toggleFavoritePreset = useSettingsStore((s) => s.toggleFavoritePreset);
+
   const [filter, setFilter] = useState<'all' | 'favorites' | 'blocked'>('all');
   const [search, setSearch] = useState('');
 
-  const filteredPresets = presetList.filter((name) => {
-    const matchesSearch = name.toLowerCase().includes(search.toLowerCase());
-    if (!matchesSearch) return false;
+  const blockedSet = useMemo(() => new Set(blockedPresets), [blockedPresets]);
+  const favoriteSet = useMemo(() => new Set(favoritePresets), [favoritePresets]);
 
-    if (filter === 'favorites') return favoritePresets.includes(name);
-    if (filter === 'blocked') return blockedPresets.includes(name);
-    return !blockedPresets.includes(name);
-  });
+  const filteredPresets = useMemo(() => {
+    const lowerSearch = search.toLowerCase();
+    return presetList.filter((name) => {
+      if (!name.toLowerCase().includes(lowerSearch)) return false;
+      if (filter === 'favorites') return favoriteSet.has(name);
+      if (filter === 'blocked') return blockedSet.has(name);
+      return !blockedSet.has(name);
+    });
+  }, [presetList, search, filter, blockedSet, favoriteSet]);
 
   return (
     <div className="flex max-h-80 flex-col gap-2 rounded-lg bg-black/60 p-4 backdrop-blur-sm">
@@ -53,8 +61,8 @@ export function PresetBrowser({ presetList, currentPreset, onSelectPreset }: Pre
 
       <div className="flex flex-col gap-0.5 overflow-y-auto">
         {filteredPresets.map((name) => {
-          const isBlocked = blockedPresets.includes(name);
-          const isFavorite = favoritePresets.includes(name);
+          const isBlocked = blockedSet.has(name);
+          const isFavorite = favoriteSet.has(name);
           const isCurrent = name === currentPreset;
 
           return (

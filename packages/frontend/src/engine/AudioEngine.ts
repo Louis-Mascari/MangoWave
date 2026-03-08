@@ -8,11 +8,6 @@ export const EQ_BANDS = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000] a
 
 export type EQBandFrequency = (typeof EQ_BANDS)[number];
 
-export interface EQBandSetting {
-  frequency: EQBandFrequency;
-  gain: number; // dB, typically -12 to +12
-}
-
 export class AudioEngine {
   private audioContext: AudioContext | null = null;
   private sourceNode: MediaStreamAudioSourceNode | null = null;

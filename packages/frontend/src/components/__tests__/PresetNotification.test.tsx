@@ -16,13 +16,12 @@ describe('PresetNotification', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('shows the preset name then fades', () => {
+  it('shows the preset name then fades after duration', () => {
     render(<PresetNotification message="Cool Preset" durationMs={3000} />);
 
-    // Flush the show timer (setTimeout 0)
+    // Flush the deferred show timer
     act(() => vi.advanceTimersByTime(1));
 
-    expect(screen.getByText('Cool Preset')).toBeInTheDocument();
     const el = screen.getByText('Cool Preset');
     expect(el.className).toContain('opacity-80');
 

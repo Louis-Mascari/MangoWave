@@ -7,14 +7,13 @@ interface PresetNotificationProps {
 
 export function PresetNotification({ message, durationMs = 3000 }: PresetNotificationProps) {
   const [visible, setVisible] = useState(false);
-  const [displayedMessage, setDisplayedMessage] = useState('');
 
   useEffect(() => {
     if (!message) return;
 
-    // Use a microtask to avoid synchronous setState-in-effect lint error
+    // Defer setState to satisfy React 19's set-state-in-effect rule.
+    // setTimeout ordering guarantees the 0ms fires before durationMs.
     const showTimer = setTimeout(() => {
-      setDisplayedMessage(message);
       setVisible(true);
     }, 0);
 
@@ -28,7 +27,7 @@ export function PresetNotification({ message, durationMs = 3000 }: PresetNotific
     };
   }, [message, durationMs]);
 
-  if (!displayedMessage) return null;
+  if (!message) return null;
 
   return (
     <div
@@ -36,7 +35,7 @@ export function PresetNotification({ message, durationMs = 3000 }: PresetNotific
         visible ? 'opacity-80' : 'opacity-0'
       }`}
     >
-      {displayedMessage}
+      {message}
     </div>
   );
 }

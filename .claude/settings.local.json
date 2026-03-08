@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vitest run 2>&1)",
+      "Bash(npx eslint --print-config src/App.tsx 2>&1 | grep -i \"unused\")",
+      "Bash(npx eslint . 2>&1)",
+      "Bash(cd /home/lmascari/MangoWave/packages/frontend && npx eslint src/store 2>&1 && npx vitest run 2>&1)",
+      "Bash(npx eslint src 2>&1)",
+      "Bash(npx eslint src --fix 2>&1)",
+      "Bash(cd /home/lmascari/MangoWave/packages/frontend && npx eslint src 2>&1 && npx vitest run 2>&1)"
+    ]
+  }
+}

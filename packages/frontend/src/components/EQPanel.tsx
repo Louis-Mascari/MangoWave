@@ -6,7 +6,10 @@ function formatFreq(freq: number): string {
 }
 
 export function EQPanel() {
-  const { eq, setPreAmpGain, setEQBandGain, resetEQ } = useSettingsStore();
+  const eq = useSettingsStore((s) => s.eq);
+  const setPreAmpGain = useSettingsStore((s) => s.setPreAmpGain);
+  const setEQBandGain = useSettingsStore((s) => s.setEQBandGain);
+  const resetEQ = useSettingsStore((s) => s.resetEQ);
 
   return (
     <div className="flex flex-col gap-3 rounded-lg bg-black/60 p-4 backdrop-blur-sm">

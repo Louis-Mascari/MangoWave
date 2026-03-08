@@ -47,6 +47,7 @@ export function EQPanel() {
               step="1"
               value={eq.bandGains[i]}
               onChange={(e) => setEQBandGain(i, parseFloat(e.target.value))}
+              // @ts-expect-error - orient="vertical" is a non-standard Firefox attribute
               orient="vertical"
               className="h-24 accent-orange-500"
               style={{ writingMode: 'vertical-lr', direction: 'rtl' }}

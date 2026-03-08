@@ -155,8 +155,6 @@ describe('AudioEngine', () => {
       } as unknown as MediaStream;
 
       engine.initAudioPipeline(mockStream);
-      // Manually set stream via captureAudio path simulation
-      // @ts-expect-error - accessing private for test
       engine['stream'] = mockStream;
 
       engine.destroy();

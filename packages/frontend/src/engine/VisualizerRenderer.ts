@@ -4,7 +4,6 @@ import butterchurnPresets from 'butterchurn-presets';
 export class VisualizerRenderer {
   private visualizer: ReturnType<typeof butterchurn.createVisualizer> | null = null;
   private animationFrameId: number | null = null;
-  private canvas: HTMLCanvasElement | null = null;
   private presets: Record<string, object> = {};
   private presetKeys: string[] = [];
   private currentPresetIndex = 0;
@@ -26,7 +25,6 @@ export class VisualizerRenderer {
     analyserNode: AnalyserNode,
     onPresetChange?: (name: string) => void,
   ): void {
-    this.canvas = canvas;
     this.onPresetChange = onPresetChange;
 
     this.visualizer = butterchurn.createVisualizer(audioContext, canvas, {
@@ -106,7 +104,6 @@ export class VisualizerRenderer {
   destroy(): void {
     this.stop();
     this.visualizer = null;
-    this.canvas = null;
     this.presets = {};
     this.presetKeys = [];
   }

@@ -58,7 +58,6 @@ export class MangoWaveStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_20_X,
       memorySize: 128,
       timeout: cdk.Duration.seconds(10),
-      reservedConcurrentExecutions: 5,
       bundling: {
         minify: true,
         sourceMap: true,

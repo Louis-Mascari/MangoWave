@@ -24,13 +24,12 @@ describe('MangoWaveStack', () => {
     });
   });
 
-  it('creates 4 Lambda functions with reserved concurrency', () => {
+  it('creates 4 Lambda functions with correct config', () => {
     const lambdas = template.findResources('AWS::Lambda::Function');
     const lambdaKeys = Object.keys(lambdas);
     expect(lambdaKeys.length).toBe(4);
 
     for (const key of lambdaKeys) {
-      expect(lambdas[key].Properties.ReservedConcurrentExecutions).toBe(5);
       expect(lambdas[key].Properties.MemorySize).toBe(128);
       expect(lambdas[key].Properties.Runtime).toBe('nodejs20.x');
     }

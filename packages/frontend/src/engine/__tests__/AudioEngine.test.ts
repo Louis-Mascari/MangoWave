@@ -132,6 +132,56 @@ describe('AudioEngine', () => {
     });
   });
 
+  describe('setSmoothingConstant', () => {
+    it('does nothing if pipeline not initialized', () => {
+      engine.setSmoothingConstant(0.8);
+      // Should not throw
+    });
+
+    it('sets smoothingTimeConstant on analyser', () => {
+      const mockCtx = createMockAudioContext();
+      globalThis.AudioContext = vi.fn(function (this: Record<string, unknown>) {
+        Object.assign(this, mockCtx);
+        return this;
+      }) as unknown as typeof AudioContext;
+
+      const mockStream = {
+        getVideoTracks: () => [],
+        getAudioTracks: () => [],
+        getTracks: () => [],
+      } as unknown as MediaStream;
+
+      engine.initAudioPipeline(mockStream);
+      engine.setSmoothingConstant(0.8);
+      expect(engine.analyserNode!.smoothingTimeConstant).toBe(0.8);
+    });
+  });
+
+  describe('setFftSize', () => {
+    it('does nothing if pipeline not initialized', () => {
+      engine.setFftSize(2048);
+      // Should not throw
+    });
+
+    it('sets fftSize on analyser', () => {
+      const mockCtx = createMockAudioContext();
+      globalThis.AudioContext = vi.fn(function (this: Record<string, unknown>) {
+        Object.assign(this, mockCtx);
+        return this;
+      }) as unknown as typeof AudioContext;
+
+      const mockStream = {
+        getVideoTracks: () => [],
+        getAudioTracks: () => [],
+        getTracks: () => [],
+      } as unknown as MediaStream;
+
+      engine.initAudioPipeline(mockStream);
+      engine.setFftSize(2048);
+      expect(engine.analyserNode!.fftSize).toBe(2048);
+    });
+  });
+
   describe('setEQBandGain', () => {
     it('does nothing if index out of range', () => {
       engine.setEQBandGain(-1, 5);

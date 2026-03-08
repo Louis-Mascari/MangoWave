@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useIdleTimer } from '../hooks/useIdleTimer.ts';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
 import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
@@ -6,6 +5,8 @@ import { EQPanel } from './EQPanel.tsx';
 import { PerformancePanel } from './PerformancePanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
 import { PlaybackControls } from './PlaybackControls.tsx';
+
+export type PanelView = 'none' | 'eq' | 'performance' | 'presets';
 
 interface ControlBarProps {
   onNextPreset: () => void;
@@ -16,9 +17,12 @@ interface ControlBarProps {
   showNowPlaying: boolean;
   presetList: string[];
   currentPreset: string;
+  autopilotEnabled: boolean;
+  onToggleAutopilot: () => void;
+  activePanel: PanelView;
+  onTogglePanel: (panel: PanelView) => void;
+  onToggleShortcuts: () => void;
 }
-
-type PanelView = 'none' | 'eq' | 'performance' | 'presets';
 
 export function ControlBar({
   onNextPreset,
@@ -29,18 +33,18 @@ export function ControlBar({
   showNowPlaying,
   presetList,
   currentPreset,
+  autopilotEnabled,
+  onToggleAutopilot,
+  activePanel,
+  onTogglePanel,
+  onToggleShortcuts,
 }: ControlBarProps) {
   const isIdle = useIdleTimer(3000);
-  const [activePanel, setActivePanel] = useState<PanelView>('none');
   const accessToken = useSpotifyStore((s) => s.accessToken);
   const user = useSpotifyStore((s) => s.user);
   const logout = useSpotifyStore((s) => s.logout);
 
   const isSpotifyConnected = !!accessToken;
-
-  const togglePanel = (panel: PanelView) => {
-    setActivePanel((current) => (current === panel ? 'none' : panel));
-  };
 
   const handleSpotifyConnect = () => {
     window.location.href = buildSpotifyAuthUrl();
@@ -69,17 +73,20 @@ export function ControlBar({
       <div className="flex items-center justify-between bg-black/50 px-4 py-2 backdrop-blur-sm">
         <div className="flex items-center gap-2">
           <BarButton onClick={onNextPreset}>Next Preset</BarButton>
-          <BarButton onClick={() => togglePanel('presets')} active={activePanel === 'presets'}>
+          <BarButton onClick={() => onTogglePanel('presets')} active={activePanel === 'presets'}>
             Presets
           </BarButton>
-          <BarButton onClick={() => togglePanel('eq')} active={activePanel === 'eq'}>
+          <BarButton onClick={() => onTogglePanel('eq')} active={activePanel === 'eq'}>
             EQ
           </BarButton>
           <BarButton
-            onClick={() => togglePanel('performance')}
+            onClick={() => onTogglePanel('performance')}
             active={activePanel === 'performance'}
           >
             Performance
+          </BarButton>
+          <BarButton onClick={onToggleAutopilot} active={autopilotEnabled}>
+            Autopilot
           </BarButton>
 
           <div className="mx-1 h-5 w-px bg-white/20" />
@@ -101,6 +108,7 @@ export function ControlBar({
           ) : (
             <BarButton onClick={handleSpotifyConnect}>Connect Spotify</BarButton>
           )}
+          <BarButton onClick={onToggleShortcuts}>?</BarButton>
           <BarButton onClick={onToggleFullscreen}>Fullscreen</BarButton>
           <BarButton onClick={onStop}>Stop</BarButton>
         </div>

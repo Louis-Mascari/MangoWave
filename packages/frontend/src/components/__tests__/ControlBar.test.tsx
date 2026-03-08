@@ -12,6 +12,11 @@ const defaultProps = {
   showNowPlaying: false,
   presetList: ['Preset A', 'Preset B'],
   currentPreset: 'Preset A',
+  autopilotEnabled: false,
+  onToggleAutopilot: vi.fn(),
+  activePanel: 'none' as const,
+  onTogglePanel: vi.fn(),
+  onToggleShortcuts: vi.fn(),
 };
 
 describe('ControlBar', () => {
@@ -22,6 +27,7 @@ describe('ControlBar', () => {
     expect(screen.getByText('Presets')).toBeInTheDocument();
     expect(screen.getByText('EQ')).toBeInTheDocument();
     expect(screen.getByText('Performance')).toBeInTheDocument();
+    expect(screen.getByText('Autopilot')).toBeInTheDocument();
     expect(screen.getByText('Fullscreen')).toBeInTheDocument();
     expect(screen.getByText('Stop')).toBeInTheDocument();
   });
@@ -44,34 +50,37 @@ describe('ControlBar', () => {
     expect(onStop).toHaveBeenCalledTimes(1);
   });
 
-  it('toggles EQ panel on click', async () => {
-    const user = userEvent.setup();
-    render(<ControlBar {...defaultProps} />);
-
-    expect(screen.queryByText('Equalizer')).not.toBeInTheDocument();
-
-    await user.click(screen.getByText('EQ'));
+  it('shows EQ panel when activePanel is eq', () => {
+    render(<ControlBar {...defaultProps} activePanel="eq" />);
     expect(screen.getByText('Equalizer')).toBeInTheDocument();
-
-    await user.click(screen.getByText('EQ'));
-    expect(screen.queryByText('Equalizer')).not.toBeInTheDocument();
   });
 
-  it('toggles Performance panel on click', async () => {
-    const user = userEvent.setup();
-    render(<ControlBar {...defaultProps} />);
-
-    expect(screen.queryByText('Frame Rate')).not.toBeInTheDocument();
-
-    await user.click(screen.getByText('Performance'));
+  it('shows Performance panel when activePanel is performance', () => {
+    render(<ControlBar {...defaultProps} activePanel="performance" />);
     expect(screen.getByText('Frame Rate')).toBeInTheDocument();
   });
 
-  it('toggles Presets panel on click', async () => {
+  it('calls onTogglePanel when panel button is clicked', async () => {
     const user = userEvent.setup();
-    render(<ControlBar {...defaultProps} />);
+    const onTogglePanel = vi.fn();
+    render(<ControlBar {...defaultProps} onTogglePanel={onTogglePanel} />);
 
-    await user.click(screen.getByText('Presets'));
-    expect(screen.getByPlaceholderText('Search presets...')).toBeInTheDocument();
+    await user.click(screen.getByText('EQ'));
+    expect(onTogglePanel).toHaveBeenCalledWith('eq');
+  });
+
+  it('calls onToggleAutopilot when Autopilot is clicked', async () => {
+    const user = userEvent.setup();
+    const onToggleAutopilot = vi.fn();
+    render(<ControlBar {...defaultProps} onToggleAutopilot={onToggleAutopilot} />);
+
+    await user.click(screen.getByText('Autopilot'));
+    expect(onToggleAutopilot).toHaveBeenCalledTimes(1);
+  });
+
+  it('highlights Autopilot button when enabled', () => {
+    render(<ControlBar {...defaultProps} autopilotEnabled={true} />);
+    const btn = screen.getByText('Autopilot');
+    expect(btn.className).toContain('bg-orange-500');
   });
 });

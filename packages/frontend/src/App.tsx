@@ -2,10 +2,16 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { useAudioCapture } from './hooks/useAudioCapture.ts';
 import { useSpotifyAuth } from './hooks/useSpotifyAuth.ts';
 import { useSettingsSync } from './hooks/useSettingsSync.ts';
+import { useAutopilot } from './hooks/useAutopilot.ts';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.ts';
+import { useHideCursor } from './hooks/useHideCursor.ts';
 import { Visualizer } from './components/Visualizer.tsx';
 import { ControlBar } from './components/ControlBar.tsx';
+import type { PanelView } from './components/ControlBar.tsx';
 import { PresetNotification } from './components/PresetNotification.tsx';
 import { NowPlaying } from './components/NowPlaying.tsx';
+import { StartScreen } from './components/StartScreen.tsx';
+import { ShortcutOverlay } from './components/ShortcutOverlay.tsx';
 import { useSettingsStore } from './store/useSettingsStore.ts';
 import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
@@ -18,10 +24,14 @@ function App() {
   const { audioEngine, isCapturing, error, startCapture, stopCapture } = useAudioCapture();
   const rendererRef = useRef<VisualizerRenderer | null>(null);
   const blockedPresets = useSettingsStore((s) => s.blockedPresets);
+  const favoritePresets = useSettingsStore((s) => s.favoritePresets);
   const transitionTime = useSettingsStore((s) => s.transitionTime);
+  const autopilot = useSettingsStore((s) => s.autopilot);
+  const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
   const [currentPreset, setCurrentPreset] = useState('');
   const [presetList, setPresetList] = useState<string[]>([]);
   const [showNowPlaying, setShowNowPlaying] = useState(false);
+  const [activePanel, setActivePanel] = useState<PanelView>('none');
 
   const handlePresetChange = useCallback((name: string) => {
     setCurrentPreset(name);
@@ -53,6 +63,40 @@ function App() {
   const handleToggleNowPlaying = useCallback(() => {
     setShowNowPlaying((prev) => !prev);
   }, []);
+
+  const handleToggleAutopilot = useCallback(() => {
+    setAutopilotEnabled(!autopilot.enabled);
+  }, [autopilot.enabled, setAutopilotEnabled]);
+
+  const handleTogglePanel = useCallback((panel: PanelView) => {
+    setActivePanel((current) => (current === panel ? 'none' : panel));
+  }, []);
+
+  const handleClosePanel = useCallback(() => {
+    setActivePanel('none');
+  }, []);
+
+  const handleAutopilotAdvance = useCallback(() => {
+    if (autopilot.favoritesOnly && favoritePresets.length > 0) {
+      // Build blocked set as everything NOT in favorites
+      const allPresets = rendererRef.current?.presetList ?? [];
+      const favSet = new Set(favoritePresets);
+      const blockedSet = new Set(allPresets.filter((p) => !favSet.has(p)));
+      rendererRef.current?.nextPreset(blockedSet, transitionTime);
+    } else {
+      handleNextPreset();
+    }
+  }, [autopilot.favoritesOnly, favoritePresets, transitionTime, handleNextPreset]);
+
+  useAutopilot(handleAutopilotAdvance);
+  useHideCursor(3000);
+
+  const { showShortcutOverlay, toggleShortcutOverlay } = useKeyboardShortcuts({
+    onNextPreset: handleNextPreset,
+    onToggleFullscreen: handleToggleFullscreen,
+    onClosePanel: handleClosePanel,
+    onToggleAutopilot: handleToggleAutopilot,
+  });
 
   if (!webgl2) {
     return (
@@ -87,20 +131,16 @@ function App() {
             showNowPlaying={showNowPlaying}
             presetList={presetList}
             currentPreset={currentPreset}
+            autopilotEnabled={autopilot.enabled}
+            onToggleAutopilot={handleToggleAutopilot}
+            activePanel={activePanel}
+            onTogglePanel={handleTogglePanel}
+            onToggleShortcuts={toggleShortcutOverlay}
           />
+          <ShortcutOverlay visible={showShortcutOverlay} onClose={toggleShortcutOverlay} />
         </>
       ) : (
-        <div className="flex h-full flex-col items-center justify-center font-sans text-white">
-          <h1 className="text-4xl font-bold">MangoWave</h1>
-          <p className="mb-6 opacity-60">Click below to share a tab and start visualizing audio</p>
-          <button
-            onClick={startCapture}
-            className="cursor-pointer rounded-lg border-none bg-orange-500 px-8 py-3 text-lg font-bold text-white hover:bg-orange-400"
-          >
-            Start Visualizer
-          </button>
-          {error && <p className="mt-4 text-red-500">{error}</p>}
-        </div>
+        <StartScreen onStart={startCapture} error={error} />
       )}
     </div>
   );

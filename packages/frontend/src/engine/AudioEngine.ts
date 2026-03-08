@@ -81,6 +81,18 @@ export class AudioEngine {
     }
   }
 
+  setSmoothingConstant(value: number): void {
+    if (this.analyser) {
+      this.analyser.smoothingTimeConstant = value;
+    }
+  }
+
+  setFftSize(size: number): void {
+    if (this.analyser) {
+      this.analyser.fftSize = size;
+    }
+  }
+
   setEQBandGain(index: number, gainDb: number): void {
     if (index >= 0 && index < this.eqFilters.length) {
       this.eqFilters[index].gain.value = gainDb;

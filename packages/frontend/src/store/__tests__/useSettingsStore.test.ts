@@ -11,6 +11,11 @@ describe('useSettingsStore', () => {
       result.current.setFpsCap(0);
       result.current.setResolutionScale(1.0);
       result.current.setTransitionTime(2.0);
+      result.current.setSmoothingConstant(0.3);
+      result.current.setFftSize(1024);
+      result.current.setAutopilotEnabled(true);
+      result.current.setAutopilotInterval(15);
+      result.current.setAutopilotFavoritesOnly(false);
       // Clear presets
       result.current.blockedPresets.forEach((p) => result.current.unblockPreset(p));
       result.current.favoritePresets.forEach((p) => result.current.toggleFavoritePreset(p));
@@ -113,6 +118,53 @@ describe('useSettingsStore', () => {
 
       act(() => result.current.toggleFavoritePreset('Cool Waves'));
       expect(result.current.favoritePresets).not.toContain('Cool Waves');
+    });
+  });
+
+  describe('audio', () => {
+    it('has correct defaults', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      expect(result.current.audio.smoothingConstant).toBe(0.3);
+      expect(result.current.audio.fftSize).toBe(1024);
+    });
+
+    it('sets smoothing constant', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setSmoothingConstant(0.7));
+      expect(result.current.audio.smoothingConstant).toBe(0.7);
+    });
+
+    it('sets FFT size', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setFftSize(2048));
+      expect(result.current.audio.fftSize).toBe(2048);
+    });
+  });
+
+  describe('autopilot', () => {
+    it('has correct defaults', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      expect(result.current.autopilot.enabled).toBe(true);
+      expect(result.current.autopilot.interval).toBe(15);
+      expect(result.current.autopilot.favoritesOnly).toBe(false);
+    });
+
+    it('sets enabled', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setAutopilotEnabled(true));
+      expect(result.current.autopilot.enabled).toBe(true);
+    });
+
+    it('sets interval', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setAutopilotInterval(30));
+      expect(result.current.autopilot.interval).toBe(30);
+    });
+
+    it('sets favoritesOnly', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setAutopilotFavoritesOnly(true));
+      expect(result.current.autopilot.favoritesOnly).toBe(true);
     });
   });
 

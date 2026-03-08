@@ -17,7 +17,7 @@ export function Visualizer({
   onPresetsLoaded,
 }: VisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { performance, eq } = useSettingsStore();
+  const { performance, eq, audio } = useSettingsStore();
 
   // Initialize renderer
   useEffect(() => {
@@ -73,6 +73,15 @@ export function Visualizer({
     canvas.height = height;
     renderer.setSize(width, height);
   }, [performance.resolutionScale, rendererRef]);
+
+  // Sync audio settings to engine
+  useEffect(() => {
+    audioEngine.setSmoothingConstant(audio.smoothingConstant);
+  }, [audioEngine, audio.smoothingConstant]);
+
+  useEffect(() => {
+    audioEngine.setFftSize(audio.fftSize);
+  }, [audioEngine, audio.fftSize]);
 
   // Sync EQ settings to audio engine
   useEffect(() => {

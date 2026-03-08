@@ -1,5 +1,6 @@
 import { EQ_BANDS } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
+import { Tooltip } from './Tooltip.tsx';
 
 function formatFreq(freq: number): string {
   return freq >= 1000 ? `${freq / 1000}k` : `${freq}`;
@@ -24,7 +25,10 @@ export function EQPanel() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-xs text-white/60">Pre-Amp</label>
+        <label className="flex items-center text-xs text-white/60">
+          Pre-Amp
+          <Tooltip text="Boost or cut the overall input signal before the EQ bands" />
+        </label>
         <input
           type="range"
           min="0"

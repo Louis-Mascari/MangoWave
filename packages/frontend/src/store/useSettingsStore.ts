@@ -12,6 +12,17 @@ export interface EQSettings {
   bandGains: number[]; // dB values for each of the 10 bands, -12 to +12
 }
 
+export interface AudioSettings {
+  smoothingConstant: number; // 0–1
+  fftSize: number; // 512, 1024, 2048, 4096
+}
+
+export interface AutopilotSettings {
+  enabled: boolean;
+  interval: number; // seconds
+  favoritesOnly: boolean;
+}
+
 export interface SettingsState {
   // Performance
   performance: PerformanceSettings;
@@ -23,6 +34,17 @@ export interface SettingsState {
   setPreAmpGain: (gain: number) => void;
   setEQBandGain: (index: number, gainDb: number) => void;
   resetEQ: () => void;
+
+  // Audio
+  audio: AudioSettings;
+  setSmoothingConstant: (value: number) => void;
+  setFftSize: (size: number) => void;
+
+  // Autopilot
+  autopilot: AutopilotSettings;
+  setAutopilotEnabled: (enabled: boolean) => void;
+  setAutopilotInterval: (interval: number) => void;
+  setAutopilotFavoritesOnly: (favoritesOnly: boolean) => void;
 
   // Presets
   blockedPresets: string[];
@@ -53,6 +75,39 @@ export const useSettingsStore = create<SettingsState>()(
       setResolutionScale: (scale) =>
         set((state) => ({
           performance: { ...state.performance, resolutionScale: scale },
+        })),
+
+      // Audio
+      audio: {
+        smoothingConstant: 0.3,
+        fftSize: 1024,
+      },
+      setSmoothingConstant: (value) =>
+        set((state) => ({
+          audio: { ...state.audio, smoothingConstant: value },
+        })),
+      setFftSize: (size) =>
+        set((state) => ({
+          audio: { ...state.audio, fftSize: size },
+        })),
+
+      // Autopilot
+      autopilot: {
+        enabled: true,
+        interval: 15,
+        favoritesOnly: false,
+      },
+      setAutopilotEnabled: (enabled) =>
+        set((state) => ({
+          autopilot: { ...state.autopilot, enabled },
+        })),
+      setAutopilotInterval: (interval) =>
+        set((state) => ({
+          autopilot: { ...state.autopilot, interval },
+        })),
+      setAutopilotFavoritesOnly: (favoritesOnly) =>
+        set((state) => ({
+          autopilot: { ...state.autopilot, favoritesOnly },
         })),
 
       // EQ

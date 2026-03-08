@@ -1,35 +1,37 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useAudioCapture } from './hooks/useAudioCapture.ts';
+import { Visualizer } from './components/Visualizer.tsx';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { audioEngine, isCapturing, error, startCapture, stopCapture } = useAudioCapture();
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+    <div className="h-screen w-screen bg-black">
+      {isCapturing && audioEngine ? <Visualizer audioEngine={audioEngine} /> : null}
+
+      {!isCapturing && (
+        <div className="flex h-full flex-col items-center justify-center font-sans text-white">
+          <h1 className="text-4xl font-bold">MangoWave</h1>
+          <p className="mb-6 opacity-60">Click below to share a tab and start visualizing audio</p>
+          <button
+            onClick={startCapture}
+            className="cursor-pointer rounded-lg border-none bg-orange-500 px-8 py-3 text-lg font-bold text-white hover:bg-orange-400"
+          >
+            Start Visualizer
+          </button>
+          {error && <p className="mt-4 text-red-500">{error}</p>}
+        </div>
+      )}
+
+      {isCapturing && (
+        <button
+          onClick={stopCapture}
+          className="fixed top-4 right-4 z-50 cursor-pointer rounded-md border-none bg-white/15 px-4 py-2 text-sm text-white hover:bg-white/25"
+        >
+          Stop
         </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;

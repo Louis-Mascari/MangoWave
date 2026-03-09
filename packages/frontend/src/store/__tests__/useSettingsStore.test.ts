@@ -109,6 +109,15 @@ describe('useSettingsStore', () => {
       act(() => result.current.unblockPreset('Scary Faces'));
       expect(result.current.blockedPresets).not.toContain('Scary Faces');
     });
+
+    it('removes from favorites when blocking', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.toggleFavoritePreset('Scary Faces'));
+      expect(result.current.favoritePresets).toContain('Scary Faces');
+      act(() => result.current.blockPreset('Scary Faces'));
+      expect(result.current.blockedPresets).toContain('Scary Faces');
+      expect(result.current.favoritePresets).not.toContain('Scary Faces');
+    });
   });
 
   describe('favorite presets', () => {
@@ -119,6 +128,15 @@ describe('useSettingsStore', () => {
 
       act(() => result.current.toggleFavoritePreset('Cool Waves'));
       expect(result.current.favoritePresets).not.toContain('Cool Waves');
+    });
+
+    it('removes from blocked when favoriting', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.blockPreset('Cool Waves'));
+      expect(result.current.blockedPresets).toContain('Cool Waves');
+      act(() => result.current.toggleFavoritePreset('Cool Waves'));
+      expect(result.current.favoritePresets).toContain('Cool Waves');
+      expect(result.current.blockedPresets).not.toContain('Cool Waves');
     });
   });
 
@@ -201,6 +219,15 @@ describe('useSettingsStore', () => {
       expect(result.current.blockedPresets).toContain('Scary Faces');
       act(() => result.current.toggleBlockPreset('Scary Faces'));
       expect(result.current.blockedPresets).not.toContain('Scary Faces');
+    });
+
+    it('removes from favorites when toggle-blocking', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.toggleFavoritePreset('Scary Faces'));
+      expect(result.current.favoritePresets).toContain('Scary Faces');
+      act(() => result.current.toggleBlockPreset('Scary Faces'));
+      expect(result.current.blockedPresets).toContain('Scary Faces');
+      expect(result.current.favoritePresets).not.toContain('Scary Faces');
     });
   });
 

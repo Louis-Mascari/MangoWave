@@ -145,6 +145,7 @@ export const useSettingsStore = create<SettingsState>()(
           blockedPresets: state.blockedPresets.includes(name)
             ? state.blockedPresets
             : [...state.blockedPresets, name],
+          favoritePresets: state.favoritePresets.filter((p) => p !== name),
         })),
       unblockPreset: (name) =>
         set((state) => ({
@@ -155,12 +156,18 @@ export const useSettingsStore = create<SettingsState>()(
           blockedPresets: state.blockedPresets.includes(name)
             ? state.blockedPresets.filter((p) => p !== name)
             : [...state.blockedPresets, name],
+          favoritePresets: state.blockedPresets.includes(name)
+            ? state.favoritePresets
+            : state.favoritePresets.filter((p) => p !== name),
         })),
       toggleFavoritePreset: (name) =>
         set((state) => ({
           favoritePresets: state.favoritePresets.includes(name)
             ? state.favoritePresets.filter((p) => p !== name)
             : [...state.favoritePresets, name],
+          blockedPresets: state.favoritePresets.includes(name)
+            ? state.blockedPresets
+            : state.blockedPresets.filter((p) => p !== name),
         })),
 
       // Display

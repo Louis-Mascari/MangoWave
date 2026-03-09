@@ -1,73 +1,83 @@
-# React + TypeScript + Vite
+# @mangowave/frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The MangoWave visualizer app — a React 19 + Vite 7 + TypeScript SPA that captures audio and renders real-time MilkDrop-style visuals via butterchurn.
 
-Currently, two official plugins are available:
+## Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+npm run dev        # Vite dev server at localhost:5173
+npm run build      # tsc -b && vite build
+npm run test       # Vitest (119 tests, jsdom)
+npm run test:watch # Vitest in watch mode
+npm run lint       # ESLint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Architecture
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x';
-import reactDom from 'eslint-plugin-react-dom';
+### Audio Pipeline
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
 ```
+getDisplayMedia -> MediaStreamSource -> GainNode (pre-amp) -> 10x BiquadFilter (EQ) -> AnalyserNode -> butterchurn
+```
+
+- **EQ is purely visual** — shapes FFT data for butterchurn, does not change audio output
+- **Pre-amp** scales overall visual reactivity (0-3x linear gain)
+- butterchurn calls `connectAudio(analyserNode)` and reads FFT data directly
+
+### Source Layout
+
+```
+src/
+├── components/    # UI: ControlBar, EQPanel, PerformancePanel, PresetBrowser,
+│                  #     StartScreen, ShortcutOverlay, Tooltip, ErrorBoundary, etc.
+├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (butterchurn),
+│                  # isWebGL2Supported
+├── hooks/         # useAudioCapture, useAutopilot, useKeyboardShortcuts,
+│                  # useIdleTimer, useHideCursor, useSpotifyAuth, useNowPlaying
+├── lib/           # PostHog & Sentry init (no-op when env vars absent)
+├── services/      # Spotify Web API client
+├── store/         # Zustand stores: useSettingsStore, useSpotifyStore
+├── types/         # butterchurn.d.ts (type declarations for untyped packages)
+└── test/          # Vitest global setup
+```
+
+### State Management
+
+Zustand with `localStorage` persistence. Key sections:
+
+| Section             | Fields                                 | Defaults          |
+| ------------------- | -------------------------------------- | ----------------- |
+| `performance`       | `fpsCap`, `resolutionScale`            | 0 (uncapped), 1.0 |
+| `audio`             | `smoothingConstant`, `fftSize`         | 0.3, 1024         |
+| `autopilot`         | `enabled`, `interval`, `favoritesOnly` | true, 15s, false  |
+| `eq`                | `preAmpGain`, `bandGains[10]`          | 1.0, all 0dB      |
+| `blockedPresets`    | string[]                               | []                |
+| `favoritePresets`   | string[]                               | []                |
+| `presetNameDisplay` | `'off' \| 'always' \| number`          | 5                 |
+| `transitionTime`    | number (seconds)                       | 2.0               |
+
+Blocked and favorited presets are mutually exclusive.
+
+## Environment Variables
+
+Create a `.env` file (gitignored):
+
+```
+VITE_SPOTIFY_CLIENT_ID=
+VITE_SPOTIFY_REDIRECT_URI=
+VITE_API_URL=
+VITE_SENTRY_DSN=
+VITE_PUBLIC_POSTHOG_KEY=
+VITE_PUBLIC_POSTHOG_HOST=
+```
+
+All are optional — the app runs fully without them. Spotify integration requires the first three; analytics/error tracking require the last three.
+
+## Key Technical Notes
+
+- **WebGL 2 required.** `isWebGL2Supported()` checks on mount and shows a fallback if unavailable.
+- **butterchurn is untyped** — type declarations live in `src/types/butterchurn.d.ts`.
+- **`vite.config.ts`** imports `defineConfig` from `vitest/config` (not `vite`) to support the `test` property.
+- **555 presets** loaded from all butterchurn preset packs (base, Extra, Extra2, MD1, NonMinimal, Minimal).
+- **Cursor auto-hides** after 3s idle in fullscreen via `useHideCursor`.
+- **ControlBar panel state** is lifted to `App.tsx` so keyboard shortcuts can close panels.

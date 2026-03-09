@@ -85,7 +85,7 @@ export function ControlBar({
 
           {currentPreset && (
             <>
-              <span className="max-w-48 truncate text-xs text-white/60" title={currentPreset}>
+              <span className="w-48 truncate text-xs text-white/60" title={currentPreset}>
                 {currentPreset}
               </span>
               <button

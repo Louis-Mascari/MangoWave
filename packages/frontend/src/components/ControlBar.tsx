@@ -55,7 +55,18 @@ export function ControlBar({
   const isSpotifyConnected = !!accessToken;
 
   const handleSpotifyConnect = () => {
-    window.location.href = buildSpotifyAuthUrl();
+    const url = buildSpotifyAuthUrl();
+    const popup = window.open(url, 'spotify-auth', 'popup,width=500,height=700');
+    if (!popup || popup.closed) {
+      // Popup blocked — fall back to confirm + redirect
+      if (
+        window.confirm(
+          'Connecting to Spotify requires a page redirect which will stop your current session. Continue?',
+        )
+      ) {
+        window.location.href = url;
+      }
+    }
   };
 
   return (

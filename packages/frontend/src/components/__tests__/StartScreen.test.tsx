@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { StartScreen } from '../StartScreen.tsx';
+import { useSpotifyStore } from '../../store/useSpotifyStore.ts';
 
 describe('StartScreen', () => {
   it('renders epilepsy warning', () => {
@@ -36,5 +37,22 @@ describe('StartScreen', () => {
   it('renders audio sharing instructions', () => {
     render(<StartScreen onStart={vi.fn()} error={null} />);
     expect(screen.getByText('How it works')).toBeInTheDocument();
+  });
+
+  it('renders Connect Spotify button when not connected', () => {
+    useSpotifyStore.setState({ sessionId: null });
+    render(<StartScreen onStart={vi.fn()} error={null} />);
+    expect(screen.getByText('Connect Spotify')).toBeInTheDocument();
+  });
+
+  it('shows connected state when Spotify sessionId exists', () => {
+    useSpotifyStore.setState({
+      sessionId: 'test-session',
+      user: { displayName: 'Test User', id: '123' },
+    });
+    render(<StartScreen onStart={vi.fn()} error={null} />);
+    expect(screen.getByText('Connected as Test User')).toBeInTheDocument();
+    expect(screen.getByText('Disconnect')).toBeInTheDocument();
+    useSpotifyStore.setState({ sessionId: null, user: null });
   });
 });

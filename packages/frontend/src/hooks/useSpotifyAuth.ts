@@ -43,6 +43,11 @@ export function useSpotifyAuth() {
     exchangeCode(code)
       .then(({ accessToken, expiresIn, sessionId: sid, user }) => {
         setAuth(accessToken, expiresIn, sid, user);
+        // If we're in a popup, notify opener and close
+        if (window.opener) {
+          window.opener.postMessage({ type: 'spotify-connected' }, window.location.origin);
+          window.close();
+        }
       })
       .catch((err) => {
         console.error('Spotify auth failed:', err);

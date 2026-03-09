@@ -87,4 +87,33 @@ describe('ControlBar', () => {
     const btn = screen.getByText('Autopilot');
     expect(btn.className).toContain('bg-orange-500');
   });
+
+  it('opens popup when Connect Spotify is clicked', async () => {
+    const user = userEvent.setup();
+    const mockPopup = { closed: false };
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup as Window);
+
+    render(<ControlBar {...defaultProps} />);
+    await user.click(screen.getByText('Connect Spotify'));
+
+    expect(openSpy).toHaveBeenCalledWith(
+      expect.any(String),
+      'spotify-auth',
+      'popup,width=500,height=700',
+    );
+    openSpy.mockRestore();
+  });
+
+  it('falls back to confirm dialog when popup is blocked', async () => {
+    const user = userEvent.setup();
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+    render(<ControlBar {...defaultProps} />);
+    await user.click(screen.getByText('Connect Spotify'));
+
+    expect(confirmSpy).toHaveBeenCalled();
+    openSpy.mockRestore();
+    confirmSpy.mockRestore();
+  });
 });

@@ -1,3 +1,5 @@
+import { useSpotifyStore } from '../store/useSpotifyStore.ts';
+import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import logoSrc from '../assets/logo.png';
 
 interface StartScreenProps {
@@ -6,6 +8,9 @@ interface StartScreenProps {
 }
 
 export function StartScreen({ onStart, error }: StartScreenProps) {
+  const sessionId = useSpotifyStore((s) => s.sessionId);
+  const user = useSpotifyStore((s) => s.user);
+  const logout = useSpotifyStore((s) => s.logout);
   return (
     <div className="flex h-full flex-col items-center overflow-y-auto px-4 py-8 font-sans text-[#e0e0e0]">
       <div className="flex flex-1 flex-col items-center justify-center gap-5">
@@ -64,11 +69,35 @@ export function StartScreen({ onStart, error }: StartScreenProps) {
           </p>
         </div>
 
-        {/* Spotify info */}
-        <p className="max-w-md text-center text-xs text-[#666]">
-          Optionally connect Spotify for now-playing metadata, playback controls, and cloud-synced
-          settings.
-        </p>
+        {/* Spotify connect */}
+        <div className="flex max-w-md flex-col items-center gap-2 text-center">
+          {sessionId ? (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-green-400">&#10003;</span>
+              <span className="text-[#ccc]">
+                {user?.displayName ? `Connected as ${user.displayName}` : 'Spotify connected'}
+              </span>
+              <button
+                onClick={logout}
+                className="cursor-pointer rounded border-none bg-white/10 px-2 py-0.5 text-xs text-white/60 hover:bg-white/20"
+              >
+                Disconnect
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => {
+                window.location.href = buildSpotifyAuthUrl();
+              }}
+              className="cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-medium text-[#1DB954] transition-colors hover:bg-white/10"
+            >
+              Connect Spotify
+            </button>
+          )}
+          <p className="text-xs text-[#666]">
+            For now-playing info and playback controls. Audio always comes from screen sharing.
+          </p>
+        </div>
 
         {/* Start button */}
         <button

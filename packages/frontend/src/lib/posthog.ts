@@ -13,7 +13,7 @@ export function initPostHog(): void {
     capture_pageview: true,
     capture_pageleave: true,
     persistence: 'localStorage',
-    disable_session_recording: true,
+    disable_session_recording: false,
   });
 }
 

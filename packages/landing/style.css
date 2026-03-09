@@ -43,10 +43,11 @@ body {
   transform: translate(-50%, -50%);
   width: 700px;
   height: auto;
-  opacity: 0.1;
+  opacity: 0.18;
   pointer-events: none;
   z-index: 0;
   filter: grayscale(0.4);
+  mix-blend-mode: screen;
 }
 
 @keyframes glow-pulse {

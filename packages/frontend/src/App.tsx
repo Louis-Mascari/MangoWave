@@ -12,14 +12,54 @@ import { PresetNotification } from './components/PresetNotification.tsx';
 import { NowPlaying } from './components/NowPlaying.tsx';
 import { StartScreen } from './components/StartScreen.tsx';
 import { ShortcutOverlay } from './components/ShortcutOverlay.tsx';
+import { LaunchAnimation } from './components/LaunchAnimation.tsx';
 import { useSettingsStore } from './store/useSettingsStore.ts';
+import { useSpotifyStore } from './store/useSpotifyStore.ts';
 import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
 
+/**
+ * Minimal shell for OAuth popup callbacks.
+ * useSpotifyAuth runs inside and handles code exchange + window.close().
+ */
+function OAuthPopup() {
+  useSpotifyAuth();
+  return (
+    <div className="flex h-screen items-center justify-center bg-black text-white">
+      Connecting to Spotify...
+    </div>
+  );
+}
+
 function App() {
+  // Detect if this window is a popup OAuth callback (before any other hooks)
+  const isOAuthPopup = useMemo(
+    () => !!window.opener && new URLSearchParams(window.location.search).has('code'),
+    [],
+  );
+
+  if (isOAuthPopup) {
+    return <OAuthPopup />;
+  }
+
+  return <MainApp />;
+}
+
+function MainApp() {
   const webgl2 = useMemo(() => isWebGL2Supported(), []);
   useSpotifyAuth();
   useSettingsSync();
+
+  // Listen for popup OAuth completion to rehydrate Spotify store
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin === window.location.origin && event.data?.type === 'spotify-connected') {
+        useSpotifyStore.persist.rehydrate();
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   const { audioEngine, isCapturing, error, startCapture, stopCapture } = useAudioCapture();
   const rendererRef = useRef<VisualizerRenderer | null>(null);
@@ -35,7 +75,13 @@ function App() {
   const [presetList, setPresetList] = useState<string[]>([]);
   const [showNowPlaying, setShowNowPlaying] = useState(false);
   const [activePanel, setActivePanel] = useState<PanelView>('none');
+  const [showLaunchAnimation, setShowLaunchAnimation] = useState(false);
   const resetAutopilotRef = useRef<() => void>(() => {});
+
+  const handleStart = useCallback(async () => {
+    await startCapture();
+    setShowLaunchAnimation(true);
+  }, [startCapture]);
 
   const handlePresetChange = useCallback((name: string) => {
     setCurrentPreset(name);
@@ -151,33 +197,40 @@ function App() {
             onPresetsLoaded={handlePresetsLoaded}
             onToggleFullscreen={handleToggleFullscreen}
           />
-          {presetNameDisplay !== 'off' && (
-            <PresetNotification message={currentPreset} mode={presetNameDisplay} />
+          {showLaunchAnimation && (
+            <LaunchAnimation onComplete={() => setShowLaunchAnimation(false)} />
           )}
-          <NowPlaying visible={showNowPlaying} />
-          <ControlBar
-            onNextPreset={handleNextPreset}
-            onSelectPreset={handleSelectPreset}
-            onStop={stopCapture}
-            onToggleFullscreen={handleToggleFullscreen}
-            onToggleNowPlaying={handleToggleNowPlaying}
-            showNowPlaying={showNowPlaying}
-            presetList={presetList}
-            currentPreset={currentPreset}
-            autopilotEnabled={autopilot.enabled}
-            onToggleAutopilot={handleToggleAutopilot}
-            activePanel={activePanel}
-            onTogglePanel={handleTogglePanel}
-            onToggleShortcuts={toggleShortcutOverlay}
-            isFavorite={favoritePresets.includes(currentPreset)}
-            isBlocked={blockedPresets.includes(currentPreset)}
-            onToggleFavorite={handleToggleFavorite}
-            onToggleBlock={handleToggleBlock}
-          />
-          <ShortcutOverlay visible={showShortcutOverlay} onClose={toggleShortcutOverlay} />
+          {!showLaunchAnimation && (
+            <>
+              {presetNameDisplay !== 'off' && (
+                <PresetNotification message={currentPreset} mode={presetNameDisplay} />
+              )}
+              <NowPlaying visible={showNowPlaying} />
+              <ControlBar
+                onNextPreset={handleNextPreset}
+                onSelectPreset={handleSelectPreset}
+                onStop={stopCapture}
+                onToggleFullscreen={handleToggleFullscreen}
+                onToggleNowPlaying={handleToggleNowPlaying}
+                showNowPlaying={showNowPlaying}
+                presetList={presetList}
+                currentPreset={currentPreset}
+                autopilotEnabled={autopilot.enabled}
+                onToggleAutopilot={handleToggleAutopilot}
+                activePanel={activePanel}
+                onTogglePanel={handleTogglePanel}
+                onToggleShortcuts={toggleShortcutOverlay}
+                isFavorite={favoritePresets.includes(currentPreset)}
+                isBlocked={blockedPresets.includes(currentPreset)}
+                onToggleFavorite={handleToggleFavorite}
+                onToggleBlock={handleToggleBlock}
+              />
+              <ShortcutOverlay visible={showShortcutOverlay} onClose={toggleShortcutOverlay} />
+            </>
+          )}
         </>
       ) : (
-        <StartScreen onStart={startCapture} error={error} />
+        <StartScreen onStart={handleStart} error={error} />
       )}
     </div>
   );

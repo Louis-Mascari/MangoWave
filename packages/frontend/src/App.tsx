@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAudioCapture } from './hooks/useAudioCapture.ts';
 import { useSpotifyAuth } from './hooks/useSpotifyAuth.ts';
 import { useSettingsSync } from './hooks/useSettingsSync.ts';
@@ -28,11 +28,14 @@ function App() {
   const transitionTime = useSettingsStore((s) => s.transitionTime);
   const autopilot = useSettingsStore((s) => s.autopilot);
   const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
-  const showPresetName = useSettingsStore((s) => s.showPresetName);
+  const presetNameDisplay = useSettingsStore((s) => s.presetNameDisplay);
+  const toggleFavoritePreset = useSettingsStore((s) => s.toggleFavoritePreset);
+  const toggleBlockPreset = useSettingsStore((s) => s.toggleBlockPreset);
   const [currentPreset, setCurrentPreset] = useState('');
   const [presetList, setPresetList] = useState<string[]>([]);
   const [showNowPlaying, setShowNowPlaying] = useState(false);
   const [activePanel, setActivePanel] = useState<PanelView>('none');
+  const resetAutopilotRef = useRef<() => void>(() => {});
 
   const handlePresetChange = useCallback((name: string) => {
     setCurrentPreset(name);
@@ -44,11 +47,13 @@ function App() {
 
   const handleNextPreset = useCallback(() => {
     rendererRef.current?.nextPreset(new Set(blockedPresets), transitionTime);
+    resetAutopilotRef.current();
   }, [blockedPresets, transitionTime]);
 
   const handleSelectPreset = useCallback(
     (name: string) => {
       rendererRef.current?.loadPreset(name, transitionTime);
+      resetAutopilotRef.current();
     },
     [transitionTime],
   );
@@ -89,14 +94,32 @@ function App() {
     }
   }, [autopilot.favoritesOnly, favoritePresets, transitionTime, handleNextPreset]);
 
-  useAutopilot(handleAutopilotAdvance);
+  const { reset: resetAutopilot } = useAutopilot(handleAutopilotAdvance);
+  useEffect(() => {
+    resetAutopilotRef.current = resetAutopilot;
+  });
   useHideCursor(3000);
+
+  // Reset autopilot timer when favoritesOnly changes
+  useEffect(() => {
+    resetAutopilot();
+  }, [autopilot.favoritesOnly, resetAutopilot]);
+
+  const handleToggleFavorite = useCallback(() => {
+    if (currentPreset) toggleFavoritePreset(currentPreset);
+  }, [currentPreset, toggleFavoritePreset]);
+
+  const handleToggleBlock = useCallback(() => {
+    if (currentPreset) toggleBlockPreset(currentPreset);
+  }, [currentPreset, toggleBlockPreset]);
 
   const { showShortcutOverlay, toggleShortcutOverlay } = useKeyboardShortcuts({
     onNextPreset: handleNextPreset,
     onToggleFullscreen: handleToggleFullscreen,
     onClosePanel: handleClosePanel,
     onToggleAutopilot: handleToggleAutopilot,
+    onToggleFavorite: handleToggleFavorite,
+    onToggleBlock: handleToggleBlock,
   });
 
   if (!webgl2) {
@@ -120,8 +143,11 @@ function App() {
             rendererRef={rendererRef}
             onPresetChange={handlePresetChange}
             onPresetsLoaded={handlePresetsLoaded}
+            onToggleFullscreen={handleToggleFullscreen}
           />
-          {showPresetName && <PresetNotification message={currentPreset} />}
+          {presetNameDisplay !== 'off' && (
+            <PresetNotification message={currentPreset} mode={presetNameDisplay} />
+          )}
           <NowPlaying visible={showNowPlaying} />
           <ControlBar
             onNextPreset={handleNextPreset}
@@ -137,6 +163,10 @@ function App() {
             activePanel={activePanel}
             onTogglePanel={handleTogglePanel}
             onToggleShortcuts={toggleShortcutOverlay}
+            isFavorite={favoritePresets.includes(currentPreset)}
+            isBlocked={blockedPresets.includes(currentPreset)}
+            onToggleFavorite={handleToggleFavorite}
+            onToggleBlock={handleToggleBlock}
           />
           <ShortcutOverlay visible={showShortcutOverlay} onClose={toggleShortcutOverlay} />
         </>

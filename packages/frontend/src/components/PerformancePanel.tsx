@@ -23,8 +23,8 @@ export function PerformancePanel() {
   const audio = useSettingsStore((s) => s.audio);
   const setSmoothingConstant = useSettingsStore((s) => s.setSmoothingConstant);
   const setFftSize = useSettingsStore((s) => s.setFftSize);
-  const showPresetName = useSettingsStore((s) => s.showPresetName);
-  const setShowPresetName = useSettingsStore((s) => s.setShowPresetName);
+  const presetNameDisplay = useSettingsStore((s) => s.presetNameDisplay);
+  const setPresetNameDisplay = useSettingsStore((s) => s.setPresetNameDisplay);
   const autopilot = useSettingsStore((s) => s.autopilot);
   const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
   const setAutopilotInterval = useSettingsStore((s) => s.setAutopilotInterval);
@@ -116,15 +116,60 @@ export function PerformancePanel() {
         </div>
       </div>
 
-      <label className="flex items-center gap-2 text-xs text-white/60">
-        <input
-          type="checkbox"
-          checked={showPresetName}
-          onChange={(e) => setShowPresetName(e.target.checked)}
-          className="accent-orange-500"
-        />
-        Show preset name
-      </label>
+      <div className="flex flex-col gap-1">
+        <label className="flex items-center text-xs text-white/60">
+          Preset Name Display
+          <Tooltip text="How long the preset name shows when switching presets" />
+        </label>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setPresetNameDisplay('off')}
+            className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
+              presetNameDisplay === 'off'
+                ? 'bg-orange-500 text-white'
+                : 'bg-white/10 text-white/70 hover:bg-white/20'
+            }`}
+          >
+            Off
+          </button>
+          <button
+            onClick={() => setPresetNameDisplay('always')}
+            className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
+              presetNameDisplay === 'always'
+                ? 'bg-orange-500 text-white'
+                : 'bg-white/10 text-white/70 hover:bg-white/20'
+            }`}
+          >
+            Always
+          </button>
+          <button
+            onClick={() =>
+              setPresetNameDisplay(typeof presetNameDisplay === 'number' ? presetNameDisplay : 5)
+            }
+            className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
+              typeof presetNameDisplay === 'number'
+                ? 'bg-orange-500 text-white'
+                : 'bg-white/10 text-white/70 hover:bg-white/20'
+            }`}
+          >
+            Timed
+          </button>
+        </div>
+        {typeof presetNameDisplay === 'number' && (
+          <div className="mt-1">
+            <label className="text-xs text-white/60">Duration: {presetNameDisplay}s</label>
+            <input
+              type="range"
+              min="1"
+              max="10"
+              step="1"
+              value={presetNameDisplay}
+              onChange={(e) => setPresetNameDisplay(parseInt(e.target.value))}
+              className="w-full accent-orange-500"
+            />
+          </div>
+        )}
+      </div>
 
       <div className="mt-1 border-t border-white/10 pt-3">
         <div className="flex items-center justify-between">

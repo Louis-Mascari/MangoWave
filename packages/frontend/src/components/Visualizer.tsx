@@ -8,6 +8,7 @@ interface VisualizerProps {
   rendererRef: React.RefObject<VisualizerRenderer | null>;
   onPresetChange: (name: string) => void;
   onPresetsLoaded: (presets: string[]) => void;
+  onToggleFullscreen: () => void;
 }
 
 export function Visualizer({
@@ -15,6 +16,7 @@ export function Visualizer({
   rendererRef,
   onPresetChange,
   onPresetsLoaded,
+  onToggleFullscreen,
 }: VisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { performance, eq, audio } = useSettingsStore();
@@ -94,5 +96,11 @@ export function Visualizer({
     });
   }, [audioEngine, eq.bandGains]);
 
-  return <canvas ref={canvasRef} className="fixed top-0 left-0 block h-screen w-screen" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      onDoubleClick={onToggleFullscreen}
+      className="fixed top-0 left-0 block h-screen w-screen"
+    />
+  );
 }

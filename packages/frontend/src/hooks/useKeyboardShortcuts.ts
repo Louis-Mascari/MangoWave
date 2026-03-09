@@ -5,6 +5,8 @@ interface KeyboardHandlers {
   onToggleFullscreen: () => void;
   onClosePanel: () => void;
   onToggleAutopilot: () => void;
+  onToggleFavorite: () => void;
+  onToggleBlock: () => void;
 }
 
 export function useKeyboardShortcuts(handlers: KeyboardHandlers) {
@@ -46,6 +48,14 @@ export function useKeyboardShortcuts(handlers: KeyboardHandlers) {
         case 'a':
         case 'A':
           handlers.onToggleAutopilot();
+          break;
+        case 's':
+        case 'S':
+          handlers.onToggleFavorite();
+          break;
+        case 'b':
+        case 'B':
+          handlers.onToggleBlock();
           break;
         case '?':
         case 'h':

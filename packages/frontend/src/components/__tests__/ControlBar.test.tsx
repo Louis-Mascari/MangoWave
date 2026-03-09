@@ -17,6 +17,10 @@ const defaultProps = {
   activePanel: 'none' as const,
   onTogglePanel: vi.fn(),
   onToggleShortcuts: vi.fn(),
+  isFavorite: false,
+  isBlocked: false,
+  onToggleFavorite: vi.fn(),
+  onToggleBlock: vi.fn(),
 };
 
 describe('ControlBar', () => {

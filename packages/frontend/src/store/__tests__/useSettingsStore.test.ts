@@ -16,7 +16,7 @@ describe('useSettingsStore', () => {
       result.current.setAutopilotEnabled(true);
       result.current.setAutopilotInterval(15);
       result.current.setAutopilotFavoritesOnly(false);
-      result.current.setShowPresetName(true);
+      result.current.setPresetNameDisplay(5);
       // Clear presets
       result.current.blockedPresets.forEach((p) => result.current.unblockPreset(p));
       result.current.favoritePresets.forEach((p) => result.current.toggleFavoritePreset(p));
@@ -169,16 +169,38 @@ describe('useSettingsStore', () => {
     });
   });
 
-  describe('showPresetName', () => {
-    it('defaults to true', () => {
+  describe('presetNameDisplay', () => {
+    it('defaults to 5 seconds', () => {
       const { result } = renderHook(() => useSettingsStore());
-      expect(result.current.showPresetName).toBe(true);
+      expect(result.current.presetNameDisplay).toBe(5);
     });
 
-    it('toggles off', () => {
+    it('sets to off', () => {
       const { result } = renderHook(() => useSettingsStore());
-      act(() => result.current.setShowPresetName(false));
-      expect(result.current.showPresetName).toBe(false);
+      act(() => result.current.setPresetNameDisplay('off'));
+      expect(result.current.presetNameDisplay).toBe('off');
+    });
+
+    it('sets to always', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setPresetNameDisplay('always'));
+      expect(result.current.presetNameDisplay).toBe('always');
+    });
+
+    it('sets to custom duration', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setPresetNameDisplay(8));
+      expect(result.current.presetNameDisplay).toBe(8);
+    });
+  });
+
+  describe('toggleBlockPreset', () => {
+    it('blocks and unblocks a preset', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.toggleBlockPreset('Scary Faces'));
+      expect(result.current.blockedPresets).toContain('Scary Faces');
+      act(() => result.current.toggleBlockPreset('Scary Faces'));
+      expect(result.current.blockedPresets).not.toContain('Scary Faces');
     });
   });
 

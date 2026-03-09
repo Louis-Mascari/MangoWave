@@ -7,6 +7,8 @@ const SHORTCUTS = [
   { key: 'Space / N', action: 'Next preset' },
   { key: 'F', action: 'Toggle fullscreen' },
   { key: 'A', action: 'Toggle autopilot' },
+  { key: 'S', action: 'Toggle favorite' },
+  { key: 'B', action: 'Toggle block' },
   { key: 'Escape', action: 'Close panel / overlay' },
   { key: '? / H', action: 'Toggle this overlay' },
 ];

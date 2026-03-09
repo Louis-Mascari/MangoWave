@@ -51,11 +51,12 @@ export interface SettingsState {
   favoritePresets: string[];
   blockPreset: (name: string) => void;
   unblockPreset: (name: string) => void;
+  toggleBlockPreset: (name: string) => void;
   toggleFavoritePreset: (name: string) => void;
 
   // Display
-  showPresetName: boolean;
-  setShowPresetName: (show: boolean) => void;
+  presetNameDisplay: 'off' | 'always' | number; // 'off', 'always', or seconds
+  setPresetNameDisplay: (value: 'off' | 'always' | number) => void;
 
   // Transitions
   transitionTime: number; // seconds for preset blend
@@ -149,6 +150,12 @@ export const useSettingsStore = create<SettingsState>()(
         set((state) => ({
           blockedPresets: state.blockedPresets.filter((p) => p !== name),
         })),
+      toggleBlockPreset: (name) =>
+        set((state) => ({
+          blockedPresets: state.blockedPresets.includes(name)
+            ? state.blockedPresets.filter((p) => p !== name)
+            : [...state.blockedPresets, name],
+        })),
       toggleFavoritePreset: (name) =>
         set((state) => ({
           favoritePresets: state.favoritePresets.includes(name)
@@ -157,8 +164,8 @@ export const useSettingsStore = create<SettingsState>()(
         })),
 
       // Display
-      showPresetName: true,
-      setShowPresetName: (show) => set({ showPresetName: show }),
+      presetNameDisplay: 5,
+      setPresetNameDisplay: (value) => set({ presetNameDisplay: value }),
 
       // Transitions
       transitionTime: 2.0,

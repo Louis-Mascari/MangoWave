@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 
 interface PresetNotificationProps {
   message: string;
-  durationMs?: number;
+  mode: 'always' | number; // 'always' or duration in seconds
 }
 
-export function PresetNotification({ message, durationMs = 3000 }: PresetNotificationProps) {
+export function PresetNotification({ message, mode }: PresetNotificationProps) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -17,22 +17,27 @@ export function PresetNotification({ message, durationMs = 3000 }: PresetNotific
       setVisible(true);
     }, 0);
 
-    const hideTimer = setTimeout(() => {
-      setVisible(false);
-    }, durationMs);
+    let hideTimer: ReturnType<typeof setTimeout> | undefined;
+    if (mode !== 'always') {
+      hideTimer = setTimeout(() => {
+        setVisible(false);
+      }, mode * 1000);
+    }
 
     return () => {
       clearTimeout(showTimer);
-      clearTimeout(hideTimer);
+      if (hideTimer !== undefined) clearTimeout(hideTimer);
     };
-  }, [message, durationMs]);
+  }, [message, mode]);
 
   if (!message) return null;
+
+  const isAlways = mode === 'always';
 
   return (
     <div
       className={`pointer-events-none fixed bottom-16 left-4 z-40 font-mono text-sm text-white transition-opacity duration-500 drop-shadow-[0_0_4px_black] ${
-        visible ? 'opacity-80' : 'opacity-0'
+        visible || isAlways ? 'opacity-80' : 'opacity-0'
       }`}
     >
       {message}

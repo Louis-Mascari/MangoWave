@@ -22,6 +22,10 @@ interface ControlBarProps {
   activePanel: PanelView;
   onTogglePanel: (panel: PanelView) => void;
   onToggleShortcuts: () => void;
+  isFavorite: boolean;
+  isBlocked: boolean;
+  onToggleFavorite: () => void;
+  onToggleBlock: () => void;
 }
 
 export function ControlBar({
@@ -38,6 +42,10 @@ export function ControlBar({
   activePanel,
   onTogglePanel,
   onToggleShortcuts,
+  isFavorite,
+  isBlocked,
+  onToggleFavorite,
+  onToggleBlock,
 }: ControlBarProps) {
   const isIdle = useIdleTimer(3000);
   const accessToken = useSpotifyStore((s) => s.accessToken);
@@ -73,6 +81,37 @@ export function ControlBar({
       <div className="flex items-center justify-between bg-black/50 px-4 py-2 backdrop-blur-sm">
         <div className="flex items-center gap-2">
           <BarButton onClick={onNextPreset}>Next Preset</BarButton>
+
+          {currentPreset && (
+            <>
+              <span className="max-w-48 truncate text-xs text-white/60" title={currentPreset}>
+                {currentPreset}
+              </span>
+              <button
+                onClick={onToggleFavorite}
+                title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                className="cursor-pointer rounded border-none bg-transparent px-1.5 py-1 text-sm hover:bg-white/10"
+              >
+                {isFavorite ? (
+                  <span className="text-yellow-400">&#9733;</span>
+                ) : (
+                  <span className="text-white/40">&#9734;</span>
+                )}
+              </button>
+              <button
+                onClick={onToggleBlock}
+                title={isBlocked ? 'Unblock preset' : 'Block preset'}
+                className="cursor-pointer rounded border-none bg-transparent px-1.5 py-1 text-sm hover:bg-white/10"
+              >
+                {isBlocked ? (
+                  <span className="text-red-400">&#8856;</span>
+                ) : (
+                  <span className="text-white/40">&#8856;</span>
+                )}
+              </button>
+            </>
+          )}
+
           <BarButton onClick={() => onTogglePanel('presets')} active={activePanel === 'presets'}>
             Presets
           </BarButton>

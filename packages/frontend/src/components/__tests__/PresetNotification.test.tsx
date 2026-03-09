@@ -12,12 +12,12 @@ describe('PresetNotification', () => {
   });
 
   it('renders nothing with empty message', () => {
-    const { container } = render(<PresetNotification message="" />);
+    const { container } = render(<PresetNotification message="" mode={5} />);
     expect(container.firstChild).toBeNull();
   });
 
   it('shows the preset name then fades after duration', () => {
-    render(<PresetNotification message="Cool Preset" durationMs={3000} />);
+    render(<PresetNotification message="Cool Preset" mode={3} />);
 
     // Flush the deferred show timer
     act(() => vi.advanceTimersByTime(1));
@@ -25,8 +25,20 @@ describe('PresetNotification', () => {
     const el = screen.getByText('Cool Preset');
     expect(el.className).toContain('opacity-80');
 
-    // After duration, should fade
+    // After duration (3s), should fade
     act(() => vi.advanceTimersByTime(3000));
     expect(el.className).toContain('opacity-0');
+  });
+
+  it('stays visible in always mode', () => {
+    render(<PresetNotification message="Always Preset" mode="always" />);
+
+    const el = screen.getByText('Always Preset');
+    // In always mode, opacity-80 is always applied
+    expect(el.className).toContain('opacity-80');
+
+    // Even after a long time, still visible
+    act(() => vi.advanceTimersByTime(60000));
+    expect(el.className).toContain('opacity-80');
   });
 });

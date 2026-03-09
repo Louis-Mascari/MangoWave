@@ -11,6 +11,8 @@ const handlers = {
   onToggleFullscreen: vi.fn(),
   onClosePanel: vi.fn(),
   onToggleAutopilot: vi.fn(),
+  onToggleFavorite: vi.fn(),
+  onToggleBlock: vi.fn(),
 };
 
 describe('useKeyboardShortcuts', () => {

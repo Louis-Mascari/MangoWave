@@ -48,7 +48,7 @@ describe('StartScreen', () => {
   it('shows connected state when Spotify sessionId exists', () => {
     useSpotifyStore.setState({
       sessionId: 'test-session',
-      user: { displayName: 'Test User', id: '123' },
+      user: { displayName: 'Test User', id: '123', imageUrl: null, product: null },
     });
     render(<StartScreen onStart={vi.fn()} error={null} />);
     expect(screen.getByText('Connected as Test User')).toBeInTheDocument();

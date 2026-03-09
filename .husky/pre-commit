@@ -1,1 +1,2 @@
 npx lint-staged
+npx tsc -b packages/frontend --noEmit

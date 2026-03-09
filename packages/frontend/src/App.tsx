@@ -110,8 +110,14 @@ function App() {
   }, [currentPreset, toggleFavoritePreset]);
 
   const handleToggleBlock = useCallback(() => {
-    if (currentPreset) toggleBlockPreset(currentPreset);
-  }, [currentPreset, toggleBlockPreset]);
+    if (!currentPreset) return;
+    const isCurrentlyBlocked = useSettingsStore.getState().blockedPresets.includes(currentPreset);
+    toggleBlockPreset(currentPreset);
+    // If we just blocked the current preset, skip to next
+    if (!isCurrentlyBlocked) {
+      handleNextPreset();
+    }
+  }, [currentPreset, toggleBlockPreset, handleNextPreset]);
 
   const { showShortcutOverlay, toggleShortcutOverlay } = useKeyboardShortcuts({
     onNextPreset: handleNextPreset,

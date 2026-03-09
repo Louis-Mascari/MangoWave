@@ -73,6 +73,7 @@ export function ControlBar({
               presetList={presetList}
               currentPreset={currentPreset}
               onSelectPreset={onSelectPreset}
+              onNextPreset={onNextPreset}
             />
           )}
         </div>

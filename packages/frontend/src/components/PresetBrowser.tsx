@@ -5,9 +5,15 @@ interface PresetBrowserProps {
   presetList: string[];
   currentPreset: string;
   onSelectPreset: (name: string) => void;
+  onNextPreset: () => void;
 }
 
-export function PresetBrowser({ presetList, currentPreset, onSelectPreset }: PresetBrowserProps) {
+export function PresetBrowser({
+  presetList,
+  currentPreset,
+  onSelectPreset,
+  onNextPreset,
+}: PresetBrowserProps) {
   const blockedPresets = useSettingsStore((s) => s.blockedPresets);
   const favoritePresets = useSettingsStore((s) => s.favoritePresets);
   const blockPreset = useSettingsStore((s) => s.blockPreset);
@@ -93,7 +99,14 @@ export function PresetBrowser({ presetList, currentPreset, onSelectPreset }: Pre
                   </svg>
                 </button>
                 <button
-                  onClick={() => (isBlocked ? unblockPreset(name) : blockPreset(name))}
+                  onClick={() => {
+                    if (isBlocked) {
+                      unblockPreset(name);
+                    } else {
+                      blockPreset(name);
+                      if (name === currentPreset) onNextPreset();
+                    }
+                  }}
                   className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
                     isBlocked
                       ? 'text-red-400'

@@ -1,8 +1,23 @@
-# MangoWave
+<p align="center">
+  <img src="packages/landing/logo.png" alt="MangoWave logo" width="200">
+</p>
 
-Browser-based audio-reactive visualizer inspired by Winamp/MilkDrop. Captures system or tab audio via `getDisplayMedia`, feeds real-time FFT data into [butterchurn](https://github.com/jberg/butterchurn) (a WebGL 2 MilkDrop port) with 555 presets.
+<h1 align="center">MangoWave</h1>
 
-**Live app:** [play.mangowave.app](https://play.mangowave.app) | **Landing page:** [mangowave.app](https://mangowave.app)
+<p align="center">
+  Browser-based audio-reactive visualizer inspired by Winamp/MilkDrop.<br>
+  Captures system or tab audio via <code>getDisplayMedia</code>, feeds real-time FFT data into
+  <a href="https://github.com/jberg/butterchurn">butterchurn</a> (a WebGL 2 MilkDrop port) with 555 presets.
+</p>
+
+<p align="center">
+  <a href="https://play.mangowave.app"><strong>Launch App</strong></a> &middot;
+  <a href="https://mangowave.app">Landing Page</a>
+</p>
+
+<p align="center">
+  <img src="packages/landing/howling.png" alt="MangoWave howling" width="400">
+</p>
 
 ## Features
 
@@ -112,4 +127,4 @@ Pushes to `main` auto-deploy via GitHub Actions:
 
 ## License
 
-This project is open source.
+[MIT](LICENSE)

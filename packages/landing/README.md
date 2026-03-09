@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" alt="MangoWave logo" width="150">
+</p>
+
 # MangoWave Landing Page
 
 Static landing page served at [mangowave.app](https://mangowave.app). Pure HTML + CSS, no JavaScript.

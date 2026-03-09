@@ -8,7 +8,12 @@ const PRESETS = ['Alpha Wave', 'Beta Pulse', 'Gamma Storm'];
 describe('PresetBrowser', () => {
   it('renders preset list', () => {
     render(
-      <PresetBrowser presetList={PRESETS} currentPreset="Alpha Wave" onSelectPreset={vi.fn()} />,
+      <PresetBrowser
+        presetList={PRESETS}
+        currentPreset="Alpha Wave"
+        onSelectPreset={vi.fn()}
+        onNextPreset={vi.fn()}
+      />,
     );
 
     expect(screen.getByText('Alpha Wave')).toBeInTheDocument();
@@ -19,7 +24,14 @@ describe('PresetBrowser', () => {
   it('calls onSelectPreset when a preset is clicked', async () => {
     const user = userEvent.setup();
     const onSelect = vi.fn();
-    render(<PresetBrowser presetList={PRESETS} currentPreset="" onSelectPreset={onSelect} />);
+    render(
+      <PresetBrowser
+        presetList={PRESETS}
+        currentPreset=""
+        onSelectPreset={onSelect}
+        onNextPreset={vi.fn()}
+      />,
+    );
 
     await user.click(screen.getByText('Beta Pulse'));
     expect(onSelect).toHaveBeenCalledWith('Beta Pulse');
@@ -27,7 +39,14 @@ describe('PresetBrowser', () => {
 
   it('filters presets by search', async () => {
     const user = userEvent.setup();
-    render(<PresetBrowser presetList={PRESETS} currentPreset="" onSelectPreset={vi.fn()} />);
+    render(
+      <PresetBrowser
+        presetList={PRESETS}
+        currentPreset=""
+        onSelectPreset={vi.fn()}
+        onNextPreset={vi.fn()}
+      />,
+    );
 
     await user.type(screen.getByPlaceholderText('Search presets...'), 'gamma');
     expect(screen.getByText('Gamma Storm')).toBeInTheDocument();
@@ -37,7 +56,14 @@ describe('PresetBrowser', () => {
 
   it('shows empty state when no presets match', async () => {
     const user = userEvent.setup();
-    render(<PresetBrowser presetList={PRESETS} currentPreset="" onSelectPreset={vi.fn()} />);
+    render(
+      <PresetBrowser
+        presetList={PRESETS}
+        currentPreset=""
+        onSelectPreset={vi.fn()}
+        onNextPreset={vi.fn()}
+      />,
+    );
 
     await user.type(screen.getByPlaceholderText('Search presets...'), 'zzzzz');
     expect(screen.getByText('No presets found')).toBeInTheDocument();

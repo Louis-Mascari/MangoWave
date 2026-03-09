@@ -49,5 +49,5 @@ infrastructure/
 Automated via GitHub Actions (`.github/workflows/deploy.yml`) using OIDC to assume `GitHubActions-MangoWave` IAM role. Manual deploy:
 
 ```bash
-npx cdk deploy -c alertEmail=lmascari16@gmail.com
+npx cdk deploy -c alertEmail=you@example.com
 ```

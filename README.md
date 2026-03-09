@@ -15,10 +15,6 @@
   <a href="https://mangowave.app">Landing Page</a>
 </p>
 
-<p align="center">
-  <img src="packages/landing/howling.png" alt="MangoWave howling" width="400">
-</p>
-
 ## Features
 
 - **555 MilkDrop presets** from all butterchurn preset packs
@@ -121,9 +117,15 @@ Pushes to `main` auto-deploy via GitHub Actions:
 
 ## Requirements
 
-- **WebGL 2** — required for butterchurn rendering
+- **[WebGL 2](https://caniuse.com/webgl2)** — required for butterchurn rendering
 - **Browser with `getDisplayMedia` support** — Chrome, Edge, Firefox (not Safari)
 - **Node >= 20** for local development
+
+## Acknowledgments
+
+- [butterchurn](https://github.com/jberg/butterchurn) — WebGL 2 implementation of the MilkDrop visualizer
+- [MilkDrop](https://en.wikipedia.org/wiki/MilkDrop) — original visualizer by Ryan Geiss
+- [Winamp](https://en.wikipedia.org/wiki/Winamp) — created by Nullsoft
 
 ## License
 

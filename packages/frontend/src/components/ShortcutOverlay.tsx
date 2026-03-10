@@ -9,6 +9,7 @@ const SHORTCUTS = [
   { key: 'A', action: 'Toggle autopilot' },
   { key: 'S', action: 'Toggle favorite' },
   { key: 'B', action: 'Toggle block' },
+  { key: 'Q', action: 'Toggle queue' },
   { key: 'Escape', action: 'Close panel / overlay' },
   { key: '? / H', action: 'Toggle this overlay' },
 ];

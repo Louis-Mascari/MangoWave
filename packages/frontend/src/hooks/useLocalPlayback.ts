@@ -13,6 +13,8 @@ export interface UseLocalPlaybackReturn {
   next: () => void;
   previous: () => void;
   seek: (time: number) => void;
+  volume: number;
+  setVolume: (volume: number) => void;
 }
 
 export function useLocalPlayback(): UseLocalPlaybackReturn {
@@ -20,6 +22,7 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audioEngine, setAudioEngine] = useState<AudioEngine | null>(null);
   const [isActive, setIsActive] = useState(false);
+  const [volume, setVolumeState] = useState(1);
 
   const tracks = useMediaPlayerStore((s) => s.tracks);
   const currentTrackIndex = useMediaPlayerStore((s) => s.currentTrackIndex);
@@ -104,18 +107,28 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
     if (!audio || !isActive) return;
 
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const onLoadedMetadata = () => setDuration(audio.duration);
+    const onLoadedMetadata = () => {
+      setDuration(audio.duration);
+      // Also update the track's duration in the store for the queue panel
+      const { tracks, currentTrackIndex } = useMediaPlayerStore.getState();
+      const track = tracks[currentTrackIndex];
+      if (track && track.duration !== audio.duration) {
+        useMediaPlayerStore.setState((state) => ({
+          tracks: state.tracks.map((t) =>
+            t.id === track.id ? { ...t, duration: audio.duration } : t,
+          ),
+        }));
+      }
+    };
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
     const onEnded = () => {
-      const { repeatMode, tracks, currentTrackIndex } = useMediaPlayerStore.getState();
+      const { repeatMode } = useMediaPlayerStore.getState();
       if (repeatMode === 'one') {
         audio.currentTime = 0;
         audio.play().catch(() => {});
-      } else if (repeatMode === 'off' && currentTrackIndex === tracks.length - 1) {
-        // Last track, no repeat — stop playback
-        setIsPlaying(false);
       } else {
+        // nextTrack handles shuffle history, repeat-off stopping, and wrapping
         nextTrack();
       }
     };
@@ -180,6 +193,13 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
     }
   }, []);
 
+  const setVolume = useCallback((vol: number) => {
+    setVolumeState(vol);
+    if (audioRef.current) {
+      audioRef.current.volume = vol;
+    }
+  }, []);
+
   return {
     audioEngine,
     isActive,
@@ -191,5 +211,7 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
     next,
     previous,
     seek,
+    volume,
+    setVolume,
   };
 }

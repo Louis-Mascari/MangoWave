@@ -35,7 +35,7 @@ export function MediaPlaylist({ onAddFiles, onClear }: MediaPlaylistProps) {
   return (
     <div className="flex max-h-80 flex-col gap-2 rounded-lg bg-black/60 p-4 backdrop-blur-sm">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-white">Playlist</h3>
+        <h3 className="text-sm font-semibold text-white">Queue</h3>
         <div className="flex gap-2">
           <button
             onClick={handleAddClick}

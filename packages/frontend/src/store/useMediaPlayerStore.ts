@@ -18,6 +18,7 @@ interface MediaPlayerState {
   duration: number;
   shuffle: boolean;
   repeatMode: RepeatMode;
+  shuffleHistory: Set<number>;
 
   addTracks: (files: File[]) => void;
   removeTrack: (id: string) => void;
@@ -45,6 +46,7 @@ export const useMediaPlayerStore = create<MediaPlayerState>()((set, get) => ({
   duration: 0,
   shuffle: false,
   repeatMode: 'off' as RepeatMode,
+  shuffleHistory: new Set<number>(),
 
   addTracks: (files) => {
     const newTracks: MediaTrack[] = files.map((file) => ({
@@ -75,7 +77,15 @@ export const useMediaPlayerStore = create<MediaPlayerState>()((set, get) => ({
       newIndex = Math.max(0, newTracks.length - 1);
     }
 
-    set({ tracks: newTracks, currentTrackIndex: newIndex });
+    // Rebuild shuffle history with adjusted indices
+    const newHistory = new Set<number>();
+    for (const idx of get().shuffleHistory) {
+      if (idx < removeIndex) newHistory.add(idx);
+      else if (idx > removeIndex) newHistory.add(idx - 1);
+      // idx === removeIndex is dropped
+    }
+
+    set({ tracks: newTracks, currentTrackIndex: newIndex, shuffleHistory: newHistory });
   },
 
   clearPlaylist: () => {
@@ -89,20 +99,56 @@ export const useMediaPlayerStore = create<MediaPlayerState>()((set, get) => ({
       isPlaying: false,
       currentTime: 0,
       duration: 0,
+      shuffleHistory: new Set(),
     });
   },
 
-  setCurrentTrack: (index) => set({ currentTrackIndex: index, currentTime: 0 }),
+  setCurrentTrack: (index) => {
+    const history = new Set(get().shuffleHistory);
+    history.add(index);
+    set({ currentTrackIndex: index, currentTime: 0, shuffleHistory: history });
+  },
 
   nextTrack: () => {
-    const { tracks, currentTrackIndex, shuffle } = get();
+    const { tracks, currentTrackIndex, shuffle, shuffleHistory, repeatMode } = get();
     if (tracks.length === 0) return;
+
     if (shuffle && tracks.length > 1) {
-      let randomIndex: number;
-      do {
-        randomIndex = Math.floor(Math.random() * tracks.length);
-      } while (randomIndex === currentTrackIndex);
-      set({ currentTrackIndex: randomIndex, currentTime: 0 });
+      // Mark current as played
+      const history = new Set(shuffleHistory);
+      history.add(currentTrackIndex);
+
+      // Find unplayed tracks
+      const unplayed = tracks
+        .map((_, i) => i)
+        .filter((i) => !history.has(i) && i !== currentTrackIndex);
+
+      if (unplayed.length === 0) {
+        // All tracks played
+        if (repeatMode !== 'off') {
+          // Reset history and pick random (not current)
+          const newHistory = new Set<number>();
+          let randomIndex: number;
+          do {
+            randomIndex = Math.floor(Math.random() * tracks.length);
+          } while (randomIndex === currentTrackIndex && tracks.length > 1);
+          newHistory.add(randomIndex);
+          set({ currentTrackIndex: randomIndex, currentTime: 0, shuffleHistory: newHistory });
+        } else {
+          // All played, repeat off — stop playback and reset to first track
+          set({
+            isPlaying: false,
+            currentTrackIndex: 0,
+            currentTime: 0,
+            shuffleHistory: new Set(),
+          });
+        }
+      } else {
+        // Pick random from unplayed
+        const randomIndex = unplayed[Math.floor(Math.random() * unplayed.length)];
+        history.add(randomIndex);
+        set({ currentTrackIndex: randomIndex, currentTime: 0, shuffleHistory: history });
+      }
     } else {
       set({ currentTrackIndex: (currentTrackIndex + 1) % tracks.length, currentTime: 0 });
     }
@@ -120,7 +166,8 @@ export const useMediaPlayerStore = create<MediaPlayerState>()((set, get) => ({
   setIsPlaying: (playing) => set({ isPlaying: playing }),
   setCurrentTime: (time) => set({ currentTime: time }),
   setDuration: (duration) => set({ duration }),
-  toggleShuffle: () => set((state) => ({ shuffle: !state.shuffle })),
+  toggleShuffle: () =>
+    set((state) => ({ shuffle: !state.shuffle, shuffleHistory: new Set<number>() })),
   cycleRepeatMode: () =>
     set((state) => {
       const next: Record<RepeatMode, RepeatMode> = { off: 'all', all: 'one', one: 'off' };

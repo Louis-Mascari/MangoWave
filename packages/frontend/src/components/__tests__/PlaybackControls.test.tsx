@@ -79,11 +79,17 @@ describe('PlaybackControls', () => {
     expect(adapter.onPause).toHaveBeenCalledOnce();
   });
 
-  it('shows tooltip when provided', () => {
-    const { container } = render(
-      <PlaybackControls adapter={makeAdapter({ tooltip: 'Rate limited' })} />,
+  it('shows disabled tooltip on buttons when canControl is false', () => {
+    render(<PlaybackControls adapter={makeAdapter({ tooltip: 'Rate limited' })} />);
+    expect(screen.getByLabelText('Play')).toHaveAttribute('title', 'Rate limited');
+  });
+
+  it('shows default disabled tooltip when no tooltip provided', () => {
+    render(<PlaybackControls adapter={makeAdapter()} />);
+    expect(screen.getByLabelText('Play')).toHaveAttribute(
+      'title',
+      'Sharing audio — no playback controls',
     );
-    expect(container.firstChild).toHaveAttribute('title', 'Rate limited');
   });
 
   it('renders correctly for each source type', () => {
@@ -143,7 +149,7 @@ describe('PlaybackControls', () => {
         })}
       />,
     );
-    expect(screen.getByLabelText('Repeat: all')).toBeInTheDocument();
+    expect(screen.getByLabelText('Repeat all')).toBeInTheDocument();
 
     rerender(
       <PlaybackControls
@@ -156,12 +162,12 @@ describe('PlaybackControls', () => {
         })}
       />,
     );
-    expect(screen.getByLabelText('Repeat: one')).toBeInTheDocument();
+    expect(screen.getByLabelText('Repeat one')).toBeInTheDocument();
   });
 
   it('does not render shuffle/repeat when callbacks not provided', () => {
     render(<PlaybackControls adapter={makeAdapter({ canControl: true })} />);
     expect(screen.queryByLabelText('Enable shuffle')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(/Repeat:/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Repeat/)).not.toBeInTheDocument();
   });
 });

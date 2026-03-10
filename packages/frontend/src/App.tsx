@@ -126,6 +126,8 @@ function MainApp() {
     if (local.isActive) {
       local.stop();
     }
+    setActivePanel('none');
+    setShowNowPlaying(false);
   }, [capture, local]);
 
   const handlePresetChange = useCallback((name: string) => {
@@ -247,11 +249,20 @@ function MainApp() {
 
   const playbackAdapter: PlaybackAdapter = useMemo(() => {
     if (local.isActive) {
+      const handleLocalPlay = () => {
+        // If playback ended (not playing, at end), restart from the first track
+        const { tracks, currentTrackIndex, isPlaying } = useMediaPlayerStore.getState();
+        if (!isPlaying && tracks.length > 0 && currentTrackIndex === tracks.length - 1) {
+          useMediaPlayerStore.getState().setCurrentTrack(0);
+        } else {
+          local.play();
+        }
+      };
       return {
         source: 'local',
         isPlaying: localIsPlaying,
         canControl: !!localCurrentTrack,
-        onPlay: local.play,
+        onPlay: handleLocalPlay,
         onPause: local.pause,
         onNext: local.next,
         onPrevious: local.previous,
@@ -299,18 +310,14 @@ function MainApp() {
       onPrevious: () => {},
     };
   }, [
-    local.isActive,
-    local.play,
-    local.pause,
-    local.next,
-    local.previous,
+    local,
     localIsPlaying,
     localCurrentTrack,
     localShuffle,
     localRepeatMode,
     toggleShuffle,
     cycleRepeatMode,
-    capture.captureSource,
+    capture,
     isSpotifyConnected,
     spotifyNowPlaying?.isPlaying,
     premiumError,
@@ -338,6 +345,10 @@ function MainApp() {
     return null;
   }, [local.isActive, localCurrentTrack, spotifyNowPlaying]);
 
+  const handleToggleQueue = useCallback(() => {
+    handleTogglePanel('playlist');
+  }, [handleTogglePanel]);
+
   const { showShortcutOverlay, toggleShortcutOverlay } = useKeyboardShortcuts({
     onNextPreset: handleNextPreset,
     onToggleFullscreen: handleToggleFullscreen,
@@ -345,6 +356,7 @@ function MainApp() {
     onToggleAutopilot: handleToggleAutopilot,
     onToggleFavorite: handleToggleFavorite,
     onToggleBlock: handleToggleBlock,
+    onToggleQueue: handleToggleQueue,
   });
 
   if (!webgl2) {
@@ -404,6 +416,8 @@ function MainApp() {
                 onAddLocalFiles={handleAddLocalFiles}
                 onClearPlaylist={local.clearQueue}
                 onSeek={local.isActive ? local.seek : undefined}
+                onVolumeChange={local.isActive ? local.setVolume : undefined}
+                volume={local.isActive ? local.volume : undefined}
                 playbackAdapter={playbackAdapter}
               />
               <ShortcutOverlay visible={showShortcutOverlay} onClose={toggleShortcutOverlay} />

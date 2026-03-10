@@ -13,6 +13,7 @@ describe('useMediaPlayerStore', () => {
       duration: 0,
       shuffle: false,
       repeatMode: 'off',
+      shuffleHistory: new Set(),
     });
     vi.restoreAllMocks();
   });
@@ -95,11 +96,11 @@ describe('useMediaPlayerStore', () => {
     expect(useMediaPlayerStore.getState().repeatMode).toBe('off');
   });
 
-  it('nextTrack picks random index when shuffle is on', () => {
+  it('nextTrack picks random index when shuffle is on with repeat', () => {
     useMediaPlayerStore
       .getState()
       .addTracks([createMockFile('a.mp3'), createMockFile('b.mp3'), createMockFile('c.mp3')]);
-    useMediaPlayerStore.getState().toggleShuffle();
+    useMediaPlayerStore.setState({ shuffle: true, repeatMode: 'all' });
 
     // Run nextTrack multiple times — should never stay on same index
     const indices = new Set<number>();
@@ -112,5 +113,43 @@ describe('useMediaPlayerStore', () => {
     }
     // With 3 tracks and 20 iterations, should have hit at least 2 different indices
     expect(indices.size).toBeGreaterThanOrEqual(2);
+  });
+
+  it('shuffle plays all tracks before repeating when repeat is on', () => {
+    useMediaPlayerStore
+      .getState()
+      .addTracks([createMockFile('a.mp3'), createMockFile('b.mp3'), createMockFile('c.mp3')]);
+    useMediaPlayerStore.setState({ shuffle: true, repeatMode: 'all' });
+
+    const played = new Set<number>();
+    played.add(useMediaPlayerStore.getState().currentTrackIndex);
+
+    // Should visit all 3 tracks within 3 nextTrack calls (2 unplayed + reset)
+    for (let i = 0; i < 2; i++) {
+      useMediaPlayerStore.getState().nextTrack();
+      played.add(useMediaPlayerStore.getState().currentTrackIndex);
+    }
+    expect(played.size).toBe(3);
+  });
+
+  it('shuffle stops when all tracks played and repeat is off', () => {
+    useMediaPlayerStore.getState().addTracks([createMockFile('a.mp3'), createMockFile('b.mp3')]);
+    useMediaPlayerStore.setState({ shuffle: true, repeatMode: 'off' });
+
+    // Play through all tracks
+    useMediaPlayerStore.getState().nextTrack(); // plays second track
+    useMediaPlayerStore.getState().nextTrack(); // all played, should stop
+
+    expect(useMediaPlayerStore.getState().isPlaying).toBe(false);
+  });
+
+  it('toggleShuffle resets shuffle history', () => {
+    useMediaPlayerStore.getState().addTracks([createMockFile('a.mp3'), createMockFile('b.mp3')]);
+    useMediaPlayerStore.setState({ shuffle: true });
+    useMediaPlayerStore.getState().nextTrack();
+    expect(useMediaPlayerStore.getState().shuffleHistory.size).toBeGreaterThan(0);
+
+    useMediaPlayerStore.getState().toggleShuffle();
+    expect(useMediaPlayerStore.getState().shuffleHistory.size).toBe(0);
   });
 });

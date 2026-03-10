@@ -15,6 +15,13 @@ type ModalView = 'none' | 'share-audio' | 'local-files' | 'microphone';
 
 const hasDisplayMedia = !!navigator.mediaDevices?.getDisplayMedia;
 
+// Detect mobile/tablet: no getDisplayMedia, or touch-primary device with small screen
+const isMobileDevice =
+  !hasDisplayMedia ||
+  (navigator.maxTouchPoints > 0 &&
+    window.matchMedia('(pointer: coarse)').matches &&
+    window.innerWidth < 1024);
+
 export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: StartScreenProps) {
   const sessionId = useSpotifyStore((s) => s.sessionId);
   const user = useSpotifyStore((s) => s.user);
@@ -48,6 +55,7 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
   const handleFilesChosen = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (files.length > 0) {
+      closeModal();
       onLocalFiles(files);
     }
     e.target.value = '';
@@ -101,15 +109,18 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
           </p>
         </div>
 
+        {/* CTA */}
+        <p className="text-sm font-medium text-white/70">Choose an audio source to get started</p>
+
         {/* Mode cards */}
         <div className="flex w-full max-w-2xl flex-col items-stretch gap-4 sm:flex-row">
-          {hasDisplayMedia && (
+          {!isMobileDevice && (
             <ModeCard
               icon="🖥️"
               title="Share Audio"
               description="Capture system or tab audio via screen sharing"
               onClick={() => setActiveModal('share-audio')}
-              primary
+              color="orange"
             />
           )}
           <ModeCard
@@ -117,21 +128,22 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
             title="Play Local Files"
             description="Play audio files from your device"
             onClick={() => setActiveModal('local-files')}
-            primary={!hasDisplayMedia}
+            color="purple"
           />
           <ModeCard
             icon="🎤"
             title="Use Microphone"
             description="Visualize ambient sound — silent mode"
             onClick={() => setActiveModal('microphone')}
+            color="cyan"
           />
         </div>
 
-        {/* Mobile callout — only shown when screen sharing is unavailable */}
-        {!hasDisplayMedia && (
+        {/* Mobile callout — only shown on mobile/tablet devices */}
+        {isMobileDevice && (
           <p className="max-w-sm text-center text-xs text-[#666]">
-            On a desktop or laptop? You can also capture audio from any screen, window, or browser
-            tab using screen sharing.
+            Use a laptop or desktop to also capture audio from any screen, window, or browser tab
+            using screen sharing.
           </p>
         )}
 
@@ -199,8 +211,9 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
                   {showByoc && (
                     <div className="flex w-full flex-col items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-3">
                       <p className="text-xs text-[#888]">
-                        Create a Spotify app at{' '}
-                        <span className="text-[#aaa]">developer.spotify.com</span>, add{' '}
+                        Spotify limits our app to 25 users. To bypass this, you can register your
+                        own free Spotify app at{' '}
+                        <span className="text-[#aaa]">developer.spotify.com</span>. Add{' '}
                         <code className="rounded bg-white/10 px-1 text-[10px]">
                           {import.meta.env.VITE_SPOTIFY_REDIRECT_URI}
                         </code>{' '}
@@ -250,10 +263,7 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
             </ul>
           </div>
           <button
-            onClick={() => {
-              closeModal();
-              handleFileSelect();
-            }}
+            onClick={handleFileSelect}
             className="start-btn mt-5 w-full cursor-pointer rounded-xl border-none px-10 py-3 text-lg font-semibold text-white"
           >
             Choose Files
@@ -320,27 +330,29 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
   );
 }
 
+const cardColors = {
+  orange: 'border-orange-500/40 hover:border-orange-500/70',
+  purple: 'border-purple-500/40 hover:border-purple-500/70',
+  cyan: 'border-cyan-500/40 hover:border-cyan-500/70',
+} as const;
+
 function ModeCard({
   icon,
   title,
   description,
   onClick,
-  primary = false,
+  color,
 }: {
   icon: string;
   title: string;
   description: string;
   onClick: () => void;
-  primary?: boolean;
+  color: keyof typeof cardColors;
 }) {
   return (
     <button
       onClick={onClick}
-      className={`mode-card flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-2xl border px-5 py-6 text-center transition-all duration-200 ${
-        primary
-          ? 'border-orange-500/30 bg-white/[0.06] hover:border-orange-500/50 hover:bg-white/[0.1]'
-          : 'border-white/10 bg-white/[0.04] hover:border-white/20 hover:bg-white/[0.08]'
-      }`}
+      className={`mode-card flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-2xl border bg-white/[0.04] px-5 py-6 text-center transition-all duration-200 hover:bg-white/[0.08] ${cardColors[color]}`}
     >
       <span className="text-3xl">{icon}</span>
       <span className="text-sm font-semibold text-white">{title}</span>

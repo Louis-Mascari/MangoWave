@@ -7,7 +7,6 @@ import { PlaybackControls } from './PlaybackControls.tsx';
 import type { PlaybackAdapter } from './PlaybackControls.tsx';
 import { MediaPlaylist } from './MediaPlaylist.tsx';
 import { LocalSeekBar } from './LocalSeekBar.tsx';
-import { useMediaPlayerStore } from '../store/useMediaPlayerStore.ts';
 
 export type PanelView = 'none' | 'settings' | 'presets' | 'playlist';
 
@@ -31,6 +30,8 @@ interface ControlBarProps {
   onAddLocalFiles?: (files: File[]) => void;
   onClearPlaylist?: () => void;
   onSeek?: (time: number) => void;
+  onVolumeChange?: (volume: number) => void;
+  volume?: number;
   playbackAdapter: PlaybackAdapter;
 }
 
@@ -54,6 +55,8 @@ export function ControlBar({
   onAddLocalFiles,
   onClearPlaylist,
   onSeek,
+  onVolumeChange,
+  volume,
   playbackAdapter,
 }: ControlBarProps) {
   const isIdle = useIdleTimer(3000, 5000);
@@ -64,7 +67,7 @@ export function ControlBar({
 
   const isSpotifyConnected = !!accessToken;
   const authMode = getAuthMode();
-  const hasLocalTracks = useMediaPlayerStore((s) => s.tracks.length > 0);
+  const isLocalSource = playbackAdapter.source === 'local';
 
   const handleSpotifyConnect = () => {
     const url = buildSpotifyAuthUrl();
@@ -147,7 +150,7 @@ export function ControlBar({
           <BarButton onClick={onToggleAutopilot} active={autopilotEnabled}>
             Autopilot
           </BarButton>
-          {hasLocalTracks && (
+          {isLocalSource && (
             <BarButton
               onClick={() => onTogglePanel('playlist')}
               active={activePanel === 'playlist'}
@@ -159,7 +162,9 @@ export function ControlBar({
 
         <div className="flex items-center gap-2">
           <PlaybackControls adapter={playbackAdapter} />
-          {onSeek && <LocalSeekBar onSeek={onSeek} />}
+          {onSeek && onVolumeChange != null && volume != null && (
+            <LocalSeekBar onSeek={onSeek} onVolumeChange={onVolumeChange} volume={volume} />
+          )}
 
           {isSpotifyConnected ? (
             <>

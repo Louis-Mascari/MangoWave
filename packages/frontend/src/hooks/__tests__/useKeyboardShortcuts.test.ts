@@ -13,6 +13,7 @@ const handlers = {
   onToggleAutopilot: vi.fn(),
   onToggleFavorite: vi.fn(),
   onToggleBlock: vi.fn(),
+  onToggleQueue: vi.fn(),
 };
 
 describe('useKeyboardShortcuts', () => {

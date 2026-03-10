@@ -28,6 +28,11 @@ function formatFreq(freq: number): string {
 
 export function SettingsPanel() {
   const [activeTab, setActiveTab] = useState<Tab>('equalizer');
+  const getAuthMode = useSpotifyStore((s) => s.getAuthMode);
+  const accessToken = useSpotifyStore((s) => s.accessToken);
+  const sessionId = useSpotifyStore((s) => s.sessionId);
+  const authMode = getAuthMode();
+  const showSpotifyTab = authMode !== 'locked' || !!(accessToken || sessionId);
 
   return (
     <div className="flex flex-col gap-3 rounded-lg bg-black/60 p-4 backdrop-blur-sm">
@@ -41,15 +46,17 @@ export function SettingsPanel() {
         <TabButton active={activeTab === 'shortcuts'} onClick={() => setActiveTab('shortcuts')}>
           Shortcuts
         </TabButton>
-        <TabButton active={activeTab === 'spotify'} onClick={() => setActiveTab('spotify')}>
-          Spotify
-        </TabButton>
+        {showSpotifyTab && (
+          <TabButton active={activeTab === 'spotify'} onClick={() => setActiveTab('spotify')}>
+            Spotify
+          </TabButton>
+        )}
       </div>
 
       {activeTab === 'equalizer' && <EqualizerTab />}
       {activeTab === 'performance' && <PerformanceTab />}
       {activeTab === 'shortcuts' && <ShortcutsTab />}
-      {activeTab === 'spotify' && <SpotifyTab />}
+      {activeTab === 'spotify' && showSpotifyTab && <SpotifyTab />}
     </div>
   );
 }
@@ -488,6 +495,7 @@ const SHORTCUTS = [
   { key: 'A', action: 'Toggle autopilot' },
   { key: 'S', action: 'Toggle favorite' },
   { key: 'B', action: 'Toggle block' },
+  { key: 'Q', action: 'Toggle queue' },
   { key: 'Escape', action: 'Close panel / overlay' },
   { key: '? / H', action: 'Toggle shortcut overlay' },
 ];

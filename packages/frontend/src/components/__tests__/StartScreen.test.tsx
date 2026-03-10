@@ -32,16 +32,6 @@ describe('StartScreen', () => {
     expect(screen.getByText('MangoWave')).toBeInTheDocument();
   });
 
-  it('hides Share Audio card when getDisplayMedia unavailable (mobile)', () => {
-    render(<StartScreen {...defaultProps} />);
-    expect(screen.queryByText('Share Audio')).not.toBeInTheDocument();
-  });
-
-  it('shows mobile callout when getDisplayMedia unavailable', () => {
-    render(<StartScreen {...defaultProps} />);
-    expect(screen.getByText(/desktop or laptop/i)).toBeInTheDocument();
-  });
-
   it('renders error when provided', () => {
     render(<StartScreen {...defaultProps} error="Something went wrong" />);
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
@@ -92,5 +82,16 @@ describe('StartScreen', () => {
     expect(screen.getByText('Start Microphone')).toBeInTheDocument();
     await user.click(screen.getByLabelText('Close'));
     expect(screen.queryByText('Start Microphone')).not.toBeInTheDocument();
+  });
+
+  it('shows mobile callout in jsdom (no getDisplayMedia, touch heuristic)', () => {
+    // In jsdom, getDisplayMedia is unavailable so isMobileDevice is true
+    render(<StartScreen {...defaultProps} />);
+    expect(screen.getByText(/laptop or desktop/i)).toBeInTheDocument();
+  });
+
+  it('hides Share Audio card in jsdom (mobile-like environment)', () => {
+    render(<StartScreen {...defaultProps} />);
+    expect(screen.queryByText('Share Audio')).not.toBeInTheDocument();
   });
 });

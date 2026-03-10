@@ -17,26 +17,35 @@ npm run lint       # ESLint
 ### Audio Pipeline
 
 ```
-getDisplayMedia -> MediaStreamSource -> GainNode (pre-amp) -> 10x BiquadFilter (EQ) -> AnalyserNode -> butterchurn
+Source -> GainNode (pre-amp) -> 10x BiquadFilter (EQ) -> AnalyserNode -> butterchurn
 ```
+
+Three source modes:
+
+- **System audio** (`getDisplayMedia`) — captures tab/screen audio
+- **Local files** (`HTMLAudioElement` via `createMediaElementSource`) — forked pipeline: EQ → analyser for visuals, direct → speakers for audio output
+- **Microphone** (`getUserMedia`) — silent mode, no speaker output to prevent feedback
+
+Key details:
 
 - **EQ is purely visual** — shapes FFT data for butterchurn, does not change audio output
 - **Pre-amp** scales overall visual reactivity (0-3x linear gain)
 - butterchurn calls `connectAudio(analyserNode)` and reads FFT data directly
+- `createMediaElementSource` can only be called once per element — engine is created once, track changes update `audioElement.src`
 
 ### Source Layout
 
 ```
 src/
-├── components/    # UI: ControlBar, SettingsPanel (tabbed: EQ/Performance/Shortcuts),
-│                  #     PresetBrowser, NowPlaying, StartScreen, ShortcutOverlay, etc.
+├── components/    # UI: ControlBar, SettingsPanel (tabbed: EQ/Performance/Shortcuts/Spotify),
+│                  #     PresetBrowser, MediaPlaylist, NowPlaying, StartScreen, etc.
 ├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (butterchurn),
 │                  # isWebGL2Supported
-├── hooks/         # useAudioCapture, useAutopilot, useKeyboardShortcuts,
-│                  # useIdleTimer, useHideCursor, useSpotifyAuth, useNowPlaying
+├── hooks/         # useAudioCapture, useLocalPlayback, useAutopilot, useKeyboardShortcuts,
+│                  # useIdleTimer, useHideCursor, useSpotifyAuth, useNowPlaying, useUnlockCheck
 ├── lib/           # PostHog & Sentry init (no-op when env vars absent)
-├── services/      # Spotify Web API client
-├── store/         # Zustand stores: useSettingsStore, useSpotifyStore
+├── services/      # Spotify Web API client, PKCE auth utilities
+├── store/         # Zustand stores: useSettingsStore, useSpotifyStore, useMediaPlayerStore
 ├── types/         # butterchurn.d.ts (type declarations for untyped packages)
 └── test/          # Vitest global setup
 ```
@@ -67,12 +76,14 @@ Create a `.env` file (gitignored):
 VITE_SPOTIFY_CLIENT_ID=
 VITE_SPOTIFY_REDIRECT_URI=
 VITE_API_URL=
+VITE_LOCKED_MODE=          # 'true' to restrict Spotify UI to authorized visitors
+VITE_UNLOCK_HASH=          # Hash used to verify visitor authorization
 VITE_SENTRY_DSN=
 VITE_PUBLIC_POSTHOG_KEY=
 VITE_PUBLIC_POSTHOG_HOST=
 ```
 
-All are optional — the app runs fully without them. Spotify integration requires the first three; analytics/error tracking require the last three.
+All are optional — the app runs fully without them. Spotify integration requires the first three; lock gate requires the next two; analytics/error tracking require the last three.
 
 ## Key Technical Notes
 

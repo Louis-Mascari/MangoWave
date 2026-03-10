@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ControlBar } from '../ControlBar.tsx';
@@ -36,11 +36,6 @@ const defaultProps = {
 };
 
 describe('ControlBar', () => {
-  beforeEach(() => {
-    // Ensure Spotify is not locked for tests that check Connect Spotify
-    useSpotifyStore.setState({ isSpotifyUnlocked: true });
-  });
-
   it('renders all control buttons', () => {
     render(<ControlBar {...defaultProps} />);
 
@@ -99,32 +94,15 @@ describe('ControlBar', () => {
     expect(btn.className).toContain('bg-orange-500');
   });
 
-  it('opens popup when Connect Spotify is clicked', async () => {
-    const user = userEvent.setup();
-    const mockPopup = { closed: false };
-    const openSpy = vi.spyOn(window, 'open').mockReturnValue(mockPopup as Window);
-
+  it('shows Now Playing button when Spotify is connected', () => {
+    useSpotifyStore.setState({ accessToken: 'test-token' });
     render(<ControlBar {...defaultProps} />);
-    await user.click(screen.getByText('Connect Spotify'));
-
-    expect(openSpy).toHaveBeenCalledWith(
-      expect.any(String),
-      'spotify-auth',
-      'popup,width=500,height=700',
-    );
-    openSpy.mockRestore();
+    expect(screen.getByText('Now Playing')).toBeInTheDocument();
   });
 
-  it('falls back to confirm dialog when popup is blocked', async () => {
-    const user = userEvent.setup();
-    const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
-
+  it('hides Now Playing button when Spotify is not connected', () => {
+    useSpotifyStore.setState({ accessToken: null });
     render(<ControlBar {...defaultProps} />);
-    await user.click(screen.getByText('Connect Spotify'));
-
-    expect(confirmSpy).toHaveBeenCalled();
-    openSpy.mockRestore();
-    confirmSpy.mockRestore();
+    expect(screen.queryByText('Now Playing')).not.toBeInTheDocument();
   });
 });

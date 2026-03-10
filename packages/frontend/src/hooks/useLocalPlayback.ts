@@ -15,6 +15,8 @@ export interface UseLocalPlaybackReturn {
   seek: (time: number) => void;
   volume: number;
   setVolume: (volume: number) => void;
+  isMuted: boolean;
+  toggleMute: () => void;
 }
 
 export function useLocalPlayback(): UseLocalPlaybackReturn {
@@ -23,6 +25,8 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
   const [audioEngine, setAudioEngine] = useState<AudioEngine | null>(null);
   const [isActive, setIsActive] = useState(false);
   const [volume, setVolumeState] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
+  const preMuteVolumeRef = useRef(1);
 
   const tracks = useMediaPlayerStore((s) => s.tracks);
   const currentTrackIndex = useMediaPlayerStore((s) => s.currentTrackIndex);
@@ -195,10 +199,25 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
 
   const setVolume = useCallback((vol: number) => {
     setVolumeState(vol);
+    setIsMuted(vol === 0);
     if (audioRef.current) {
       audioRef.current.volume = vol;
     }
   }, []);
+
+  const toggleMute = useCallback(() => {
+    if (isMuted) {
+      const restored = preMuteVolumeRef.current || 1;
+      setVolumeState(restored);
+      setIsMuted(false);
+      if (audioRef.current) audioRef.current.volume = restored;
+    } else {
+      preMuteVolumeRef.current = volume;
+      setVolumeState(0);
+      setIsMuted(true);
+      if (audioRef.current) audioRef.current.volume = 0;
+    }
+  }, [isMuted, volume]);
 
   return {
     audioEngine,
@@ -213,5 +232,7 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
     seek,
     volume,
     setVolume,
+    isMuted,
+    toggleMute,
   };
 }

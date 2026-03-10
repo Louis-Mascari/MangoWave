@@ -1,6 +1,5 @@
 import { useIdleTimer } from '../hooks/useIdleTimer.ts';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
-import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { SettingsPanel } from './SettingsPanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
 import { PlaybackControls } from './PlaybackControls.tsx';
@@ -32,6 +31,8 @@ interface ControlBarProps {
   onSeek?: (time: number) => void;
   onVolumeChange?: (volume: number) => void;
   volume?: number;
+  isMuted?: boolean;
+  onToggleMute?: () => void;
   playbackAdapter: PlaybackAdapter;
 }
 
@@ -57,32 +58,13 @@ export function ControlBar({
   onSeek,
   onVolumeChange,
   volume,
+  isMuted,
+  onToggleMute,
   playbackAdapter,
 }: ControlBarProps) {
   const isIdle = useIdleTimer(3000, 5000);
-  const accessToken = useSpotifyStore((s) => s.accessToken);
-  const user = useSpotifyStore((s) => s.user);
-  const logout = useSpotifyStore((s) => s.logout);
-  const getAuthMode = useSpotifyStore((s) => s.getAuthMode);
-
-  const isSpotifyConnected = !!accessToken;
-  const authMode = getAuthMode();
+  const isSpotifyConnected = !!useSpotifyStore((s) => s.accessToken);
   const isLocalSource = playbackAdapter.source === 'local';
-
-  const handleSpotifyConnect = () => {
-    const url = buildSpotifyAuthUrl();
-    const popup = window.open(url, 'spotify-auth', 'popup,width=500,height=700');
-    if (!popup || popup.closed) {
-      // Popup blocked — fall back to confirm + redirect
-      if (
-        window.confirm(
-          'Connecting to Spotify requires a page redirect which will stop your current session. Continue?',
-        )
-      ) {
-        window.location.href = url;
-      }
-    }
-  };
 
   return (
     <div
@@ -162,23 +144,20 @@ export function ControlBar({
 
         <div className="flex items-center gap-2">
           <PlaybackControls adapter={playbackAdapter} />
-          {onSeek && onVolumeChange != null && volume != null && (
-            <LocalSeekBar onSeek={onSeek} onVolumeChange={onVolumeChange} volume={volume} />
+          {onSeek && onVolumeChange != null && volume != null && onToggleMute != null && (
+            <LocalSeekBar
+              onSeek={onSeek}
+              onVolumeChange={onVolumeChange}
+              volume={volume}
+              isMuted={isMuted ?? false}
+              onToggleMute={onToggleMute}
+            />
           )}
 
-          {isSpotifyConnected ? (
-            <>
-              <BarButton onClick={onToggleNowPlaying} active={showNowPlaying}>
-                Now Playing
-              </BarButton>
-              <BarButton onClick={logout}>
-                {user?.displayName ? `${user.displayName} ×` : 'Disconnect'}
-              </BarButton>
-            </>
-          ) : (
-            authMode !== 'locked' && (
-              <BarButton onClick={handleSpotifyConnect}>Connect Spotify</BarButton>
-            )
+          {isSpotifyConnected && (
+            <BarButton onClick={onToggleNowPlaying} active={showNowPlaying}>
+              Now Playing
+            </BarButton>
           )}
 
           <div className="mx-1 h-5 w-px bg-white/20" />

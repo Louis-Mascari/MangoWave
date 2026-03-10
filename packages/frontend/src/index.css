@@ -6,13 +6,11 @@ body {
 
 /* StartScreen hover effects */
 .start-logo {
-  filter: drop-shadow(0 0 32px rgba(255, 140, 50, 0.4))
-    drop-shadow(0 0 64px rgba(255, 140, 50, 0.2));
+  filter: drop-shadow(0 0 48px rgba(255, 140, 50, 0.45));
   transition: filter 0.3s;
 }
 .start-logo:hover {
-  filter: drop-shadow(0 0 40px rgba(255, 140, 50, 0.6))
-    drop-shadow(0 0 80px rgba(255, 140, 50, 0.35));
+  filter: drop-shadow(0 0 64px rgba(255, 140, 50, 0.6));
 }
 
 .start-btn {

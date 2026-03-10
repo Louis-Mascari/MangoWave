@@ -29,11 +29,11 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
   const byocClientId = useSpotifyStore((s) => s.byocClientId);
   const logout = useSpotifyStore((s) => s.logout);
   const getAuthMode = useSpotifyStore((s) => s.getAuthMode);
+  const isSpotifyUnlocked = useSpotifyStore((s) => s.isSpotifyUnlocked);
   const setByocClientId = useSpotifyStore((s) => s.setByocClientId);
   const authMode = getAuthMode();
 
   const [activeModal, setActiveModal] = useState<ModalView>('none');
-  const [showByoc, setShowByoc] = useState(false);
   const [byocInput, setByocInput] = useState(byocClientId ?? '');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -191,50 +191,48 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-2">
-                  <p className="text-center text-xs text-[#888]">
-                    Connect Spotify for now-playing info and playback controls while sharing audio.
-                  </p>
-                  <button
-                    onClick={() => {
-                      window.location.href = buildSpotifyAuthUrl();
-                    }}
-                    className="spotify-btn cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-medium text-[#1DB954] hover:bg-white/10"
-                  >
-                    Connect Spotify
-                  </button>
-                  <button
-                    onClick={() => setShowByoc(!showByoc)}
-                    className="cursor-pointer border-none bg-transparent text-xs text-[#666] underline hover:text-[#999]"
-                  >
-                    {showByoc ? 'Hide' : 'Use your own Spotify credentials'}
-                  </button>
-                  {showByoc && (
-                    <div className="flex w-full flex-col items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-3">
-                      <p className="text-xs text-[#888]">
-                        Spotify limits our app to 25 users. To bypass this, you can register your
-                        own free Spotify app at{' '}
-                        <span className="text-[#aaa]">developer.spotify.com</span>. Add{' '}
-                        <code className="rounded bg-white/10 px-1 text-[10px]">
-                          {import.meta.env.VITE_SPOTIFY_REDIRECT_URI}
-                        </code>{' '}
-                        as a redirect URI, then paste your Client ID below.
+                  <p className="text-center text-xs text-[#666]">Optional</p>
+                  {isSpotifyUnlocked && (
+                    <>
+                      <p className="text-center text-xs text-[#888]">
+                        Connect Spotify for now-playing info and playback controls while sharing
+                        audio.
                       </p>
-                      <input
-                        type="text"
-                        value={byocInput}
-                        onChange={(e) => setByocInput(e.target.value)}
-                        placeholder="Spotify Client ID"
-                        className="w-full rounded border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-[#1DB954] focus:outline-none"
-                      />
                       <button
-                        onClick={handleByocConnect}
-                        disabled={!byocInput.trim()}
-                        className="cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-1.5 text-sm font-medium text-[#1DB954] hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                        onClick={() => {
+                          window.location.href = buildSpotifyAuthUrl();
+                        }}
+                        className="spotify-btn cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-medium text-[#1DB954] hover:bg-white/10"
                       >
-                        Connect with PKCE
+                        Connect Spotify
                       </button>
-                    </div>
+                    </>
                   )}
+                  <div className="flex w-full flex-col items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                    <p className="text-xs text-[#888]">
+                      Spotify&apos;s API limits each app key to 5 users, so you&apos;ll need your
+                      own. Register a free Spotify app at{' '}
+                      <span className="text-[#aaa]">developer.spotify.com</span>, add{' '}
+                      <code className="rounded bg-white/10 px-1 text-[10px]">
+                        {import.meta.env.VITE_SPOTIFY_REDIRECT_URI}
+                      </code>{' '}
+                      as a redirect URI, then paste your Client ID (not your secret key) below.
+                    </p>
+                    <input
+                      type="text"
+                      value={byocInput}
+                      onChange={(e) => setByocInput(e.target.value)}
+                      placeholder="Client ID (not secret key)"
+                      className="w-full rounded border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-[#1DB954] focus:outline-none"
+                    />
+                    <button
+                      onClick={handleByocConnect}
+                      disabled={!byocInput.trim()}
+                      className="cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-1.5 text-sm font-medium text-[#1DB954] hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Connect with PKCE
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

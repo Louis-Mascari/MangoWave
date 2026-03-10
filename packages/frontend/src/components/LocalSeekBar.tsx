@@ -10,9 +10,17 @@ interface LocalSeekBarProps {
   onSeek: (time: number) => void;
   onVolumeChange: (volume: number) => void;
   volume: number;
+  isMuted: boolean;
+  onToggleMute: () => void;
 }
 
-export function LocalSeekBar({ onSeek, onVolumeChange, volume }: LocalSeekBarProps) {
+export function LocalSeekBar({
+  onSeek,
+  onVolumeChange,
+  volume,
+  isMuted,
+  onToggleMute,
+}: LocalSeekBarProps) {
   const currentTime = useMediaPlayerStore((s) => s.currentTime);
   const duration = useMediaPlayerStore((s) => s.duration);
 
@@ -31,9 +39,14 @@ export function LocalSeekBar({ onSeek, onVolumeChange, volume }: LocalSeekBarPro
         aria-label="Seek"
       />
       <span className="text-[10px] tabular-nums text-white/50">{formatTime(duration)}</span>
-      <span className="ml-1 text-[10px] text-white/40" title="Volume">
-        🔊
-      </span>
+      <button
+        onClick={onToggleMute}
+        className="ml-1 cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 hover:text-white/70"
+        title={isMuted ? 'Unmute' : 'Mute'}
+        aria-label={isMuted ? 'Unmute' : 'Mute'}
+      >
+        {isMuted ? '🔇' : '🔊'}
+      </button>
       <input
         type="range"
         min={0}

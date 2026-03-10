@@ -18,12 +18,15 @@
 ## Features
 
 - **555 MilkDrop presets** from all butterchurn preset packs
+- **Multiple audio sources** — system/tab audio, local files, or microphone input
+- **Local file playback** with queue, shuffle, repeat, seek, and volume controls
 - **10-band EQ** that shapes which frequencies drive the visuals
 - **Pre-amp gain** to boost quiet audio sources
 - **Preset browser** with search, favorites, and blocking
 - **Autopilot** auto-cycles presets on a configurable interval (5-120s)
 - **Keyboard shortcuts** for preset navigation, fullscreen, favorites, and more
 - **Optional Spotify integration** for Now Playing metadata and playback controls
+- **BYOC Spotify** — bring your own Client ID via PKCE auth to bypass app user limits
 - **Configurable performance** — FPS cap, resolution scaling, FFT size, smoothing
 - **Zero install** — runs entirely in the browser, no extensions needed
 
@@ -34,8 +37,10 @@ The core visualizer is **100% client-side**. Audio capture, rendering, EQ, prese
 The backend only serves **optional Spotify integration** — 4 Lambda endpoints behind API Gateway handle OAuth token exchange, token refresh, and settings sync to DynamoDB.
 
 ```
-getDisplayMedia -> MediaStreamSource -> GainNode (pre-amp) -> 10x BiquadFilter (EQ) -> AnalyserNode -> butterchurn
+Source -> GainNode (pre-amp) -> 10x BiquadFilter (EQ) -> AnalyserNode -> butterchurn
 ```
+
+Sources: `getDisplayMedia` (system audio), `HTMLAudioElement` (local files), or `getUserMedia` (microphone). Local files fork the pipeline — EQ feeds the visualizer while audio plays directly to speakers.
 
 ## Project Structure
 
@@ -86,22 +91,23 @@ npm run build -w packages/frontend   # tsc + vite build
 
 ## Keyboard Shortcuts
 
-| Key          | Action              |
-| ------------ | ------------------- |
-| Space / N    | Next preset         |
-| F            | Toggle fullscreen   |
-| Double-click | Toggle fullscreen   |
-| A            | Toggle autopilot    |
-| S            | Toggle favorite     |
-| B            | Toggle block        |
-| Escape       | Close panel/overlay |
-| ? / H        | Shortcut help       |
+| Key          | Action                     |
+| ------------ | -------------------------- |
+| Space / N    | Next preset                |
+| F            | Toggle fullscreen          |
+| Double-click | Toggle fullscreen          |
+| A            | Toggle autopilot           |
+| S            | Toggle favorite            |
+| B            | Toggle block               |
+| Q            | Toggle queue (local files) |
+| Escape       | Close panel/overlay        |
+| ? / H        | Shortcut help              |
 
 ## Tech Stack
 
 - **Frontend:** React 19, Vite 7, TypeScript 5.9, Tailwind CSS 4, Zustand
 - **Visual engine:** butterchurn (WebGL 2 MilkDrop port)
-- **Audio:** Web Audio API (`getDisplayMedia` + `AnalyserNode`)
+- **Audio:** Web Audio API (`getDisplayMedia`, `HTMLAudioElement`, `getUserMedia`)
 - **Backend:** AWS Lambda (Node.js/TypeScript), API Gateway, DynamoDB
 - **Infrastructure:** AWS CDK v2
 - **CI/CD:** GitHub Actions (OIDC deploy to AWS)
@@ -119,7 +125,7 @@ Pushes to `main` auto-deploy via GitHub Actions:
 ## Requirements
 
 - **[WebGL 2](https://caniuse.com/webgl2)** — required for butterchurn rendering
-- **Browser with `getDisplayMedia` support** — Chrome, Edge, Firefox (not Safari)
+- **Browser with `getDisplayMedia` support** for system audio — Chrome, Edge, Firefox (not Safari). Local files and microphone work on all browsers including mobile
 - **Node >= 20** for local development
 
 ## Acknowledgments

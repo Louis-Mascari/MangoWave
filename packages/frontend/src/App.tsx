@@ -346,8 +346,8 @@ function MainApp() {
   }, [local.isActive, localCurrentTrack, spotifyNowPlaying]);
 
   const handleToggleQueue = useCallback(() => {
-    handleTogglePanel('playlist');
-  }, [handleTogglePanel]);
+    if (local.isActive) handleTogglePanel('playlist');
+  }, [local.isActive, handleTogglePanel]);
 
   const { showShortcutOverlay, toggleShortcutOverlay } = useKeyboardShortcuts({
     onNextPreset: handleNextPreset,
@@ -418,6 +418,8 @@ function MainApp() {
                 onSeek={local.isActive ? local.seek : undefined}
                 onVolumeChange={local.isActive ? local.setVolume : undefined}
                 volume={local.isActive ? local.volume : undefined}
+                isMuted={local.isActive ? local.isMuted : undefined}
+                onToggleMute={local.isActive ? local.toggleMute : undefined}
                 playbackAdapter={playbackAdapter}
               />
               <ShortcutOverlay visible={showShortcutOverlay} onClose={toggleShortcutOverlay} />

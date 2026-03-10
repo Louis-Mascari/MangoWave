@@ -54,7 +54,7 @@ describe('StartScreen', () => {
   });
 
   it('renders Connect Spotify button when not connected', () => {
-    useSpotifyStore.setState({ sessionId: null });
+    useSpotifyStore.setState({ sessionId: null, isSpotifyUnlocked: true });
     render(<StartScreen {...defaultProps} />);
     expect(screen.getByText('Connect Spotify')).toBeInTheDocument();
   });
@@ -62,6 +62,7 @@ describe('StartScreen', () => {
   it('shows connected state when Spotify sessionId exists', () => {
     useSpotifyStore.setState({
       sessionId: 'test-session',
+      isSpotifyUnlocked: true,
       user: { displayName: 'Test User', id: '123', imageUrl: null, product: null },
     });
     render(<StartScreen {...defaultProps} />);
@@ -81,6 +82,7 @@ describe('StartScreen', () => {
   });
 
   it('renders BYOC toggle when Spotify not connected', () => {
+    useSpotifyStore.setState({ isSpotifyUnlocked: true });
     render(<StartScreen {...defaultProps} />);
     expect(screen.getByText('Use your own Spotify credentials')).toBeInTheDocument();
   });

@@ -11,6 +11,8 @@ describe('useMediaPlayerStore', () => {
       isPlaying: false,
       currentTime: 0,
       duration: 0,
+      shuffle: false,
+      repeatMode: 'off',
     });
     vi.restoreAllMocks();
   });
@@ -73,5 +75,42 @@ describe('useMediaPlayerStore', () => {
   it('strips file extension from name', () => {
     useMediaPlayerStore.getState().addTracks([createMockFile('My Song.flac')]);
     expect(useMediaPlayerStore.getState().tracks[0].name).toBe('My Song');
+  });
+
+  it('toggleShuffle toggles shuffle state', () => {
+    expect(useMediaPlayerStore.getState().shuffle).toBe(false);
+    useMediaPlayerStore.getState().toggleShuffle();
+    expect(useMediaPlayerStore.getState().shuffle).toBe(true);
+    useMediaPlayerStore.getState().toggleShuffle();
+    expect(useMediaPlayerStore.getState().shuffle).toBe(false);
+  });
+
+  it('cycleRepeatMode cycles off → all → one → off', () => {
+    expect(useMediaPlayerStore.getState().repeatMode).toBe('off');
+    useMediaPlayerStore.getState().cycleRepeatMode();
+    expect(useMediaPlayerStore.getState().repeatMode).toBe('all');
+    useMediaPlayerStore.getState().cycleRepeatMode();
+    expect(useMediaPlayerStore.getState().repeatMode).toBe('one');
+    useMediaPlayerStore.getState().cycleRepeatMode();
+    expect(useMediaPlayerStore.getState().repeatMode).toBe('off');
+  });
+
+  it('nextTrack picks random index when shuffle is on', () => {
+    useMediaPlayerStore
+      .getState()
+      .addTracks([createMockFile('a.mp3'), createMockFile('b.mp3'), createMockFile('c.mp3')]);
+    useMediaPlayerStore.getState().toggleShuffle();
+
+    // Run nextTrack multiple times — should never stay on same index
+    const indices = new Set<number>();
+    for (let i = 0; i < 20; i++) {
+      const prev = useMediaPlayerStore.getState().currentTrackIndex;
+      useMediaPlayerStore.getState().nextTrack();
+      const next = useMediaPlayerStore.getState().currentTrackIndex;
+      expect(next).not.toBe(prev);
+      indices.add(next);
+    }
+    // With 3 tracks and 20 iterations, should have hit at least 2 different indices
+    expect(indices.size).toBeGreaterThanOrEqual(2);
   });
 });

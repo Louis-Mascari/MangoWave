@@ -37,3 +37,21 @@ body {
 .spotify-disconnect:hover {
   box-shadow: 0 2px 16px rgba(29, 185, 84, 0.3);
 }
+
+/* Seek bar thumb */
+.seek-bar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ff8c32;
+  cursor: pointer;
+}
+.seek-bar::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: #ff8c32;
+  cursor: pointer;
+}

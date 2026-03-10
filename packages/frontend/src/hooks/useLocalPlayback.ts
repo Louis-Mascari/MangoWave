@@ -7,10 +7,12 @@ export interface UseLocalPlaybackReturn {
   isActive: boolean;
   startWithFiles: (files: File[]) => void;
   stop: () => void;
+  clearQueue: () => void;
   play: () => void;
   pause: () => void;
   next: () => void;
   previous: () => void;
+  seek: (time: number) => void;
 }
 
 export function useLocalPlayback(): UseLocalPlaybackReturn {
@@ -93,7 +95,18 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
     const onLoadedMetadata = () => setDuration(audio.duration);
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
-    const onEnded = () => nextTrack();
+    const onEnded = () => {
+      const { repeatMode, tracks, currentTrackIndex } = useMediaPlayerStore.getState();
+      if (repeatMode === 'one') {
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+      } else if (repeatMode === 'off' && currentTrackIndex === tracks.length - 1) {
+        // Last track, no repeat — stop playback
+        setIsPlaying(false);
+      } else {
+        nextTrack();
+      }
+    };
 
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('loadedmetadata', onLoadedMetadata);
@@ -125,6 +138,14 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
     setIsActive(false);
   }, [clearPlaylist]);
 
+  const clearQueue = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
+    }
+    clearPlaylist();
+  }, [clearPlaylist]);
+
   const play = useCallback(() => {
     audioRef.current?.play();
   }, []);
@@ -141,5 +162,22 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
     previousTrack();
   }, [previousTrack]);
 
-  return { audioEngine, isActive, startWithFiles, stop, play, pause, next, previous };
+  const seek = useCallback((time: number) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+    }
+  }, []);
+
+  return {
+    audioEngine,
+    isActive,
+    startWithFiles,
+    stop,
+    clearQueue,
+    play,
+    pause,
+    next,
+    previous,
+    seek,
+  };
 }

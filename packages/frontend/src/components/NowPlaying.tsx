@@ -15,18 +15,20 @@ interface NowPlayingProps {
 
 interface AutoShowStore {
   autoShow: boolean;
-  prevTrackKey: string | null;
   timer: ReturnType<typeof setTimeout> | null;
   listeners: Set<() => void>;
 }
 
+/**
+ * Triggers auto-show on track change with optional timed auto-hide.
+ * StrictMode-safe: cleanup clears the timer and the re-run restarts it.
+ */
 function useAutoShow(
   track: NowPlayingTrackInfo | null,
   songInfoDisplay: 'off' | 'always' | number,
 ) {
   const storeRef = useRef<AutoShowStore>({
     autoShow: false,
-    prevTrackKey: null,
     timer: null,
     listeners: new Set(),
   });
@@ -44,16 +46,18 @@ function useAutoShow(
 
   useEffect(() => {
     const store = storeRef.current;
-    if (!trackKey || trackKey === store.prevTrackKey || songInfoDisplay === 'off') {
-      store.prevTrackKey = trackKey;
-      return;
-    }
-
-    store.prevTrackKey = trackKey;
 
     if (store.timer) {
       clearTimeout(store.timer);
       store.timer = null;
+    }
+
+    if (!trackKey || songInfoDisplay === 'off') {
+      if (store.autoShow) {
+        store.autoShow = false;
+        store.listeners.forEach((l) => l());
+      }
+      return;
     }
 
     store.autoShow = true;
@@ -66,15 +70,14 @@ function useAutoShow(
         store.listeners.forEach((l) => l());
       }, songInfoDisplay * 1000);
     }
-  }, [trackKey, songInfoDisplay]);
 
-  useEffect(() => {
     return () => {
-      if (storeRef.current.timer) {
-        clearTimeout(storeRef.current.timer);
+      if (store.timer) {
+        clearTimeout(store.timer);
+        store.timer = null;
       }
     };
-  }, []);
+  }, [trackKey, songInfoDisplay]);
 
   return useSyncExternalStore(subscribe, getSnapshot);
 }

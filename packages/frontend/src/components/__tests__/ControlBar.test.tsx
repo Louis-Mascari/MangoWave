@@ -1,8 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ControlBar } from '../ControlBar.tsx';
 import type { PlaybackAdapter } from '../PlaybackControls.tsx';
+import { useSpotifyStore } from '../../store/useSpotifyStore.ts';
 
 const noneAdapter: PlaybackAdapter = {
   source: 'none',
@@ -35,6 +36,11 @@ const defaultProps = {
 };
 
 describe('ControlBar', () => {
+  beforeEach(() => {
+    // Ensure Spotify is not locked for tests that check Connect Spotify
+    useSpotifyStore.setState({ isSpotifyUnlocked: true });
+  });
+
   it('renders all control buttons', () => {
     render(<ControlBar {...defaultProps} />);
 

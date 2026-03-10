@@ -6,6 +6,7 @@ import { PresetBrowser } from './PresetBrowser.tsx';
 import { PlaybackControls } from './PlaybackControls.tsx';
 import type { PlaybackAdapter } from './PlaybackControls.tsx';
 import { MediaPlaylist } from './MediaPlaylist.tsx';
+import { LocalSeekBar } from './LocalSeekBar.tsx';
 import { useMediaPlayerStore } from '../store/useMediaPlayerStore.ts';
 
 export type PanelView = 'none' | 'settings' | 'presets' | 'playlist';
@@ -28,6 +29,8 @@ interface ControlBarProps {
   onToggleFavorite: () => void;
   onToggleBlock: () => void;
   onAddLocalFiles?: (files: File[]) => void;
+  onClearPlaylist?: () => void;
+  onSeek?: (time: number) => void;
   playbackAdapter: PlaybackAdapter;
 }
 
@@ -49,6 +52,8 @@ export function ControlBar({
   onToggleFavorite,
   onToggleBlock,
   onAddLocalFiles,
+  onClearPlaylist,
+  onSeek,
   playbackAdapter,
 }: ControlBarProps) {
   const isIdle = useIdleTimer(3000, 5000);
@@ -93,8 +98,8 @@ export function ControlBar({
               onNextPreset={onNextPreset}
             />
           )}
-          {activePanel === 'playlist' && onAddLocalFiles && (
-            <MediaPlaylist onAddFiles={onAddLocalFiles} />
+          {activePanel === 'playlist' && onAddLocalFiles && onClearPlaylist && (
+            <MediaPlaylist onAddFiles={onAddLocalFiles} onClear={onClearPlaylist} />
           )}
         </div>
       )}
@@ -154,6 +159,7 @@ export function ControlBar({
 
         <div className="flex items-center gap-2">
           <PlaybackControls adapter={playbackAdapter} />
+          {onSeek && <LocalSeekBar onSeek={onSeek} />}
 
           {isSpotifyConnected ? (
             <>

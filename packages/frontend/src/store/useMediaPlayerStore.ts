@@ -8,12 +8,16 @@ export interface MediaTrack {
   objectUrl: string | null;
 }
 
+export type RepeatMode = 'off' | 'all' | 'one';
+
 interface MediaPlayerState {
   tracks: MediaTrack[];
   currentTrackIndex: number;
   isPlaying: boolean;
   currentTime: number;
   duration: number;
+  shuffle: boolean;
+  repeatMode: RepeatMode;
 
   addTracks: (files: File[]) => void;
   removeTrack: (id: string) => void;
@@ -24,6 +28,8 @@ interface MediaPlayerState {
   setIsPlaying: (playing: boolean) => void;
   setCurrentTime: (time: number) => void;
   setDuration: (duration: number) => void;
+  toggleShuffle: () => void;
+  cycleRepeatMode: () => void;
 }
 
 function fileNameWithoutExtension(name: string): string {
@@ -37,6 +43,8 @@ export const useMediaPlayerStore = create<MediaPlayerState>()((set, get) => ({
   isPlaying: false,
   currentTime: 0,
   duration: 0,
+  shuffle: false,
+  repeatMode: 'off' as RepeatMode,
 
   addTracks: (files) => {
     const newTracks: MediaTrack[] = files.map((file) => ({
@@ -87,9 +95,17 @@ export const useMediaPlayerStore = create<MediaPlayerState>()((set, get) => ({
   setCurrentTrack: (index) => set({ currentTrackIndex: index, currentTime: 0 }),
 
   nextTrack: () => {
-    const { tracks, currentTrackIndex } = get();
+    const { tracks, currentTrackIndex, shuffle } = get();
     if (tracks.length === 0) return;
-    set({ currentTrackIndex: (currentTrackIndex + 1) % tracks.length, currentTime: 0 });
+    if (shuffle && tracks.length > 1) {
+      let randomIndex: number;
+      do {
+        randomIndex = Math.floor(Math.random() * tracks.length);
+      } while (randomIndex === currentTrackIndex);
+      set({ currentTrackIndex: randomIndex, currentTime: 0 });
+    } else {
+      set({ currentTrackIndex: (currentTrackIndex + 1) % tracks.length, currentTime: 0 });
+    }
   },
 
   previousTrack: () => {
@@ -104,4 +120,15 @@ export const useMediaPlayerStore = create<MediaPlayerState>()((set, get) => ({
   setIsPlaying: (playing) => set({ isPlaying: playing }),
   setCurrentTime: (time) => set({ currentTime: time }),
   setDuration: (duration) => set({ duration }),
+  toggleShuffle: () => set((state) => ({ shuffle: !state.shuffle })),
+  cycleRepeatMode: () =>
+    set((state) => {
+      const next: Record<RepeatMode, RepeatMode> = { off: 'all', all: 'one', one: 'off' };
+      return { repeatMode: next[state.repeatMode] };
+    }),
 }));
+
+// Expose stores on window in dev mode for console QA
+if (import.meta.env.DEV) {
+  (window as unknown as Record<string, unknown>).useMediaPlayerStore = useMediaPlayerStore;
+}

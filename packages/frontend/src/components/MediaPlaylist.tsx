@@ -10,14 +10,14 @@ function formatDuration(seconds: number): string {
 
 interface MediaPlaylistProps {
   onAddFiles: (files: File[]) => void;
+  onClear: () => void;
 }
 
-export function MediaPlaylist({ onAddFiles }: MediaPlaylistProps) {
+export function MediaPlaylist({ onAddFiles, onClear }: MediaPlaylistProps) {
   const tracks = useMediaPlayerStore((s) => s.tracks);
   const currentTrackIndex = useMediaPlayerStore((s) => s.currentTrackIndex);
   const setCurrentTrack = useMediaPlayerStore((s) => s.setCurrentTrack);
   const removeTrack = useMediaPlayerStore((s) => s.removeTrack);
-  const clearPlaylist = useMediaPlayerStore((s) => s.clearPlaylist);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddClick = () => {
@@ -44,7 +44,7 @@ export function MediaPlaylist({ onAddFiles }: MediaPlaylistProps) {
             Add Files
           </button>
           <button
-            onClick={clearPlaylist}
+            onClick={onClear}
             className="cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-xs text-red-400/70 hover:bg-white/20"
           >
             Clear

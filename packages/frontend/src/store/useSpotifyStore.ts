@@ -156,3 +156,8 @@ export const useSpotifyStore = create<SpotifyState>()(
     },
   ),
 );
+
+// Expose stores on window in dev mode for console QA
+if (import.meta.env.DEV) {
+  (window as unknown as Record<string, unknown>).useSpotifyStore = useSpotifyStore;
+}

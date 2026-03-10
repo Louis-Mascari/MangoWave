@@ -96,4 +96,72 @@ describe('PlaybackControls', () => {
       unmount();
     }
   });
+
+  it('renders shuffle and repeat toggles when provided', () => {
+    render(
+      <PlaybackControls
+        adapter={makeAdapter({
+          canControl: true,
+          shuffle: false,
+          repeatMode: 'off',
+          onToggleShuffle: vi.fn(),
+          onCycleRepeat: vi.fn(),
+        })}
+      />,
+    );
+    expect(screen.getByLabelText('Enable shuffle')).toBeInTheDocument();
+    expect(screen.getByLabelText('Repeat: off')).toBeInTheDocument();
+  });
+
+  it('calls onToggleShuffle when shuffle is clicked', async () => {
+    const user = userEvent.setup();
+    const onToggleShuffle = vi.fn();
+    render(
+      <PlaybackControls
+        adapter={makeAdapter({
+          canControl: true,
+          shuffle: false,
+          onToggleShuffle,
+          onCycleRepeat: vi.fn(),
+          repeatMode: 'off',
+        })}
+      />,
+    );
+    await user.click(screen.getByLabelText('Enable shuffle'));
+    expect(onToggleShuffle).toHaveBeenCalledOnce();
+  });
+
+  it('cycles repeat mode label correctly', () => {
+    const { rerender } = render(
+      <PlaybackControls
+        adapter={makeAdapter({
+          canControl: true,
+          repeatMode: 'all',
+          onCycleRepeat: vi.fn(),
+          onToggleShuffle: vi.fn(),
+          shuffle: false,
+        })}
+      />,
+    );
+    expect(screen.getByLabelText('Repeat: all')).toBeInTheDocument();
+
+    rerender(
+      <PlaybackControls
+        adapter={makeAdapter({
+          canControl: true,
+          repeatMode: 'one',
+          onCycleRepeat: vi.fn(),
+          onToggleShuffle: vi.fn(),
+          shuffle: false,
+        })}
+      />,
+    );
+    expect(screen.getByLabelText('Repeat: one')).toBeInTheDocument();
+  });
+
+  it('does not render shuffle/repeat when callbacks not provided', () => {
+    render(<PlaybackControls adapter={makeAdapter({ canControl: true })} />);
+    expect(screen.queryByLabelText('Enable shuffle')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Repeat:/)).not.toBeInTheDocument();
+  });
 });

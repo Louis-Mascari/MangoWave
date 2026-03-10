@@ -221,6 +221,10 @@ function MainApp() {
 
   const localIsPlaying = useMediaPlayerStore((s) => s.isPlaying);
   const localCurrentTrack = useMediaPlayerStore((s) => s.tracks[s.currentTrackIndex] ?? null);
+  const localShuffle = useMediaPlayerStore((s) => s.shuffle);
+  const localRepeatMode = useMediaPlayerStore((s) => s.repeatMode);
+  const toggleShuffle = useMediaPlayerStore((s) => s.toggleShuffle);
+  const cycleRepeatMode = useMediaPlayerStore((s) => s.cycleRepeatMode);
 
   const handleSpotifyAction = useCallback(
     async (action: 'play' | 'pause' | 'next' | 'previous') => {
@@ -246,11 +250,15 @@ function MainApp() {
       return {
         source: 'local',
         isPlaying: localIsPlaying,
-        canControl: true,
+        canControl: !!localCurrentTrack,
         onPlay: local.play,
         onPause: local.pause,
         onNext: local.next,
         onPrevious: local.previous,
+        shuffle: localShuffle,
+        repeatMode: localRepeatMode,
+        onToggleShuffle: toggleShuffle,
+        onCycleRepeat: cycleRepeatMode,
       };
     }
     if (capture.captureSource === 'mic') {
@@ -297,6 +305,11 @@ function MainApp() {
     local.next,
     local.previous,
     localIsPlaying,
+    localCurrentTrack,
+    localShuffle,
+    localRepeatMode,
+    toggleShuffle,
+    cycleRepeatMode,
     capture.captureSource,
     isSpotifyConnected,
     spotifyNowPlaying?.isPlaying,
@@ -389,6 +402,8 @@ function MainApp() {
                 onToggleFavorite={handleToggleFavorite}
                 onToggleBlock={handleToggleBlock}
                 onAddLocalFiles={handleAddLocalFiles}
+                onClearPlaylist={local.clearQueue}
+                onSeek={local.isActive ? local.seek : undefined}
                 playbackAdapter={playbackAdapter}
               />
               <ShortcutOverlay visible={showShortcutOverlay} onClose={toggleShortcutOverlay} />

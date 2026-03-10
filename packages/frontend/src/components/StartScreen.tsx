@@ -70,7 +70,7 @@ export function StartScreen({ onStart, error }: StartScreenProps) {
         </div>
 
         {/* Spotify connect */}
-        <div className="flex max-w-md flex-col items-center gap-2 text-center">
+        <div className="flex max-w-lg flex-col items-center gap-2">
           {sessionId ? (
             <div className="flex items-center gap-2 text-sm">
               <span className="text-green-400">&#10003;</span>
@@ -85,18 +85,27 @@ export function StartScreen({ onStart, error }: StartScreenProps) {
               </button>
             </div>
           ) : (
-            <button
-              onClick={() => {
-                window.location.href = buildSpotifyAuthUrl();
-              }}
-              className="cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-medium text-[#1DB954] transition-colors hover:bg-white/10"
-            >
-              Connect Spotify
-            </button>
+            <div className="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-3">
+              <span className="text-right text-xs text-[#666]">
+                For now-playing info
+                <br />
+                and playback controls.
+              </span>
+              <button
+                onClick={() => {
+                  window.location.href = buildSpotifyAuthUrl();
+                }}
+                className="shrink-0 cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-medium text-[#1DB954] transition-colors hover:bg-white/10"
+              >
+                Connect Spotify
+              </button>
+              <span className="text-left text-xs text-[#666]">
+                Audio always comes
+                <br />
+                from screen sharing.
+              </span>
+            </div>
           )}
-          <p className="text-xs text-[#666]">
-            For now-playing info and playback controls. Audio always comes from screen sharing.
-          </p>
         </div>
 
         {/* Start button */}
@@ -110,12 +119,6 @@ export function StartScreen({ onStart, error }: StartScreenProps) {
         >
           Start Visualizer
         </button>
-
-        {/* Shortcut hint */}
-        <p className="text-xs text-[#888]">
-          Press <kbd className="rounded bg-white/10 px-1 py-0.5 font-mono text-[#aaa]">?</kbd>{' '}
-          during playback for shortcuts, or find them in Settings
-        </p>
 
         {/* Error */}
         {error && <p className="text-sm text-red-500">{error}</p>}
@@ -138,7 +141,7 @@ export function StartScreen({ onStart, error }: StartScreenProps) {
           href="https://ko-fi.com/louismascari"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 text-xs text-[#666] no-underline transition-colors hover:text-[#ff8c32]"
+          className="flex items-center gap-1.5 text-xs text-[#ff8c32] no-underline transition-colors hover:text-[#ffab66]"
         >
           <svg viewBox="0 0 32 32" width="14" height="14" fill="currentColor">
             <path d="M6 14a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm20 0a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM8 12h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2zm18 14a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM6 26a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />

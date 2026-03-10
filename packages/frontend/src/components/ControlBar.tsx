@@ -4,8 +4,10 @@ import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { SettingsPanel } from './SettingsPanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
 import { PlaybackControls } from './PlaybackControls.tsx';
+import { MediaPlaylist } from './MediaPlaylist.tsx';
+import { useMediaPlayerStore } from '../store/useMediaPlayerStore.ts';
 
-export type PanelView = 'none' | 'settings' | 'presets';
+export type PanelView = 'none' | 'settings' | 'presets' | 'playlist';
 
 interface ControlBarProps {
   onNextPreset: () => void;
@@ -24,6 +26,7 @@ interface ControlBarProps {
   isBlocked: boolean;
   onToggleFavorite: () => void;
   onToggleBlock: () => void;
+  onAddLocalFiles?: (files: File[]) => void;
 }
 
 export function ControlBar({
@@ -43,6 +46,7 @@ export function ControlBar({
   isBlocked,
   onToggleFavorite,
   onToggleBlock,
+  onAddLocalFiles,
 }: ControlBarProps) {
   const isIdle = useIdleTimer(3000, 5000);
   const accessToken = useSpotifyStore((s) => s.accessToken);
@@ -52,6 +56,7 @@ export function ControlBar({
 
   const isSpotifyConnected = !!accessToken;
   const authMode = getAuthMode();
+  const hasLocalTracks = useMediaPlayerStore((s) => s.tracks.length > 0);
 
   const handleSpotifyConnect = () => {
     const url = buildSpotifyAuthUrl();
@@ -84,6 +89,9 @@ export function ControlBar({
               onSelectPreset={onSelectPreset}
               onNextPreset={onNextPreset}
             />
+          )}
+          {activePanel === 'playlist' && onAddLocalFiles && (
+            <MediaPlaylist onAddFiles={onAddLocalFiles} />
           )}
         </div>
       )}
@@ -131,6 +139,14 @@ export function ControlBar({
           <BarButton onClick={onToggleAutopilot} active={autopilotEnabled}>
             Autopilot
           </BarButton>
+          {hasLocalTracks && (
+            <BarButton
+              onClick={() => onTogglePanel('playlist')}
+              active={activePanel === 'playlist'}
+            >
+              Queue
+            </BarButton>
+          )}
         </div>
 
         <div className="flex items-center gap-2">

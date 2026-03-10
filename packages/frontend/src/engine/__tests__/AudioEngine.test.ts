@@ -36,6 +36,7 @@ function createMockAudioContext() {
 
   const ctx = {
     state: 'running' as AudioContextState,
+    destination: { connect: vi.fn() },
     createGain: vi.fn(() => ({ ...mockGain })),
     createBiquadFilter: vi.fn(() => ({
       ...mockFilter,
@@ -46,6 +47,7 @@ function createMockAudioContext() {
     })),
     createAnalyser: vi.fn(() => ({ ...mockAnalyser })),
     createMediaStreamSource: vi.fn(() => ({ ...mockSource })),
+    createMediaElementSource: vi.fn(() => ({ ...mockSource })),
     close: vi.fn(),
   };
 
@@ -122,6 +124,65 @@ describe('AudioEngine', () => {
       expect(mockCtx.createAnalyser).toHaveBeenCalledTimes(1);
       expect(engine.context).toEqual(mockCtx);
       expect(engine.isActive).toBe(true);
+    });
+  });
+
+  describe('initFromMediaElement', () => {
+    it('creates forked pipeline with destination connection', () => {
+      const mockCtx = createMockAudioContext();
+      globalThis.AudioContext = vi.fn(function (this: Record<string, unknown>) {
+        Object.assign(this, mockCtx);
+        return this;
+      }) as unknown as typeof AudioContext;
+
+      const mockAudioElement = {} as HTMLAudioElement;
+      engine.initFromMediaElement(mockAudioElement);
+
+      expect(mockCtx.createMediaElementSource).toHaveBeenCalledWith(mockAudioElement);
+      expect(mockCtx.createGain).toHaveBeenCalledTimes(1);
+      expect(mockCtx.createBiquadFilter).toHaveBeenCalledTimes(EQ_BANDS.length);
+      expect(mockCtx.createAnalyser).toHaveBeenCalledTimes(1);
+      expect(engine.isActive).toBe(true);
+
+      // Source should connect to destination (audible output)
+      const source = mockCtx.createMediaElementSource.mock.results[0].value;
+      expect(source.connect).toHaveBeenCalledWith(mockCtx.destination);
+    });
+  });
+
+  describe('initFromMicrophone', () => {
+    it('creates pipeline without destination connection', async () => {
+      const mockCtx = createMockAudioContext();
+      globalThis.AudioContext = vi.fn(function (this: Record<string, unknown>) {
+        Object.assign(this, mockCtx);
+        return this;
+      }) as unknown as typeof AudioContext;
+
+      const mockStream = {
+        getTracks: () => [],
+      } as unknown as MediaStream;
+
+      Object.defineProperty(navigator, 'mediaDevices', {
+        value: {
+          getUserMedia: vi.fn().mockResolvedValue(mockStream),
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      await engine.initFromMicrophone();
+
+      expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledWith({ audio: true });
+      expect(mockCtx.createMediaStreamSource).toHaveBeenCalledWith(mockStream);
+      expect(engine.isActive).toBe(true);
+
+      // Source should NOT connect to destination (silent mode)
+      const source = mockCtx.createMediaStreamSource.mock.results[0].value;
+      const connectCalls = source.connect.mock.calls;
+      const connectedToDestination = connectCalls.some(
+        (call: unknown[]) => call[0] === mockCtx.destination,
+      );
+      expect(connectedToDestination).toBe(false);
     });
   });
 

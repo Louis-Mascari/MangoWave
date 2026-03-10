@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAudioCapture } from './hooks/useAudioCapture.ts';
+import { useLocalPlayback } from './hooks/useLocalPlayback.ts';
+import { useMediaPlayerStore } from './store/useMediaPlayerStore.ts';
 import { useSpotifyAuth } from './hooks/useSpotifyAuth.ts';
 import { useSettingsSync } from './hooks/useSettingsSync.ts';
 import { useNowPlaying } from './hooks/useNowPlaying.ts';
@@ -69,7 +71,12 @@ function MainApp() {
   const isSpotifyConnected = !!accessToken;
   useNowPlaying(isSpotifyConnected);
 
-  const { audioEngine, isCapturing, error, startCapture, stopCapture } = useAudioCapture();
+  const capture = useAudioCapture();
+  const local = useLocalPlayback();
+
+  // Whichever source is active provides the engine
+  const audioEngine = capture.audioEngine ?? local.audioEngine;
+  const isActive = capture.isCapturing || local.isActive;
   const rendererRef = useRef<VisualizerRenderer | null>(null);
   const blockedPresets = useSettingsStore((s) => s.blockedPresets);
   const favoritePresets = useSettingsStore((s) => s.favoritePresets);
@@ -88,9 +95,30 @@ function MainApp() {
   const resetAutopilotRef = useRef<() => void>(() => {});
 
   const handleStart = useCallback(async () => {
-    await startCapture();
+    await capture.startCapture();
     setShowLaunchAnimation(true);
-  }, [startCapture]);
+  }, [capture]);
+
+  const handleLocalFiles = useCallback(
+    (files: File[]) => {
+      local.startWithFiles(files);
+      setShowLaunchAnimation(true);
+    },
+    [local],
+  );
+
+  const handleAddLocalFiles = useCallback((files: File[]) => {
+    useMediaPlayerStore.getState().addTracks(files);
+  }, []);
+
+  const handleStop = useCallback(() => {
+    if (capture.isCapturing) {
+      capture.stopCapture();
+    }
+    if (local.isActive) {
+      local.stop();
+    }
+  }, [capture, local]);
 
   const handlePresetChange = useCallback((name: string) => {
     setCurrentPreset(name);
@@ -197,7 +225,7 @@ function MainApp() {
 
   return (
     <div className="h-screen w-screen bg-black">
-      {isCapturing && audioEngine ? (
+      {isActive && audioEngine ? (
         <>
           <Visualizer
             audioEngine={audioEngine}
@@ -219,7 +247,7 @@ function MainApp() {
               <ControlBar
                 onNextPreset={handleNextPreset}
                 onSelectPreset={handleSelectPreset}
-                onStop={stopCapture}
+                onStop={handleStop}
                 onToggleFullscreen={handleToggleFullscreen}
                 onToggleNowPlaying={handleToggleNowPlaying}
                 showNowPlaying={showNowPlaying}
@@ -233,6 +261,7 @@ function MainApp() {
                 isBlocked={blockedPresets.includes(currentPreset)}
                 onToggleFavorite={handleToggleFavorite}
                 onToggleBlock={handleToggleBlock}
+                onAddLocalFiles={handleAddLocalFiles}
               />
               <ShortcutOverlay visible={showShortcutOverlay} onClose={toggleShortcutOverlay} />
             </>
@@ -241,9 +270,9 @@ function MainApp() {
       ) : (
         <StartScreen
           onStart={handleStart}
-          onLocalFiles={() => {}}
+          onLocalFiles={handleLocalFiles}
           onMicCapture={() => {}}
-          error={error}
+          error={capture.error}
         />
       )}
     </div>

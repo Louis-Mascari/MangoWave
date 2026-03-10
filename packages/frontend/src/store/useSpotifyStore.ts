@@ -13,6 +13,10 @@ interface SpotifyState {
   nowPlaying: NowPlayingTrack | null;
   premiumError: boolean;
 
+  // Rate limiting (session-only)
+  isRateLimited: boolean;
+  rateLimitResetsAt: number | null;
+
   // Poll control
   pollRequestedAt: number;
   requestPoll: () => void;
@@ -23,6 +27,8 @@ interface SpotifyState {
   setNowPlaying: (track: NowPlayingTrack | null) => void;
   updateIsPlaying: (isPlaying: boolean) => void;
   setPremiumError: (value: boolean) => void;
+  setRateLimited: (retryAfterMs: number) => void;
+  clearRateLimited: () => void;
   logout: () => void;
   isTokenValid: () => boolean;
 }
@@ -36,6 +42,8 @@ export const useSpotifyStore = create<SpotifyState>()(
       user: null,
       nowPlaying: null,
       premiumError: false,
+      isRateLimited: false,
+      rateLimitResetsAt: null,
       pollRequestedAt: 0,
 
       requestPoll: () => set({ pollRequestedAt: Date.now() }),
@@ -64,6 +72,18 @@ export const useSpotifyStore = create<SpotifyState>()(
 
       setPremiumError: (value) => set({ premiumError: value }),
 
+      setRateLimited: (retryAfterMs) =>
+        set({
+          isRateLimited: true,
+          rateLimitResetsAt: Date.now() + retryAfterMs,
+        }),
+
+      clearRateLimited: () =>
+        set({
+          isRateLimited: false,
+          rateLimitResetsAt: null,
+        }),
+
       logout: () =>
         set({
           sessionId: null,
@@ -72,6 +92,8 @@ export const useSpotifyStore = create<SpotifyState>()(
           user: null,
           nowPlaying: null,
           premiumError: false,
+          isRateLimited: false,
+          rateLimitResetsAt: null,
           pollRequestedAt: 0,
         }),
 

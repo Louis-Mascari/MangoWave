@@ -98,6 +98,11 @@ export async function getNowPlaying(accessToken: string): Promise<NowPlayingTrac
     throw new TokenExpiredError();
   }
 
+  if (response.status === 429) {
+    const retryAfter = parseInt(response.headers.get('Retry-After') ?? '5', 10);
+    throw new RateLimitedError(retryAfter);
+  }
+
   if (!response.ok) {
     throw new Error(`Spotify API error (${response.status})`);
   }
@@ -157,6 +162,11 @@ export async function controlPlayback(
     throw new TokenExpiredError();
   }
 
+  if (response.status === 429) {
+    const retryAfter = parseInt(response.headers.get('Retry-After') ?? '5', 10);
+    throw new RateLimitedError(retryAfter);
+  }
+
   if (!response.ok) {
     throw new Error(`Playback control failed (${response.status})`);
   }
@@ -213,5 +223,15 @@ export class PremiumRequiredError extends Error {
   constructor() {
     super('Spotify Premium is required for playback controls');
     this.name = 'PremiumRequiredError';
+  }
+}
+
+export class RateLimitedError extends Error {
+  retryAfterSeconds: number;
+
+  constructor(retryAfterSeconds: number) {
+    super(`Rate limited — retry after ${retryAfterSeconds}s`);
+    this.name = 'RateLimitedError';
+    this.retryAfterSeconds = retryAfterSeconds;
   }
 }

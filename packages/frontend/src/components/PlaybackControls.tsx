@@ -1,9 +1,10 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
 import {
   controlPlayback,
   PremiumRequiredError,
   TokenExpiredError,
+  RateLimitedError,
   refreshToken,
 } from '../services/spotifyApi.ts';
 
@@ -12,15 +13,19 @@ export function PlaybackControls() {
   const sessionId = useSpotifyStore((s) => s.sessionId);
   const nowPlaying = useSpotifyStore((s) => s.nowPlaying);
   const premiumError = useSpotifyStore((s) => s.premiumError);
+  const isRateLimited = useSpotifyStore((s) => s.isRateLimited);
   const setPremiumError = useSpotifyStore((s) => s.setPremiumError);
   const setAccessToken = useSpotifyStore((s) => s.setAccessToken);
+  const setRateLimited = useSpotifyStore((s) => s.setRateLimited);
+  const clearRateLimited = useSpotifyStore((s) => s.clearRateLimited);
   const updateIsPlaying = useSpotifyStore((s) => s.updateIsPlaying);
   const requestPoll = useSpotifyStore((s) => s.requestPoll);
   const logout = useSpotifyStore((s) => s.logout);
   const [loading, setLoading] = useState(false);
+  const rateLimitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isConnected = !!accessToken;
-  const isDisabled = !isConnected || premiumError || loading;
+  const isDisabled = !isConnected || premiumError || loading || isRateLimited;
 
   const handleAction = useCallback(
     async (action: 'play' | 'pause' | 'next' | 'previous') => {
@@ -34,7 +39,17 @@ export function PlaybackControls() {
         }
         requestPoll();
       } catch (err) {
-        if (err instanceof PremiumRequiredError) {
+        if (err instanceof RateLimitedError) {
+          const retryAfterMs = err.retryAfterSeconds * 1000;
+          setRateLimited(retryAfterMs);
+          if (rateLimitTimerRef.current) {
+            clearTimeout(rateLimitTimerRef.current);
+          }
+          rateLimitTimerRef.current = setTimeout(() => {
+            clearRateLimited();
+            rateLimitTimerRef.current = null;
+          }, retryAfterMs);
+        } else if (err instanceof PremiumRequiredError) {
           setPremiumError(true);
         } else if (err instanceof TokenExpiredError) {
           try {
@@ -53,14 +68,26 @@ export function PlaybackControls() {
         setLoading(false);
       }
     },
-    [accessToken, sessionId, setPremiumError, setAccessToken, updateIsPlaying, requestPoll, logout],
+    [
+      accessToken,
+      sessionId,
+      setPremiumError,
+      setAccessToken,
+      setRateLimited,
+      clearRateLimited,
+      updateIsPlaying,
+      requestPoll,
+      logout,
+    ],
   );
 
   const tooltipText = !isConnected
     ? 'Connect Spotify to use playback controls'
     : premiumError
       ? 'Spotify Premium required for playback controls'
-      : undefined;
+      : isRateLimited
+        ? 'Spotify rate limited — please wait'
+        : undefined;
 
   return (
     <div className="flex items-center gap-1" title={tooltipText}>

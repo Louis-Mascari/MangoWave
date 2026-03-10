@@ -10,6 +10,8 @@ describe('useSpotifyStore', () => {
       user: null,
       nowPlaying: null,
       premiumError: false,
+      isRateLimited: false,
+      rateLimitResetsAt: null,
       pollRequestedAt: 0,
     });
   });
@@ -128,5 +130,28 @@ describe('useSpotifyStore', () => {
     expect(useSpotifyStore.getState().pollRequestedAt).toBe(0);
     useSpotifyStore.getState().requestPoll();
     expect(useSpotifyStore.getState().pollRequestedAt).toBeGreaterThan(0);
+  });
+
+  it('setRateLimited sets isRateLimited and rateLimitResetsAt', () => {
+    useSpotifyStore.getState().setRateLimited(5000);
+    const state = useSpotifyStore.getState();
+    expect(state.isRateLimited).toBe(true);
+    expect(state.rateLimitResetsAt).toBeGreaterThan(Date.now() - 100);
+  });
+
+  it('clearRateLimited resets rate limit state', () => {
+    useSpotifyStore.getState().setRateLimited(5000);
+    useSpotifyStore.getState().clearRateLimited();
+    const state = useSpotifyStore.getState();
+    expect(state.isRateLimited).toBe(false);
+    expect(state.rateLimitResetsAt).toBeNull();
+  });
+
+  it('logout clears rate limit state', () => {
+    useSpotifyStore.getState().setRateLimited(5000);
+    useSpotifyStore.getState().logout();
+    const state = useSpotifyStore.getState();
+    expect(state.isRateLimited).toBe(false);
+    expect(state.rateLimitResetsAt).toBeNull();
   });
 });

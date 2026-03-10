@@ -19,6 +19,14 @@ vi.mock('../../services/spotifyApi.ts', () => ({
       this.name = 'TokenExpiredError';
     }
   },
+  RateLimitedError: class extends Error {
+    retryAfterSeconds: number;
+    constructor(retryAfterSeconds: number) {
+      super(`Rate limited — retry after ${retryAfterSeconds}s`);
+      this.name = 'RateLimitedError';
+      this.retryAfterSeconds = retryAfterSeconds;
+    }
+  },
 }));
 
 import { controlPlayback } from '../../services/spotifyApi.ts';
@@ -31,6 +39,8 @@ describe('PlaybackControls', () => {
       sessionId: null,
       nowPlaying: null,
       premiumError: false,
+      isRateLimited: false,
+      rateLimitResetsAt: null,
       pollRequestedAt: 0,
     });
   });
@@ -126,5 +136,18 @@ describe('PlaybackControls', () => {
     await user.click(screen.getByLabelText('Next track'));
 
     expect(useSpotifyStore.getState().pollRequestedAt).toBeGreaterThan(0);
+  });
+
+  it('disables buttons when rate limited', () => {
+    useSpotifyStore.setState({
+      accessToken: 'at_123',
+      sessionId: 'sess_abc',
+      isRateLimited: true,
+      rateLimitResetsAt: Date.now() + 5000,
+    });
+    render(<PlaybackControls />);
+
+    const buttons = screen.getAllByRole('button');
+    buttons.forEach((btn) => expect(btn).toBeDisabled());
   });
 });

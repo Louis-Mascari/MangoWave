@@ -14,6 +14,7 @@ import { NowPlaying } from './components/NowPlaying.tsx';
 import { StartScreen } from './components/StartScreen.tsx';
 import { ShortcutOverlay } from './components/ShortcutOverlay.tsx';
 import { LaunchAnimation } from './components/LaunchAnimation.tsx';
+import { RateLimitToast } from './components/RateLimitToast.tsx';
 import { useSettingsStore } from './store/useSettingsStore.ts';
 import { useSpotifyStore } from './store/useSpotifyStore.ts';
 import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
@@ -211,6 +212,7 @@ function MainApp() {
               {presetNameDisplay !== 'off' && (
                 <PresetNotification message={currentPreset} mode={presetNameDisplay} />
               )}
+              <RateLimitToast />
               <NowPlaying visible={showNowPlaying} songInfoDisplay={songInfoDisplay} />
               <ControlBar
                 onNextPreset={handleNextPreset}

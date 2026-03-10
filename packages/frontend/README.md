@@ -1,6 +1,6 @@
 # @mangowave/frontend
 
-The MangoWave visualizer app — a React 19 + Vite 7 + TypeScript SPA that captures audio and renders real-time MilkDrop-style visuals via butterchurn.
+The MangoWave visualizer app — a React 19 + Vite 7 + TypeScript SPA that plays local files, captures system audio, or listens via microphone, rendering real-time MilkDrop-style visuals via butterchurn.
 
 ## Development
 
@@ -67,6 +67,8 @@ Zustand with `localStorage` persistence. Key sections:
 | `transitionTime`    | number (seconds)                       | 2.0               |
 
 Blocked and favorited presets are mutually exclusive.
+
+`useMediaPlayerStore` manages local file playback state (queue, current track, shuffle history, repeat mode). Not persisted — `File` objects can't survive page reload.
 
 ## Environment Variables
 

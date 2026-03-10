@@ -6,7 +6,7 @@
 
 <p align="center">
   Browser-based audio-reactive visualizer inspired by Winamp/MilkDrop.<br>
-  Captures system or tab audio via <code>getDisplayMedia</code>, feeds real-time FFT data into
+  Plays local files, captures system audio, or listens via microphone — feeds real-time FFT data into
   <a href="https://github.com/jberg/butterchurn">butterchurn</a> (a WebGL 2 MilkDrop port) with 555 presets.
 </p>
 
@@ -25,14 +25,13 @@
 - **Preset browser** with search, favorites, and blocking
 - **Autopilot** auto-cycles presets on a configurable interval (5-120s)
 - **Keyboard shortcuts** for preset navigation, fullscreen, favorites, and more
-- **Optional Spotify integration** for Now Playing metadata and playback controls
-- **BYOC Spotify** — bring your own Client ID via PKCE auth to bypass app user limits
+- **Optional Spotify integration** for Now Playing metadata and playback controls (bring your own Client ID via PKCE — Spotify limits each app key to 5 users)
 - **Configurable performance** — FPS cap, resolution scaling, FFT size, smoothing
 - **Zero install** — runs entirely in the browser, no extensions needed
 
 ## Architecture
 
-The core visualizer is **100% client-side**. Audio capture, rendering, EQ, presets, and all settings run in the browser with zero backend calls.
+The core visualizer is **100% client-side**. Audio sources (system capture, local files, microphone), rendering, EQ, presets, and all settings run in the browser with zero backend calls.
 
 The backend only serves **optional Spotify integration** — 4 Lambda endpoints behind API Gateway handle OAuth token exchange, token refresh, and settings sync to DynamoDB.
 

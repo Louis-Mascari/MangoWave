@@ -3,3 +3,37 @@
 body {
   margin: 0;
 }
+
+/* StartScreen hover effects */
+.start-logo {
+  filter: drop-shadow(0 0 48px rgba(255, 140, 50, 0.35));
+  transition: filter 0.3s;
+}
+.start-logo:hover {
+  filter: drop-shadow(0 0 64px rgba(255, 140, 50, 0.5));
+}
+
+.start-btn {
+  background: linear-gradient(135deg, #ff8c32, #e050e0);
+  box-shadow: 0 4px 28px rgba(255, 140, 50, 0.3);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.start-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 40px rgba(255, 140, 50, 0.45);
+}
+
+.spotify-btn {
+  transition:
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+.spotify-btn:hover {
+  box-shadow: 0 4px 24px rgba(29, 185, 84, 0.35);
+}
+
+.spotify-disconnect:hover {
+  box-shadow: 0 2px 16px rgba(29, 185, 84, 0.3);
+}

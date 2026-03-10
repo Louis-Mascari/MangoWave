@@ -1,80 +1,87 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { useSpotifyStore } from '../store/useSpotifyStore.ts';
+import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
+
+export interface NowPlayingTrackInfo {
+  title: string;
+  artist: string;
+  albumName: string;
+  albumArtUrl: string | null;
+}
 
 interface NowPlayingProps {
   visible: boolean;
   songInfoDisplay: 'off' | 'always' | number;
+  track: NowPlayingTrackInfo | null;
 }
 
-/**
- * Subscribes to store changes to derive auto-show state without
- * calling setState inside an effect (avoids react-hooks/set-state-in-effect).
- */
-function useAutoShow(songInfoDisplay: 'off' | 'always' | number) {
-  const [autoShow, setAutoShow] = useState(false);
-  const prevTrackKeyRef = useRef<string | null>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+interface AutoShowStore {
+  autoShow: boolean;
+  prevTrackKey: string | null;
+  timer: ReturnType<typeof setTimeout> | null;
+  listeners: Set<() => void>;
+}
 
-  // Subscribe to nowPlaying changes via useSyncExternalStore to
-  // derive the trackKey and trigger auto-show from subscription callback
-  const trackKey = useSyncExternalStore(
-    (onStoreChange) => {
-      return useSpotifyStore.subscribe((state, prevState) => {
-        const newKey = state.nowPlaying
-          ? `${state.nowPlaying.title}|${state.nowPlaying.artist}`
-          : null;
-        const oldKey = prevState.nowPlaying
-          ? `${prevState.nowPlaying.title}|${prevState.nowPlaying.artist}`
-          : null;
+function useAutoShow(
+  track: NowPlayingTrackInfo | null,
+  songInfoDisplay: 'off' | 'always' | number,
+) {
+  const storeRef = useRef<AutoShowStore>({
+    autoShow: false,
+    prevTrackKey: null,
+    timer: null,
+    listeners: new Set(),
+  });
 
-        if (newKey && newKey !== oldKey && songInfoDisplay !== 'off') {
-          // Clear any existing timer
-          if (timerRef.current) {
-            clearTimeout(timerRef.current);
-            timerRef.current = null;
-          }
+  const trackKey = track ? `${track.title}|${track.artist}` : null;
 
-          setAutoShow(true);
+  const subscribe = useCallback((listener: () => void) => {
+    storeRef.current.listeners.add(listener);
+    return () => {
+      storeRef.current.listeners.delete(listener);
+    };
+  }, []);
 
-          if (typeof songInfoDisplay === 'number') {
-            timerRef.current = setTimeout(() => {
-              setAutoShow(false);
-              timerRef.current = null;
-            }, songInfoDisplay * 1000);
-          }
-        }
+  const getSnapshot = useCallback(() => storeRef.current.autoShow, []);
 
-        onStoreChange();
-      });
-    },
-    () => {
-      const np = useSpotifyStore.getState().nowPlaying;
-      return np ? `${np.title}|${np.artist}` : null;
-    },
-  );
-
-  // Track initial mount — set prevTrackKeyRef without triggering auto-show
   useEffect(() => {
-    prevTrackKeyRef.current = trackKey;
-  }, [trackKey]);
+    const store = storeRef.current;
+    if (!trackKey || trackKey === store.prevTrackKey || songInfoDisplay === 'off') {
+      store.prevTrackKey = trackKey;
+      return;
+    }
 
-  // Clean up timer on unmount
+    store.prevTrackKey = trackKey;
+
+    if (store.timer) {
+      clearTimeout(store.timer);
+      store.timer = null;
+    }
+
+    store.autoShow = true;
+    store.listeners.forEach((l) => l());
+
+    if (typeof songInfoDisplay === 'number') {
+      store.timer = setTimeout(() => {
+        store.autoShow = false;
+        store.timer = null;
+        store.listeners.forEach((l) => l());
+      }, songInfoDisplay * 1000);
+    }
+  }, [trackKey, songInfoDisplay]);
+
   useEffect(() => {
     return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
+      if (storeRef.current.timer) {
+        clearTimeout(storeRef.current.timer);
       }
     };
   }, []);
 
-  return autoShow;
+  return useSyncExternalStore(subscribe, getSnapshot);
 }
 
-export function NowPlaying({ visible, songInfoDisplay }: NowPlayingProps) {
-  const nowPlaying = useSpotifyStore((s) => s.nowPlaying);
-  const autoShow = useAutoShow(songInfoDisplay);
-
-  const shouldShow = (visible || autoShow) && nowPlaying;
+export function NowPlaying({ visible, songInfoDisplay, track }: NowPlayingProps) {
+  const autoShow = useAutoShow(track, songInfoDisplay);
+  const shouldShow = (visible || autoShow) && track;
 
   return (
     <div
@@ -82,19 +89,19 @@ export function NowPlaying({ visible, songInfoDisplay }: NowPlayingProps) {
         shouldShow ? 'opacity-100' : 'opacity-0'
       }`}
     >
-      {nowPlaying && (
+      {track && (
         <>
-          {nowPlaying.albumArtUrl && (
+          {track.albumArtUrl && (
             <img
-              src={nowPlaying.albumArtUrl}
-              alt={nowPlaying.albumName}
+              src={track.albumArtUrl}
+              alt={track.albumName}
               className="h-14 w-14 rounded shadow-lg"
             />
           )}
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-white">{nowPlaying.title}</p>
-            <p className="truncate text-xs text-white/70">{nowPlaying.artist}</p>
-            <p className="truncate text-xs text-white/50">{nowPlaying.albumName}</p>
+            <p className="truncate text-sm font-semibold text-white">{track.title}</p>
+            <p className="truncate text-xs text-white/70">{track.artist}</p>
+            {track.albumName && <p className="truncate text-xs text-white/50">{track.albumName}</p>}
           </div>
         </>
       )}

@@ -2,6 +2,17 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ControlBar } from '../ControlBar.tsx';
+import type { PlaybackAdapter } from '../PlaybackControls.tsx';
+
+const noneAdapter: PlaybackAdapter = {
+  source: 'none',
+  isPlaying: false,
+  canControl: false,
+  onPlay: vi.fn(),
+  onPause: vi.fn(),
+  onNext: vi.fn(),
+  onPrevious: vi.fn(),
+};
 
 const defaultProps = {
   onNextPreset: vi.fn(),
@@ -20,6 +31,7 @@ const defaultProps = {
   isBlocked: false,
   onToggleFavorite: vi.fn(),
   onToggleBlock: vi.fn(),
+  playbackAdapter: noneAdapter,
 };
 
 describe('ControlBar', () => {

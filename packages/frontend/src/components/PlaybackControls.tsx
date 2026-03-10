@@ -1,111 +1,34 @@
-import { useCallback, useRef, useState } from 'react';
-import { useSpotifyStore } from '../store/useSpotifyStore.ts';
-import {
-  controlPlayback,
-  PremiumRequiredError,
-  TokenExpiredError,
-  RateLimitedError,
-  refreshToken,
-} from '../services/spotifyApi.ts';
+export interface PlaybackAdapter {
+  source: 'spotify' | 'local' | 'mic' | 'none';
+  isPlaying: boolean;
+  canControl: boolean;
+  onPlay: () => void;
+  onPause: () => void;
+  onNext: () => void;
+  onPrevious: () => void;
+  tooltip?: string;
+}
 
-export function PlaybackControls() {
-  const accessToken = useSpotifyStore((s) => s.accessToken);
-  const sessionId = useSpotifyStore((s) => s.sessionId);
-  const nowPlaying = useSpotifyStore((s) => s.nowPlaying);
-  const premiumError = useSpotifyStore((s) => s.premiumError);
-  const isRateLimited = useSpotifyStore((s) => s.isRateLimited);
-  const setPremiumError = useSpotifyStore((s) => s.setPremiumError);
-  const setAccessToken = useSpotifyStore((s) => s.setAccessToken);
-  const setRateLimited = useSpotifyStore((s) => s.setRateLimited);
-  const clearRateLimited = useSpotifyStore((s) => s.clearRateLimited);
-  const updateIsPlaying = useSpotifyStore((s) => s.updateIsPlaying);
-  const requestPoll = useSpotifyStore((s) => s.requestPoll);
-  const logout = useSpotifyStore((s) => s.logout);
-  const [loading, setLoading] = useState(false);
-  const rateLimitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+interface PlaybackControlsProps {
+  adapter: PlaybackAdapter;
+}
 
-  const isConnected = !!accessToken;
-  const isDisabled = !isConnected || premiumError || loading || isRateLimited;
-
-  const handleAction = useCallback(
-    async (action: 'play' | 'pause' | 'next' | 'previous') => {
-      if (!accessToken || !sessionId) return;
-      setLoading(true);
-
-      try {
-        await controlPlayback(accessToken, action);
-        if (action === 'play' || action === 'pause') {
-          updateIsPlaying(action === 'play');
-        }
-        requestPoll();
-      } catch (err) {
-        if (err instanceof RateLimitedError) {
-          const retryAfterMs = err.retryAfterSeconds * 1000;
-          setRateLimited(retryAfterMs);
-          if (rateLimitTimerRef.current) {
-            clearTimeout(rateLimitTimerRef.current);
-          }
-          rateLimitTimerRef.current = setTimeout(() => {
-            clearRateLimited();
-            rateLimitTimerRef.current = null;
-          }, retryAfterMs);
-        } else if (err instanceof PremiumRequiredError) {
-          setPremiumError(true);
-        } else if (err instanceof TokenExpiredError) {
-          try {
-            const result = await refreshToken(sessionId);
-            setAccessToken(result.accessToken, result.expiresIn);
-            await controlPlayback(result.accessToken, action);
-            if (action === 'play' || action === 'pause') {
-              updateIsPlaying(action === 'play');
-            }
-            requestPoll();
-          } catch {
-            logout();
-          }
-        }
-      } finally {
-        setLoading(false);
-      }
-    },
-    [
-      accessToken,
-      sessionId,
-      setPremiumError,
-      setAccessToken,
-      setRateLimited,
-      clearRateLimited,
-      updateIsPlaying,
-      requestPoll,
-      logout,
-    ],
-  );
-
-  const tooltipText = !isConnected
-    ? 'Connect Spotify to use playback controls'
-    : premiumError
-      ? 'Spotify Premium required for playback controls'
-      : isRateLimited
-        ? 'Spotify rate limited — please wait'
-        : undefined;
+export function PlaybackControls({ adapter }: PlaybackControlsProps) {
+  const isDisabled = !adapter.canControl;
 
   return (
-    <div className="flex items-center gap-1" title={tooltipText}>
-      <PlaybackButton
-        onClick={() => handleAction('previous')}
-        disabled={isDisabled}
-        label="Previous track"
-      >
+    <div className="flex items-center gap-1" title={adapter.tooltip}>
+      <PlaybackButton onClick={adapter.onPrevious} disabled={isDisabled} label="Previous track">
         ⏮
       </PlaybackButton>
       <PlaybackButton
-        onClick={() => handleAction(nowPlaying?.isPlaying ? 'pause' : 'play')}
+        onClick={adapter.isPlaying ? adapter.onPause : adapter.onPlay}
         disabled={isDisabled}
-        label={nowPlaying?.isPlaying ? 'Pause' : 'Play'}
+        label={adapter.isPlaying ? 'Pause' : 'Play'}
       >
-        {nowPlaying?.isPlaying ? '⏸' : '▶'}
+        {adapter.isPlaying ? '⏸' : '▶'}
       </PlaybackButton>
-      <PlaybackButton onClick={() => handleAction('next')} disabled={isDisabled} label="Next track">
+      <PlaybackButton onClick={adapter.onNext} disabled={isDisabled} label="Next track">
         ⏭
       </PlaybackButton>
     </div>

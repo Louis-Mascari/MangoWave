@@ -1,153 +1,99 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PlaybackControls } from '../PlaybackControls.tsx';
-import { useSpotifyStore } from '../../store/useSpotifyStore.ts';
+import type { PlaybackAdapter } from '../PlaybackControls.tsx';
 
-vi.mock('../../services/spotifyApi.ts', () => ({
-  controlPlayback: vi.fn(),
-  refreshToken: vi.fn(),
-  PremiumRequiredError: class extends Error {
-    constructor() {
-      super('Premium required');
-      this.name = 'PremiumRequiredError';
-    }
-  },
-  TokenExpiredError: class extends Error {
-    constructor() {
-      super('Token expired');
-      this.name = 'TokenExpiredError';
-    }
-  },
-  RateLimitedError: class extends Error {
-    retryAfterSeconds: number;
-    constructor(retryAfterSeconds: number) {
-      super(`Rate limited — retry after ${retryAfterSeconds}s`);
-      this.name = 'RateLimitedError';
-      this.retryAfterSeconds = retryAfterSeconds;
-    }
-  },
-}));
-
-import { controlPlayback } from '../../services/spotifyApi.ts';
+function makeAdapter(overrides: Partial<PlaybackAdapter> = {}): PlaybackAdapter {
+  return {
+    source: 'none',
+    isPlaying: false,
+    canControl: false,
+    onPlay: vi.fn(),
+    onPause: vi.fn(),
+    onNext: vi.fn(),
+    onPrevious: vi.fn(),
+    ...overrides,
+  };
+}
 
 describe('PlaybackControls', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    useSpotifyStore.setState({
-      accessToken: null,
-      sessionId: null,
-      nowPlaying: null,
-      premiumError: false,
-      isRateLimited: false,
-      rateLimitResetsAt: null,
-      pollRequestedAt: 0,
-    });
-  });
-
-  it('renders disabled buttons when not connected', () => {
-    render(<PlaybackControls />);
+  it('renders disabled buttons when canControl is false', () => {
+    render(<PlaybackControls adapter={makeAdapter()} />);
 
     const buttons = screen.getAllByRole('button');
     expect(buttons).toHaveLength(3);
     buttons.forEach((btn) => expect(btn).toBeDisabled());
   });
 
-  it('renders enabled buttons when connected', () => {
-    useSpotifyStore.setState({ accessToken: 'at_123', sessionId: 'sess_abc' });
-    render(<PlaybackControls />);
+  it('renders enabled buttons when canControl is true', () => {
+    render(<PlaybackControls adapter={makeAdapter({ canControl: true })} />);
 
     const buttons = screen.getAllByRole('button');
     buttons.forEach((btn) => expect(btn).toBeEnabled());
   });
 
-  it('calls controlPlayback with "next" when next is clicked', async () => {
+  it('calls onNext when next is clicked', async () => {
     const user = userEvent.setup();
-    useSpotifyStore.setState({ accessToken: 'at_123', sessionId: 'sess_abc' });
-    vi.mocked(controlPlayback).mockResolvedValue(undefined);
+    const adapter = makeAdapter({ canControl: true });
+    render(<PlaybackControls adapter={adapter} />);
 
-    render(<PlaybackControls />);
     await user.click(screen.getByLabelText('Next track'));
-
-    expect(controlPlayback).toHaveBeenCalledWith('at_123', 'next');
+    expect(adapter.onNext).toHaveBeenCalledOnce();
   });
 
-  it('shows play button when nothing is playing', () => {
-    useSpotifyStore.setState({ accessToken: 'at_123', sessionId: 'sess_abc', nowPlaying: null });
-    render(<PlaybackControls />);
+  it('calls onPrevious when previous is clicked', async () => {
+    const user = userEvent.setup();
+    const adapter = makeAdapter({ canControl: true });
+    render(<PlaybackControls adapter={adapter} />);
+
+    await user.click(screen.getByLabelText('Previous track'));
+    expect(adapter.onPrevious).toHaveBeenCalledOnce();
+  });
+
+  it('shows play button when not playing', () => {
+    render(<PlaybackControls adapter={makeAdapter({ canControl: true, isPlaying: false })} />);
     expect(screen.getByLabelText('Play')).toBeInTheDocument();
   });
 
-  it('shows pause button when track is playing', () => {
-    useSpotifyStore.setState({
-      accessToken: 'at_123',
-      sessionId: 'sess_abc',
-      nowPlaying: {
-        title: 'Song',
-        artist: 'Artist',
-        albumName: 'Album',
-        albumArtUrl: null,
-        isPlaying: true,
-        progressMs: 0,
-        durationMs: 300000,
-      },
-    });
-    render(<PlaybackControls />);
+  it('shows pause button when playing', () => {
+    render(<PlaybackControls adapter={makeAdapter({ canControl: true, isPlaying: true })} />);
     expect(screen.getByLabelText('Pause')).toBeInTheDocument();
   });
 
-  it('disables buttons when premiumError is true', () => {
-    useSpotifyStore.setState({ accessToken: 'at_123', sessionId: 'sess_abc', premiumError: true });
-    render(<PlaybackControls />);
+  it('calls onPlay when play button clicked', async () => {
+    const user = userEvent.setup();
+    const adapter = makeAdapter({ canControl: true, isPlaying: false });
+    render(<PlaybackControls adapter={adapter} />);
 
-    const buttons = screen.getAllByRole('button');
-    buttons.forEach((btn) => expect(btn).toBeDisabled());
+    await user.click(screen.getByLabelText('Play'));
+    expect(adapter.onPlay).toHaveBeenCalledOnce();
   });
 
-  it('optimistically updates isPlaying on pause', async () => {
+  it('calls onPause when pause button clicked', async () => {
     const user = userEvent.setup();
-    useSpotifyStore.setState({
-      accessToken: 'at_123',
-      sessionId: 'sess_abc',
-      nowPlaying: {
-        title: 'Song',
-        artist: 'Artist',
-        albumName: 'Album',
-        albumArtUrl: null,
-        isPlaying: true,
-        progressMs: 0,
-        durationMs: 300000,
-      },
-    });
-    vi.mocked(controlPlayback).mockResolvedValue(undefined);
+    const adapter = makeAdapter({ canControl: true, isPlaying: true });
+    render(<PlaybackControls adapter={adapter} />);
 
-    render(<PlaybackControls />);
     await user.click(screen.getByLabelText('Pause'));
-
-    expect(useSpotifyStore.getState().nowPlaying?.isPlaying).toBe(false);
+    expect(adapter.onPause).toHaveBeenCalledOnce();
   });
 
-  it('requests poll after successful action', async () => {
-    const user = userEvent.setup();
-    useSpotifyStore.setState({ accessToken: 'at_123', sessionId: 'sess_abc' });
-    vi.mocked(controlPlayback).mockResolvedValue(undefined);
-
-    render(<PlaybackControls />);
-    await user.click(screen.getByLabelText('Next track'));
-
-    expect(useSpotifyStore.getState().pollRequestedAt).toBeGreaterThan(0);
+  it('shows tooltip when provided', () => {
+    const { container } = render(
+      <PlaybackControls adapter={makeAdapter({ tooltip: 'Rate limited' })} />,
+    );
+    expect(container.firstChild).toHaveAttribute('title', 'Rate limited');
   });
 
-  it('disables buttons when rate limited', () => {
-    useSpotifyStore.setState({
-      accessToken: 'at_123',
-      sessionId: 'sess_abc',
-      isRateLimited: true,
-      rateLimitResetsAt: Date.now() + 5000,
-    });
-    render(<PlaybackControls />);
-
-    const buttons = screen.getAllByRole('button');
-    buttons.forEach((btn) => expect(btn).toBeDisabled());
+  it('renders correctly for each source type', () => {
+    for (const source of ['spotify', 'local', 'mic', 'none'] as const) {
+      const { unmount } = render(
+        <PlaybackControls adapter={makeAdapter({ source, canControl: source !== 'none' })} />,
+      );
+      const buttons = screen.getAllByRole('button');
+      expect(buttons).toHaveLength(3);
+      unmount();
+    }
   });
 });

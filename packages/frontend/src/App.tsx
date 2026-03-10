@@ -13,6 +13,7 @@ import { ControlBar } from './components/ControlBar.tsx';
 import type { PanelView } from './components/ControlBar.tsx';
 import { PresetNotification } from './components/PresetNotification.tsx';
 import { NowPlaying } from './components/NowPlaying.tsx';
+import type { NowPlayingTrackInfo } from './components/NowPlaying.tsx';
 import { StartScreen } from './components/StartScreen.tsx';
 import { ShortcutOverlay } from './components/ShortcutOverlay.tsx';
 import { LaunchAnimation } from './components/LaunchAnimation.tsx';
@@ -20,6 +21,8 @@ import { RateLimitToast } from './components/RateLimitToast.tsx';
 import { useUnlockCheck } from './hooks/useUnlockCheck.ts';
 import { useSettingsStore } from './store/useSettingsStore.ts';
 import { useSpotifyStore } from './store/useSpotifyStore.ts';
+import { controlPlayback, RateLimitedError } from './services/spotifyApi.ts';
+import type { PlaybackAdapter } from './components/PlaybackControls.tsx';
 import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
 
@@ -207,6 +210,121 @@ function MainApp() {
     }
   }, [currentPreset, toggleBlockPreset, handleNextPreset]);
 
+  // --- Playback adapter (unified controls for local / spotify / mic / none) ---
+  const spotifyNowPlaying = useSpotifyStore((s) => s.nowPlaying);
+  const premiumError = useSpotifyStore((s) => s.premiumError);
+  const isRateLimited = useSpotifyStore((s) => s.isRateLimited);
+  const updateIsPlaying = useSpotifyStore((s) => s.updateIsPlaying);
+  const requestPoll = useSpotifyStore((s) => s.requestPoll);
+  const setRateLimited = useSpotifyStore((s) => s.setRateLimited);
+  const clearRateLimited = useSpotifyStore((s) => s.clearRateLimited);
+
+  const localIsPlaying = useMediaPlayerStore((s) => s.isPlaying);
+  const localCurrentTrack = useMediaPlayerStore((s) => s.tracks[s.currentTrackIndex] ?? null);
+
+  const handleSpotifyAction = useCallback(
+    async (action: 'play' | 'pause' | 'next' | 'previous') => {
+      const token = useSpotifyStore.getState().accessToken;
+      if (!token) return;
+      if (action === 'play') updateIsPlaying(true);
+      else if (action === 'pause') updateIsPlaying(false);
+      try {
+        await controlPlayback(token, action);
+        requestPoll();
+      } catch (err) {
+        if (err instanceof RateLimitedError) {
+          setRateLimited(err.retryAfterSeconds * 1000);
+          setTimeout(() => clearRateLimited(), err.retryAfterSeconds * 1000);
+        }
+      }
+    },
+    [updateIsPlaying, requestPoll, setRateLimited, clearRateLimited],
+  );
+
+  const playbackAdapter: PlaybackAdapter = useMemo(() => {
+    if (local.isActive) {
+      return {
+        source: 'local',
+        isPlaying: localIsPlaying,
+        canControl: true,
+        onPlay: local.play,
+        onPause: local.pause,
+        onNext: local.next,
+        onPrevious: local.previous,
+      };
+    }
+    if (capture.captureSource === 'mic') {
+      return {
+        source: 'mic',
+        isPlaying: false,
+        canControl: false,
+        onPlay: () => {},
+        onPause: () => {},
+        onNext: () => {},
+        onPrevious: () => {},
+        tooltip: 'Microphone input — no playback controls',
+      };
+    }
+    if (isSpotifyConnected) {
+      return {
+        source: 'spotify',
+        isPlaying: spotifyNowPlaying?.isPlaying ?? false,
+        canControl: !premiumError && !isRateLimited,
+        onPlay: () => handleSpotifyAction('play'),
+        onPause: () => handleSpotifyAction('pause'),
+        onNext: () => handleSpotifyAction('next'),
+        onPrevious: () => handleSpotifyAction('previous'),
+        tooltip: premiumError
+          ? 'Spotify Premium required for playback controls'
+          : isRateLimited
+            ? 'Spotify rate limited'
+            : undefined,
+      };
+    }
+    return {
+      source: 'none',
+      isPlaying: false,
+      canControl: false,
+      onPlay: () => {},
+      onPause: () => {},
+      onNext: () => {},
+      onPrevious: () => {},
+    };
+  }, [
+    local.isActive,
+    local.play,
+    local.pause,
+    local.next,
+    local.previous,
+    localIsPlaying,
+    capture.captureSource,
+    isSpotifyConnected,
+    spotifyNowPlaying?.isPlaying,
+    premiumError,
+    isRateLimited,
+    handleSpotifyAction,
+  ]);
+
+  const nowPlayingTrack: NowPlayingTrackInfo | null = useMemo(() => {
+    if (local.isActive && localCurrentTrack) {
+      return {
+        title: localCurrentTrack.name,
+        artist: '',
+        albumName: '',
+        albumArtUrl: null,
+      };
+    }
+    if (spotifyNowPlaying) {
+      return {
+        title: spotifyNowPlaying.title,
+        artist: spotifyNowPlaying.artist,
+        albumName: spotifyNowPlaying.albumName,
+        albumArtUrl: spotifyNowPlaying.albumArtUrl,
+      };
+    }
+    return null;
+  }, [local.isActive, localCurrentTrack, spotifyNowPlaying]);
+
   const { showShortcutOverlay, toggleShortcutOverlay } = useKeyboardShortcuts({
     onNextPreset: handleNextPreset,
     onToggleFullscreen: handleToggleFullscreen,
@@ -248,7 +366,11 @@ function MainApp() {
                 <PresetNotification message={currentPreset} mode={presetNameDisplay} />
               )}
               <RateLimitToast />
-              <NowPlaying visible={showNowPlaying} songInfoDisplay={songInfoDisplay} />
+              <NowPlaying
+                visible={showNowPlaying}
+                songInfoDisplay={songInfoDisplay}
+                track={nowPlayingTrack}
+              />
               <ControlBar
                 onNextPreset={handleNextPreset}
                 onSelectPreset={handleSelectPreset}
@@ -267,6 +389,7 @@ function MainApp() {
                 onToggleFavorite={handleToggleFavorite}
                 onToggleBlock={handleToggleBlock}
                 onAddLocalFiles={handleAddLocalFiles}
+                playbackAdapter={playbackAdapter}
               />
               <ShortcutOverlay visible={showShortcutOverlay} onClose={toggleShortcutOverlay} />
             </>

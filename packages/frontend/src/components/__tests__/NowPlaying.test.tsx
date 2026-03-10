@@ -1,22 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import { NowPlaying } from '../NowPlaying.tsx';
-import { useSpotifyStore } from '../../store/useSpotifyStore.ts';
+import type { NowPlayingTrackInfo } from '../NowPlaying.tsx';
 
-const track = {
+const track: NowPlayingTrackInfo = {
   title: 'Test Song',
   artist: 'Test Artist',
   albumName: 'Test Album',
   albumArtUrl: 'https://img.example.com/art.jpg',
-  isPlaying: true,
-  progressMs: 30000,
-  durationMs: 200000,
 };
 
 describe('NowPlaying', () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    useSpotifyStore.setState({ nowPlaying: null });
   });
 
   afterEach(() => {
@@ -24,21 +20,19 @@ describe('NowPlaying', () => {
   });
 
   it('is hidden when not visible and no auto-show', () => {
-    const { container } = render(<NowPlaying visible={false} songInfoDisplay={5} />);
+    const { container } = render(<NowPlaying visible={false} songInfoDisplay={5} track={null} />);
     const wrapper = container.firstChild as HTMLElement;
     expect(wrapper.className).toContain('opacity-0');
   });
 
   it('is hidden when visible but no track', () => {
-    const { container } = render(<NowPlaying visible={true} songInfoDisplay={5} />);
+    const { container } = render(<NowPlaying visible={true} songInfoDisplay={5} track={null} />);
     const wrapper = container.firstChild as HTMLElement;
     expect(wrapper.className).toContain('opacity-0');
   });
 
   it('renders track info when visible and track exists', () => {
-    useSpotifyStore.setState({ nowPlaying: track });
-
-    render(<NowPlaying visible={true} songInfoDisplay={5} />);
+    render(<NowPlaying visible={true} songInfoDisplay={5} track={track} />);
 
     expect(screen.getByText('Test Song')).toBeInTheDocument();
     expect(screen.getByText('Test Artist')).toBeInTheDocument();
@@ -50,59 +44,72 @@ describe('NowPlaying', () => {
   });
 
   it('auto-shows when track changes and songInfoDisplay is a number', () => {
-    const { container, rerender } = render(<NowPlaying visible={false} songInfoDisplay={5} />);
+    const { container, rerender } = render(
+      <NowPlaying visible={false} songInfoDisplay={5} track={null} />,
+    );
 
     // Set track — triggers auto-show
-    useSpotifyStore.setState({ nowPlaying: track });
-    rerender(<NowPlaying visible={false} songInfoDisplay={5} />);
+    rerender(<NowPlaying visible={false} songInfoDisplay={5} track={track} />);
 
     const wrapper = container.firstChild as HTMLElement;
     expect(wrapper.className).toContain('opacity-100');
   });
 
   it('auto-show fades after timeout', () => {
-    const { container, rerender } = render(<NowPlaying visible={false} songInfoDisplay={3} />);
+    const { container, rerender } = render(
+      <NowPlaying visible={false} songInfoDisplay={3} track={null} />,
+    );
 
-    useSpotifyStore.setState({ nowPlaying: track });
-    rerender(<NowPlaying visible={false} songInfoDisplay={3} />);
+    rerender(<NowPlaying visible={false} songInfoDisplay={3} track={track} />);
 
     expect((container.firstChild as HTMLElement).className).toContain('opacity-100');
 
     // Advance past timeout
     act(() => vi.advanceTimersByTime(3000));
-    rerender(<NowPlaying visible={false} songInfoDisplay={3} />);
+    rerender(<NowPlaying visible={false} songInfoDisplay={3} track={track} />);
 
     expect((container.firstChild as HTMLElement).className).toContain('opacity-0');
   });
 
   it('auto-show stays visible when songInfoDisplay is always', () => {
-    const { container, rerender } = render(<NowPlaying visible={false} songInfoDisplay="always" />);
+    const { container, rerender } = render(
+      <NowPlaying visible={false} songInfoDisplay="always" track={null} />,
+    );
 
-    useSpotifyStore.setState({ nowPlaying: track });
-    rerender(<NowPlaying visible={false} songInfoDisplay="always" />);
+    rerender(<NowPlaying visible={false} songInfoDisplay="always" track={track} />);
 
     expect((container.firstChild as HTMLElement).className).toContain('opacity-100');
 
     // No timeout — should stay visible
     act(() => vi.advanceTimersByTime(10000));
-    rerender(<NowPlaying visible={false} songInfoDisplay="always" />);
+    rerender(<NowPlaying visible={false} songInfoDisplay="always" track={track} />);
 
     expect((container.firstChild as HTMLElement).className).toContain('opacity-100');
   });
 
   it('does not auto-show when songInfoDisplay is off', () => {
-    const { container, rerender } = render(<NowPlaying visible={false} songInfoDisplay="off" />);
+    const { container, rerender } = render(
+      <NowPlaying visible={false} songInfoDisplay="off" track={null} />,
+    );
 
-    useSpotifyStore.setState({ nowPlaying: track });
-    rerender(<NowPlaying visible={false} songInfoDisplay="off" />);
+    rerender(<NowPlaying visible={false} songInfoDisplay="off" track={track} />);
 
     expect((container.firstChild as HTMLElement).className).toContain('opacity-0');
   });
 
   it('manual toggle still works independently of auto-show', () => {
-    useSpotifyStore.setState({ nowPlaying: track });
-
-    const { container } = render(<NowPlaying visible={true} songInfoDisplay="off" />);
+    const { container } = render(<NowPlaying visible={true} songInfoDisplay="off" track={track} />);
     expect((container.firstChild as HTMLElement).className).toContain('opacity-100');
+  });
+
+  it('displays local track with no artist/album', () => {
+    const localTrack: NowPlayingTrackInfo = {
+      title: 'my-song.mp3',
+      artist: '',
+      albumName: '',
+      albumArtUrl: null,
+    };
+    render(<NowPlaying visible={true} songInfoDisplay="always" track={localTrack} />);
+    expect(screen.getByText('my-song.mp3')).toBeInTheDocument();
   });
 });

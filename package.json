@@ -13,7 +13,8 @@
     "prepare": "husky",
     "lint": "npm run lint --workspaces --if-present",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "check": "prettier --check . && npm run lint && tsc -b packages/frontend --noEmit && npm test"
   },
   "lint-staged": {
     "packages/frontend/**/*.{ts,tsx}": [

@@ -4,6 +4,7 @@ import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { SettingsPanel } from './SettingsPanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
 import { PlaybackControls } from './PlaybackControls.tsx';
+import type { PlaybackAdapter } from './PlaybackControls.tsx';
 import { MediaPlaylist } from './MediaPlaylist.tsx';
 import { useMediaPlayerStore } from '../store/useMediaPlayerStore.ts';
 
@@ -27,6 +28,7 @@ interface ControlBarProps {
   onToggleFavorite: () => void;
   onToggleBlock: () => void;
   onAddLocalFiles?: (files: File[]) => void;
+  playbackAdapter: PlaybackAdapter;
 }
 
 export function ControlBar({
@@ -47,6 +49,7 @@ export function ControlBar({
   onToggleFavorite,
   onToggleBlock,
   onAddLocalFiles,
+  playbackAdapter,
 }: ControlBarProps) {
   const isIdle = useIdleTimer(3000, 5000);
   const accessToken = useSpotifyStore((s) => s.accessToken);
@@ -150,7 +153,7 @@ export function ControlBar({
         </div>
 
         <div className="flex items-center gap-2">
-          <PlaybackControls />
+          <PlaybackControls adapter={playbackAdapter} />
 
           {isSpotifyConnected ? (
             <>

@@ -6,32 +6,29 @@ AWS CDK v2 stack for MangoWave's backend infrastructure.
 
 ```bash
 npm run build          # tsc
-npm run test           # Jest (15 CDK template assertion tests)
+npm run test           # Jest (CDK template assertion tests)
 npx cdk synth          # Synthesize CloudFormation template
 npx cdk deploy -c alertEmail=<email>   # Deploy stack
 ```
 
 ## Resources
 
-| Resource           | Type             | Details                                                   |
+| Resource           | Type             | Description                                               |
 | ------------------ | ---------------- | --------------------------------------------------------- |
-| `MangoWave_Data`   | DynamoDB table   | PK: `USER#<spotify_id>`, SK: `PROFILE`                    |
+| DynamoDB table     | NoSQL database   | User profiles and settings                                |
 | 4 Lambda functions | Node.js handlers | auth-callback, auth-refresh, settings-save, settings-load |
-| HTTP API           | API Gateway v2   | Stage-level throttle: 20 burst, 10 rate/sec               |
-| CloudWatch alarms  | Per-Lambda + API | 3 errors/5min per Lambda, 5 5xx/5min for API              |
-| Access logging     | API Gateway      | Structured JSON, 1-month retention                        |
+| HTTP API           | API Gateway v2   | Stage-level throttling                                    |
+| CloudWatch alarms  | Per-Lambda + API | Error and 5xx monitoring                                  |
+| Access logging     | API Gateway      | Structured JSON logs                                      |
 | SNS topic          | Alerts           | All alarms notify via email                               |
-| Budget             | $1/month         | SNS alerts at 50% and 100%                                |
-| Budget kill-switch | IAM Deny policy  | Auto-attached to Lambda roles at 100% budget              |
-| SSM parameters     | Spotify secrets  | client-id, client-secret, redirect-uri                    |
+| Budget             | AWS Budgets      | Alerts and automated cost protection                      |
+| SSM parameters     | Spotify secrets  | OAuth credentials (encrypted)                             |
 | S3 bucket          | Frontend hosting | Private, CloudFront OAC                                   |
 | CloudFront         | CDN              | OAC to S3, host-based routing function                    |
 
 ## Cost Protection
 
-- **API Gateway throttling:** 20 burst, 10 sustained requests/sec (HTTP API v2 stage-level)
-- **Budget kill-switch:** At $1/month, a `BudgetsAction` auto-attaches an IAM Deny policy to all Lambda execution roles, blocking API and Lambda invocations
-- **No reserved concurrency** on Lambdas — new AWS accounts have a 10 unreserved minimum that conflicts with reservations across 4 functions
+API throttling, budget kill-switch, no reserved concurrency — see CDK stack for specifics.
 
 ## Stack Layout
 

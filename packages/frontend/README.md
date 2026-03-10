@@ -7,7 +7,7 @@ The MangoWave visualizer app — a React 19 + Vite 7 + TypeScript SPA that captu
 ```bash
 npm run dev        # Vite dev server at localhost:5173
 npm run build      # tsc -b && vite build
-npm run test       # Vitest (147 tests, jsdom)
+npm run test       # Vitest (jsdom)
 npm run test:watch # Vitest in watch mode
 npm run lint       # ESLint
 ```
@@ -80,5 +80,3 @@ All are optional — the app runs fully without them. Spotify integration requir
 - **butterchurn is untyped** — type declarations live in `src/types/butterchurn.d.ts`.
 - **`vite.config.ts`** imports `defineConfig` from `vitest/config` (not `vite`) to support the `test` property.
 - **555 presets** loaded from all butterchurn preset packs (base, Extra, Extra2, MD1, NonMinimal, Minimal).
-- **Cursor auto-hides** after 3s idle in fullscreen via `useHideCursor`.
-- **ControlBar panel state** is lifted to `App.tsx` so keyboard shortcuts can close panels.

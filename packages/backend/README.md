@@ -6,7 +6,7 @@ Lambda handlers for MangoWave's optional Spotify integration and cloud settings 
 
 ```bash
 npm run build   # tsc
-npm run test    # Vitest (17 tests)
+npm run test    # Vitest
 ```
 
 Handlers are deployed via CDK (see `infrastructure/`). No local server — test with Vitest.
@@ -27,11 +27,6 @@ Handlers are deployed via CDK (see `infrastructure/`). No local server — test 
 3. Frontend calls `POST /auth/callback` with the code
 4. Handler exchanges code for tokens via Spotify API, stores `sessionId -> {userId, refreshToken}` in DynamoDB
 5. Frontend uses access token, auto-refreshes via `POST /auth/refresh`
-
-## Infrastructure Dependencies
-
-- **DynamoDB table:** `MangoWave_Data` (PK: `USER#<spotify_id>`, SK: `PROFILE`)
-- **SSM parameters:** `/mangowave/spotify/client-id`, `/mangowave/spotify/client-secret`, `/mangowave/spotify/redirect-uri`
 
 ## Error Handling
 

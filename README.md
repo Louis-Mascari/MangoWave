@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="packages/landing/logo.png" alt="MangoWave logo" width="200">
+  <img src="packages/landing/images/logo.png" alt="MangoWave logo" width="200">
 </p>
 
 <h1 align="center">MangoWave</h1>
@@ -69,10 +69,10 @@ npm run dev -w packages/frontend
 # Development
 npm run dev -w packages/frontend     # Vite dev server (localhost:5173)
 
-# Testing (179 tests)
-npm run test -w packages/frontend    # 147 Vitest tests (jsdom)
-npm run test -w packages/backend     # 17 Vitest tests
-npm run test -w infrastructure       # 15 Jest tests (CDK assertions)
+# Testing
+npm run test -w packages/frontend    # Vitest (jsdom)
+npm run test -w packages/backend     # Vitest
+npm run test -w infrastructure       # Jest (CDK assertions)
 npm test                             # All workspaces
 
 # Linting & formatting

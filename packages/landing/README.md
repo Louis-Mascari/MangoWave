@@ -34,4 +34,4 @@ landing/
 
 ## Deployment
 
-The deploy workflow syncs `packages/landing/` to `s3://mangowave-frontend/landing/`. A CloudFront Function (`mangowave-host-router`) routes requests with `Host: mangowave.app` to the `/landing/` prefix in S3.
+Deployed via GitHub Actions alongside the main app. CloudFront routes `mangowave.app` requests to landing page assets.

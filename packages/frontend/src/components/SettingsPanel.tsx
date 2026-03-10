@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { EQ_BANDS } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
+import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { buildPkceAuthUrl } from '../services/spotifyPkce.ts';
 import { Tooltip } from './Tooltip.tsx';
 
@@ -405,6 +406,7 @@ function SpotifyTab() {
   const accessToken = useSpotifyStore((s) => s.accessToken);
   const sessionId = useSpotifyStore((s) => s.sessionId);
   const byocClientId = useSpotifyStore((s) => s.byocClientId);
+  const isSpotifyUnlocked = useSpotifyStore((s) => s.isSpotifyUnlocked);
   const getAuthMode = useSpotifyStore((s) => s.getAuthMode);
   const setByocClientId = useSpotifyStore((s) => s.setByocClientId);
   const logout = useSpotifyStore((s) => s.logout);
@@ -419,6 +421,14 @@ function SpotifyTab() {
     setByocClientId(trimmed);
     const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
     const { url } = await buildPkceAuthUrl(trimmed, redirectUri);
+    const popup = window.open(url, 'spotify-auth', 'popup,width=500,height=700');
+    if (!popup || popup.closed) {
+      window.location.href = url;
+    }
+  };
+
+  const handleOwnerConnect = () => {
+    const url = buildSpotifyAuthUrl();
     const popup = window.open(url, 'spotify-auth', 'popup,width=500,height=700');
     if (!popup || popup.closed) {
       window.location.href = url;
@@ -451,6 +461,10 @@ function SpotifyTab() {
               </span>
             )}
           </div>
+          <p className="text-xs text-white/40">
+            Now-playing metadata &amp; cloud-synced settings active. Playback controls require
+            Premium. Share a screen, window, or tab playing Spotify for audio.
+          </p>
           <button
             onClick={logout}
             className="w-fit cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
@@ -461,27 +475,45 @@ function SpotifyTab() {
       ) : (
         <div className="flex flex-col gap-3">
           <p className="text-xs text-white/50">
-            Connect Spotify for now-playing info and playback controls.
+            Connect Spotify for now-playing metadata and cloud-synced settings. Spotify Premium also
+            enables playback controls. You&apos;ll still need to share a screen, window, or tab
+            playing Spotify for the visualizer to react to audio.
           </p>
 
-          {/* BYOC section */}
-          <div className="flex flex-col gap-2 rounded border border-white/10 bg-white/[0.03] p-3">
-            <label className="text-xs text-white/60">Client ID (BYOC)</label>
-            <input
-              type="text"
-              value={byocInput}
-              onChange={(e) => setByocInput(e.target.value)}
-              placeholder="Spotify Client ID"
-              className="w-full rounded border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-[#1DB954] focus:outline-none"
-            />
+          {isSpotifyUnlocked ? (
             <button
-              onClick={handleByocConnect}
-              disabled={!byocInput.trim()}
-              className="w-fit cursor-pointer rounded border-none bg-[#1DB954]/20 px-3 py-1 text-xs text-[#1DB954] hover:bg-[#1DB954]/30 disabled:cursor-not-allowed disabled:opacity-40"
+              onClick={handleOwnerConnect}
+              className="w-fit cursor-pointer rounded border-none bg-[#1DB954]/20 px-3 py-1 text-xs text-[#1DB954] hover:bg-[#1DB954]/30"
             >
-              Connect with PKCE
+              Connect Spotify
             </button>
-          </div>
+          ) : (
+            <div className="flex flex-col gap-2 rounded border border-white/10 bg-white/[0.03] p-3">
+              <p className="text-xs text-white/50">
+                Spotify&apos;s API limits each app key to 5 users, so you&apos;ll need your own.
+                Register a free Spotify app at{' '}
+                <span className="text-white/70">developer.spotify.com</span>, add{' '}
+                <code className="rounded bg-white/10 px-1 text-[10px]">
+                  {import.meta.env.VITE_SPOTIFY_REDIRECT_URI}
+                </code>{' '}
+                as a redirect URI, then paste your Client ID (not your secret key) below.
+              </p>
+              <input
+                type="text"
+                value={byocInput}
+                onChange={(e) => setByocInput(e.target.value)}
+                placeholder="Client ID (not secret key)"
+                className="w-full rounded border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-[#1DB954] focus:outline-none"
+              />
+              <button
+                onClick={handleByocConnect}
+                disabled={!byocInput.trim()}
+                className="w-fit cursor-pointer rounded border-none bg-[#1DB954]/20 px-3 py-1 text-xs text-[#1DB954] hover:bg-[#1DB954]/30 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Connect with PKCE
+              </button>
+            </div>
+          )}
         </div>
       )}
     </>

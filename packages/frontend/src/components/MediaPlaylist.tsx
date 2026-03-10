@@ -18,6 +18,8 @@ export function MediaPlaylist({ onAddFiles, onClear }: MediaPlaylistProps) {
   const currentTrackIndex = useMediaPlayerStore((s) => s.currentTrackIndex);
   const setCurrentTrack = useMediaPlayerStore((s) => s.setCurrentTrack);
   const removeTrack = useMediaPlayerStore((s) => s.removeTrack);
+  const moveTrack = useMediaPlayerStore((s) => s.moveTrack);
+  const shuffle = useMediaPlayerStore((s) => s.shuffle);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddClick = () => {
@@ -65,6 +67,32 @@ export function MediaPlaylist({ onAddFiles, onClear }: MediaPlaylistProps) {
           >
             <span className="min-w-0 flex-1 truncate">{track.name}</span>
             <span className="shrink-0 text-white/40">{formatDuration(track.duration)}</span>
+            {!shuffle && tracks.length > 1 && (
+              <span className="flex shrink-0 flex-col">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    moveTrack(index, index - 1);
+                  }}
+                  disabled={index === 0}
+                  className="cursor-pointer border-none bg-transparent px-0.5 text-[10px] leading-none text-white/30 hover:text-white/70 disabled:cursor-default disabled:text-white/10"
+                  aria-label={`Move ${track.name} up`}
+                >
+                  ▲
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    moveTrack(index, index + 1);
+                  }}
+                  disabled={index === tracks.length - 1}
+                  className="cursor-pointer border-none bg-transparent px-0.5 text-[10px] leading-none text-white/30 hover:text-white/70 disabled:cursor-default disabled:text-white/10"
+                  aria-label={`Move ${track.name} down`}
+                >
+                  ▼
+                </button>
+              </span>
+            )}
             <button
               onClick={(e) => {
                 e.stopPropagation();

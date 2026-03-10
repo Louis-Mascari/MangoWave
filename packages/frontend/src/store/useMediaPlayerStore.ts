@@ -21,7 +21,9 @@ interface MediaPlayerState {
   shuffleHistory: Set<number>;
 
   addTracks: (files: File[]) => void;
+  setTrackDuration: (id: string, duration: number) => void;
   removeTrack: (id: string) => void;
+  moveTrack: (fromIndex: number, toIndex: number) => void;
   clearPlaylist: () => void;
   setCurrentTrack: (index: number) => void;
   nextTrack: () => void;
@@ -57,6 +59,35 @@ export const useMediaPlayerStore = create<MediaPlayerState>()((set, get) => ({
       objectUrl: null,
     }));
     set((state) => ({ tracks: [...state.tracks, ...newTracks] }));
+
+    // Probe durations in the background via temporary Audio elements
+    for (const track of newTracks) {
+      const probe = new Audio();
+      const url = URL.createObjectURL(track.file);
+      probe.preload = 'metadata';
+      probe.addEventListener(
+        'loadedmetadata',
+        () => {
+          get().setTrackDuration(track.id, probe.duration);
+          URL.revokeObjectURL(url);
+        },
+        { once: true },
+      );
+      probe.addEventListener(
+        'error',
+        () => {
+          URL.revokeObjectURL(url);
+        },
+        { once: true },
+      );
+      probe.src = url;
+    }
+  },
+
+  setTrackDuration: (id, duration) => {
+    set((state) => ({
+      tracks: state.tracks.map((t) => (t.id === id ? { ...t, duration } : t)),
+    }));
   },
 
   removeTrack: (id) => {
@@ -83,6 +114,47 @@ export const useMediaPlayerStore = create<MediaPlayerState>()((set, get) => ({
       if (idx < removeIndex) newHistory.add(idx);
       else if (idx > removeIndex) newHistory.add(idx - 1);
       // idx === removeIndex is dropped
+    }
+
+    set({ tracks: newTracks, currentTrackIndex: newIndex, shuffleHistory: newHistory });
+  },
+
+  moveTrack: (fromIndex, toIndex) => {
+    const { tracks, currentTrackIndex, shuffleHistory } = get();
+    if (
+      fromIndex === toIndex ||
+      fromIndex < 0 ||
+      toIndex < 0 ||
+      fromIndex >= tracks.length ||
+      toIndex >= tracks.length
+    )
+      return;
+
+    const newTracks = [...tracks];
+    const [moved] = newTracks.splice(fromIndex, 1);
+    newTracks.splice(toIndex, 0, moved);
+
+    // Adjust currentTrackIndex to follow the currently playing track
+    let newIndex = currentTrackIndex;
+    if (currentTrackIndex === fromIndex) {
+      newIndex = toIndex;
+    } else if (fromIndex < currentTrackIndex && toIndex >= currentTrackIndex) {
+      newIndex = currentTrackIndex - 1;
+    } else if (fromIndex > currentTrackIndex && toIndex <= currentTrackIndex) {
+      newIndex = currentTrackIndex + 1;
+    }
+
+    // Rebuild shuffle history with remapped indices
+    const indexMap = new Map<number, number>();
+    for (let i = 0; i < tracks.length; i++) {
+      const originalTrack = tracks[i];
+      const newPos = newTracks.indexOf(originalTrack);
+      indexMap.set(i, newPos);
+    }
+    const newHistory = new Set<number>();
+    for (const idx of shuffleHistory) {
+      const mapped = indexMap.get(idx);
+      if (mapped !== undefined) newHistory.add(mapped);
     }
 
     set({ tracks: newTracks, currentTrackIndex: newIndex, shuffleHistory: newHistory });

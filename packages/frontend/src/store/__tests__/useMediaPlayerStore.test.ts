@@ -143,6 +143,63 @@ describe('useMediaPlayerStore', () => {
     expect(useMediaPlayerStore.getState().isPlaying).toBe(false);
   });
 
+  it('moveTrack reorders tracks and adjusts currentTrackIndex when moving current track', () => {
+    useMediaPlayerStore
+      .getState()
+      .addTracks([createMockFile('a.mp3'), createMockFile('b.mp3'), createMockFile('c.mp3')]);
+    useMediaPlayerStore.getState().setCurrentTrack(0); // playing 'a'
+
+    useMediaPlayerStore.getState().moveTrack(0, 2); // move 'a' to end
+
+    const state = useMediaPlayerStore.getState();
+    expect(state.tracks[0].name).toBe('b');
+    expect(state.tracks[1].name).toBe('c');
+    expect(state.tracks[2].name).toBe('a');
+    expect(state.currentTrackIndex).toBe(2); // follows the playing track
+  });
+
+  it('moveTrack adjusts currentTrackIndex when moving a track before current', () => {
+    useMediaPlayerStore
+      .getState()
+      .addTracks([createMockFile('a.mp3'), createMockFile('b.mp3'), createMockFile('c.mp3')]);
+    useMediaPlayerStore.getState().setCurrentTrack(2); // playing 'c'
+
+    useMediaPlayerStore.getState().moveTrack(0, 2); // move 'a' past 'c'
+
+    const state = useMediaPlayerStore.getState();
+    expect(state.tracks[2].name).toBe('a');
+    expect(state.currentTrackIndex).toBe(1); // 'c' shifted left
+  });
+
+  it('moveTrack remaps shuffleHistory indices', () => {
+    useMediaPlayerStore
+      .getState()
+      .addTracks([createMockFile('a.mp3'), createMockFile('b.mp3'), createMockFile('c.mp3')]);
+    // Mark tracks 0 and 1 as played
+    useMediaPlayerStore.setState({ shuffleHistory: new Set([0, 1]) });
+
+    useMediaPlayerStore.getState().moveTrack(0, 2); // a moves to end: [b, c, a]
+
+    const history = useMediaPlayerStore.getState().shuffleHistory;
+    // Track 'a' was at 0, now at 2. Track 'b' was at 1, now at 0.
+    expect(history.has(2)).toBe(true); // 'a' (was 0)
+    expect(history.has(0)).toBe(true); // 'b' (was 1)
+    expect(history.has(1)).toBe(false);
+  });
+
+  it('moveTrack no-ops for invalid or same indices', () => {
+    useMediaPlayerStore.getState().addTracks([createMockFile('a.mp3'), createMockFile('b.mp3')]);
+
+    useMediaPlayerStore.getState().moveTrack(0, 0); // same index
+    expect(useMediaPlayerStore.getState().tracks[0].name).toBe('a');
+
+    useMediaPlayerStore.getState().moveTrack(-1, 0); // negative
+    expect(useMediaPlayerStore.getState().tracks[0].name).toBe('a');
+
+    useMediaPlayerStore.getState().moveTrack(0, 5); // out of bounds
+    expect(useMediaPlayerStore.getState().tracks[0].name).toBe('a');
+  });
+
   it('toggleShuffle resets shuffle history', () => {
     useMediaPlayerStore.getState().addTracks([createMockFile('a.mp3'), createMockFile('b.mp3')]);
     useMediaPlayerStore.setState({ shuffle: true });

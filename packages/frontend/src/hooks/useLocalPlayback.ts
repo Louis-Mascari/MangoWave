@@ -36,7 +36,12 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
   // Initialize audio element + engine on first file load
   const startWithFiles = useCallback(
     (files: File[]) => {
-      // Clean up any existing engine
+      // Clean up any existing audio element and engine
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current = null;
+      }
       if (engineRef.current) {
         engineRef.current.destroy();
         engineRef.current = null;
@@ -63,14 +68,16 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
     const audio = audioRef.current;
     if (!audio || !isActive || !currentTrack) return;
 
-    // Revoke old objectUrl from previous track in store
-    const prevTrack = useMediaPlayerStore
+    // Revoke ALL stale objectUrls from other tracks
+    const staleTracks = useMediaPlayerStore
       .getState()
-      .tracks.find((t) => t.objectUrl && t !== currentTrack);
-    if (prevTrack?.objectUrl) {
-      URL.revokeObjectURL(prevTrack.objectUrl);
+      .tracks.filter((t) => t.objectUrl && t.id !== currentTrack.id);
+    if (staleTracks.length > 0) {
+      staleTracks.forEach((t) => URL.revokeObjectURL(t.objectUrl!));
       useMediaPlayerStore.setState((state) => ({
-        tracks: state.tracks.map((t) => (t.id === prevTrack.id ? { ...t, objectUrl: null } : t)),
+        tracks: state.tracks.map((t) =>
+          staleTracks.some((s) => s.id === t.id) ? { ...t, objectUrl: null } : t,
+        ),
       }));
     }
 
@@ -84,6 +91,11 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
     audio.play().catch(() => {
       // Autoplay may be blocked
     });
+
+    return () => {
+      // Revoke on cleanup (unmount or track change)
+      URL.revokeObjectURL(url);
+    };
   }, [currentTrack?.id, isActive]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Wire up audio element events

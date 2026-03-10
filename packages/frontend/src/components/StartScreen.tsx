@@ -175,73 +175,15 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
 
           {/* Spotify connect inside Share Audio modal */}
           {authMode !== 'locked' && (
-            <div className="mt-4 border-t border-white/10 pt-4">
-              {isSpotifyConnected ? (
-                <div className="flex flex-col items-center gap-1.5">
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-green-400">&#10003;</span>
-                    <span className="text-[#ccc]">
-                      {user?.displayName ? `Connected as ${user.displayName}` : 'Spotify connected'}
-                    </span>
-                    <button
-                      onClick={logout}
-                      className="spotify-disconnect cursor-pointer rounded border-none bg-white/10 px-2 py-0.5 text-xs text-white/60 transition-[box-shadow] duration-150 hover:bg-white/20"
-                    >
-                      Disconnect
-                    </button>
-                  </div>
-                  <p className="text-[10px] text-[#666]">
-                    Now-playing metadata &amp; cloud-synced settings active. Playback controls
-                    require Premium. Share a screen, window, or tab playing Spotify for audio.
-                  </p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-2">
-                  <p className="text-center text-xs text-[#666]">Optional</p>
-                  <p className="text-center text-xs text-[#888]">
-                    Connect Spotify for now-playing metadata and cloud-synced settings. Spotify
-                    Premium also enables playback controls. You&apos;ll still need to share a
-                    screen, window, or tab playing Spotify for the visualizer to react to audio.
-                  </p>
-                  {isSpotifyUnlocked ? (
-                    <button
-                      onClick={() => {
-                        window.location.href = buildSpotifyAuthUrl();
-                      }}
-                      className="spotify-btn cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-medium text-[#1DB954] hover:bg-white/10"
-                    >
-                      Connect Spotify
-                    </button>
-                  ) : (
-                    <div className="flex w-full flex-col items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-3">
-                      <p className="text-xs text-[#888]">
-                        Spotify&apos;s API limits each app key to 5 users, so you&apos;ll need your
-                        own. Register a free Spotify app at{' '}
-                        <span className="text-[#aaa]">developer.spotify.com</span>, add{' '}
-                        <code className="rounded bg-white/10 px-1 text-[10px]">
-                          {import.meta.env.VITE_SPOTIFY_REDIRECT_URI}
-                        </code>{' '}
-                        as a redirect URI, then paste your Client ID (not your secret key) below.
-                      </p>
-                      <input
-                        type="text"
-                        value={byocInput}
-                        onChange={(e) => setByocInput(e.target.value)}
-                        placeholder="Client ID (not secret key)"
-                        className="w-full rounded border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-[#1DB954] focus:outline-none"
-                      />
-                      <button
-                        onClick={handleByocConnect}
-                        disabled={!byocInput.trim()}
-                        className="cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-1.5 text-sm font-medium text-[#1DB954] hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-                      >
-                        Connect with PKCE
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            <SpotifySection
+              isSpotifyConnected={isSpotifyConnected}
+              user={user}
+              logout={logout}
+              isSpotifyUnlocked={isSpotifyUnlocked}
+              byocInput={byocInput}
+              setByocInput={setByocInput}
+              handleByocConnect={handleByocConnect}
+            />
           )}
 
           <button
@@ -330,6 +272,116 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
           Buy Mango a Treat
         </a>
       </div>
+    </div>
+  );
+}
+
+function SpotifySection({
+  isSpotifyConnected,
+  user,
+  logout,
+  isSpotifyUnlocked,
+  byocInput,
+  setByocInput,
+  handleByocConnect,
+}: {
+  isSpotifyConnected: boolean;
+  user: { displayName?: string | null } | null;
+  logout: () => void;
+  isSpotifyUnlocked: boolean;
+  byocInput: string;
+  setByocInput: (v: string) => void;
+  handleByocConnect: () => void;
+}) {
+  const [expanded, setExpanded] = useState(isSpotifyConnected);
+
+  return (
+    <div className="mt-4 border-t border-white/10 pt-4">
+      {isSpotifyConnected ? (
+        <div className="flex flex-col items-center gap-1.5">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-green-400">&#10003;</span>
+            <span className="text-[#ccc]">
+              {user?.displayName ? `Connected as ${user.displayName}` : 'Spotify connected'}
+            </span>
+            <button
+              onClick={logout}
+              className="spotify-disconnect cursor-pointer rounded border-none bg-white/10 px-2 py-0.5 text-xs text-white/60 transition-[box-shadow] duration-150 hover:bg-white/20"
+            >
+              Disconnect
+            </button>
+          </div>
+          <p className="text-[10px] text-[#666]">
+            Now-playing metadata &amp; cloud-synced settings active. Playback controls require
+            Premium. Share a screen, window, or tab playing Spotify for audio.
+          </p>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-2">
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="flex cursor-pointer items-center gap-1.5 border-none bg-transparent text-xs text-[#888] transition-colors hover:text-[#bbb]"
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="#1DB954">
+              <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
+            </svg>
+            Connect Spotify (optional)
+          </button>
+          <div
+            className="grid overflow-hidden transition-[grid-template-rows,opacity] duration-300 ease-in-out"
+            style={{
+              gridTemplateRows: expanded ? '1fr' : '0fr',
+              opacity: expanded ? 1 : 0,
+            }}
+          >
+            <div className="min-h-0">
+              <div className="flex flex-col items-center gap-2 pt-1">
+                <p className="text-center text-xs text-[#888]">
+                  Connect Spotify for now-playing metadata and cloud-synced settings. Spotify
+                  Premium also enables playback controls. You&apos;ll still need to share a screen,
+                  window, or tab playing Spotify for the visualizer to react to audio.
+                </p>
+                {isSpotifyUnlocked ? (
+                  <button
+                    onClick={() => {
+                      window.location.href = buildSpotifyAuthUrl();
+                    }}
+                    className="spotify-btn cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-medium text-[#1DB954] hover:bg-white/10"
+                  >
+                    Connect Spotify
+                  </button>
+                ) : (
+                  <div className="flex w-full flex-col items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                    <p className="text-xs text-[#888]">
+                      Spotify&apos;s API limits each app key to 5 users, so you&apos;ll need your
+                      own. Register a free Spotify app at{' '}
+                      <span className="text-[#aaa]">developer.spotify.com</span>, add{' '}
+                      <code className="rounded bg-white/10 px-1 text-[10px]">
+                        {import.meta.env.VITE_SPOTIFY_REDIRECT_URI}
+                      </code>{' '}
+                      as a redirect URI, then paste your Client ID (not your secret key) below.
+                    </p>
+                    <input
+                      type="text"
+                      value={byocInput}
+                      onChange={(e) => setByocInput(e.target.value)}
+                      placeholder="Client ID (not secret key)"
+                      className="w-full rounded border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-[#1DB954] focus:outline-none"
+                    />
+                    <button
+                      onClick={handleByocConnect}
+                      disabled={!byocInput.trim()}
+                      className="cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-1.5 text-sm font-medium text-[#1DB954] hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Connect with PKCE
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

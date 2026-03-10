@@ -31,6 +31,7 @@ describe('PlaybackControls', () => {
       sessionId: null,
       nowPlaying: null,
       premiumError: false,
+      pollRequestedAt: 0,
     });
   });
 
@@ -91,5 +92,39 @@ describe('PlaybackControls', () => {
 
     const buttons = screen.getAllByRole('button');
     buttons.forEach((btn) => expect(btn).toBeDisabled());
+  });
+
+  it('optimistically updates isPlaying on pause', async () => {
+    const user = userEvent.setup();
+    useSpotifyStore.setState({
+      accessToken: 'at_123',
+      sessionId: 'sess_abc',
+      nowPlaying: {
+        title: 'Song',
+        artist: 'Artist',
+        albumName: 'Album',
+        albumArtUrl: null,
+        isPlaying: true,
+        progressMs: 0,
+        durationMs: 300000,
+      },
+    });
+    vi.mocked(controlPlayback).mockResolvedValue(undefined);
+
+    render(<PlaybackControls />);
+    await user.click(screen.getByLabelText('Pause'));
+
+    expect(useSpotifyStore.getState().nowPlaying?.isPlaying).toBe(false);
+  });
+
+  it('requests poll after successful action', async () => {
+    const user = userEvent.setup();
+    useSpotifyStore.setState({ accessToken: 'at_123', sessionId: 'sess_abc' });
+    vi.mocked(controlPlayback).mockResolvedValue(undefined);
+
+    render(<PlaybackControls />);
+    await user.click(screen.getByLabelText('Next track'));
+
+    expect(useSpotifyStore.getState().pollRequestedAt).toBeGreaterThan(0);
   });
 });

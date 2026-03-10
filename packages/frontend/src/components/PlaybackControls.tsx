@@ -14,6 +14,8 @@ export function PlaybackControls() {
   const premiumError = useSpotifyStore((s) => s.premiumError);
   const setPremiumError = useSpotifyStore((s) => s.setPremiumError);
   const setAccessToken = useSpotifyStore((s) => s.setAccessToken);
+  const updateIsPlaying = useSpotifyStore((s) => s.updateIsPlaying);
+  const requestPoll = useSpotifyStore((s) => s.requestPoll);
   const logout = useSpotifyStore((s) => s.logout);
   const [loading, setLoading] = useState(false);
 
@@ -27,6 +29,10 @@ export function PlaybackControls() {
 
       try {
         await controlPlayback(accessToken, action);
+        if (action === 'play' || action === 'pause') {
+          updateIsPlaying(action === 'play');
+        }
+        requestPoll();
       } catch (err) {
         if (err instanceof PremiumRequiredError) {
           setPremiumError(true);
@@ -35,6 +41,10 @@ export function PlaybackControls() {
             const result = await refreshToken(sessionId);
             setAccessToken(result.accessToken, result.expiresIn);
             await controlPlayback(result.accessToken, action);
+            if (action === 'play' || action === 'pause') {
+              updateIsPlaying(action === 'play');
+            }
+            requestPoll();
           } catch {
             logout();
           }
@@ -43,7 +53,7 @@ export function PlaybackControls() {
         setLoading(false);
       }
     },
-    [accessToken, sessionId, setPremiumError, setAccessToken, logout],
+    [accessToken, sessionId, setPremiumError, setAccessToken, updateIsPlaying, requestPoll, logout],
   );
 
   const tooltipText = !isConnected

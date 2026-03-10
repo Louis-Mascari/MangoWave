@@ -16,7 +16,6 @@ const defaultProps = {
   onToggleAutopilot: vi.fn(),
   activePanel: 'none' as const,
   onTogglePanel: vi.fn(),
-  onToggleShortcuts: vi.fn(),
   isFavorite: false,
   isBlocked: false,
   onToggleFavorite: vi.fn(),
@@ -29,8 +28,7 @@ describe('ControlBar', () => {
 
     expect(screen.getByText('Next Preset')).toBeInTheDocument();
     expect(screen.getByText('Presets')).toBeInTheDocument();
-    expect(screen.getByText('EQ')).toBeInTheDocument();
-    expect(screen.getByText('Performance')).toBeInTheDocument();
+    expect(screen.getByText('Settings')).toBeInTheDocument();
     expect(screen.getByText('Autopilot')).toBeInTheDocument();
     expect(screen.getByText('Fullscreen')).toBeInTheDocument();
     expect(screen.getByText('Stop')).toBeInTheDocument();
@@ -54,23 +52,18 @@ describe('ControlBar', () => {
     expect(onStop).toHaveBeenCalledTimes(1);
   });
 
-  it('shows EQ panel when activePanel is eq', () => {
-    render(<ControlBar {...defaultProps} activePanel="eq" />);
-    expect(screen.getByText('Equalizer')).toBeInTheDocument();
+  it('shows Settings panel with Equalizer tab when activePanel is settings', () => {
+    render(<ControlBar {...defaultProps} activePanel="settings" />);
+    expect(screen.getByText('Pre-Amp')).toBeInTheDocument();
   });
 
-  it('shows Performance panel when activePanel is performance', () => {
-    render(<ControlBar {...defaultProps} activePanel="performance" />);
-    expect(screen.getByText('Frame Rate')).toBeInTheDocument();
-  });
-
-  it('calls onTogglePanel when panel button is clicked', async () => {
+  it('calls onTogglePanel with settings when Settings button is clicked', async () => {
     const user = userEvent.setup();
     const onTogglePanel = vi.fn();
     render(<ControlBar {...defaultProps} onTogglePanel={onTogglePanel} />);
 
-    await user.click(screen.getByText('EQ'));
-    expect(onTogglePanel).toHaveBeenCalledWith('eq');
+    await user.click(screen.getByText('Settings'));
+    expect(onTogglePanel).toHaveBeenCalledWith('settings');
   });
 
   it('calls onToggleAutopilot when Autopilot is clicked', async () => {

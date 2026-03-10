@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAudioCapture } from './hooks/useAudioCapture.ts';
 import { useSpotifyAuth } from './hooks/useSpotifyAuth.ts';
 import { useSettingsSync } from './hooks/useSettingsSync.ts';
+import { useNowPlaying } from './hooks/useNowPlaying.ts';
 import { useAutopilot } from './hooks/useAutopilot.ts';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.ts';
 import { useHideCursor } from './hooks/useHideCursor.ts';
@@ -61,6 +62,10 @@ function MainApp() {
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
+  const accessToken = useSpotifyStore((s) => s.accessToken);
+  const isSpotifyConnected = !!accessToken;
+  useNowPlaying(isSpotifyConnected);
+
   const { audioEngine, isCapturing, error, startCapture, stopCapture } = useAudioCapture();
   const rendererRef = useRef<VisualizerRenderer | null>(null);
   const blockedPresets = useSettingsStore((s) => s.blockedPresets);
@@ -69,6 +74,7 @@ function MainApp() {
   const autopilot = useSettingsStore((s) => s.autopilot);
   const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
   const presetNameDisplay = useSettingsStore((s) => s.presetNameDisplay);
+  const songInfoDisplay = useSettingsStore((s) => s.songInfoDisplay);
   const toggleFavoritePreset = useSettingsStore((s) => s.toggleFavoritePreset);
   const toggleBlockPreset = useSettingsStore((s) => s.toggleBlockPreset);
   const [currentPreset, setCurrentPreset] = useState('');
@@ -205,7 +211,7 @@ function MainApp() {
               {presetNameDisplay !== 'off' && (
                 <PresetNotification message={currentPreset} mode={presetNameDisplay} />
               )}
-              <NowPlaying visible={showNowPlaying} />
+              <NowPlaying visible={showNowPlaying} songInfoDisplay={songInfoDisplay} />
               <ControlBar
                 onNextPreset={handleNextPreset}
                 onSelectPreset={handleSelectPreset}
@@ -219,7 +225,6 @@ function MainApp() {
                 onToggleAutopilot={handleToggleAutopilot}
                 activePanel={activePanel}
                 onTogglePanel={handleTogglePanel}
-                onToggleShortcuts={toggleShortcutOverlay}
                 isFavorite={favoritePresets.includes(currentPreset)}
                 isBlocked={blockedPresets.includes(currentPreset)}
                 onToggleFavorite={handleToggleFavorite}

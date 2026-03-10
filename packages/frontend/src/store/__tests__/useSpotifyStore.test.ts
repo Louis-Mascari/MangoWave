@@ -10,6 +10,7 @@ describe('useSpotifyStore', () => {
       user: null,
       nowPlaying: null,
       premiumError: false,
+      pollRequestedAt: 0,
     });
   });
 
@@ -78,6 +79,7 @@ describe('useSpotifyStore', () => {
     expect(state.accessToken).toBeNull();
     expect(state.user).toBeNull();
     expect(state.nowPlaying).toBeNull();
+    expect(state.pollRequestedAt).toBe(0);
   });
 
   it('setPremiumError updates the flag', () => {
@@ -99,5 +101,32 @@ describe('useSpotifyStore', () => {
     };
     setNowPlaying(track);
     expect(useSpotifyStore.getState().nowPlaying).toEqual(track);
+  });
+
+  it('updateIsPlaying optimistically flips isPlaying', () => {
+    useSpotifyStore.setState({
+      nowPlaying: {
+        title: 'Song',
+        artist: 'Artist',
+        albumName: 'Album',
+        albumArtUrl: null,
+        isPlaying: true,
+        progressMs: 0,
+        durationMs: 300000,
+      },
+    });
+    useSpotifyStore.getState().updateIsPlaying(false);
+    expect(useSpotifyStore.getState().nowPlaying?.isPlaying).toBe(false);
+  });
+
+  it('updateIsPlaying does nothing when nowPlaying is null', () => {
+    useSpotifyStore.getState().updateIsPlaying(true);
+    expect(useSpotifyStore.getState().nowPlaying).toBeNull();
+  });
+
+  it('requestPoll sets pollRequestedAt to a non-zero timestamp', () => {
+    expect(useSpotifyStore.getState().pollRequestedAt).toBe(0);
+    useSpotifyStore.getState().requestPoll();
+    expect(useSpotifyStore.getState().pollRequestedAt).toBeGreaterThan(0);
   });
 });

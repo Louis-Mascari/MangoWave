@@ -57,6 +57,8 @@ export interface SettingsState {
   // Display
   presetNameDisplay: 'off' | 'always' | number; // 'off', 'always', or seconds
   setPresetNameDisplay: (value: 'off' | 'always' | number) => void;
+  songInfoDisplay: 'off' | 'always' | number; // 'off', 'always', or seconds
+  setSongInfoDisplay: (value: 'off' | 'always' | number) => void;
 
   // Transitions
   transitionTime: number; // seconds for preset blend
@@ -173,6 +175,8 @@ export const useSettingsStore = create<SettingsState>()(
       // Display
       presetNameDisplay: 5,
       setPresetNameDisplay: (value) => set({ presetNameDisplay: value }),
+      songInfoDisplay: 5,
+      setSongInfoDisplay: (value) => set({ songInfoDisplay: value }),
 
       // Transitions
       transitionTime: 2.0,

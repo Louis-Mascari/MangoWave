@@ -17,6 +17,7 @@ describe('useSettingsStore', () => {
       result.current.setAutopilotInterval(15);
       result.current.setAutopilotFavoritesOnly(false);
       result.current.setPresetNameDisplay(5);
+      result.current.setSongInfoDisplay(5);
       // Clear presets
       result.current.blockedPresets.forEach((p) => result.current.unblockPreset(p));
       result.current.favoritePresets.forEach((p) => result.current.toggleFavoritePreset(p));
@@ -209,6 +210,31 @@ describe('useSettingsStore', () => {
       const { result } = renderHook(() => useSettingsStore());
       act(() => result.current.setPresetNameDisplay(8));
       expect(result.current.presetNameDisplay).toBe(8);
+    });
+  });
+
+  describe('songInfoDisplay', () => {
+    it('defaults to 5 seconds', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      expect(result.current.songInfoDisplay).toBe(5);
+    });
+
+    it('sets to off', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setSongInfoDisplay('off'));
+      expect(result.current.songInfoDisplay).toBe('off');
+    });
+
+    it('sets to always', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setSongInfoDisplay('always'));
+      expect(result.current.songInfoDisplay).toBe('always');
+    });
+
+    it('sets to custom duration', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setSongInfoDisplay(8));
+      expect(result.current.songInfoDisplay).toBe(8);
     });
   });
 

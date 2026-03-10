@@ -1,5 +1,9 @@
+import { useState } from 'react';
+import { EQ_BANDS } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { Tooltip } from './Tooltip.tsx';
+
+type Tab = 'equalizer' | 'performance' | 'shortcuts';
 
 const FPS_OPTIONS = [
   { label: 'Uncapped', value: 0 },
@@ -16,7 +20,117 @@ const RESOLUTION_OPTIONS = [
 
 const FFT_OPTIONS = [512, 1024, 2048, 4096];
 
-export function PerformancePanel() {
+function formatFreq(freq: number): string {
+  return freq >= 1000 ? `${freq / 1000}k` : `${freq}`;
+}
+
+export function SettingsPanel() {
+  const [activeTab, setActiveTab] = useState<Tab>('equalizer');
+
+  return (
+    <div className="flex flex-col gap-3 rounded-lg bg-black/60 p-4 backdrop-blur-sm">
+      <div className="flex gap-2 border-b border-white/10 pb-2">
+        <TabButton active={activeTab === 'equalizer'} onClick={() => setActiveTab('equalizer')}>
+          Equalizer
+        </TabButton>
+        <TabButton active={activeTab === 'performance'} onClick={() => setActiveTab('performance')}>
+          Performance
+        </TabButton>
+        <TabButton active={activeTab === 'shortcuts'} onClick={() => setActiveTab('shortcuts')}>
+          Shortcuts
+        </TabButton>
+      </div>
+
+      {activeTab === 'equalizer' && <EqualizerTab />}
+      {activeTab === 'performance' && <PerformanceTab />}
+      {activeTab === 'shortcuts' && <ShortcutsTab />}
+    </div>
+  );
+}
+
+function TabButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`cursor-pointer rounded border-none px-3 py-1.5 text-xs font-medium ${
+        active ? 'bg-orange-500 text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function EqualizerTab() {
+  const eq = useSettingsStore((s) => s.eq);
+  const setPreAmpGain = useSettingsStore((s) => s.setPreAmpGain);
+  const setEQBandGain = useSettingsStore((s) => s.setEQBandGain);
+  const resetEQ = useSettingsStore((s) => s.resetEQ);
+
+  return (
+    <>
+      <div className="flex items-center justify-between">
+        <h3 className="flex items-center text-sm font-semibold text-white">
+          Equalizer
+          <Tooltip text="Shapes which frequencies drive the visuals — does not change audio output. Boost bass for more intense movement, cut highs to calm treble reactions" />
+        </h3>
+        <button
+          onClick={resetEQ}
+          className="cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-xs text-white/70 hover:bg-white/20"
+        >
+          Reset
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className="flex items-center text-xs text-white/60">
+          Pre-Amp
+          <Tooltip text="Scales the overall signal — higher makes visuals more reactive, lower calms them. Purely visual, does not affect audio output" />
+        </label>
+        <input
+          type="range"
+          min="0"
+          max="3"
+          step="0.1"
+          value={eq.preAmpGain}
+          onChange={(e) => setPreAmpGain(parseFloat(e.target.value))}
+          className="w-full accent-orange-500"
+        />
+        <span className="text-right text-xs text-white/50">{eq.preAmpGain.toFixed(1)}x</span>
+      </div>
+
+      <div className="flex gap-2">
+        {EQ_BANDS.map((freq, i) => (
+          <div key={freq} className="flex flex-col items-center gap-1">
+            <input
+              type="range"
+              min="-12"
+              max="12"
+              step="1"
+              value={eq.bandGains[i]}
+              onChange={(e) => setEQBandGain(i, parseFloat(e.target.value))}
+              // @ts-expect-error - orient="vertical" is a non-standard Firefox attribute
+              orient="vertical"
+              className="h-24 accent-orange-500"
+              style={{ writingMode: 'vertical-lr', direction: 'rtl' }}
+            />
+            <span className="text-[10px] text-white/50">{formatFreq(freq)}</span>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function PerformanceTab() {
   const performance = useSettingsStore((s) => s.performance);
   const setFpsCap = useSettingsStore((s) => s.setFpsCap);
   const setResolutionScale = useSettingsStore((s) => s.setResolutionScale);
@@ -25,13 +139,15 @@ export function PerformancePanel() {
   const setFftSize = useSettingsStore((s) => s.setFftSize);
   const presetNameDisplay = useSettingsStore((s) => s.presetNameDisplay);
   const setPresetNameDisplay = useSettingsStore((s) => s.setPresetNameDisplay);
+  const songInfoDisplay = useSettingsStore((s) => s.songInfoDisplay);
+  const setSongInfoDisplay = useSettingsStore((s) => s.setSongInfoDisplay);
   const autopilot = useSettingsStore((s) => s.autopilot);
   const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
   const setAutopilotInterval = useSettingsStore((s) => s.setAutopilotInterval);
   const setAutopilotFavoritesOnly = useSettingsStore((s) => s.setAutopilotFavoritesOnly);
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg bg-black/60 p-4 backdrop-blur-sm">
+    <>
       <h3 className="text-sm font-semibold text-white">Performance</h3>
 
       <div className="flex flex-col gap-1">
@@ -171,6 +287,61 @@ export function PerformancePanel() {
         )}
       </div>
 
+      <div className="flex flex-col gap-1">
+        <label className="flex items-center text-xs text-white/60">
+          Song Info Display
+          <Tooltip text="How long the Now Playing banner shows when the song changes" />
+        </label>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setSongInfoDisplay('off')}
+            className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
+              songInfoDisplay === 'off'
+                ? 'bg-orange-500 text-white'
+                : 'bg-white/10 text-white/70 hover:bg-white/20'
+            }`}
+          >
+            Off
+          </button>
+          <button
+            onClick={() => setSongInfoDisplay('always')}
+            className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
+              songInfoDisplay === 'always'
+                ? 'bg-orange-500 text-white'
+                : 'bg-white/10 text-white/70 hover:bg-white/20'
+            }`}
+          >
+            Always
+          </button>
+          <button
+            onClick={() =>
+              setSongInfoDisplay(typeof songInfoDisplay === 'number' ? songInfoDisplay : 5)
+            }
+            className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
+              typeof songInfoDisplay === 'number'
+                ? 'bg-orange-500 text-white'
+                : 'bg-white/10 text-white/70 hover:bg-white/20'
+            }`}
+          >
+            Timed
+          </button>
+        </div>
+        {typeof songInfoDisplay === 'number' && (
+          <div className="mt-1">
+            <label className="text-xs text-white/60">Duration: {songInfoDisplay}s</label>
+            <input
+              type="range"
+              min="1"
+              max="10"
+              step="1"
+              value={songInfoDisplay}
+              onChange={(e) => setSongInfoDisplay(parseInt(e.target.value))}
+              className="w-full accent-orange-500"
+            />
+          </div>
+        )}
+      </div>
+
       <div className="mt-1 border-t border-white/10 pt-3">
         <div className="flex items-center justify-between">
           <label className="flex items-center text-xs font-semibold text-white/80">
@@ -212,6 +383,35 @@ export function PerformancePanel() {
           Favorites only
         </label>
       </div>
-    </div>
+    </>
+  );
+}
+
+const SHORTCUTS = [
+  { key: 'Space / N', action: 'Next preset' },
+  { key: 'F', action: 'Toggle fullscreen' },
+  { key: 'Double-click', action: 'Toggle fullscreen' },
+  { key: 'A', action: 'Toggle autopilot' },
+  { key: 'S', action: 'Toggle favorite' },
+  { key: 'B', action: 'Toggle block' },
+  { key: 'Escape', action: 'Close panel / overlay' },
+  { key: '? / H', action: 'Toggle shortcut overlay' },
+];
+
+function ShortcutsTab() {
+  return (
+    <>
+      <h3 className="text-sm font-semibold text-white">Keyboard Shortcuts</h3>
+      <div className="flex flex-col gap-2">
+        {SHORTCUTS.map((s) => (
+          <div key={s.key} className="flex items-center justify-between">
+            <kbd className="rounded bg-white/10 px-2 py-0.5 font-mono text-xs text-white/80">
+              {s.key}
+            </kbd>
+            <span className="text-xs text-white/60">{s.action}</span>
+          </div>
+        ))}
+      </div>
+    </>
   );
 }

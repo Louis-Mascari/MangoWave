@@ -13,10 +13,15 @@ interface SpotifyState {
   nowPlaying: NowPlayingTrack | null;
   premiumError: boolean;
 
+  // Poll control
+  pollRequestedAt: number;
+  requestPoll: () => void;
+
   // Actions
   setAuth: (accessToken: string, expiresIn: number, sessionId: string, user: SpotifyUser) => void;
   setAccessToken: (accessToken: string, expiresIn: number) => void;
   setNowPlaying: (track: NowPlayingTrack | null) => void;
+  updateIsPlaying: (isPlaying: boolean) => void;
   setPremiumError: (value: boolean) => void;
   logout: () => void;
   isTokenValid: () => boolean;
@@ -31,6 +36,9 @@ export const useSpotifyStore = create<SpotifyState>()(
       user: null,
       nowPlaying: null,
       premiumError: false,
+      pollRequestedAt: 0,
+
+      requestPoll: () => set({ pollRequestedAt: Date.now() }),
 
       setAuth: (accessToken, expiresIn, sessionId, user) =>
         set({
@@ -49,6 +57,11 @@ export const useSpotifyStore = create<SpotifyState>()(
 
       setNowPlaying: (track) => set({ nowPlaying: track }),
 
+      updateIsPlaying: (isPlaying) =>
+        set((state) => ({
+          nowPlaying: state.nowPlaying ? { ...state.nowPlaying, isPlaying } : null,
+        })),
+
       setPremiumError: (value) => set({ premiumError: value }),
 
       logout: () =>
@@ -59,6 +72,7 @@ export const useSpotifyStore = create<SpotifyState>()(
           user: null,
           nowPlaying: null,
           premiumError: false,
+          pollRequestedAt: 0,
         }),
 
       isTokenValid: () => {

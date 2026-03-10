@@ -32,6 +32,7 @@ vi.mock('../../engine/AudioEngine.ts', () => {
         });
       });
       initAudioPipeline = vi.fn();
+      initFromMicrophone = vi.fn(() => Promise.resolve());
       destroy = mockDestroy;
     },
     EQ_BANDS: [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000],
@@ -106,6 +107,28 @@ describe('useAudioCapture', () => {
     // First engine should have been destroyed before second was created
     expect(mockDestroy).toHaveBeenCalledTimes(1);
     expect(result.current.isCapturing).toBe(true);
+  });
+
+  it('starts mic capture successfully', async () => {
+    const { result } = renderHook(() => useAudioCapture());
+
+    await act(async () => {
+      await result.current.startMicCapture();
+    });
+
+    expect(result.current.isCapturing).toBe(true);
+    expect(result.current.captureSource).toBe('mic');
+    expect(result.current.error).toBeNull();
+  });
+
+  it('sets captureSource to system for display capture', async () => {
+    const { result } = renderHook(() => useAudioCapture());
+
+    await act(async () => {
+      await result.current.startCapture();
+    });
+
+    expect(result.current.captureSource).toBe('system');
   });
 
   it('cleans up when browser stop-sharing fires track ended', async () => {

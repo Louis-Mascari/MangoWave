@@ -99,6 +99,11 @@ function MainApp() {
     setShowLaunchAnimation(true);
   }, [capture]);
 
+  const handleMicCapture = useCallback(async () => {
+    await capture.startMicCapture();
+    setShowLaunchAnimation(true);
+  }, [capture]);
+
   const handleLocalFiles = useCallback(
     (files: File[]) => {
       local.startWithFiles(files);
@@ -271,7 +276,7 @@ function MainApp() {
         <StartScreen
           onStart={handleStart}
           onLocalFiles={handleLocalFiles}
-          onMicCapture={() => {}}
+          onMicCapture={handleMicCapture}
           error={capture.error}
         />
       )}

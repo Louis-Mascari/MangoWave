@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
 import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { buildPkceAuthUrl } from '../services/spotifyPkce.ts';
@@ -10,6 +10,8 @@ interface StartScreenProps {
   onMicCapture: () => void;
   error: string | null;
 }
+
+type ModalView = 'none' | 'share-audio' | 'local-files' | 'microphone';
 
 const hasDisplayMedia = !!navigator.mediaDevices?.getDisplayMedia;
 
@@ -23,6 +25,7 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
   const setByocClientId = useSpotifyStore((s) => s.setByocClientId);
   const authMode = getAuthMode();
 
+  const [activeModal, setActiveModal] = useState<ModalView>('none');
   const [showByoc, setShowByoc] = useState(false);
   const [byocInput, setByocInput] = useState(byocClientId ?? '');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -47,20 +50,35 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
     if (files.length > 0) {
       onLocalFiles(files);
     }
-    // Reset so same files can be re-selected
     e.target.value = '';
   };
 
+  const closeModal = useCallback(() => setActiveModal('none'), []);
+
+  // Close modal on Escape
+  useEffect(() => {
+    if (activeModal === 'none') return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeModal();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [activeModal, closeModal]);
+
   return (
     <div className="flex h-full flex-col items-center overflow-y-auto px-4 py-8 font-sans text-[#e0e0e0]">
-      <div className="flex flex-1 flex-col items-center justify-center gap-5">
+      <div className="flex flex-1 flex-col items-center justify-center gap-6">
         {/* Logo + Title */}
         <div className="flex flex-col items-center gap-3">
           <a href="https://mangowave.app" target="_blank" rel="noopener noreferrer">
-            <img src={logoSrc} alt="MangoWave logo" className="start-logo h-40 w-40" />
+            <img
+              src={logoSrc}
+              alt="MangoWave logo"
+              className="start-logo h-32 w-32 sm:h-40 sm:w-40"
+            />
           </a>
           <h1
-            className="text-5xl font-extrabold leading-[1.3] tracking-tight"
+            className="text-4xl font-extrabold leading-[1.3] tracking-tight sm:text-5xl"
             style={{
               background: 'linear-gradient(135deg, #ff8c32 0%, #e050e0 100%)',
               WebkitBackgroundClip: 'text',
@@ -83,147 +101,195 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
           </p>
         </div>
 
-        {/* Audio sharing guide */}
-        {hasDisplayMedia && (
-          <div className="max-w-lg rounded-2xl border border-white/[0.07] bg-white/[0.04] px-6 py-5">
-            <h2 className="mb-3 text-base font-semibold text-white">How it works</h2>
-            <ol className="flex flex-col gap-3 text-sm text-[#aaa]">
-              <li>
-                <span className="font-medium text-[#e0e0e0]">1. Click Start</span> and choose a
-                screen, window, or tab to share
-              </li>
-              <li>
-                <span className="font-medium text-[#ff8c32]">2. Check &quot;Share audio&quot;</span>{' '}
-                — this is required for the visualizer to react to sound
-              </li>
-              <li>
-                <span className="font-medium text-[#e0e0e0]">3. Play music</span> and watch the
-                visuals respond
-              </li>
-            </ol>
-            <p className="mt-3 text-xs text-[#888]">
-              Tip: Share your entire screen or a window for the cleanest experience — sharing a tab
-              shows an unhideable browser banner. Go fullscreen (F) for full immersion.
-            </p>
-          </div>
-        )}
-
-        {/* Spotify connect — hidden in locked mode */}
-        {authMode !== 'locked' && (
-          <div className="flex max-w-lg flex-col items-center gap-2">
-            {isSpotifyConnected ? (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-green-400">&#10003;</span>
-                <span className="text-[#ccc]">
-                  {user?.displayName ? `Connected as ${user.displayName}` : 'Spotify connected'}
-                </span>
-                <button
-                  onClick={logout}
-                  className="spotify-disconnect cursor-pointer rounded border-none bg-white/10 px-2 py-0.5 text-xs text-white/60 transition-[box-shadow] duration-150 hover:bg-white/20"
-                >
-                  Disconnect
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-3">
-                  <span className="text-right text-xs text-[#666]">
-                    For now-playing info
-                    <br />
-                    and playback controls.
-                  </span>
-                  <button
-                    onClick={() => {
-                      window.location.href = buildSpotifyAuthUrl();
-                    }}
-                    className="spotify-btn shrink-0 cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-medium text-[#1DB954] hover:bg-white/10"
-                  >
-                    Connect Spotify
-                  </button>
-                  <span className="text-left text-xs text-[#666]">
-                    Audio always comes
-                    <br />
-                    from screen sharing.
-                  </span>
-                </div>
-
-                {/* BYOC collapsible section */}
-                <button
-                  onClick={() => setShowByoc(!showByoc)}
-                  className="mt-1 cursor-pointer border-none bg-transparent text-xs text-[#666] underline hover:text-[#999]"
-                >
-                  {showByoc ? 'Hide' : 'Use your own Spotify credentials'}
-                </button>
-                {showByoc && (
-                  <div className="flex w-full max-w-sm flex-col items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-3">
-                    <p className="text-xs text-[#888]">
-                      Create a Spotify app at{' '}
-                      <span className="text-[#aaa]">developer.spotify.com</span>, add{' '}
-                      <code className="rounded bg-white/10 px-1 text-[10px]">
-                        {import.meta.env.VITE_SPOTIFY_REDIRECT_URI}
-                      </code>{' '}
-                      as a redirect URI, then paste your Client ID below.
-                    </p>
-                    <input
-                      type="text"
-                      value={byocInput}
-                      onChange={(e) => setByocInput(e.target.value)}
-                      placeholder="Spotify Client ID"
-                      className="w-full rounded border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-[#1DB954] focus:outline-none"
-                    />
-                    <button
-                      onClick={handleByocConnect}
-                      disabled={!byocInput.trim()}
-                      className="cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-1.5 text-sm font-medium text-[#1DB954] hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Connect with PKCE
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Action buttons */}
-        <div className="flex flex-col items-center gap-3">
+        {/* Mode cards */}
+        <div className="flex w-full max-w-2xl flex-col items-stretch gap-4 sm:flex-row">
           {hasDisplayMedia && (
-            <button
-              onClick={onStart}
-              className="start-btn cursor-pointer rounded-xl border-none px-10 py-3 text-lg font-semibold text-white"
-            >
-              Start Visualizer
-            </button>
+            <ModeCard
+              icon="🖥️"
+              title="Share Audio"
+              description="Capture system or tab audio via screen sharing"
+              onClick={() => setActiveModal('share-audio')}
+              primary
+            />
           )}
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleFileSelect}
-              className="cursor-pointer rounded-xl border border-white/10 bg-white/[0.06] px-6 py-2 text-sm font-medium text-white/80 hover:bg-white/10"
-            >
-              Play Local Files
-            </button>
-            <button
-              onClick={onMicCapture}
-              className="cursor-pointer rounded-xl border border-white/10 bg-white/[0.06] px-6 py-2 text-sm font-medium text-white/80 hover:bg-white/10"
-            >
-              Use Microphone
-            </button>
-          </div>
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept="audio/*"
-            onChange={handleFilesChosen}
-            className="hidden"
+          <ModeCard
+            icon="🎵"
+            title="Play Local Files"
+            description="Play audio files from your device"
+            onClick={() => setActiveModal('local-files')}
+            primary={!hasDisplayMedia}
+          />
+          <ModeCard
+            icon="🎤"
+            title="Use Microphone"
+            description="Visualize ambient sound — silent mode"
+            onClick={() => setActiveModal('microphone')}
           />
         </div>
+
+        {/* Mobile callout — only shown when screen sharing is unavailable */}
+        {!hasDisplayMedia && (
+          <p className="max-w-sm text-center text-xs text-[#666]">
+            On a desktop or laptop? You can also capture audio from any screen, window, or browser
+            tab using screen sharing.
+          </p>
+        )}
 
         {/* Error */}
         {error && <p className="text-sm text-red-500">{error}</p>}
       </div>
+
+      {/* Modals */}
+      {activeModal === 'share-audio' && (
+        <Modal title="Share Audio" onClose={closeModal}>
+          <ol className="flex flex-col gap-3 text-sm text-[#aaa]">
+            <li>
+              <span className="font-medium text-[#e0e0e0]">1. Click Start</span> and choose a
+              screen, window, or tab to share
+            </li>
+            <li>
+              <span className="font-medium text-[#ff8c32]">2. Check &quot;Share audio&quot;</span> —
+              this is required for the visualizer to react to sound
+            </li>
+            <li>
+              <span className="font-medium text-[#e0e0e0]">3. Play music</span> and watch the
+              visuals respond
+            </li>
+          </ol>
+          <p className="mt-3 text-xs text-[#888]">
+            Tip: Share your entire screen or a window for the cleanest experience — sharing a tab
+            shows an unhideable browser banner. Go fullscreen (F) for full immersion.
+          </p>
+
+          {/* Spotify connect inside Share Audio modal */}
+          {authMode !== 'locked' && (
+            <div className="mt-4 border-t border-white/10 pt-4">
+              {isSpotifyConnected ? (
+                <div className="flex items-center justify-center gap-2 text-sm">
+                  <span className="text-green-400">&#10003;</span>
+                  <span className="text-[#ccc]">
+                    {user?.displayName ? `Connected as ${user.displayName}` : 'Spotify connected'}
+                  </span>
+                  <button
+                    onClick={logout}
+                    className="spotify-disconnect cursor-pointer rounded border-none bg-white/10 px-2 py-0.5 text-xs text-white/60 transition-[box-shadow] duration-150 hover:bg-white/20"
+                  >
+                    Disconnect
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2">
+                  <p className="text-center text-xs text-[#888]">
+                    Connect Spotify for now-playing info and playback controls while sharing audio.
+                  </p>
+                  <button
+                    onClick={() => {
+                      window.location.href = buildSpotifyAuthUrl();
+                    }}
+                    className="spotify-btn cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-medium text-[#1DB954] hover:bg-white/10"
+                  >
+                    Connect Spotify
+                  </button>
+                  <button
+                    onClick={() => setShowByoc(!showByoc)}
+                    className="cursor-pointer border-none bg-transparent text-xs text-[#666] underline hover:text-[#999]"
+                  >
+                    {showByoc ? 'Hide' : 'Use your own Spotify credentials'}
+                  </button>
+                  {showByoc && (
+                    <div className="flex w-full flex-col items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                      <p className="text-xs text-[#888]">
+                        Create a Spotify app at{' '}
+                        <span className="text-[#aaa]">developer.spotify.com</span>, add{' '}
+                        <code className="rounded bg-white/10 px-1 text-[10px]">
+                          {import.meta.env.VITE_SPOTIFY_REDIRECT_URI}
+                        </code>{' '}
+                        as a redirect URI, then paste your Client ID below.
+                      </p>
+                      <input
+                        type="text"
+                        value={byocInput}
+                        onChange={(e) => setByocInput(e.target.value)}
+                        placeholder="Spotify Client ID"
+                        className="w-full rounded border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-[#1DB954] focus:outline-none"
+                      />
+                      <button
+                        onClick={handleByocConnect}
+                        disabled={!byocInput.trim()}
+                        className="cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-1.5 text-sm font-medium text-[#1DB954] hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        Connect with PKCE
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          <button
+            onClick={onStart}
+            className="start-btn mt-5 w-full cursor-pointer rounded-xl border-none px-10 py-3 text-lg font-semibold text-white"
+          >
+            Start Visualizer
+          </button>
+        </Modal>
+      )}
+
+      {activeModal === 'local-files' && (
+        <Modal title="Play Local Files" onClose={closeModal}>
+          <div className="flex flex-col gap-3 text-sm text-[#aaa]">
+            <p>
+              Select audio files from your device. They&apos;ll play through your speakers while the
+              visualizer reacts to the music.
+            </p>
+            <ul className="flex flex-col gap-1.5 text-xs text-[#888]">
+              <li>Supports MP3, WAV, FLAC, OGG, AAC, and more</li>
+              <li>Build a queue and control playback with shuffle, repeat, and seek</li>
+              <li>Add or remove tracks at any time from the Queue panel</li>
+            </ul>
+          </div>
+          <button
+            onClick={() => {
+              closeModal();
+              handleFileSelect();
+            }}
+            className="start-btn mt-5 w-full cursor-pointer rounded-xl border-none px-10 py-3 text-lg font-semibold text-white"
+          >
+            Choose Files
+          </button>
+        </Modal>
+      )}
+
+      {activeModal === 'microphone' && (
+        <Modal title="Use Microphone" onClose={closeModal}>
+          <div className="flex flex-col gap-3 text-sm text-[#aaa]">
+            <p>
+              Feed your microphone into the visualizer. Great for live instruments, ambient sound,
+              or parties.
+            </p>
+            <ul className="flex flex-col gap-1.5 text-xs text-[#888]">
+              <li>Silent mode — no audio plays through your speakers</li>
+              <li>Requires microphone permission from your browser</li>
+            </ul>
+          </div>
+          <button
+            onClick={onMicCapture}
+            className="start-btn mt-5 w-full cursor-pointer rounded-xl border-none px-10 py-3 text-lg font-semibold text-white"
+          >
+            Start Microphone
+          </button>
+        </Modal>
+      )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept="audio/*"
+        onChange={handleFilesChosen}
+        className="hidden"
+      />
 
       {/* Footer links */}
       <div className="flex items-center gap-4 pb-4 pt-2">
@@ -249,6 +315,66 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
           </svg>
           Buy Mango a Treat
         </a>
+      </div>
+    </div>
+  );
+}
+
+function ModeCard({
+  icon,
+  title,
+  description,
+  onClick,
+  primary = false,
+}: {
+  icon: string;
+  title: string;
+  description: string;
+  onClick: () => void;
+  primary?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`mode-card flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-2xl border px-5 py-6 text-center transition-all duration-200 ${
+        primary
+          ? 'border-orange-500/30 bg-white/[0.06] hover:border-orange-500/50 hover:bg-white/[0.1]'
+          : 'border-white/10 bg-white/[0.04] hover:border-white/20 hover:bg-white/[0.08]'
+      }`}
+    >
+      <span className="text-3xl">{icon}</span>
+      <span className="text-sm font-semibold text-white">{title}</span>
+      <span className="text-xs text-[#999]">{description}</span>
+    </button>
+  );
+}
+
+function Modal({
+  title,
+  onClose,
+  children,
+}: {
+  title: string;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="relative mx-4 w-full max-w-md rounded-2xl border border-white/10 bg-[#111] p-6 shadow-2xl">
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 cursor-pointer border-none bg-transparent text-lg text-white/40 hover:text-white/80"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+        <h2 className="mb-4 text-xl font-bold text-white">{title}</h2>
+        {children}
       </div>
     </div>
   );

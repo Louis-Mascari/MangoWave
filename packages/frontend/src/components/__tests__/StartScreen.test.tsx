@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { StartScreen } from '../StartScreen.tsx';
 import { useSpotifyStore } from '../../store/useSpotifyStore.ts';
 
@@ -31,10 +32,14 @@ describe('StartScreen', () => {
     expect(screen.getByText('MangoWave')).toBeInTheDocument();
   });
 
-  it('hides Start Visualizer when getDisplayMedia unavailable (mobile)', () => {
-    // In jsdom, getDisplayMedia is not available
+  it('hides Share Audio card when getDisplayMedia unavailable (mobile)', () => {
     render(<StartScreen {...defaultProps} />);
-    expect(screen.queryByText('Start Visualizer')).not.toBeInTheDocument();
+    expect(screen.queryByText('Share Audio')).not.toBeInTheDocument();
+  });
+
+  it('shows mobile callout when getDisplayMedia unavailable', () => {
+    render(<StartScreen {...defaultProps} />);
+    expect(screen.getByText(/desktop or laptop/i)).toBeInTheDocument();
   });
 
   it('renders error when provided', () => {
@@ -47,43 +52,45 @@ describe('StartScreen', () => {
     expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
   });
 
-  it('hides audio sharing instructions when getDisplayMedia unavailable', () => {
-    render(<StartScreen {...defaultProps} />);
-    // In jsdom, getDisplayMedia is not available, so instructions are hidden
-    expect(screen.queryByText('How it works')).not.toBeInTheDocument();
-  });
-
-  it('renders Connect Spotify button when not connected', () => {
-    useSpotifyStore.setState({ sessionId: null, isSpotifyUnlocked: true });
-    render(<StartScreen {...defaultProps} />);
-    expect(screen.getByText('Connect Spotify')).toBeInTheDocument();
-  });
-
-  it('shows connected state when Spotify sessionId exists', () => {
-    useSpotifyStore.setState({
-      sessionId: 'test-session',
-      isSpotifyUnlocked: true,
-      user: { displayName: 'Test User', id: '123', imageUrl: null, product: null },
-    });
-    render(<StartScreen {...defaultProps} />);
-    expect(screen.getByText('Connected as Test User')).toBeInTheDocument();
-    expect(screen.getByText('Disconnect')).toBeInTheDocument();
-    useSpotifyStore.setState({ sessionId: null, user: null });
-  });
-
-  it('renders Play Local Files button', () => {
+  it('renders Play Local Files card', () => {
     render(<StartScreen {...defaultProps} />);
     expect(screen.getByText('Play Local Files')).toBeInTheDocument();
   });
 
-  it('renders Use Microphone button', () => {
+  it('renders Use Microphone card', () => {
     render(<StartScreen {...defaultProps} />);
     expect(screen.getByText('Use Microphone')).toBeInTheDocument();
   });
 
-  it('renders BYOC toggle when Spotify not connected', () => {
-    useSpotifyStore.setState({ isSpotifyUnlocked: true });
+  it('opens local files modal on card click', async () => {
+    const user = userEvent.setup();
     render(<StartScreen {...defaultProps} />);
-    expect(screen.getByText('Use your own Spotify credentials')).toBeInTheDocument();
+    await user.click(screen.getByText('Play Local Files'));
+    expect(screen.getByText('Choose Files')).toBeInTheDocument();
+  });
+
+  it('opens microphone modal on card click', async () => {
+    const user = userEvent.setup();
+    render(<StartScreen {...defaultProps} />);
+    await user.click(screen.getByText('Use Microphone'));
+    expect(screen.getByText('Start Microphone')).toBeInTheDocument();
+  });
+
+  it('closes modal on Escape key', async () => {
+    const user = userEvent.setup();
+    render(<StartScreen {...defaultProps} />);
+    await user.click(screen.getByText('Play Local Files'));
+    expect(screen.getByText('Choose Files')).toBeInTheDocument();
+    await user.keyboard('{Escape}');
+    expect(screen.queryByText('Choose Files')).not.toBeInTheDocument();
+  });
+
+  it('closes modal on close button click', async () => {
+    const user = userEvent.setup();
+    render(<StartScreen {...defaultProps} />);
+    await user.click(screen.getByText('Use Microphone'));
+    expect(screen.getByText('Start Microphone')).toBeInTheDocument();
+    await user.click(screen.getByLabelText('Close'));
+    expect(screen.queryByText('Start Microphone')).not.toBeInTheDocument();
   });
 });

@@ -69,8 +69,8 @@ npm run dev -w packages/frontend
 # Development
 npm run dev -w packages/frontend     # Vite dev server (localhost:5173)
 
-# Testing (151 tests)
-npm run test -w packages/frontend    # 119 Vitest tests (jsdom)
+# Testing (179 tests)
+npm run test -w packages/frontend    # 147 Vitest tests (jsdom)
 npm run test -w packages/backend     # 17 Vitest tests
 npm run test -w infrastructure       # 15 Jest tests (CDK assertions)
 npm test                             # All workspaces
@@ -86,15 +86,16 @@ npm run build -w packages/frontend   # tsc + vite build
 
 ## Keyboard Shortcuts
 
-| Key       | Action              |
-| --------- | ------------------- |
-| Space / N | Next preset         |
-| F         | Toggle fullscreen   |
-| A         | Toggle autopilot    |
-| S         | Toggle favorite     |
-| B         | Toggle block        |
-| Escape    | Close panel/overlay |
-| ? / H     | Shortcut help       |
+| Key          | Action              |
+| ------------ | ------------------- |
+| Space / N    | Next preset         |
+| F            | Toggle fullscreen   |
+| Double-click | Toggle fullscreen   |
+| A            | Toggle autopilot    |
+| S            | Toggle favorite     |
+| B            | Toggle block        |
+| Escape       | Close panel/overlay |
+| ? / H        | Shortcut help       |
 
 ## Tech Stack
 
@@ -129,4 +130,4 @@ Pushes to `main` auto-deploy via GitHub Actions:
 
 ## License
 
-[MIT](LICENSE)
+[AGPL-3.0](LICENSE)

@@ -7,7 +7,7 @@ The MangoWave visualizer app — a React 19 + Vite 7 + TypeScript SPA that captu
 ```bash
 npm run dev        # Vite dev server at localhost:5173
 npm run build      # tsc -b && vite build
-npm run test       # Vitest (119 tests, jsdom)
+npm run test       # Vitest (147 tests, jsdom)
 npm run test:watch # Vitest in watch mode
 npm run lint       # ESLint
 ```
@@ -28,8 +28,8 @@ getDisplayMedia -> MediaStreamSource -> GainNode (pre-amp) -> 10x BiquadFilter (
 
 ```
 src/
-├── components/    # UI: ControlBar, EQPanel, PerformancePanel, PresetBrowser,
-│                  #     StartScreen, ShortcutOverlay, Tooltip, ErrorBoundary, etc.
+├── components/    # UI: ControlBar, SettingsPanel (tabbed: EQ/Performance/Shortcuts),
+│                  #     PresetBrowser, NowPlaying, StartScreen, ShortcutOverlay, etc.
 ├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (butterchurn),
 │                  # isWebGL2Supported
 ├── hooks/         # useAudioCapture, useAutopilot, useKeyboardShortcuts,
@@ -54,6 +54,7 @@ Zustand with `localStorage` persistence. Key sections:
 | `blockedPresets`    | string[]                               | []                |
 | `favoritePresets`   | string[]                               | []                |
 | `presetNameDisplay` | `'off' \| 'always' \| number`          | 5                 |
+| `songInfoDisplay`   | `'off' \| 'always' \| number`          | 5                 |
 | `transitionTime`    | number (seconds)                       | 2.0               |
 
 Blocked and favorited presets are mutually exclusive.

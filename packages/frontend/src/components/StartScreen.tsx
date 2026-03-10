@@ -114,7 +114,7 @@ export function StartScreen({ onStart, error }: StartScreenProps) {
         {/* Shortcut hint */}
         <p className="text-xs text-[#888]">
           Press <kbd className="rounded bg-white/10 px-1 py-0.5 font-mono text-[#aaa]">?</kbd>{' '}
-          during playback to see keyboard shortcuts
+          during playback for shortcuts, or find them in Settings
         </p>
 
         {/* Error */}

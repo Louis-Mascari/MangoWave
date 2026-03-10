@@ -44,7 +44,7 @@ export function ControlBar({
   onToggleFavorite,
   onToggleBlock,
 }: ControlBarProps) {
-  const isIdle = useIdleTimer(3000);
+  const isIdle = useIdleTimer(3000, 5000);
   const accessToken = useSpotifyStore((s) => s.accessToken);
   const user = useSpotifyStore((s) => s.user);
   const logout = useSpotifyStore((s) => s.logout);

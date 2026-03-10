@@ -1,18 +1,28 @@
 <p align="center">
-  <img src="logo.png" alt="MangoWave logo" width="150">
+  <img src="images/logo.png" alt="MangoWave logo" width="150">
 </p>
 
 # MangoWave Landing Page
 
 Static landing page served at [mangowave.app](https://mangowave.app). Pure HTML + CSS, no JavaScript.
 
-## Files
+## Structure
 
-- `index.html` — single-page landing with inline SVG icons
-- `style.css` — extracted styles
-- `logo.png` — MangoWave logo (transparent background)
-- `howling.png` — background wolf image (subtle opacity layer)
-- `favicon.ico` + icon PNGs — favicons and touch icons
+```
+landing/
+├── index.html       # Single-page landing with inline SVG icons
+├── style.css        # Extracted styles
+├── favicon.ico      # Browser tab icon
+├── images/          # Visual assets
+│   ├── logo.png     # MangoWave logo (transparent background)
+│   └── howling.png  # Background wolf image (subtle opacity layer)
+└── icons/           # Favicons and touch icons
+    ├── apple-touch-icon.png
+    ├── android-chrome-192x192.png
+    ├── android-chrome-512x512.png
+    ├── favicon-16x16.png
+    └── favicon-32x32.png
+```
 
 ## Design
 

@@ -46,4 +46,34 @@ describe('useIdleTimer', () => {
     act(() => vi.advanceTimersByTime(1000));
     expect(result.current).toBe(true);
   });
+
+  it('delays initial idle timer when initialDelayMs is set', () => {
+    const { result } = renderHook(() => useIdleTimer(3000, 5000));
+
+    // After initial delay hasn't elapsed, timer hasn't started
+    act(() => vi.advanceTimersByTime(4000));
+    expect(result.current).toBe(false);
+
+    // After initial delay elapses, resetTimer fires (starts the 3s idle timer)
+    act(() => vi.advanceTimersByTime(1000));
+    expect(result.current).toBe(false);
+
+    // After the idle timeout, becomes idle
+    act(() => vi.advanceTimersByTime(3000));
+    expect(result.current).toBe(true);
+  });
+
+  it('skips initial delay when user interacts before it elapses', () => {
+    const { result } = renderHook(() => useIdleTimer(3000, 5000));
+
+    // User moves mouse before initial delay
+    act(() => vi.advanceTimersByTime(1000));
+    act(() => {
+      window.dispatchEvent(new Event('mousemove'));
+    });
+
+    // Normal idle timeout from interaction
+    act(() => vi.advanceTimersByTime(3000));
+    expect(result.current).toBe(true);
+  });
 });

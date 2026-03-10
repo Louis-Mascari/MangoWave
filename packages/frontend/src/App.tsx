@@ -15,6 +15,7 @@ import { StartScreen } from './components/StartScreen.tsx';
 import { ShortcutOverlay } from './components/ShortcutOverlay.tsx';
 import { LaunchAnimation } from './components/LaunchAnimation.tsx';
 import { RateLimitToast } from './components/RateLimitToast.tsx';
+import { useUnlockCheck } from './hooks/useUnlockCheck.ts';
 import { useSettingsStore } from './store/useSettingsStore.ts';
 import { useSpotifyStore } from './store/useSpotifyStore.ts';
 import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
@@ -49,6 +50,7 @@ function App() {
 
 function MainApp() {
   const webgl2 = useMemo(() => isWebGL2Supported(), []);
+  useUnlockCheck();
   useSpotifyAuth();
   useSettingsSync();
 
@@ -237,7 +239,12 @@ function MainApp() {
           )}
         </>
       ) : (
-        <StartScreen onStart={handleStart} error={error} />
+        <StartScreen
+          onStart={handleStart}
+          onLocalFiles={() => {}}
+          onMicCapture={() => {}}
+          error={error}
+        />
       )}
     </div>
   );

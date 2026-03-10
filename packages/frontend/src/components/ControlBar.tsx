@@ -48,8 +48,10 @@ export function ControlBar({
   const accessToken = useSpotifyStore((s) => s.accessToken);
   const user = useSpotifyStore((s) => s.user);
   const logout = useSpotifyStore((s) => s.logout);
+  const getAuthMode = useSpotifyStore((s) => s.getAuthMode);
 
   const isSpotifyConnected = !!accessToken;
+  const authMode = getAuthMode();
 
   const handleSpotifyConnect = () => {
     const url = buildSpotifyAuthUrl();
@@ -144,7 +146,9 @@ export function ControlBar({
               </BarButton>
             </>
           ) : (
-            <BarButton onClick={handleSpotifyConnect}>Connect Spotify</BarButton>
+            authMode !== 'locked' && (
+              <BarButton onClick={handleSpotifyConnect}>Connect Spotify</BarButton>
+            )
           )}
 
           <div className="mx-1 h-5 w-px bg-white/20" />

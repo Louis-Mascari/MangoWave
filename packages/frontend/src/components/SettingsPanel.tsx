@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { EQ_BANDS } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
+import { useSpotifyStore } from '../store/useSpotifyStore.ts';
+import { buildPkceAuthUrl } from '../services/spotifyPkce.ts';
 import { Tooltip } from './Tooltip.tsx';
 
-type Tab = 'equalizer' | 'performance' | 'shortcuts';
+type Tab = 'equalizer' | 'performance' | 'shortcuts' | 'spotify';
 
 const FPS_OPTIONS = [
   { label: 'Uncapped', value: 0 },
@@ -39,11 +41,15 @@ export function SettingsPanel() {
         <TabButton active={activeTab === 'shortcuts'} onClick={() => setActiveTab('shortcuts')}>
           Shortcuts
         </TabButton>
+        <TabButton active={activeTab === 'spotify'} onClick={() => setActiveTab('spotify')}>
+          Spotify
+        </TabButton>
       </div>
 
       {activeTab === 'equalizer' && <EqualizerTab />}
       {activeTab === 'performance' && <PerformanceTab />}
       {activeTab === 'shortcuts' && <ShortcutsTab />}
+      {activeTab === 'spotify' && <SpotifyTab />}
     </div>
   );
 }
@@ -383,6 +389,94 @@ function PerformanceTab() {
           Favorites only
         </label>
       </div>
+    </>
+  );
+}
+
+function SpotifyTab() {
+  const user = useSpotifyStore((s) => s.user);
+  const accessToken = useSpotifyStore((s) => s.accessToken);
+  const sessionId = useSpotifyStore((s) => s.sessionId);
+  const byocClientId = useSpotifyStore((s) => s.byocClientId);
+  const getAuthMode = useSpotifyStore((s) => s.getAuthMode);
+  const setByocClientId = useSpotifyStore((s) => s.setByocClientId);
+  const logout = useSpotifyStore((s) => s.logout);
+  const authMode = getAuthMode();
+
+  const isConnected = !!(accessToken || sessionId);
+  const [byocInput, setByocInput] = useState(byocClientId ?? '');
+
+  const handleByocConnect = async () => {
+    const trimmed = byocInput.trim();
+    if (!trimmed) return;
+    setByocClientId(trimmed);
+    const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
+    const { url } = await buildPkceAuthUrl(trimmed, redirectUri);
+    const popup = window.open(url, 'spotify-auth', 'popup,width=500,height=700');
+    if (!popup || popup.closed) {
+      window.location.href = url;
+    }
+  };
+
+  if (authMode === 'locked') {
+    return (
+      <>
+        <h3 className="text-sm font-semibold text-white">Spotify</h3>
+        <p className="text-xs text-white/50">Spotify integration is not available.</p>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <h3 className="text-sm font-semibold text-white">Spotify</h3>
+
+      {isConnected ? (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-green-400">&#10003;</span>
+            <span className="text-white/80">
+              {user?.displayName ? `Connected as ${user.displayName}` : 'Connected'}
+            </span>
+            {byocClientId && (
+              <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] text-white/50">
+                BYOC
+              </span>
+            )}
+          </div>
+          <button
+            onClick={logout}
+            className="w-fit cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
+          >
+            Disconnect
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          <p className="text-xs text-white/50">
+            Connect Spotify for now-playing info and playback controls.
+          </p>
+
+          {/* BYOC section */}
+          <div className="flex flex-col gap-2 rounded border border-white/10 bg-white/[0.03] p-3">
+            <label className="text-xs text-white/60">Client ID (BYOC)</label>
+            <input
+              type="text"
+              value={byocInput}
+              onChange={(e) => setByocInput(e.target.value)}
+              placeholder="Spotify Client ID"
+              className="w-full rounded border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-[#1DB954] focus:outline-none"
+            />
+            <button
+              onClick={handleByocConnect}
+              disabled={!byocInput.trim()}
+              className="w-fit cursor-pointer rounded border-none bg-[#1DB954]/20 px-3 py-1 text-xs text-[#1DB954] hover:bg-[#1DB954]/30 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Connect with PKCE
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

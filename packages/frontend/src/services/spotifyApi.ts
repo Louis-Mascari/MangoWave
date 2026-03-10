@@ -30,8 +30,8 @@ const SCOPES = [
   'user-modify-playback-state',
 ].join(' ');
 
-export function buildSpotifyAuthUrl(): string {
-  const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+export function buildSpotifyAuthUrl(clientIdOverride?: string): string {
+  const clientId = clientIdOverride ?? import.meta.env.VITE_SPOTIFY_CLIENT_ID;
   const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
 
   if (!clientId || !redirectUri) {

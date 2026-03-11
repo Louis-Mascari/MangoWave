@@ -109,19 +109,18 @@ function MainApp() {
   const [showLaunchAnimation, setShowLaunchAnimation] = useState(false);
   const resetAutopilotRef = useRef<() => void>(() => {});
 
-  // Build effective quarantine set (quarantined minus overrides and favorites)
+  // Build effective quarantine set (quarantined minus user overrides)
   const effectiveQuarantineSet = useMemo(() => {
     if (showQuarantined) return new Set<string>();
     const overrideSet = new Set(quarantineOverrides);
-    const favSet = new Set(favoritePresets);
     const result = new Set<string>();
     for (const name of quarantinedSet) {
-      if (!overrideSet.has(name) && !favSet.has(name)) {
+      if (!overrideSet.has(name)) {
         result.add(name);
       }
     }
     return result;
-  }, [showQuarantined, quarantineOverrides, favoritePresets]);
+  }, [showQuarantined, quarantineOverrides]);
 
   // Merged blocked set: user blocks + effective quarantine
   const mergedBlockedSet = useMemo(() => {

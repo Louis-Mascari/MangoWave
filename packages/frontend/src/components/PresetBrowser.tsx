@@ -43,6 +43,7 @@ function PresetRow({
   onSelect,
   onToggleFavorite,
   onToggleBlock,
+  onUnquarantine,
   onAddToPack,
   hasCustomPacks,
 }: {
@@ -54,6 +55,7 @@ function PresetRow({
   onSelect: () => void;
   onToggleFavorite: () => void;
   onToggleBlock: () => void;
+  onUnquarantine: () => void;
   onAddToPack: () => void;
   hasCustomPacks: boolean;
 }) {
@@ -97,6 +99,21 @@ function PresetRow({
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
           </svg>
         </button>
+        {isQuarantined && (
+          <button
+            onClick={onUnquarantine}
+            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent text-yellow-500/60 hover:bg-white/10 hover:text-yellow-400"
+            title="Remove from quarantine"
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+        )}
         <button
           onClick={onToggleBlock}
           className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
@@ -236,15 +253,14 @@ export function PresetBrowser({
 
   const enabledPackSet = useMemo(() => new Set(enabledPacks), [enabledPacks]);
 
-  // Determine effective quarantine (hidden unless shown, overridden, or favorited)
+  // Determine effective quarantine (hidden unless overridden by user)
   const isQuarantined = useCallback(
     (name: string) => {
       if (!quarantinedSet.has(name)) return false;
       if (overrideSet.has(name)) return false;
-      if (favoriteSet.has(name)) return false;
       return true;
     },
-    [overrideSet, favoriteSet],
+    [overrideSet],
   );
 
   // Get pack for a preset (Mango's Picks membership + source pack)
@@ -375,13 +391,17 @@ export function PresetBrowser({
     (name: string) => {
       const wasFavorite = favoriteSet.has(name);
       toggleFavoritePreset(name);
-      // If favoriting a quarantined preset, override quarantine
-      if (!wasFavorite && quarantinedSet.has(name)) {
-        addQuarantineOverride(name);
-      }
       useToastStore.getState().show(wasFavorite ? 'Removed from favorites' : 'Added to favorites');
     },
-    [favoriteSet, toggleFavoritePreset, addQuarantineOverride],
+    [favoriteSet, toggleFavoritePreset],
+  );
+
+  const handleUnquarantine = useCallback(
+    (name: string) => {
+      addQuarantineOverride(name);
+      useToastStore.getState().show('Removed from quarantine');
+    },
+    [addQuarantineOverride],
   );
 
   const handleToggleBlock = useCallback(
@@ -576,6 +596,7 @@ export function PresetBrowser({
                 onSelect={() => onSelectPreset(name)}
                 onToggleFavorite={() => handleToggleFavorite(name)}
                 onToggleBlock={() => handleToggleBlock(name)}
+                onUnquarantine={() => handleUnquarantine(name)}
                 onAddToPack={() => setPackPickerPreset(name)}
                 hasCustomPacks={hasCustomPacks}
               />
@@ -602,6 +623,7 @@ export function PresetBrowser({
           onSelect={() => onSelectPreset(name)}
           onToggleFavorite={() => handleToggleFavorite(name)}
           onToggleBlock={() => handleToggleBlock(name)}
+          onUnquarantine={() => handleUnquarantine(name)}
           onAddToPack={() => setPackPickerPreset(name)}
           hasCustomPacks={hasCustomPacks}
         />

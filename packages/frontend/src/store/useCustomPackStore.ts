@@ -16,7 +16,7 @@ interface ImportedPack {
   exportedAt?: string;
 }
 
-const MAX_FILE_SIZE = 1_048_576; // 1MB
+const MAX_FILE_SIZE = 102_400; // 100KB — realistic packs are ~10KB
 const MAX_STRING_LENGTH = 200;
 
 function sanitizeString(s: unknown): string | null {
@@ -107,7 +107,7 @@ export const useCustomPackStore = create<CustomPackState>()(
 
       importPack: async (file) => {
         if (file.size > MAX_FILE_SIZE) {
-          return { success: false, error: 'File too large (max 1MB)' };
+          return { success: false, error: 'File too large (max 100KB)' };
         }
 
         try {

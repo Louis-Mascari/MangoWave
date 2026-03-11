@@ -5,6 +5,7 @@ interface ShortcutOverlayProps {
 
 const SHORTCUTS = [
   { key: 'Space / N', action: 'Next preset' },
+  { key: 'P', action: 'Previous preset' },
   { key: 'F', action: 'Toggle fullscreen' },
   { key: 'A', action: 'Toggle autopilot' },
   { key: 'S', action: 'Toggle favorite' },

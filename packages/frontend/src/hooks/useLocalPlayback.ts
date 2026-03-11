@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AudioEngine } from '../engine/AudioEngine.ts';
 import { useMediaPlayerStore } from '../store/useMediaPlayerStore.ts';
+import { useSettingsStore } from '../store/useSettingsStore.ts';
 
 export interface UseLocalPlaybackReturn {
   audioEngine: AudioEngine | null;
@@ -24,9 +25,11 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audioEngine, setAudioEngine] = useState<AudioEngine | null>(null);
   const [isActive, setIsActive] = useState(false);
-  const [volume, setVolumeState] = useState(1);
+  const savedVolume = useSettingsStore((s) => s.volume);
+  const persistVolume = useSettingsStore((s) => s.setVolume);
+  const [volume, setVolumeState] = useState(savedVolume);
   const [isMuted, setIsMuted] = useState(false);
-  const preMuteVolumeRef = useRef(1);
+  const preMuteVolumeRef = useRef(savedVolume);
 
   const tracks = useMediaPlayerStore((s) => s.tracks);
   const currentTrackIndex = useMediaPlayerStore((s) => s.currentTrackIndex);
@@ -59,6 +62,7 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
 
       const audio = new Audio();
       audio.crossOrigin = 'anonymous';
+      audio.volume = useSettingsStore.getState().volume;
       audioRef.current = audio;
 
       const engine = new AudioEngine();
@@ -197,13 +201,17 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
     }
   }, []);
 
-  const setVolume = useCallback((vol: number) => {
-    setVolumeState(vol);
-    setIsMuted(vol === 0);
-    if (audioRef.current) {
-      audioRef.current.volume = vol;
-    }
-  }, []);
+  const setVolume = useCallback(
+    (vol: number) => {
+      setVolumeState(vol);
+      setIsMuted(vol === 0);
+      if (audioRef.current) {
+        audioRef.current.volume = vol;
+      }
+      if (vol > 0) persistVolume(vol);
+    },
+    [persistVolume],
+  );
 
   const toggleMute = useCallback(() => {
     if (isMuted) {

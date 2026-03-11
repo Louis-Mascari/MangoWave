@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
+import { useToastStore } from '../store/useToastStore.ts';
 
 interface PresetBrowserProps {
   presetList: string[];
@@ -86,7 +87,12 @@ export function PresetBrowser({
               </button>
               <div className="flex gap-1.5">
                 <button
-                  onClick={() => toggleFavoritePreset(name)}
+                  onClick={() => {
+                    toggleFavoritePreset(name);
+                    useToastStore
+                      .getState()
+                      .show(isFavorite ? 'Removed from favorites' : 'Added to favorites');
+                  }}
                   className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
                     isFavorite
                       ? 'text-yellow-400'
@@ -102,8 +108,10 @@ export function PresetBrowser({
                   onClick={() => {
                     if (isBlocked) {
                       unblockPreset(name);
+                      useToastStore.getState().show('Preset unblocked');
                     } else {
                       blockPreset(name);
+                      useToastStore.getState().show('Preset blocked');
                       if (name === currentPreset) onNextPreset();
                     }
                   }}

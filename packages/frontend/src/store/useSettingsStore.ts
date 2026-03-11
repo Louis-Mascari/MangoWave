@@ -63,6 +63,10 @@ export interface SettingsState {
   // Transitions
   transitionTime: number; // seconds for preset blend
   setTransitionTime: (seconds: number) => void;
+
+  // Volume (persisted for local file playback)
+  volume: number; // 0.0 to 1.0
+  setVolume: (volume: number) => void;
 }
 
 const DEFAULT_BAND_GAINS = EQ_BANDS.map(() => 0);
@@ -181,6 +185,10 @@ export const useSettingsStore = create<SettingsState>()(
       // Transitions
       transitionTime: 2.0,
       setTransitionTime: (seconds) => set({ transitionTime: seconds }),
+
+      // Volume
+      volume: 0.5,
+      setVolume: (volume) => set({ volume }),
     }),
     {
       name: 'mangowave-settings',

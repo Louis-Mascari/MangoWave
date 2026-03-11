@@ -8,6 +8,7 @@ import { useNowPlaying } from './hooks/useNowPlaying.ts';
 import { useAutopilot } from './hooks/useAutopilot.ts';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.ts';
 import { useHideCursor } from './hooks/useHideCursor.ts';
+import { useFullscreen } from './hooks/useFullscreen.ts';
 import { Visualizer } from './components/Visualizer.tsx';
 import { ControlBar } from './components/ControlBar.tsx';
 import type { PanelView } from './components/ControlBar.tsx';
@@ -18,12 +19,16 @@ import { StartScreen } from './components/StartScreen.tsx';
 import { ShortcutOverlay } from './components/ShortcutOverlay.tsx';
 import { LaunchAnimation } from './components/LaunchAnimation.tsx';
 import { RateLimitToast } from './components/RateLimitToast.tsx';
+import { ActionToast } from './components/ActionToast.tsx';
 import { useUnlockCheck } from './hooks/useUnlockCheck.ts';
 import { useSettingsStore } from './store/useSettingsStore.ts';
 import { useSpotifyStore } from './store/useSpotifyStore.ts';
+import { usePresetHistoryStore } from './store/usePresetHistoryStore.ts';
+import { useToastStore } from './store/useToastStore.ts';
 import { controlPlayback, RateLimitedError } from './services/spotifyApi.ts';
 import type { PlaybackAdapter } from './components/PlaybackControls.tsx';
 import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
+import { isMobileDevice } from './utils/isMobileDevice.ts';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
 
 /**
@@ -132,6 +137,7 @@ function MainApp() {
 
   const handlePresetChange = useCallback((name: string) => {
     setCurrentPreset(name);
+    usePresetHistoryStore.getState().push(name);
   }, []);
 
   const handlePresetsLoaded = useCallback((presets: string[]) => {
@@ -142,6 +148,16 @@ function MainApp() {
     rendererRef.current?.nextPreset(new Set(blockedPresets), transitionTime);
     resetAutopilotRef.current();
   }, [blockedPresets, transitionTime]);
+
+  const handlePreviousPreset = useCallback(() => {
+    const name = usePresetHistoryStore.getState().goBack();
+    if (name) {
+      rendererRef.current?.loadPreset(name, transitionTime);
+      resetAutopilotRef.current();
+    }
+  }, [transitionTime]);
+
+  const canGoBack = usePresetHistoryStore((s) => s.cursor > 0);
 
   const handleSelectPreset = useCallback(
     (name: string) => {
@@ -192,6 +208,7 @@ function MainApp() {
     resetAutopilotRef.current = resetAutopilot;
   });
   useHideCursor(3000);
+  const isFullscreen = useFullscreen();
 
   // Reset autopilot timer when favoritesOnly changes
   useEffect(() => {
@@ -199,13 +216,17 @@ function MainApp() {
   }, [autopilot.favoritesOnly, resetAutopilot]);
 
   const handleToggleFavorite = useCallback(() => {
-    if (currentPreset) toggleFavoritePreset(currentPreset);
+    if (!currentPreset) return;
+    const wasFavorite = useSettingsStore.getState().favoritePresets.includes(currentPreset);
+    toggleFavoritePreset(currentPreset);
+    useToastStore.getState().show(wasFavorite ? 'Removed from favorites' : 'Added to favorites');
   }, [currentPreset, toggleFavoritePreset]);
 
   const handleToggleBlock = useCallback(() => {
     if (!currentPreset) return;
     const isCurrentlyBlocked = useSettingsStore.getState().blockedPresets.includes(currentPreset);
     toggleBlockPreset(currentPreset);
+    useToastStore.getState().show(isCurrentlyBlocked ? 'Preset unblocked' : 'Preset blocked');
     // If we just blocked the current preset, skip to next
     if (!isCurrentlyBlocked) {
       handleNextPreset();
@@ -284,7 +305,7 @@ function MainApp() {
         tooltip: 'Microphone input — no playback controls',
       };
     }
-    if (isSpotifyConnected) {
+    if (isSpotifyConnected && !isMobileDevice) {
       return {
         source: 'spotify',
         isPlaying: spotifyNowPlaying?.isPlaying ?? false,
@@ -351,6 +372,7 @@ function MainApp() {
 
   const { showShortcutOverlay, toggleShortcutOverlay } = useKeyboardShortcuts({
     onNextPreset: handleNextPreset,
+    onPreviousPreset: handlePreviousPreset,
     onToggleFullscreen: handleToggleFullscreen,
     onClosePanel: handleClosePanel,
     onToggleAutopilot: handleToggleAutopilot,
@@ -398,9 +420,12 @@ function MainApp() {
               />
               <ControlBar
                 onNextPreset={handleNextPreset}
+                onPreviousPreset={handlePreviousPreset}
+                canGoBack={canGoBack}
                 onSelectPreset={handleSelectPreset}
                 onStop={handleStop}
                 onToggleFullscreen={handleToggleFullscreen}
+                isFullscreen={isFullscreen}
                 onToggleNowPlaying={handleToggleNowPlaying}
                 showNowPlaying={showNowPlaying}
                 presetList={presetList}
@@ -422,6 +447,7 @@ function MainApp() {
                 onToggleMute={local.isActive ? local.toggleMute : undefined}
                 playbackAdapter={playbackAdapter}
               />
+              <ActionToast />
               <ShortcutOverlay visible={showShortcutOverlay} onClose={toggleShortcutOverlay} />
             </>
           )}

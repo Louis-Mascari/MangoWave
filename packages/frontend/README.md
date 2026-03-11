@@ -45,7 +45,9 @@ src/
 │                  # useIdleTimer, useHideCursor, useSpotifyAuth, useNowPlaying, useUnlockCheck
 ├── lib/           # PostHog & Sentry init (no-op when env vars absent)
 ├── services/      # Spotify Web API client, PKCE auth utilities
-├── store/         # Zustand stores: useSettingsStore, useSpotifyStore, useMediaPlayerStore
+├── store/         # Zustand stores: useSettingsStore, useSpotifyStore, useMediaPlayerStore,
+│                  #     usePresetHistoryStore, useToastStore
+├── utils/         # Shared utilities (isMobileDevice)
 ├── types/         # butterchurn.d.ts (type declarations for untyped packages)
 └── test/          # Vitest global setup
 ```
@@ -65,10 +67,15 @@ Zustand with `localStorage` persistence. Key sections:
 | `presetNameDisplay` | `'off' \| 'always' \| number`          | 5                 |
 | `songInfoDisplay`   | `'off' \| 'always' \| number`          | 5                 |
 | `transitionTime`    | number (seconds)                       | 2.0               |
+| `volume`            | number (0.0–1.0)                       | 0.5               |
 
 Blocked and favorited presets are mutually exclusive.
 
 `useMediaPlayerStore` manages local file playback state (queue, current track, shuffle history, repeat mode). Not persisted — `File` objects can't survive page reload.
+
+`usePresetHistoryStore` tracks preset navigation history (max 50 entries, cursor-based) for previous/next preset navigation. Not persisted.
+
+`useToastStore` drives single-message action toasts (favorite/block confirmations). Auto-clears after 2s.
 
 ## Environment Variables
 

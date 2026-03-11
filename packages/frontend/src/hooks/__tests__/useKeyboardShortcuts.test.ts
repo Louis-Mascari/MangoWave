@@ -8,6 +8,7 @@ function fireKey(key: string, options: Partial<KeyboardEventInit> = {}) {
 
 const handlers = {
   onNextPreset: vi.fn(),
+  onPreviousPreset: vi.fn(),
   onToggleFullscreen: vi.fn(),
   onClosePanel: vi.fn(),
   onToggleAutopilot: vi.fn(),

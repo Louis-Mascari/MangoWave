@@ -24,7 +24,9 @@
 - **Pre-amp gain** to boost quiet audio sources
 - **Preset browser** with search, favorites, and blocking
 - **Autopilot** auto-cycles presets on a configurable interval (5-120s)
+- **Preset history** with previous/next navigation (up to 50 entries)
 - **Keyboard shortcuts** for preset navigation, fullscreen, favorites, and more
+- **Mobile-optimized UI** with radial FAB menu and full-screen modal panels
 - **Optional Spotify integration** for Now Playing metadata and playback controls (bring your own Client ID via PKCE — Spotify limits each app key to 5 users)
 - **Configurable performance** — FPS cap, resolution scaling, FFT size, smoothing
 - **Zero install** — runs entirely in the browser, no extensions needed
@@ -93,6 +95,7 @@ npm run build -w packages/frontend   # tsc + vite build
 | Key          | Action                     |
 | ------------ | -------------------------- |
 | Space / N    | Next preset                |
+| P            | Previous preset            |
 | F            | Toggle fullscreen          |
 | Double-click | Toggle fullscreen          |
 | A            | Toggle autopilot           |

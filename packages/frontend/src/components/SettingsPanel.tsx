@@ -5,6 +5,7 @@ import { useSpotifyStore } from '../store/useSpotifyStore.ts';
 import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { buildPkceAuthUrl } from '../services/spotifyPkce.ts';
 import { Tooltip } from './Tooltip.tsx';
+import { isMobileDevice } from '../utils/isMobileDevice.ts';
 
 type Tab = 'equalizer' | 'performance' | 'shortcuts' | 'spotify';
 
@@ -33,7 +34,7 @@ export function SettingsPanel() {
   const accessToken = useSpotifyStore((s) => s.accessToken);
   const sessionId = useSpotifyStore((s) => s.sessionId);
   const authMode = getAuthMode();
-  const showSpotifyTab = authMode !== 'locked' || !!(accessToken || sessionId);
+  const showSpotifyTab = !isMobileDevice && (authMode !== 'locked' || !!(accessToken || sessionId));
 
   return (
     <div className="flex flex-col gap-3 rounded-lg bg-black/60 p-4 backdrop-blur-sm">
@@ -522,6 +523,7 @@ function SpotifyTab() {
 
 const SHORTCUTS = [
   { key: 'Space / N', action: 'Next preset' },
+  { key: 'P', action: 'Previous preset' },
   { key: 'F', action: 'Toggle fullscreen' },
   { key: 'Double-click', action: 'Toggle fullscreen' },
   { key: 'A', action: 'Toggle autopilot' },

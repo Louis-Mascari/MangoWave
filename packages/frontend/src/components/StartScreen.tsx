@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
 import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { buildPkceAuthUrl } from '../services/spotifyPkce.ts';
+import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import logoSrc from '../assets/logo.png';
 
 interface StartScreenProps {
@@ -12,15 +13,6 @@ interface StartScreenProps {
 }
 
 type ModalView = 'none' | 'share-audio' | 'local-files' | 'microphone';
-
-const hasDisplayMedia = !!navigator.mediaDevices?.getDisplayMedia;
-
-// Detect mobile/tablet: no getDisplayMedia, or touch-primary device with small screen
-const isMobileDevice =
-  !hasDisplayMedia ||
-  (navigator.maxTouchPoints > 0 &&
-    window.matchMedia('(pointer: coarse)').matches &&
-    window.innerWidth < 1024);
 
 export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: StartScreenProps) {
   const sessionId = useSpotifyStore((s) => s.sessionId);

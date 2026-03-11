@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 interface KeyboardHandlers {
   onNextPreset: () => void;
+  onPreviousPreset: () => void;
   onToggleFullscreen: () => void;
   onClosePanel: () => void;
   onToggleAutopilot: () => void;
@@ -34,6 +35,10 @@ export function useKeyboardShortcuts(handlers: KeyboardHandlers) {
         case 'n':
         case 'N':
           handlers.onNextPreset();
+          break;
+        case 'p':
+        case 'P':
+          handlers.onPreviousPreset();
           break;
         case 'f':
         case 'F':

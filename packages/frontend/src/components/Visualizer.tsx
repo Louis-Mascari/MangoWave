@@ -7,7 +7,7 @@ interface VisualizerProps {
   audioEngine: AudioEngine;
   rendererRef: React.RefObject<VisualizerRenderer | null>;
   onPresetChange: (name: string) => void;
-  onPresetsLoaded: (presets: string[]) => void;
+  onPresetsLoaded: (presets: string[], packMap: Map<string, string>) => void;
   onToggleFullscreen: () => void;
 }
 
@@ -43,7 +43,7 @@ export function Visualizer({
     updateSize();
     renderer.init(canvas, ctx, analyser, onPresetChange);
     renderer.start();
-    onPresetsLoaded(renderer.presetList);
+    onPresetsLoaded(renderer.presetList, renderer.presetPackMap);
 
     window.addEventListener('resize', updateSize);
 

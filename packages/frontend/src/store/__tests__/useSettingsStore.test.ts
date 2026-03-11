@@ -15,9 +15,11 @@ describe('useSettingsStore', () => {
       result.current.setFftSize(1024);
       result.current.setAutopilotEnabled(true);
       result.current.setAutopilotInterval(15);
-      result.current.setAutopilotFavoritesOnly(false);
+      result.current.setAutopilotMode('all');
+      result.current.setAutopilotFavoriteWeight(2);
       result.current.setPresetNameDisplay(5);
       result.current.setSongInfoDisplay(5);
+      result.current.setShowQuarantined(false);
       // Clear presets
       result.current.blockedPresets.forEach((p) => result.current.unblockPreset(p));
       result.current.favoritePresets.forEach((p) => result.current.toggleFavoritePreset(p));
@@ -166,7 +168,8 @@ describe('useSettingsStore', () => {
       const { result } = renderHook(() => useSettingsStore());
       expect(result.current.autopilot.enabled).toBe(true);
       expect(result.current.autopilot.interval).toBe(15);
-      expect(result.current.autopilot.favoritesOnly).toBe(false);
+      expect(result.current.autopilot.mode).toBe('all');
+      expect(result.current.autopilot.favoriteWeight).toBe(2);
     });
 
     it('sets enabled', () => {
@@ -181,10 +184,37 @@ describe('useSettingsStore', () => {
       expect(result.current.autopilot.interval).toBe(30);
     });
 
-    it('sets favoritesOnly', () => {
+    it('sets mode', () => {
       const { result } = renderHook(() => useSettingsStore());
-      act(() => result.current.setAutopilotFavoritesOnly(true));
-      expect(result.current.autopilot.favoritesOnly).toBe(true);
+      act(() => result.current.setAutopilotMode('favorites'));
+      expect(result.current.autopilot.mode).toBe('favorites');
+    });
+
+    it('sets favorite weight', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setAutopilotFavoriteWeight(4));
+      expect(result.current.autopilot.favoriteWeight).toBe(4);
+    });
+  });
+
+  describe('quarantine', () => {
+    it('defaults to hidden', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      expect(result.current.showQuarantined).toBe(false);
+    });
+
+    it('toggles show quarantined', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setShowQuarantined(true));
+      expect(result.current.showQuarantined).toBe(true);
+    });
+
+    it('manages quarantine overrides', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.addQuarantineOverride('Bad Preset'));
+      expect(result.current.quarantineOverrides).toContain('Bad Preset');
+      act(() => result.current.removeQuarantineOverride('Bad Preset'));
+      expect(result.current.quarantineOverrides).not.toContain('Bad Preset');
     });
   });
 
@@ -267,6 +297,28 @@ describe('useSettingsStore', () => {
       const { result } = renderHook(() => useSettingsStore());
       act(() => result.current.setTransitionTime(5.0));
       expect(result.current.transitionTime).toBe(5.0);
+    });
+  });
+
+  describe('pack filtering', () => {
+    it('starts with empty enabledPacks', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      expect(result.current.enabledPacks).toEqual([]);
+    });
+
+    it('sets enabled packs', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setEnabledPacks(['Base', 'Extra']));
+      expect(result.current.enabledPacks).toEqual(['Base', 'Extra']);
+    });
+
+    it('toggles a pack', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setEnabledPacks(['Base', 'Extra']));
+      act(() => result.current.togglePack('Base'));
+      expect(result.current.enabledPacks).toEqual(['Extra']);
+      act(() => result.current.togglePack('Base'));
+      expect(result.current.enabledPacks).toContain('Base');
     });
   });
 });

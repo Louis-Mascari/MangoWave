@@ -40,6 +40,10 @@ vi.mock('butterchurn-presets/lib/butterchurnPresetsMinimal.min', () => ({
   default: { getPresets: () => ({}) },
 }));
 
+vi.mock('../../data/mangos-picks.json', () => ({
+  default: [],
+}));
+
 describe('VisualizerRenderer', () => {
   let renderer: VisualizerRenderer;
 
@@ -69,6 +73,16 @@ describe('VisualizerRenderer', () => {
       expect(renderer.presetList).toEqual(['Preset A', 'Preset B', 'Preset C']);
       expect(renderer.currentPresetName).toBe('Preset A');
       expect(onPresetChange).toHaveBeenCalledWith('Preset A');
+    });
+
+    it('builds pack map tracking preset origins', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+
+      const packMap = renderer.presetPackMap;
+      expect(packMap.get('Preset A')).toBe('Base');
+      expect(packMap.get('Preset B')).toBe('Base');
+      expect(packMap.get('Preset C')).toBe('Base');
     });
   });
 
@@ -138,6 +152,20 @@ describe('VisualizerRenderer', () => {
       expect(mockRaf).toHaveBeenCalledTimes(1);
 
       mockRaf.mockRestore();
+    });
+  });
+
+  describe('custom presets', () => {
+    it('registers and unregisters custom presets', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+
+      renderer.registerCustomPreset('Custom 1', { code: 'custom' });
+      expect(renderer.presetList).toContain('Custom 1');
+      expect(renderer.presetPackMap.get('Custom 1')).toBe('My Imports');
+
+      renderer.unregisterCustomPreset('Custom 1');
+      expect(renderer.presetList).not.toContain('Custom 1');
     });
   });
 

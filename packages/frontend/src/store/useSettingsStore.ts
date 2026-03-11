@@ -17,10 +17,14 @@ export interface AudioSettings {
   fftSize: number; // 512, 1024, 2048, 4096
 }
 
+export type AutopilotMode = 'all' | 'favorites' | 'pack';
+
 export interface AutopilotSettings {
   enabled: boolean;
   interval: number; // seconds
-  favoritesOnly: boolean;
+  mode: AutopilotMode;
+  packId: string | null; // custom pack ID for 'pack' mode
+  favoriteWeight: number; // 1–5, weight for favorites in shuffle
 }
 
 export interface SettingsState {
@@ -44,7 +48,9 @@ export interface SettingsState {
   autopilot: AutopilotSettings;
   setAutopilotEnabled: (enabled: boolean) => void;
   setAutopilotInterval: (interval: number) => void;
-  setAutopilotFavoritesOnly: (favoritesOnly: boolean) => void;
+  setAutopilotMode: (mode: AutopilotMode) => void;
+  setAutopilotPackId: (packId: string | null) => void;
+  setAutopilotFavoriteWeight: (weight: number) => void;
 
   // Presets
   blockedPresets: string[];
@@ -53,6 +59,18 @@ export interface SettingsState {
   unblockPreset: (name: string) => void;
   toggleBlockPreset: (name: string) => void;
   toggleFavoritePreset: (name: string) => void;
+
+  // Pack filtering
+  enabledPacks: string[];
+  setEnabledPacks: (packs: string[]) => void;
+  togglePack: (pack: string) => void;
+
+  // Quarantine
+  showQuarantined: boolean;
+  setShowQuarantined: (show: boolean) => void;
+  quarantineOverrides: string[];
+  addQuarantineOverride: (name: string) => void;
+  removeQuarantineOverride: (name: string) => void;
 
   // Display
   presetNameDisplay: 'off' | 'always' | number; // 'off', 'always', or seconds
@@ -106,7 +124,9 @@ export const useSettingsStore = create<SettingsState>()(
       autopilot: {
         enabled: true,
         interval: 15,
-        favoritesOnly: false,
+        mode: 'all',
+        packId: null,
+        favoriteWeight: 2,
       },
       setAutopilotEnabled: (enabled) =>
         set((state) => ({
@@ -116,9 +136,17 @@ export const useSettingsStore = create<SettingsState>()(
         set((state) => ({
           autopilot: { ...state.autopilot, interval },
         })),
-      setAutopilotFavoritesOnly: (favoritesOnly) =>
+      setAutopilotMode: (mode) =>
         set((state) => ({
-          autopilot: { ...state.autopilot, favoritesOnly },
+          autopilot: { ...state.autopilot, mode },
+        })),
+      setAutopilotPackId: (packId) =>
+        set((state) => ({
+          autopilot: { ...state.autopilot, packId },
+        })),
+      setAutopilotFavoriteWeight: (weight) =>
+        set((state) => ({
+          autopilot: { ...state.autopilot, favoriteWeight: weight },
         })),
 
       // EQ
@@ -176,6 +204,31 @@ export const useSettingsStore = create<SettingsState>()(
             : state.blockedPresets.filter((p) => p !== name),
         })),
 
+      // Pack filtering
+      enabledPacks: [],
+      setEnabledPacks: (packs) => set({ enabledPacks: packs }),
+      togglePack: (pack) =>
+        set((state) => ({
+          enabledPacks: state.enabledPacks.includes(pack)
+            ? state.enabledPacks.filter((p) => p !== pack)
+            : [...state.enabledPacks, pack],
+        })),
+
+      // Quarantine
+      showQuarantined: false,
+      setShowQuarantined: (show) => set({ showQuarantined: show }),
+      quarantineOverrides: [],
+      addQuarantineOverride: (name) =>
+        set((state) => ({
+          quarantineOverrides: state.quarantineOverrides.includes(name)
+            ? state.quarantineOverrides
+            : [...state.quarantineOverrides, name],
+        })),
+      removeQuarantineOverride: (name) =>
+        set((state) => ({
+          quarantineOverrides: state.quarantineOverrides.filter((p) => p !== name),
+        })),
+
       // Display
       presetNameDisplay: 5,
       setPresetNameDisplay: (value) => set({ presetNameDisplay: value }),
@@ -192,6 +245,21 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'mangowave-settings',
+      migrate: (persisted, version) => {
+        const state = persisted as Record<string, unknown>;
+        // Migrate from favoritesOnly boolean to mode enum
+        if (version === 0 || version === undefined) {
+          const autopilot = state.autopilot as Record<string, unknown> | undefined;
+          if (autopilot && 'favoritesOnly' in autopilot) {
+            autopilot.mode = autopilot.favoritesOnly ? 'favorites' : 'all';
+            autopilot.packId = autopilot.packId ?? null;
+            autopilot.favoriteWeight = autopilot.favoriteWeight ?? 2;
+            delete autopilot.favoritesOnly;
+          }
+        }
+        return state as unknown as SettingsState;
+      },
+      version: 1,
     },
   ),
 );

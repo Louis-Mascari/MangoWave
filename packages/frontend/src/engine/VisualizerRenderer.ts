@@ -5,6 +5,16 @@ import butterchurnPresetsExtra2 from 'butterchurn-presets/lib/butterchurnPresets
 import butterchurnPresetsMD1 from 'butterchurn-presets/lib/butterchurnPresetsMD1.min';
 import butterchurnPresetsNonMinimal from 'butterchurn-presets/lib/butterchurnPresetsNonMinimal.min';
 import butterchurnPresetsMinimal from 'butterchurn-presets/lib/butterchurnPresetsMinimal.min';
+import mangosPicks from '../data/mangos-picks.json';
+
+const PACK_SOURCES = [
+  { label: 'Base', getPresets: () => butterchurnPresets.getPresets() },
+  { label: 'Extra', getPresets: () => butterchurnPresetsExtra.getPresets() },
+  { label: 'Extra 2', getPresets: () => butterchurnPresetsExtra2.getPresets() },
+  { label: 'MD1', getPresets: () => butterchurnPresetsMD1.getPresets() },
+  { label: 'Non-Minimal', getPresets: () => butterchurnPresetsNonMinimal.getPresets() },
+  { label: 'Minimal', getPresets: () => butterchurnPresetsMinimal.getPresets() },
+] as const;
 
 export class VisualizerRenderer {
   private visualizer: ReturnType<typeof butterchurn.createVisualizer> | null = null;
@@ -15,6 +25,8 @@ export class VisualizerRenderer {
   private fpsInterval = 0; // 0 = uncapped
   private lastFrameTime = 0;
   private onPresetChange?: (name: string) => void;
+  private _presetPackMap: Map<string, string> = new Map();
+  private customPresets: Map<string, object> = new Map();
 
   get currentPresetName(): string {
     return this.presetKeys[this.currentPresetIndex] ?? '';
@@ -22,6 +34,10 @@ export class VisualizerRenderer {
 
   get presetList(): string[] {
     return [...this.presetKeys];
+  }
+
+  get presetPackMap(): Map<string, string> {
+    return new Map(this._presetPackMap);
   }
 
   init(
@@ -40,14 +56,29 @@ export class VisualizerRenderer {
 
     this.visualizer.connectAudio(analyserNode);
 
-    this.presets = {
-      ...butterchurnPresets.getPresets(),
-      ...butterchurnPresetsExtra.getPresets(),
-      ...butterchurnPresetsExtra2.getPresets(),
-      ...butterchurnPresetsMD1.getPresets(),
-      ...butterchurnPresetsNonMinimal.getPresets(),
-      ...butterchurnPresetsMinimal.getPresets(),
-    };
+    // Build presets and track pack origins
+    this._presetPackMap = new Map();
+    this.presets = {};
+
+    const mangosPicksSet = new Set(mangosPicks as string[]);
+
+    for (const { label, getPresets } of PACK_SOURCES) {
+      const packPresets = getPresets();
+      for (const [name, preset] of Object.entries(packPresets)) {
+        this.presets[name] = preset;
+        this._presetPackMap.set(name, label);
+        if (mangosPicksSet.has(name)) {
+          mangosPicksSet.delete(name);
+        }
+      }
+    }
+
+    // Register any stored custom presets
+    for (const [name, preset] of this.customPresets) {
+      this.presets[name] = preset;
+      // Pack map entry already set during registerCustomPreset
+    }
+
     this.presetKeys = Object.keys(this.presets);
 
     // Load a random initial preset
@@ -85,6 +116,20 @@ export class VisualizerRenderer {
     this.loadPreset(available[randomIndex], blendTime);
   }
 
+  registerCustomPreset(name: string, preset: object, packName = 'My Imports'): void {
+    this.customPresets.set(name, preset);
+    this.presets[name] = preset;
+    this._presetPackMap.set(name, packName);
+    this.presetKeys = Object.keys(this.presets);
+  }
+
+  unregisterCustomPreset(name: string): void {
+    this.customPresets.delete(name);
+    delete this.presets[name];
+    this._presetPackMap.delete(name);
+    this.presetKeys = Object.keys(this.presets);
+  }
+
   start(): void {
     if (this.animationFrameId !== null) return;
     this.lastFrameTime = performance.now();
@@ -118,5 +163,6 @@ export class VisualizerRenderer {
     this.visualizer = null;
     this.presets = {};
     this.presetKeys = [];
+    this._presetPackMap = new Map();
   }
 }

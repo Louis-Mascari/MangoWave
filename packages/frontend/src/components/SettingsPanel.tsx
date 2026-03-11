@@ -159,7 +159,10 @@ function PerformanceTab() {
   const autopilot = useSettingsStore((s) => s.autopilot);
   const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
   const setAutopilotInterval = useSettingsStore((s) => s.setAutopilotInterval);
-  const setAutopilotFavoritesOnly = useSettingsStore((s) => s.setAutopilotFavoritesOnly);
+  const setAutopilotMode = useSettingsStore((s) => s.setAutopilotMode);
+  const setAutopilotFavoriteWeight = useSettingsStore((s) => s.setAutopilotFavoriteWeight);
+  const showQuarantined = useSettingsStore((s) => s.showQuarantined);
+  const setShowQuarantined = useSettingsStore((s) => s.setShowQuarantined);
 
   return (
     <>
@@ -361,7 +364,7 @@ function PerformanceTab() {
         <div className="flex items-center justify-between">
           <label className="flex items-center text-xs font-semibold text-white/80">
             Autopilot
-            <Tooltip text="Automatically cycles through presets at the set interval" />
+            <Tooltip text="Automatically cycles through presets at the set interval. Uses shuffle-style rounds — every preset plays once before any repeats" />
           </label>
           <button
             onClick={() => setAutopilotEnabled(!autopilot.enabled)}
@@ -388,14 +391,55 @@ function PerformanceTab() {
           />
         </div>
 
-        <label className="mt-2 flex items-center gap-2 text-xs text-white/60">
+        <div className="mt-2 flex flex-col gap-1">
+          <label className="flex items-center text-xs text-white/60">
+            Mode
+            <Tooltip text="All = all enabled presets, Favorites = only favorited presets" />
+          </label>
+          <div className="flex gap-2">
+            {(['all', 'favorites'] as const).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => setAutopilotMode(mode)}
+                className={`cursor-pointer rounded border-none px-3 py-1 text-xs capitalize ${
+                  autopilot.mode === mode
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-white/10 text-white/70 hover:bg-white/20'
+                }`}
+              >
+                {mode}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-2 flex flex-col gap-1">
+          <label className="flex items-center text-xs text-white/60">
+            Favorite frequency: {autopilot.favoriteWeight}x
+            <Tooltip text="How much more likely favorites are to appear earlier in each shuffle round" />
+          </label>
+          <input
+            type="range"
+            min="1"
+            max="5"
+            step="1"
+            value={autopilot.favoriteWeight}
+            onChange={(e) => setAutopilotFavoriteWeight(parseInt(e.target.value))}
+            className="w-full accent-orange-500"
+          />
+        </div>
+      </div>
+
+      <div className="mt-1 border-t border-white/10 pt-3">
+        <label className="flex items-center gap-2 text-xs text-white/60">
           <input
             type="checkbox"
-            checked={autopilot.favoritesOnly}
-            onChange={(e) => setAutopilotFavoritesOnly(e.target.checked)}
+            checked={showQuarantined}
+            onChange={(e) => setShowQuarantined(e.target.checked)}
             className="accent-orange-500"
           />
-          Favorites only
+          Show quarantined presets
+          <Tooltip text="Quarantined presets are low-quality or broken presets hidden by default. Enable to browse and override them" />
         </label>
       </div>
     </>

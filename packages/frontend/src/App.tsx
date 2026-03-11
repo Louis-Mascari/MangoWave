@@ -24,12 +24,16 @@ import { useUnlockCheck } from './hooks/useUnlockCheck.ts';
 import { useSettingsStore } from './store/useSettingsStore.ts';
 import { useSpotifyStore } from './store/useSpotifyStore.ts';
 import { usePresetHistoryStore } from './store/usePresetHistoryStore.ts';
+import { useCustomPackStore } from './store/useCustomPackStore.ts';
 import { useToastStore } from './store/useToastStore.ts';
 import { controlPlayback, RateLimitedError } from './services/spotifyApi.ts';
 import type { PlaybackAdapter } from './components/PlaybackControls.tsx';
 import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
 import { isMobileDevice } from './utils/isMobileDevice.ts';
+import quarantinedData from './data/quarantined-presets.json';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
+
+const quarantinedSet = new Set(quarantinedData.presets as string[]);
 
 /**
  * Minimal shell for OAuth popup callbacks.
@@ -95,12 +99,38 @@ function MainApp() {
   const songInfoDisplay = useSettingsStore((s) => s.songInfoDisplay);
   const toggleFavoritePreset = useSettingsStore((s) => s.toggleFavoritePreset);
   const toggleBlockPreset = useSettingsStore((s) => s.toggleBlockPreset);
+  const showQuarantined = useSettingsStore((s) => s.showQuarantined);
+  const quarantineOverrides = useSettingsStore((s) => s.quarantineOverrides);
   const [currentPreset, setCurrentPreset] = useState('');
   const [presetList, setPresetList] = useState<string[]>([]);
+  const [presetPackMap, setPresetPackMap] = useState<Map<string, string>>(new Map());
   const [showNowPlaying, setShowNowPlaying] = useState(false);
   const [activePanel, setActivePanel] = useState<PanelView>('none');
   const [showLaunchAnimation, setShowLaunchAnimation] = useState(false);
   const resetAutopilotRef = useRef<() => void>(() => {});
+
+  // Build effective quarantine set (quarantined minus overrides and favorites)
+  const effectiveQuarantineSet = useMemo(() => {
+    if (showQuarantined) return new Set<string>();
+    const overrideSet = new Set(quarantineOverrides);
+    const favSet = new Set(favoritePresets);
+    const result = new Set<string>();
+    for (const name of quarantinedSet) {
+      if (!overrideSet.has(name) && !favSet.has(name)) {
+        result.add(name);
+      }
+    }
+    return result;
+  }, [showQuarantined, quarantineOverrides, favoritePresets]);
+
+  // Merged blocked set: user blocks + effective quarantine
+  const mergedBlockedSet = useMemo(() => {
+    const set = new Set(blockedPresets);
+    for (const name of effectiveQuarantineSet) {
+      set.add(name);
+    }
+    return set;
+  }, [blockedPresets, effectiveQuarantineSet]);
 
   const handleStart = useCallback(async () => {
     await capture.startCapture();
@@ -140,14 +170,15 @@ function MainApp() {
     usePresetHistoryStore.getState().push(name);
   }, []);
 
-  const handlePresetsLoaded = useCallback((presets: string[]) => {
+  const handlePresetsLoaded = useCallback((presets: string[], packMap: Map<string, string>) => {
     setPresetList(presets);
+    setPresetPackMap(packMap);
   }, []);
 
   const handleNextPreset = useCallback(() => {
-    rendererRef.current?.nextPreset(new Set(blockedPresets), transitionTime);
+    rendererRef.current?.nextPreset(mergedBlockedSet, transitionTime);
     resetAutopilotRef.current();
-  }, [blockedPresets, transitionTime]);
+  }, [mergedBlockedSet, transitionTime]);
 
   const handlePreviousPreset = useCallback(() => {
     const name = usePresetHistoryStore.getState().goBack();
@@ -191,17 +222,57 @@ function MainApp() {
     setActivePanel('none');
   }, []);
 
+  // Shuffle-style autopilot advance with weighting
   const handleAutopilotAdvance = useCallback(() => {
-    if (autopilot.favoritesOnly && favoritePresets.length > 0) {
-      // Build blocked set as everything NOT in favorites
-      const allPresets = rendererRef.current?.presetList ?? [];
-      const favSet = new Set(favoritePresets);
-      const blockedSet = new Set(allPresets.filter((p) => !favSet.has(p)));
-      rendererRef.current?.nextPreset(blockedSet, transitionTime);
+    const renderer = rendererRef.current;
+    if (!renderer) return;
+
+    const allPresets = renderer.presetList;
+    const favSet = new Set(favoritePresets);
+
+    // Determine available pool based on autopilot mode
+    let pool: string[];
+    if (autopilot.mode === 'favorites' && favoritePresets.length > 0) {
+      pool = favoritePresets.filter((p) => !mergedBlockedSet.has(p));
+    } else if (autopilot.mode === 'pack' && autopilot.packId) {
+      const customPack = useCustomPackStore.getState().packs.find((p) => p.id === autopilot.packId);
+      if (customPack) {
+        pool = customPack.presets.filter((p) => !mergedBlockedSet.has(p));
+      } else {
+        pool = allPresets.filter((p) => !mergedBlockedSet.has(p));
+      }
     } else {
-      handleNextPreset();
+      pool = allPresets.filter((p) => !mergedBlockedSet.has(p));
     }
-  }, [autopilot.favoritesOnly, favoritePresets, transitionTime, handleNextPreset]);
+
+    if (pool.length === 0) return;
+
+    const historyStore = usePresetHistoryStore.getState();
+
+    // Filter out already-played presets this round
+    let available = pool.filter((p) => !historyStore.playedSet.has(p));
+
+    // If all played, reset the round
+    if (available.length === 0) {
+      historyStore.resetRound();
+      available = pool;
+    }
+
+    // Weighted selection: favorites more likely to be picked early
+    const weight = autopilot.favoriteWeight;
+    const availableFavorites = available.filter((p) => favSet.has(p));
+    let pick: string;
+
+    if (availableFavorites.length > 0 && Math.random() < weight / (weight + 1)) {
+      pick = availableFavorites[Math.floor(Math.random() * availableFavorites.length)];
+    } else {
+      pick = available[Math.floor(Math.random() * available.length)];
+    }
+
+    // Mark as played and load
+    historyStore.markPlayed(pick);
+    renderer.loadPreset(pick, transitionTime);
+  }, [autopilot, favoritePresets, mergedBlockedSet, transitionTime]);
 
   const { reset: resetAutopilot } = useAutopilot(handleAutopilotAdvance);
   useEffect(() => {
@@ -210,10 +281,11 @@ function MainApp() {
   useHideCursor(3000);
   const isFullscreen = useFullscreen();
 
-  // Reset autopilot timer when favoritesOnly changes
+  // Reset autopilot timer and shuffle round when mode changes
   useEffect(() => {
     resetAutopilot();
-  }, [autopilot.favoritesOnly, resetAutopilot]);
+    usePresetHistoryStore.getState().resetRound();
+  }, [autopilot.mode, autopilot.packId, resetAutopilot]);
 
   const handleToggleFavorite = useCallback(() => {
     if (!currentPreset) return;
@@ -429,6 +501,7 @@ function MainApp() {
                 onToggleNowPlaying={handleToggleNowPlaying}
                 showNowPlaying={showNowPlaying}
                 presetList={presetList}
+                presetPackMap={presetPackMap}
                 currentPreset={currentPreset}
                 autopilotEnabled={autopilot.enabled}
                 onToggleAutopilot={handleToggleAutopilot}

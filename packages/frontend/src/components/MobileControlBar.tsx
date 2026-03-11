@@ -20,6 +20,7 @@ interface MobileControlBarProps {
   onToggleFullscreen: () => void;
   isFullscreen: boolean;
   presetList: string[];
+  presetPackMap: Map<string, string>;
   currentPreset: string;
   autopilotEnabled: boolean;
   onToggleAutopilot: () => void;
@@ -137,6 +138,7 @@ export function MobileControlBar({
   onToggleFullscreen,
   isFullscreen,
   presetList,
+  presetPackMap,
   currentPreset,
   autopilotEnabled,
   onToggleAutopilot,
@@ -426,6 +428,7 @@ export function MobileControlBar({
               {activePanel === 'presets' && (
                 <PresetBrowser
                   presetList={presetList}
+                  presetPackMap={presetPackMap}
                   currentPreset={currentPreset}
                   onSelectPreset={onSelectPreset}
                   onNextPreset={onNextPreset}

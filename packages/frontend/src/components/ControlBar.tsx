@@ -21,6 +21,7 @@ interface ControlBarProps {
   onToggleNowPlaying: () => void;
   showNowPlaying: boolean;
   presetList: string[];
+  presetPackMap: Map<string, string>;
   currentPreset: string;
   autopilotEnabled: boolean;
   onToggleAutopilot: () => void;
@@ -53,6 +54,7 @@ export function ControlBar(props: ControlBarProps) {
         onToggleFullscreen={props.onToggleFullscreen}
         isFullscreen={props.isFullscreen}
         presetList={props.presetList}
+        presetPackMap={props.presetPackMap}
         currentPreset={props.currentPreset}
         autopilotEnabled={props.autopilotEnabled}
         onToggleAutopilot={props.onToggleAutopilot}
@@ -82,6 +84,7 @@ function DesktopControlBar({
   onToggleNowPlaying,
   showNowPlaying,
   presetList,
+  presetPackMap,
   currentPreset,
   autopilotEnabled,
   onToggleAutopilot,
@@ -126,6 +129,7 @@ function DesktopControlBar({
           {activePanel === 'presets' && (
             <PresetBrowser
               presetList={presetList}
+              presetPackMap={presetPackMap}
               currentPreset={currentPreset}
               onSelectPreset={onSelectPreset}
               onNextPreset={onNextPreset}

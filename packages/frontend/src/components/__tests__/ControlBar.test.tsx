@@ -36,6 +36,10 @@ const defaultProps = {
   onToggleNowPlaying: vi.fn(),
   showNowPlaying: false,
   presetList: ['Preset A', 'Preset B'],
+  presetPackMap: new Map([
+    ['Preset A', 'Base'],
+    ['Preset B', 'Base'],
+  ]),
   currentPreset: 'Preset A',
   autopilotEnabled: false,
   onToggleAutopilot: vi.fn(),

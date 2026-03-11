@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GroupedVirtuoso } from 'react-virtuoso';
-import type { GroupedVirtuosoHandle } from 'react-virtuoso';
+
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { usePresetHistoryStore } from '../store/usePresetHistoryStore.ts';
 import { useCustomPackStore } from '../store/useCustomPackStore.ts';
@@ -10,7 +10,7 @@ import { convertMilkFile } from '../engine/milkdropConverter.ts';
 import mangosPicks from '../data/mangos-picks.json';
 import quarantinedData from '../data/quarantined-presets.json';
 
-type FilterTab = 'all' | 'favorites' | 'blocked' | 'history' | 'packs';
+type FilterTab = 'all' | 'favorites' | 'blocked' | 'quarantined' | 'history' | 'packs';
 
 interface PresetBrowserProps {
   presetList: string[];
@@ -210,6 +210,10 @@ export function PresetBrowser({
   const setEnabledPacks = useSettingsStore((s) => s.setEnabledPacks);
   const togglePack = useSettingsStore((s) => s.togglePack);
   const showQuarantined = useSettingsStore((s) => s.showQuarantined);
+  const autopilot = useSettingsStore((s) => s.autopilot);
+  const setAutopilotMode = useSettingsStore((s) => s.setAutopilotMode);
+  const setAutopilotPackId = useSettingsStore((s) => s.setAutopilotPackId);
+  const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
   const quarantineOverrides = useSettingsStore((s) => s.quarantineOverrides);
   const addQuarantineOverride = useSettingsStore((s) => s.addQuarantineOverride);
   const blockPreset = useSettingsStore((s) => s.blockPreset);
@@ -234,7 +238,7 @@ export function PresetBrowser({
   const [renamingPackId, setRenamingPackId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const [milkImporting, setMilkImporting] = useState(false);
-  const virtuosoRef = useRef<GroupedVirtuosoHandle>(null);
+
   const importInputRef = useRef<HTMLInputElement>(null);
   const milkInputRef = useRef<HTMLInputElement>(null);
 
@@ -244,9 +248,12 @@ export function PresetBrowser({
 
   const allPacks = useMemo(() => getAllBuiltinPacks(presetPackMap), [presetPackMap]);
 
-  // Initialize enabledPacks to all packs on first load
+  // Initialize enabledPacks on first load (only if never set before).
+  // We use a ref to ensure this runs only once, so "Deselect All" isn't overridden.
+  const didInitPacks = useRef(false);
   useEffect(() => {
-    if (enabledPacks.length === 0 && allPacks.length > 0) {
+    if (!didInitPacks.current && enabledPacks.length === 0 && allPacks.length > 0) {
+      didInitPacks.current = true;
       setEnabledPacks(allPacks);
     }
   }, [allPacks, enabledPacks.length, setEnabledPacks]);
@@ -267,17 +274,6 @@ export function PresetBrowser({
   const getPresetPack = useCallback(
     (name: string): string => {
       return presetPackMap.get(name) ?? 'Unknown';
-    },
-    [presetPackMap],
-  );
-
-  const getPresetPacks = useCallback(
-    (name: string): string[] => {
-      const packs: string[] = [];
-      if (mangosPicksSet.has(name)) packs.push(MANGOS_PICKS_PACK);
-      const sourcePack = presetPackMap.get(name);
-      if (sourcePack) packs.push(sourcePack);
-      return packs;
     },
     [presetPackMap],
   );
@@ -349,24 +345,24 @@ export function PresetBrowser({
     getPresetPack,
   ]);
 
-  // Flat filtered list for search, favorites, blocked tabs
+  // Flat filtered list for search, favorites, blocked, quarantined tabs
   const filteredPresets = useMemo(() => {
     if (filter === 'all' && !search) return [];
     if (filter === 'history') return [];
+    if (filter === 'packs') return [];
 
     const lowerSearch = search.toLowerCase();
     return presetList.filter((name) => {
       if (search && !name.toLowerCase().includes(lowerSearch)) return false;
       if (filter === 'favorites') return favoriteSet.has(name);
       if (filter === 'blocked') return blockedSet.has(name);
-      // 'all' with search or 'packs'
+      if (filter === 'quarantined') {
+        // Show quarantined presets that haven't been overridden
+        return quarantinedSet.has(name) && !overrideSet.has(name);
+      }
+      // 'all' with search
       if (blockedSet.has(name)) return false;
       if (!showQuarantined && isQuarantined(name)) return false;
-      if (filter === 'all' && search) {
-        // During search, check enabled packs
-        const presetPacks = getPresetPacks(name);
-        return presetPacks.some((p) => enabledPackSet.has(p));
-      }
       return true;
     });
   }, [
@@ -375,17 +371,19 @@ export function PresetBrowser({
     filter,
     blockedSet,
     favoriteSet,
+    overrideSet,
     showQuarantined,
     isQuarantined,
-    enabledPackSet,
-    getPresetPacks,
   ]);
 
-  // History list (reversed)
+  // History list (reversed, filtered by search)
   const historyList = useMemo(() => {
     if (filter !== 'history') return [];
-    return [...presetHistory].reverse();
-  }, [filter, presetHistory]);
+    const reversed = [...presetHistory].reverse();
+    if (!search) return reversed;
+    const lowerSearch = search.toLowerCase();
+    return reversed.filter((name) => name.toLowerCase().includes(lowerSearch));
+  }, [filter, presetHistory, search]);
 
   const handleToggleFavorite = useCallback(
     (name: string) => {
@@ -439,16 +437,6 @@ export function PresetBrowser({
       return next;
     });
   }, []);
-
-  // Auto-scroll to current preset
-  useEffect(() => {
-    if (filter === 'all' && !search && flatPresets.length > 0) {
-      const idx = flatPresets.indexOf(currentPreset);
-      if (idx >= 0 && virtuosoRef.current) {
-        virtuosoRef.current.scrollToIndex({ index: idx, align: 'center', behavior: 'smooth' });
-      }
-    }
-  }, [currentPreset, filter, search, flatPresets]);
 
   const handleSelectAll = useCallback(() => {
     setEnabledPacks(allPacks);
@@ -530,41 +518,63 @@ export function PresetBrowser({
 
   const hasCustomPacks = customPacks.length > 0;
 
+  const handlePlayPack = useCallback(
+    (packId: string) => {
+      setAutopilotMode('pack');
+      setAutopilotPackId(packId);
+      setAutopilotEnabled(true);
+      useToastStore.getState().show('Autopilot: playing pack');
+    },
+    [setAutopilotMode, setAutopilotPackId, setAutopilotEnabled],
+  );
+
+  const handleStopPackPlay = useCallback(() => {
+    setAutopilotMode('all');
+    setAutopilotPackId(null);
+    useToastStore.getState().show('Autopilot: all presets');
+  }, [setAutopilotMode, setAutopilotPackId]);
+
   // Render the grouped "all" tab
   const renderGroupedAll = () => (
     <>
-      {/* Pack filter chips */}
-      <div className="mb-2 flex flex-wrap items-center gap-1">
+      {/* Pack filter checkboxes */}
+      <div className="mb-1 flex flex-wrap items-center gap-x-3 gap-y-0.5">
+        {allPacks.map((pack) => (
+          <label key={pack} className="flex cursor-pointer items-center gap-1 text-[10px]">
+            <input
+              type="checkbox"
+              checked={enabledPackSet.has(pack)}
+              onChange={() => togglePack(pack)}
+              className="h-3 w-3 accent-orange-500"
+            />
+            <span className={enabledPackSet.has(pack) ? 'text-white/70' : 'text-white/30'}>
+              {pack}
+            </span>
+          </label>
+        ))}
+      </div>
+      <div className="mb-1 flex items-center gap-2">
         <button
           onClick={handleSelectAll}
-          className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[10px] text-white/60 hover:bg-white/20"
+          className="cursor-pointer border-none bg-transparent p-0 text-[9px] text-white/40 underline hover:text-white/60"
         >
-          All
+          Select all
         </button>
         <button
           onClick={handleDeselectAll}
-          className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[10px] text-white/60 hover:bg-white/20"
+          className="cursor-pointer border-none bg-transparent p-0 text-[9px] text-white/40 underline hover:text-white/60"
         >
-          None
+          Deselect all
         </button>
-        {allPacks.map((pack) => (
-          <button
-            key={pack}
-            onClick={() => togglePack(pack)}
-            className={`cursor-pointer rounded border-none px-1.5 py-0.5 text-[10px] ${
-              enabledPackSet.has(pack)
-                ? 'bg-orange-500/30 text-orange-300'
-                : 'bg-white/10 text-white/40'
-            }`}
-          >
-            {pack}
-          </button>
-        ))}
+        <span className="text-[9px] text-white/25">
+          {enabledPacks.length === 0
+            ? 'No packs selected — autopilot paused'
+            : `${enabledPacks.length}/${allPacks.length} packs active`}
+        </span>
       </div>
 
-      {flatPresets.length > 0 ? (
+      {groupNames.length > 0 ? (
         <GroupedVirtuoso
-          ref={virtuosoRef}
           style={{ height: '280px' }}
           groupCounts={groupCounts}
           groupContent={(index) => {
@@ -651,60 +661,115 @@ export function PresetBrowser({
     </div>
   );
 
+  // Render quarantined tab
+  const renderQuarantined = () => (
+    <div className="flex max-h-[280px] flex-col gap-0.5 overflow-y-auto">
+      <p className="mb-1 text-[10px] leading-snug text-white/40">
+        Presets suspected broken or not conducive to good vibes. Click to preview, then unquarantine
+        any you want to keep.
+      </p>
+      {filteredPresets.map((name) => (
+        <div
+          key={name}
+          className="flex items-center justify-between rounded px-2 py-1 text-xs text-white/70 hover:bg-white/10"
+        >
+          <button
+            onClick={() => onSelectPreset(name)}
+            className="min-w-0 flex-1 cursor-pointer truncate border-none bg-transparent text-left text-inherit"
+          >
+            {name}
+          </button>
+          <button
+            onClick={() => handleUnquarantine(name)}
+            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent text-yellow-500/60 hover:bg-white/10 hover:text-yellow-400"
+            title="Remove from quarantine"
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+      ))}
+      {filteredPresets.length === 0 && (
+        <p className="py-2 text-center text-xs text-white/40">No quarantined presets</p>
+      )}
+    </div>
+  );
+
   // Render custom packs tab
   const renderPacks = () => (
-    <div className="flex max-h-[280px] flex-col gap-2 overflow-y-auto">
-      <p className="text-[10px] text-white/40">
-        Custom packs are saved in your browser. Use Export to back up.
-      </p>
-
-      {/* Create new pack */}
-      <div className="flex gap-1">
-        <input
-          type="text"
-          placeholder="New pack name..."
-          value={newPackName}
-          onChange={(e) => setNewPackName(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleCreatePack()}
-          className="min-w-0 flex-1 rounded border-none bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
-        />
-        <button
-          onClick={handleCreatePack}
-          disabled={!newPackName.trim()}
-          className="cursor-pointer rounded border-none bg-orange-500/30 px-2 py-1 text-xs text-orange-300 hover:bg-orange-500/40 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          Create
-        </button>
-      </div>
-
-      {/* Import buttons */}
-      <div className="flex gap-1">
-        <button
-          onClick={() => importInputRef.current?.click()}
-          className="cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-xs text-white/60 hover:bg-white/20"
-        >
-          Import Pack
-        </button>
+    <div className="flex max-h-[280px] flex-col gap-3 overflow-y-auto">
+      {/* Section: Import MilkDrop presets */}
+      <div className="flex flex-col gap-1.5">
+        <h4 className="text-[10px] font-semibold uppercase tracking-wider text-orange-400">
+          Import Presets
+        </h4>
+        <p className="text-[10px] leading-snug text-white/40">
+          Add MilkDrop .milk preset files to expand your library beyond the built-in 555. You can
+          find thousands of .milk files at community sites like geisswerks.com/milkdrop. Converted
+          presets are stored locally in your browser (IndexedDB) and work with all features.
+        </p>
         <button
           onClick={() => milkInputRef.current?.click()}
           disabled={milkImporting}
-          className="cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-xs text-white/60 hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+          className="w-fit cursor-pointer rounded border-none bg-orange-500/30 px-2 py-1 text-xs text-orange-300 hover:bg-orange-500/40 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {milkImporting ? 'Converting...' : 'Import .milk'}
+          {milkImporting ? 'Converting...' : 'Import .milk files'}
         </button>
-        <input
-          ref={importInputRef}
-          type="file"
-          accept=".json"
-          onChange={handleImportFile}
-          className="hidden"
-        />
         <input
           ref={milkInputRef}
           type="file"
           accept=".milk"
           multiple
           onChange={handleMilkImport}
+          className="hidden"
+        />
+      </div>
+
+      <div className="border-t border-white/10" />
+
+      {/* Section: Custom packs */}
+      <div className="flex flex-col gap-1.5">
+        <h4 className="text-[10px] font-semibold uppercase tracking-wider text-orange-400">
+          Custom Packs
+        </h4>
+        <p className="text-[10px] leading-snug text-white/40">
+          Organize presets into named collections. Add presets from the{' '}
+          <span className="text-white/60">All</span> tab using the + button on each preset. Use
+          packs with autopilot (Settings &gt; Pack mode) or export as JSON to share with others.
+        </p>
+        <div className="flex gap-1">
+          <input
+            type="text"
+            placeholder="New pack name..."
+            value={newPackName}
+            onChange={(e) => setNewPackName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleCreatePack()}
+            className="min-w-0 flex-1 rounded border-none bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
+          />
+          <button
+            onClick={handleCreatePack}
+            disabled={!newPackName.trim()}
+            className="cursor-pointer rounded border-none bg-orange-500/30 px-2 py-1 text-xs text-orange-300 hover:bg-orange-500/40 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Create
+          </button>
+        </div>
+        <button
+          onClick={() => importInputRef.current?.click()}
+          className="w-fit cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-[10px] text-white/50 hover:bg-white/20"
+        >
+          Import pack (.json exported from MangoWave)
+        </button>
+        <input
+          ref={importInputRef}
+          type="file"
+          accept=".json"
+          onChange={handleImportFile}
           className="hidden"
         />
       </div>
@@ -739,6 +804,22 @@ export function PresetBrowser({
               </span>
             )}
             <div className="flex gap-1">
+              {pack.presets.length > 0 &&
+                (autopilot.mode === 'pack' && autopilot.packId === pack.id ? (
+                  <button
+                    onClick={handleStopPackPlay}
+                    className="cursor-pointer rounded border-none bg-orange-500/30 px-1.5 py-0.5 text-[10px] text-orange-300 hover:bg-orange-500/40"
+                  >
+                    Stop
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handlePlayPack(pack.id)}
+                    className="cursor-pointer rounded border-none bg-orange-500/20 px-1.5 py-0.5 text-[10px] text-orange-300 hover:bg-orange-500/30"
+                  >
+                    Play
+                  </button>
+                ))}
               <button
                 onClick={() => {
                   setRenamingPackId(pack.id);
@@ -762,7 +843,7 @@ export function PresetBrowser({
               </button>
             </div>
           </div>
-          {pack.presets.length > 0 && (
+          {pack.presets.length > 0 ? (
             <div className="flex max-h-24 flex-col gap-0.5 overflow-y-auto">
               {pack.presets.map((name) => (
                 <div
@@ -786,12 +867,18 @@ export function PresetBrowser({
                 </div>
               ))}
             </div>
+          ) : (
+            <p className="py-1 text-[10px] text-white/30">
+              Empty — use the + button on presets in the All tab to add them here.
+            </p>
           )}
         </div>
       ))}
 
       {customPacks.length === 0 && (
-        <p className="py-2 text-center text-xs text-white/40">No custom packs yet</p>
+        <p className="py-2 text-center text-xs text-white/40">
+          No packs yet — create one above, then add presets from the All tab.
+        </p>
       )}
     </div>
   );
@@ -810,19 +897,21 @@ export function PresetBrowser({
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-white">Presets</h3>
         <div className="flex flex-wrap gap-1">
-          {(['all', 'favorites', 'blocked', 'history', 'packs'] as const).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`cursor-pointer rounded border-none px-2 py-0.5 text-[10px] capitalize ${
-                filter === f
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-white/10 text-white/60 hover:bg-white/20'
-              }`}
-            >
-              {f}
-            </button>
-          ))}
+          {(['all', 'favorites', 'blocked', 'quarantined', 'history', 'packs'] as const).map(
+            (f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`cursor-pointer rounded border-none px-2 py-0.5 text-[10px] capitalize ${
+                  filter === f
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-white/10 text-white/60 hover:bg-white/20'
+                }`}
+              >
+                {f}
+              </button>
+            ),
+          )}
         </div>
       </div>
 
@@ -835,11 +924,10 @@ export function PresetBrowser({
       />
 
       {filter === 'all' && !search && renderGroupedAll()}
+      {filter === 'quarantined' && renderQuarantined()}
       {filter === 'history' && renderHistory()}
       {filter === 'packs' && renderPacks()}
-      {(filter === 'favorites' || filter === 'blocked' || search) &&
-        filter !== 'history' &&
-        filter !== 'packs' &&
+      {(filter === 'favorites' || filter === 'blocked' || (search && filter === 'all')) &&
         renderFlatList()}
     </div>
   );

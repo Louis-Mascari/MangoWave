@@ -144,6 +144,7 @@ describe('PresetBrowser', () => {
 
     await user.click(screen.getByText('packs'));
     expect(screen.getByPlaceholderText('New pack name...')).toBeInTheDocument();
-    expect(screen.getByText('Import Pack')).toBeInTheDocument();
+    expect(screen.getByText('Import .milk files')).toBeInTheDocument();
+    expect(screen.getByText('Import pack (.json exported from MangoWave)')).toBeInTheDocument();
   });
 });

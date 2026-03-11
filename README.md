@@ -17,14 +17,17 @@
 
 ## Features
 
-- **555 MilkDrop presets** from all butterchurn preset packs
+- **555+ MilkDrop presets** from 6 butterchurn packs, organized by source pack with virtualized browsing
+- **Import .milk presets** — drag-and-drop MilkDrop preset files, converted client-side via lazy-loaded converter
+- **Custom packs** — create named collections, export/import as JSON for sharing and backup
+- **"Mango's Picks"** — curated built-in pack for an immediate high-quality experience
+- **Quarantine system** — suspected broken or vibe-killing presets hidden by default, revealable in settings with per-preset override
 - **Multiple audio sources** — system/tab audio, local files, or microphone input
 - **Local file playback** with queue, shuffle, repeat, seek, and volume controls
 - **10-band EQ** that shapes which frequencies drive the visuals
 - **Pre-amp gain** to boost quiet audio sources
-- **Preset browser** with search, favorites, and blocking
-- **Autopilot** auto-cycles presets on a configurable interval (5-120s)
-- **Preset history** with previous/next navigation (up to 50 entries)
+- **Autopilot** with shuffle-style rounds (no repeats), favorite weighting, and pack-cycling mode
+- **Preset history** with previous/next navigation and browseable history tab
 - **Keyboard shortcuts** for preset navigation, fullscreen, favorites, and more
 - **Mobile-optimized UI** with radial FAB menu and full-screen modal panels
 - **Optional Spotify integration** for Now Playing metadata and playback controls (bring your own Client ID via PKCE — Spotify limits each app key to 5 users)

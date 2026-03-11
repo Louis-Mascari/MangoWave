@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { EQ_BANDS } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
+import { useCustomPackStore } from '../store/useCustomPackStore.ts';
 import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { buildPkceAuthUrl } from '../services/spotifyPkce.ts';
 import { Tooltip } from './Tooltip.tsx';
@@ -110,19 +111,21 @@ function EqualizerTab() {
           Pre-Amp
           <Tooltip text="Scales the overall signal — higher makes visuals more reactive, lower calms them. Purely visual, does not affect audio output" />
         </label>
-        <input
-          type="range"
-          min="0"
-          max="3"
-          step="0.1"
-          value={eq.preAmpGain}
-          onChange={(e) => setPreAmpGain(parseFloat(e.target.value))}
-          className="w-full accent-orange-500"
-        />
-        <span className="text-right text-xs text-white/50">{eq.preAmpGain.toFixed(1)}x</span>
+        <div className="flex items-center gap-2">
+          <input
+            type="range"
+            min="0"
+            max="3"
+            step="0.1"
+            value={eq.preAmpGain}
+            onChange={(e) => setPreAmpGain(parseFloat(e.target.value))}
+            className="flex-1 accent-orange-500"
+          />
+          <span className="w-8 text-right text-xs text-white/50">{eq.preAmpGain.toFixed(1)}x</span>
+        </div>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex w-full justify-between">
         {EQ_BANDS.map((freq, i) => (
           <div key={freq} className="flex flex-col items-center gap-1">
             <input
@@ -160,9 +163,9 @@ function PerformanceTab() {
   const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
   const setAutopilotInterval = useSettingsStore((s) => s.setAutopilotInterval);
   const setAutopilotMode = useSettingsStore((s) => s.setAutopilotMode);
+  const setAutopilotPackId = useSettingsStore((s) => s.setAutopilotPackId);
   const setAutopilotFavoriteWeight = useSettingsStore((s) => s.setAutopilotFavoriteWeight);
-  const showQuarantined = useSettingsStore((s) => s.showQuarantined);
-  const setShowQuarantined = useSettingsStore((s) => s.setShowQuarantined);
+  const customPacks = useCustomPackStore((s) => s.packs);
 
   return (
     <>
@@ -394,23 +397,43 @@ function PerformanceTab() {
         <div className="mt-2 flex flex-col gap-1">
           <label className="flex items-center text-xs text-white/60">
             Mode
-            <Tooltip text="All = all enabled presets, Favorites = only favorited presets" />
+            <Tooltip text="All = all enabled presets, Favorites = only favorited presets, Pack = a specific custom pack" />
           </label>
           <div className="flex gap-2">
-            {(['all', 'favorites'] as const).map((mode) => (
+            {[
+              { mode: 'all' as const, label: 'All' },
+              { mode: 'favorites' as const, label: 'Favorites' },
+              ...(customPacks.length > 0 ? [{ mode: 'pack' as const, label: 'Pack' }] : []),
+            ].map(({ mode, label }) => (
               <button
                 key={mode}
                 onClick={() => setAutopilotMode(mode)}
-                className={`cursor-pointer rounded border-none px-3 py-1 text-xs capitalize ${
+                className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
                   autopilot.mode === mode
                     ? 'bg-orange-500 text-white'
                     : 'bg-white/10 text-white/70 hover:bg-white/20'
                 }`}
               >
-                {mode}
+                {label}
               </button>
             ))}
           </div>
+          {autopilot.mode === 'pack' && (
+            <select
+              value={autopilot.packId ?? ''}
+              onChange={(e) => setAutopilotPackId(e.target.value || null)}
+              className="mt-1 rounded border-none bg-white/10 px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+            >
+              <option value="" className="bg-neutral-900">
+                Select a pack...
+              </option>
+              {customPacks.map((p) => (
+                <option key={p.id} value={p.id} className="bg-neutral-900">
+                  {p.name} ({p.presets.length})
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         <div className="mt-2 flex flex-col gap-1">
@@ -428,19 +451,6 @@ function PerformanceTab() {
             className="w-full accent-orange-500"
           />
         </div>
-      </div>
-
-      <div className="mt-1 border-t border-white/10 pt-3">
-        <label className="flex items-center gap-2 text-xs text-white/60">
-          <input
-            type="checkbox"
-            checked={showQuarantined}
-            onChange={(e) => setShowQuarantined(e.target.checked)}
-            className="accent-orange-500"
-          />
-          Show quarantined presets
-          <Tooltip text="Quarantined presets are low-quality or broken presets hidden by default. Enable to browse and override them" />
-        </label>
       </div>
     </>
   );

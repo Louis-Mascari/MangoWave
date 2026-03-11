@@ -40,13 +40,15 @@ src/
 ├── components/    # UI: ControlBar, SettingsPanel (tabbed: EQ/Performance/Shortcuts/Spotify),
 │                  #     PresetBrowser, MediaPlaylist, NowPlaying, StartScreen, etc.
 ├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (butterchurn),
-│                  # isWebGL2Supported
+│                  # milkdropConverter (lazy-loaded .milk→JSON), isWebGL2Supported
+├── data/          # mangos-picks.json, quarantined-presets.json
 ├── hooks/         # useAudioCapture, useLocalPlayback, useAutopilot, useKeyboardShortcuts,
 │                  # useIdleTimer, useHideCursor, useSpotifyAuth, useNowPlaying, useUnlockCheck
 ├── lib/           # PostHog & Sentry init (no-op when env vars absent)
 ├── services/      # Spotify Web API client, PKCE auth utilities
 ├── store/         # Zustand stores: useSettingsStore, useSpotifyStore, useMediaPlayerStore,
-│                  #     usePresetHistoryStore, useToastStore
+│                  #     usePresetHistoryStore, useToastStore, useCustomPackStore,
+│                  #     useCustomPresetsStore
 ├── utils/         # Shared utilities (isMobileDevice)
 ├── types/         # butterchurn.d.ts (type declarations for untyped packages)
 └── test/          # Vitest global setup
@@ -56,24 +58,31 @@ src/
 
 Zustand with `localStorage` persistence. Key sections:
 
-| Section             | Fields                                 | Defaults          |
-| ------------------- | -------------------------------------- | ----------------- |
-| `performance`       | `fpsCap`, `resolutionScale`            | 0 (uncapped), 1.0 |
-| `audio`             | `smoothingConstant`, `fftSize`         | 0.3, 1024         |
-| `autopilot`         | `enabled`, `interval`, `favoritesOnly` | true, 15s, false  |
-| `eq`                | `preAmpGain`, `bandGains[10]`          | 1.0, all 0dB      |
-| `blockedPresets`    | string[]                               | []                |
-| `favoritePresets`   | string[]                               | []                |
-| `presetNameDisplay` | `'off' \| 'always' \| number`          | 5                 |
-| `songInfoDisplay`   | `'off' \| 'always' \| number`          | 5                 |
-| `transitionTime`    | number (seconds)                       | 2.0               |
-| `volume`            | number (0.0–1.0)                       | 0.5               |
+| Section               | Fields                                                    | Defaults                    |
+| --------------------- | --------------------------------------------------------- | --------------------------- |
+| `performance`         | `fpsCap`, `resolutionScale`                               | 0 (uncapped), 1.0           |
+| `audio`               | `smoothingConstant`, `fftSize`                            | 0.3, 1024                   |
+| `autopilot`           | `enabled`, `interval`, `mode`, `packId`, `favoriteWeight` | true, 15s, `'all'`, null, 2 |
+| `eq`                  | `preAmpGain`, `bandGains[10]`                             | 1.0, all 0dB                |
+| `blockedPresets`      | string[]                                                  | []                          |
+| `favoritePresets`     | string[]                                                  | []                          |
+| `presetNameDisplay`   | `'off' \| 'always' \| number`                             | 5                           |
+| `songInfoDisplay`     | `'off' \| 'always' \| number`                             | 5                           |
+| `transitionTime`      | number (seconds)                                          | 2.0                         |
+| `volume`              | number (0.0–1.0)                                          | 0.5                         |
+| `enabledPacks`        | string[]                                                  | all packs                   |
+| `showQuarantined`     | boolean                                                   | false                       |
+| `quarantineOverrides` | string[]                                                  | []                          |
 
 Blocked and favorited presets are mutually exclusive.
 
 `useMediaPlayerStore` manages local file playback state (queue, current track, shuffle history, repeat mode). Not persisted — `File` objects can't survive page reload.
 
-`usePresetHistoryStore` tracks preset navigation history (max 50 entries, cursor-based) for previous/next preset navigation. Not persisted.
+`usePresetHistoryStore` tracks preset navigation history (max 100 entries, cursor-based) for previous/next preset navigation. Also tracks `playedSet` for shuffle-style autopilot rounds. Not persisted.
+
+`useCustomPackStore` manages user-created preset collections with JSON export/import. Persisted to localStorage.
+
+`useCustomPresetsStore` stores imported .milk preset data in IndexedDB via `idb-keyval`. Metadata in Zustand state, preset JSON blobs keyed with `mw-preset:` prefix.
 
 `useToastStore` drives single-message action toasts (favorite/block confirmations). Auto-clears after 2s.
 
@@ -99,4 +108,5 @@ All are optional — the app runs fully without them. Spotify integration requir
 - **WebGL 2 required.** `isWebGL2Supported()` checks on mount and shows a fallback if unavailable.
 - **butterchurn is untyped** — type declarations live in `src/types/butterchurn.d.ts`.
 - **`vite.config.ts`** imports `defineConfig` from `vitest/config` (not `vite`) to support the `test` property.
-- **555 presets** loaded from all butterchurn preset packs (base, Extra, Extra2, MD1, NonMinimal, Minimal).
+- **555+ presets** loaded from 6 butterchurn packs, organized by source pack with virtualized browsing (`react-virtuoso`). Users can import `.milk` files (lazy-loaded converter, zero main bundle impact).
+- **`secure-json-parse`** used for prototype pollution protection on all JSON import surfaces (custom packs, .milk conversion).

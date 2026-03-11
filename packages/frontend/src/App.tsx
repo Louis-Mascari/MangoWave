@@ -26,6 +26,7 @@ import { useSpotifyStore } from './store/useSpotifyStore.ts';
 import { usePresetHistoryStore } from './store/usePresetHistoryStore.ts';
 import { useCustomPackStore } from './store/useCustomPackStore.ts';
 import { useToastStore } from './store/useToastStore.ts';
+import mangosPicks from './data/mangos-picks.json';
 import { controlPlayback, RateLimitedError } from './services/spotifyApi.ts';
 import type { PlaybackAdapter } from './components/PlaybackControls.tsx';
 import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
@@ -34,6 +35,8 @@ import quarantinedData from './data/quarantined-presets.json';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
 
 const quarantinedSet = new Set(quarantinedData.presets as string[]);
+const mangosPicksSet = new Set(mangosPicks as string[]);
+const MANGOS_PICKS_PACK = "Mango's Picks";
 
 /**
  * Minimal shell for OAuth popup callbacks.
@@ -101,6 +104,7 @@ function MainApp() {
   const toggleBlockPreset = useSettingsStore((s) => s.toggleBlockPreset);
   const showQuarantined = useSettingsStore((s) => s.showQuarantined);
   const quarantineOverrides = useSettingsStore((s) => s.quarantineOverrides);
+  const enabledPacks = useSettingsStore((s) => s.enabledPacks);
   const [currentPreset, setCurrentPreset] = useState('');
   const [presetList, setPresetList] = useState<string[]>([]);
   const [presetPackMap, setPresetPackMap] = useState<Map<string, string>>(new Map());
@@ -130,6 +134,22 @@ function MainApp() {
     }
     return set;
   }, [blockedPresets, effectiveQuarantineSet]);
+
+  // Check if a preset belongs to any enabled pack
+  const enabledPackSet = useMemo(() => new Set(enabledPacks), [enabledPacks]);
+  const isInEnabledPack = useCallback(
+    (name: string) => {
+      // If no packs are enabled, nothing passes
+      if (enabledPackSet.size === 0) return false;
+      // Check Mango's Picks membership
+      if (mangosPicksSet.has(name) && enabledPackSet.has(MANGOS_PICKS_PACK)) return true;
+      // Check source pack
+      const sourcePack = presetPackMap.get(name);
+      if (sourcePack && enabledPackSet.has(sourcePack)) return true;
+      return false;
+    },
+    [enabledPackSet, presetPackMap],
+  );
 
   const handleStart = useCallback(async () => {
     await capture.startCapture();
@@ -174,10 +194,62 @@ function MainApp() {
     setPresetPackMap(packMap);
   }, []);
 
+  // Shared shuffle pick: used by both manual next and autopilot
+  const pickNextPreset = useCallback(() => {
+    const renderer = rendererRef.current;
+    if (!renderer) return;
+
+    const allPresets = renderer.presetList;
+
+    // Build pool: not blocked, in an enabled pack
+    let pool: string[];
+    if (enabledPacks.length > 0) {
+      pool = allPresets.filter((p) => !mergedBlockedSet.has(p) && isInEnabledPack(p));
+    } else if (presetPackMap.size > 0) {
+      pool = []; // Packs initialized but none enabled
+    } else {
+      pool = allPresets.filter((p) => !mergedBlockedSet.has(p));
+    }
+
+    if (pool.length === 0) return;
+
+    const historyStore = usePresetHistoryStore.getState();
+
+    // Shuffle: exclude already-played presets this round
+    let available = pool.filter((p) => !historyStore.playedSet.has(p));
+    if (available.length === 0) {
+      historyStore.resetRound();
+      available = pool;
+    }
+
+    // Weighted selection: favorites more likely to be picked early
+    const favSet = new Set(favoritePresets);
+    const weight = autopilot.favoriteWeight;
+    const availableFavorites = available.filter((p) => favSet.has(p));
+    let pick: string;
+
+    if (availableFavorites.length > 0 && Math.random() < weight / (weight + 1)) {
+      pick = availableFavorites[Math.floor(Math.random() * availableFavorites.length)];
+    } else {
+      pick = available[Math.floor(Math.random() * available.length)];
+    }
+
+    historyStore.markPlayed(pick);
+    renderer.loadPreset(pick, transitionTime);
+  }, [
+    mergedBlockedSet,
+    enabledPacks,
+    isInEnabledPack,
+    presetPackMap,
+    favoritePresets,
+    autopilot.favoriteWeight,
+    transitionTime,
+  ]);
+
   const handleNextPreset = useCallback(() => {
-    rendererRef.current?.nextPreset(mergedBlockedSet, transitionTime);
+    pickNextPreset();
     resetAutopilotRef.current();
-  }, [mergedBlockedSet, transitionTime]);
+  }, [pickNextPreset]);
 
   const handlePreviousPreset = useCallback(() => {
     const name = usePresetHistoryStore.getState().goBack();
@@ -221,15 +293,18 @@ function MainApp() {
     setActivePanel('none');
   }, []);
 
-  // Shuffle-style autopilot advance with weighting
+  // Autopilot: delegates to pickNextPreset for 'all' mode,
+  // overrides pool for 'favorites' and 'pack' modes
   const handleAutopilotAdvance = useCallback(() => {
+    if (autopilot.mode === 'all') {
+      pickNextPreset();
+      return;
+    }
+
     const renderer = rendererRef.current;
     if (!renderer) return;
 
-    const allPresets = renderer.presetList;
-    const favSet = new Set(favoritePresets);
-
-    // Determine available pool based on autopilot mode
+    // Build mode-specific pool
     let pool: string[];
     if (autopilot.mode === 'favorites' && favoritePresets.length > 0) {
       pool = favoritePresets.filter((p) => !mergedBlockedSet.has(p));
@@ -238,26 +313,22 @@ function MainApp() {
       if (customPack) {
         pool = customPack.presets.filter((p) => !mergedBlockedSet.has(p));
       } else {
-        pool = allPresets.filter((p) => !mergedBlockedSet.has(p));
+        return; // Pack deleted — nothing to play
       }
     } else {
-      pool = allPresets.filter((p) => !mergedBlockedSet.has(p));
+      return; // No valid pool
     }
 
     if (pool.length === 0) return;
 
     const historyStore = usePresetHistoryStore.getState();
-
-    // Filter out already-played presets this round
     let available = pool.filter((p) => !historyStore.playedSet.has(p));
-
-    // If all played, reset the round
     if (available.length === 0) {
       historyStore.resetRound();
       available = pool;
     }
 
-    // Weighted selection: favorites more likely to be picked early
+    const favSet = new Set(favoritePresets);
     const weight = autopilot.favoriteWeight;
     const availableFavorites = available.filter((p) => favSet.has(p));
     let pick: string;
@@ -268,10 +339,9 @@ function MainApp() {
       pick = available[Math.floor(Math.random() * available.length)];
     }
 
-    // Mark as played and load
     historyStore.markPlayed(pick);
     renderer.loadPreset(pick, transitionTime);
-  }, [autopilot, favoritePresets, mergedBlockedSet, transitionTime]);
+  }, [autopilot, favoritePresets, mergedBlockedSet, pickNextPreset, transitionTime]);
 
   const { reset: resetAutopilot } = useAutopilot(handleAutopilotAdvance);
   useEffect(() => {
@@ -284,7 +354,22 @@ function MainApp() {
   useEffect(() => {
     resetAutopilot();
     usePresetHistoryStore.getState().resetRound();
-  }, [autopilot.mode, autopilot.packId, resetAutopilot]);
+  }, [autopilot.mode, autopilot.packId, enabledPacks, resetAutopilot]);
+
+  // If initial preset isn't in an enabled pack, pick one that is
+  const didFixInitialPreset = useRef(false);
+  useEffect(() => {
+    if (
+      !didFixInitialPreset.current &&
+      currentPreset &&
+      enabledPacks.length > 0 &&
+      presetPackMap.size > 0 &&
+      !isInEnabledPack(currentPreset)
+    ) {
+      didFixInitialPreset.current = true;
+      pickNextPreset();
+    }
+  }, [currentPreset, enabledPacks, presetPackMap, isInEnabledPack, pickNextPreset]);
 
   const handleToggleFavorite = useCallback(() => {
     if (!currentPreset) return;

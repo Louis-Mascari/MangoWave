@@ -543,7 +543,7 @@ function PresetsTab() {
         <div className="mt-2 flex flex-col gap-1">
           <label className="flex items-center text-xs text-white/60">
             Mode
-            <Tooltip text="All = all enabled presets, Favorites = only favorited presets" />
+            <Tooltip text="All = presets from selected packs, Favorites = only favorited presets (ignores pack selection)" />
           </label>
           <div className="flex gap-2">
             {[
@@ -568,7 +568,7 @@ function PresetsTab() {
         <div className="mt-2 flex flex-col gap-1">
           <label className="flex items-center text-xs text-white/60">
             Favorite frequency: {autopilot.favoriteWeight}x
-            <Tooltip text="How much more likely each favorite is to be picked vs a non-favorite. At 2x with 10 favorites in a 200-preset pool, favorites appear ~10% of the time instead of ~5%" />
+            <Tooltip text="How much more likely favorites are to be picked next. Every preset still plays once per round before any repeats — this just makes favorites come up sooner" />
           </label>
           <input
             type="range"

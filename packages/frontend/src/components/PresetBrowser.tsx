@@ -49,22 +49,20 @@ function PresetRow({
 }) {
   return (
     <div
-      className={`flex items-center justify-between rounded px-2 py-1 text-xs ${
+      onClick={onSelect}
+      className={`flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs ${
         isCurrent ? 'bg-orange-500/30 text-white' : 'text-white/70 hover:bg-white/10'
       }`}
     >
-      <button
-        onClick={onSelect}
-        className="min-w-0 flex-1 cursor-pointer truncate border-none bg-transparent text-left text-inherit"
-      >
+      <span className="min-w-0 flex-1 truncate text-left">
         {isQuarantined && (
           <span className="mr-1 text-yellow-500/60" title="Quarantined">
             !
           </span>
         )}
         {name}
-      </button>
-      <div className="flex gap-1.5">
+      </span>
+      <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
         <button
           onClick={onToggleFavorite}
           className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
@@ -124,14 +122,14 @@ function HistoryRow({
   onSelect: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between rounded px-2 py-1 text-xs text-white/70 hover:bg-white/10">
-      <button
-        onClick={onSelect}
-        className="min-w-0 flex-1 cursor-pointer truncate border-none bg-transparent text-left text-inherit"
-      >
+    <div
+      onClick={onSelect}
+      className="flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs text-white/70 hover:bg-white/10"
+    >
+      <span className="min-w-0 flex-1 truncate text-left">
         {isFavorite && <span className="mr-1 text-yellow-400">&#9733;</span>}
         {name}
-      </button>
+      </span>
     </div>
   );
 }
@@ -473,16 +471,15 @@ export function PresetBrowser({
       {filteredPresets.map((name) => (
         <div
           key={name}
-          className="flex items-center justify-between rounded px-2 py-1 text-xs text-white/70 hover:bg-white/10"
+          onClick={() => onSelectPreset(name)}
+          className="flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs text-white/70 hover:bg-white/10"
         >
+          <span className="min-w-0 flex-1 truncate text-left">{name}</span>
           <button
-            onClick={() => onSelectPreset(name)}
-            className="min-w-0 flex-1 cursor-pointer truncate border-none bg-transparent text-left text-inherit"
-          >
-            {name}
-          </button>
-          <button
-            onClick={() => handleUnquarantine(name)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleUnquarantine(name);
+            }}
             className="flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent text-yellow-500/60 hover:bg-white/10 hover:text-yellow-400"
             title="Remove from quarantine"
           >

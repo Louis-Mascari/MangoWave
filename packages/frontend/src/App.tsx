@@ -498,19 +498,7 @@ function MainApp() {
         tooltip: 'Microphone input — no playback controls',
       };
     }
-    if (capture.captureSource === 'system') {
-      return {
-        source: 'system',
-        isPlaying: false,
-        canControl: false,
-        onPlay: () => {},
-        onPause: () => {},
-        onNext: () => {},
-        onPrevious: () => {},
-        tooltip: 'Sharing audio — no playback controls',
-      };
-    }
-    if (isSpotifyConnected && !isMobileDevice && !premiumError) {
+    if (isSpotifyConnected && !premiumError) {
       return {
         source: 'spotify',
         isPlaying: spotifyNowPlaying?.isPlaying ?? false,
@@ -529,6 +517,18 @@ function MainApp() {
         onToggleShuffle: handleSpotifyToggleShuffle,
         onCycleRepeat: handleSpotifyCycleRepeat,
         tooltip: isRateLimited ? 'Spotify rate limited' : undefined,
+      };
+    }
+    if (capture.captureSource === 'system') {
+      return {
+        source: 'system',
+        isPlaying: false,
+        canControl: false,
+        onPlay: () => {},
+        onPause: () => {},
+        onNext: () => {},
+        onPrevious: () => {},
+        tooltip: 'Sharing audio — no playback controls',
       };
     }
     return {

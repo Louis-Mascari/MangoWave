@@ -6,12 +6,12 @@
     <title>MangoWave | Audio Visualizer</title>
     <meta
       name="description"
-      content="A free, browser-based, audio-reactive visualizer inspired by Winamp and MilkDrop — no signup, no install. Share your screen, window, or tab and watch your music come to life. Connect Spotify for song info, playback controls, and cloud-synced settings."
+      content="Free audio-reactive visualizer with 500+ visuals — no signup, no install, no ads. Works with any audio source on desktop and mobile. Just hit launch."
     />
     <meta property="og:title" content="MangoWave | Audio Visualizer" />
     <meta
       property="og:description"
-      content="A free, browser-based, audio-reactive visualizer inspired by Winamp and MilkDrop — no signup, no install. Share your screen, window, or tab and watch your music come to life. Connect Spotify for song info, playback controls, and cloud-synced settings."
+      content="Free audio-reactive visualizer with 500+ visuals — no signup, no install, no ads. Works with any audio source on desktop and mobile. Just hit launch."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://mangowave.app" />
@@ -20,7 +20,7 @@
     <meta name="twitter:title" content="MangoWave | Audio Visualizer" />
     <meta
       name="twitter:description"
-      content="A free, browser-based, audio-reactive visualizer inspired by Winamp and MilkDrop — no signup, no install. Share your screen, window, or tab and watch your music come to life. Connect Spotify for song info, playback controls, and cloud-synced settings."
+      content="Free audio-reactive visualizer with 500+ visuals — no signup, no install, no ads. Works with any audio source on desktop and mobile. Just hit launch."
     />
     <meta name="twitter:image" content="https://mangowave.app/landing/images/howling.png" />
     <link rel="icon" href="favicon.ico" />
@@ -31,16 +31,15 @@
     <div class="bg-glow"></div>
     <img src="images/howling.png" class="bg-howling" aria-hidden="true" alt="" />
     <div class="content">
-      <img src="images/logo.png" alt="MangoWave logo" class="logo" />
       <h1>MangoWave</h1>
       <p class="tagline">
-        A free, browser-based, audio-reactive visualizer inspired by Winamp and MilkDrop.<br />
-        No signup, no install — just share your screen and watch your music come to life.<br />
-        Connect Spotify for song info, playback controls, and cloud-synced settings.
+        Your music, visualized.<br />
+        500+ real-time visuals that react to every beat.<br />
+        Just hit launch.
       </p>
 
       <div class="features">
-        <!-- MilkDrop Presets -->
+        <!-- 500+ Visuals -->
         <div class="feature">
           <svg
             viewBox="0 0 24 24"
@@ -50,16 +49,15 @@
             stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <circle cx="12" cy="12" r="10" />
-            <path
-              d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
-            />
-            <path d="M2 12h20" />
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
           </svg>
-          <span>500+ Presets</span>
+          <span>500+ Visuals</span>
         </div>
 
-        <!-- 10-Band EQ -->
+        <!-- Any Audio Source -->
         <div class="feature">
           <svg
             viewBox="0 0 24 24"
@@ -67,46 +65,17 @@
             stroke="#c850c8"
             stroke-width="1.5"
             stroke-linecap="round"
-          >
-            <line x1="4" y1="21" x2="4" y2="14" />
-            <line x1="8" y1="21" x2="8" y2="7" />
-            <line x1="12" y1="21" x2="12" y2="10" />
-            <line x1="16" y1="21" x2="16" y2="4" />
-            <line x1="20" y1="21" x2="20" y2="12" />
-          </svg>
-          <span>10-Band EQ</span>
-        </div>
-
-        <!-- Spotify -->
-        <div class="feature">
-          <svg viewBox="0 0 24 24" fill="#1DB954">
-            <path
-              d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"
-            />
-          </svg>
-          <span>Spotify Integration</span>
-        </div>
-
-        <!-- WebGL 2 -->
-        <div class="feature">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#50b0ff"
-            stroke-width="1.5"
-            stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
-            <line x1="12" y1="22" x2="12" y2="15.5" />
-            <polyline points="22 8.5 12 15.5 2 8.5" />
-            <polyline points="2 15.5 12 8.5 22 15.5" />
-            <line x1="12" y1="2" x2="12" y2="8.5" />
+            <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+            <path
+              d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3v5zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3v5z"
+            />
           </svg>
-          <span>WebGL 2</span>
+          <span>Any Audio Source</span>
         </div>
 
-        <!-- Real-time FFT -->
+        <!-- Desktop & Mobile -->
         <div class="feature">
           <svg
             viewBox="0 0 24 24"
@@ -116,12 +85,16 @@
             stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            <rect x="2" y="3" width="13" height="10" rx="1" />
+            <line x1="8.5" y1="13" x2="8.5" y2="15" />
+            <line x1="5.5" y1="15" x2="11.5" y2="15" />
+            <rect x="16" y="5" width="6" height="11" rx="1" />
+            <line x1="18" y1="14" x2="20" y2="14" />
           </svg>
-          <span>Real-Time FFT</span>
+          <span>Desktop &amp; Mobile</span>
         </div>
 
-        <!-- Zero Install -->
+        <!-- No Signup -->
         <div class="feature">
           <svg
             viewBox="0 0 24 24"
@@ -131,16 +104,47 @@
             stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="16 12 12 8 8 12" />
-            <line x1="12" y1="16" x2="12" y2="8" />
+            <rect x="5" y="11" width="14" height="10" rx="2" />
+            <path d="M12 17a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" />
+            <path d="M8 11V7a4 4 0 0 1 8 0" />
           </svg>
-          <span>Zero Install</span>
+          <span>No Signup</span>
+        </div>
+
+        <!-- No Install -->
+        <div class="feature">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#50b0ff"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+          <span>No Install</span>
+        </div>
+
+        <!-- No Ads -->
+        <div class="feature">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#ff8c32"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            <polyline points="9 12 11 14 15 10" />
+          </svg>
+          <span>No Ads</span>
         </div>
       </div>
 
       <a href="https://play.mangowave.app" class="cta">
-        Launch App
+        Launch
         <svg
           viewBox="0 0 24 24"
           fill="none"

@@ -73,18 +73,6 @@ body {
   margin: auto 0;
 }
 
-.logo {
-  width: 200px;
-  height: 200px;
-  border-radius: 28px;
-  filter: drop-shadow(0 0 48px rgba(255, 140, 50, 0.35));
-  transition: filter 0.3s;
-}
-
-.logo:hover {
-  filter: drop-shadow(0 0 64px rgba(255, 140, 50, 0.5));
-}
-
 h1 {
   font-size: 3rem;
   font-weight: 800;
@@ -216,11 +204,6 @@ h1 {
   h1 {
     font-size: 2.2rem;
   }
-  .logo {
-    width: 150px;
-    height: 150px;
-    border-radius: 22px;
-  }
   .tagline {
     font-size: 1rem;
   }
@@ -230,6 +213,9 @@ h1 {
   .cta {
     padding: 0.85rem 2rem;
     font-size: 1.05rem;
+  }
+  .bg-howling {
+    width: 400px;
   }
 }
 

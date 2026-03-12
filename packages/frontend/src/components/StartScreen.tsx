@@ -100,13 +100,27 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
         </div>
 
         {/* CTA */}
-        <p className="text-sm font-medium text-white/70">Choose an audio source to get started</p>
+        <p className="text-sm font-medium text-white/70">Choose your audio source</p>
 
         {/* Mode cards */}
         <div className="flex w-full max-w-2xl flex-col items-stretch gap-4 sm:flex-row">
           {!isMobileDevice && (
             <ModeCard
-              icon="🖥️"
+              icon={
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-8 w-8"
+                >
+                  <rect x="2" y="3" width="20" height="14" rx="2" />
+                  <line x1="8" y1="21" x2="16" y2="21" />
+                  <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+              }
               title="Share Audio"
               description="Capture system or tab audio via screen sharing"
               onClick={() => setActiveModal('share-audio')}
@@ -114,14 +128,42 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
             />
           )}
           <ModeCard
-            icon="🎵"
+            icon={
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-8 w-8"
+              >
+                <path d="M9 18V5l12-2v13" />
+                <circle cx="6" cy="18" r="3" />
+                <circle cx="18" cy="16" r="3" />
+              </svg>
+            }
             title="Play Local Files"
             description="Play audio files from your device"
             onClick={() => setActiveModal('local-files')}
             color="purple"
           />
           <ModeCard
-            icon="🎤"
+            icon={
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-8 w-8"
+              >
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <line x1="12" y1="19" x2="12" y2="22" />
+              </svg>
+            }
             title="Use Microphone"
             description="Visualize ambient sound — silent mode"
             onClick={() => setActiveModal('microphone')}
@@ -391,7 +433,7 @@ function ModeCard({
   onClick,
   color,
 }: {
-  icon: string;
+  icon: React.ReactNode;
   title: string;
   description: string;
   onClick: () => void;
@@ -403,7 +445,7 @@ function ModeCard({
       className={`mode-card flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-2xl border bg-white/[0.04] px-5 py-6 text-center transition-all duration-200 hover:bg-white/[0.08] ${cardColors[color]}`}
       style={{ '--glow-color': glowColors[color] } as React.CSSProperties}
     >
-      <span className="text-3xl">{icon}</span>
+      <span className="text-white/70">{icon}</span>
       <span className="text-sm font-semibold text-white">{title}</span>
       <span className="text-xs text-[#999]">{description}</span>
     </button>

@@ -11,9 +11,10 @@ function formatDuration(seconds: number): string {
 interface MediaPlaylistProps {
   onAddFiles: (files: File[]) => void;
   onClear: () => void;
+  onClose?: () => void;
 }
 
-export function MediaPlaylist({ onAddFiles, onClear }: MediaPlaylistProps) {
+export function MediaPlaylist({ onAddFiles, onClear, onClose }: MediaPlaylistProps) {
   const tracks = useMediaPlayerStore((s) => s.tracks);
   const currentTrackIndex = useMediaPlayerStore((s) => s.currentTrackIndex);
   const setCurrentTrack = useMediaPlayerStore((s) => s.setCurrentTrack);
@@ -51,6 +52,16 @@ export function MediaPlaylist({ onAddFiles, onClear }: MediaPlaylistProps) {
           >
             Clear
           </button>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-none bg-white/10 text-xs text-white/60 hover:bg-white/20 hover:text-white"
+              aria-label="Close queue"
+              title="Close queue"
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
 

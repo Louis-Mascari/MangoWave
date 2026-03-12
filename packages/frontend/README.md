@@ -38,14 +38,15 @@ Key details:
 ```
 src/
 ├── components/    # UI: ControlBar, SettingsPanel (tabbed: EQ/Rendering/Presets/Shortcuts/Data/Spotify),
-│                  #     PresetBrowser, MediaPlaylist, NowPlaying, StartScreen, etc.
+│                  #     PresetBrowser, MediaPlaylist, NowPlaying, PlaybackPanel, StartScreen, etc.
 ├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (butterchurn),
 │                  # isWebGL2Supported
 ├── data/          # quarantined-presets.json
 ├── hooks/         # useAudioCapture, useLocalPlayback, useAutopilot, useKeyboardShortcuts,
-│                  # useIdleTimer, useHideCursor, useSpotifyAuth, useNowPlaying, useUnlockCheck
+│                  # useIdleTimer, useHideCursor, useSpotifyAuth, useNowPlaying, useUnlockCheck,
+│                  # useSpotifyProgress (smooth seek interpolation via rAF)
 ├── lib/           # PostHog & Sentry init (no-op when env vars absent)
-├── services/      # Spotify Web API client, PKCE auth utilities
+├── services/      # Spotify Web API client (owner-mode OAuth + PKCE utilities for self-hosters)
 ├── store/         # Zustand stores: useSettingsStore, useSpotifyStore, useMediaPlayerStore,
 │                  #     usePresetHistoryStore, useToastStore
 ├── utils/         # Shared utilities (isMobileDevice, settingsPortability)
@@ -66,7 +67,7 @@ Zustand with `localStorage` persistence. Key sections:
 | `blockedPresets`      | string[]                                                                       | []                          |
 | `favoritePresets`     | string[]                                                                       | []                          |
 | `presetNameDisplay`   | `'off' \| 'always' \| number`                                                  | 5                           |
-| `songInfoDisplay`     | `'off' \| 'always' \| number`                                                  | 5                           |
+| `songInfoDisplay`     | `'off' \| number`                                                              | 5                           |
 | `transitionTime`      | number (seconds)                                                               | 2.0                         |
 | `volume`              | number (0.0–1.0)                                                               | 0.5                         |
 | `enabledPacks`        | string[]                                                                       | all packs                   |
@@ -89,14 +90,36 @@ Create a `.env` file (gitignored):
 VITE_SPOTIFY_CLIENT_ID=
 VITE_SPOTIFY_REDIRECT_URI=
 VITE_API_URL=
-VITE_LOCKED_MODE=          # 'true' to restrict Spotify UI to authorized visitors
-VITE_UNLOCK_HASH=          # Hash used to verify visitor authorization
+VITE_LOCKED_MODE=          # 'true' to restrict Spotify connect button to magic-link visitors
+VITE_UNLOCK_HASH=          # SHA-256 hash of the unlock passphrase (visitors use ?unlock=PASSPHRASE)
 VITE_SENTRY_DSN=
 VITE_PUBLIC_POSTHOG_KEY=
 VITE_PUBLIC_POSTHOG_HOST=
 ```
 
 All are optional — the app runs fully without them. Spotify integration requires the first three; lock gate requires the next two; analytics/error tracking require the last three.
+
+### Spotify Integration
+
+Spotify is optional and only available in **owner mode** (backend-proxied OAuth). The hosted site's UI has no BYOC (bring your own client) option due to Spotify's dev mode limits (1 Client ID, 5 users, Premium to register). The PKCE code is retained in `services/spotifyPkce.ts` for self-hosters.
+
+Key details:
+
+- **PlaybackAdapter** — source-agnostic interface (`local | system | mic | spotify | none`). Spotify adapter only activates for Premium users; non-Premium falls to `'none'` (no PlaybackPanel, but Now Playing metadata still shown)
+- **`GET /me/player`** — full playback state (device name, shuffle, repeat) instead of `/me/player/currently-playing`
+- **`useSpotifyProgress`** — interpolates progress between 5s polls via `useSyncExternalStore` + `requestAnimationFrame` for smooth seek bar
+- **Seek/shuffle/repeat** — `PUT /me/player/seek`, `PUT /me/player/shuffle`, `PUT /me/player/repeat` with 401/403/429 error handling
+- **Auth mode** — UI branches on `authMode === 'owner'` (not `isSpotifyUnlocked`)
+- **Connect button** — click guard (`isConnecting` state) prevents double-auth
+
+### PlaybackPanel
+
+Floating panel (`components/PlaybackPanel.tsx`) rendered by App.tsx when source is `local` or `spotify`. Contains seek bar, transport controls (prev/play/next), shuffle, repeat, Now Playing toggle, queue toggle (local only), and volume (local only, desktop only).
+
+- **Responsive layout** — flex-wrap groups: `[prev play next]` + `[shuffle repeat nowplaying queue]` wrap as units, volume wraps last
+- **Idle auto-hide** — `useIdleTimer` with `pause`/`resume` (hover keeps visible on desktop) and `forceIdle` (instant hide after mobile radial actions). 5s mobile, 3s desktop
+- **Mobile** — `bottom-24 left-4 right-4`, hidden when FAB menu is open (`mobileMenuOpen` state in App.tsx)
+- **Desktop** — `bottom-16 left-1/2 -translate-x-1/2`, centered above ControlBar
 
 ## Key Technical Notes
 

@@ -35,6 +35,7 @@ import {
 } from './services/spotifyApi.ts';
 import type { PlaybackAdapter } from './components/PlaybackControls.tsx';
 import { PlaybackPanel } from './components/PlaybackPanel.tsx';
+import { MediaPlaylist } from './components/MediaPlaylist.tsx';
 import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
 import { isMobileDevice } from './utils/isMobileDevice.ts';
 import quarantinedData from './data/quarantined-presets.json';
@@ -104,6 +105,7 @@ function MainApp() {
   const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
   const presetNameDisplay = useSettingsStore((s) => s.presetNameDisplay);
   const songInfoDisplay = useSettingsStore((s) => s.songInfoDisplay);
+  const setSongInfoDisplay = useSettingsStore((s) => s.setSongInfoDisplay);
   const toggleFavoritePreset = useSettingsStore((s) => s.toggleFavoritePreset);
   const toggleBlockPreset = useSettingsStore((s) => s.toggleBlockPreset);
   const showQuarantined = useSettingsStore((s) => s.showQuarantined);
@@ -112,8 +114,8 @@ function MainApp() {
   const [currentPreset, setCurrentPreset] = useState('');
   const [presetList, setPresetList] = useState<string[]>([]);
   const [presetPackMap, setPresetPackMap] = useState<Map<string, string>>(new Map());
-  const [showNowPlaying, setShowNowPlaying] = useState(false);
   const [activePanel, setActivePanel] = useState<PanelView>('none');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLaunchAnimation, setShowLaunchAnimation] = useState(false);
   const resetAutopilotRef = useRef<() => void>(() => {});
   const rateLimitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -181,7 +183,6 @@ function MainApp() {
       local.stop();
     }
     setActivePanel('none');
-    setShowNowPlaying(false);
   }, [capture, local]);
 
   const handlePresetChange = useCallback((name: string) => {
@@ -293,8 +294,8 @@ function MainApp() {
   }, []);
 
   const handleToggleNowPlaying = useCallback(() => {
-    setShowNowPlaying((prev) => !prev);
-  }, []);
+    setSongInfoDisplay(songInfoDisplay === 'off' ? 5 : 'off');
+  }, [songInfoDisplay, setSongInfoDisplay]);
 
   const handleToggleAutopilot = useCallback(() => {
     setAutopilotEnabled(!autopilot.enabled);
@@ -497,11 +498,23 @@ function MainApp() {
         tooltip: 'Microphone input — no playback controls',
       };
     }
-    if (isSpotifyConnected && !isMobileDevice) {
+    if (capture.captureSource === 'system') {
+      return {
+        source: 'system',
+        isPlaying: false,
+        canControl: false,
+        onPlay: () => {},
+        onPause: () => {},
+        onNext: () => {},
+        onPrevious: () => {},
+        tooltip: 'Sharing audio — no playback controls',
+      };
+    }
+    if (isSpotifyConnected && !isMobileDevice && !premiumError) {
       return {
         source: 'spotify',
         isPlaying: spotifyNowPlaying?.isPlaying ?? false,
-        canControl: !premiumError && !isRateLimited,
+        canControl: !isRateLimited,
         onPlay: () => handleSpotifyAction('play'),
         onPause: () => handleSpotifyAction('pause'),
         onNext: () => handleSpotifyAction('next'),
@@ -515,11 +528,7 @@ function MainApp() {
               : 'off',
         onToggleShuffle: handleSpotifyToggleShuffle,
         onCycleRepeat: handleSpotifyCycleRepeat,
-        tooltip: premiumError
-          ? 'Spotify Premium required for playback controls'
-          : isRateLimited
-            ? 'Spotify rate limited'
-            : undefined,
+        tooltip: isRateLimited ? 'Spotify rate limited' : undefined,
       };
     }
     return {
@@ -581,11 +590,16 @@ function MainApp() {
     [local, isSpotifyConnected, handleSpotifySeek],
   );
 
-  const playbackPanelIdle = useIdleTimer(3000, 5000);
+  const {
+    isIdle: playbackPanelIdle,
+    pause: pausePlaybackIdle,
+    resume: resumePlaybackIdle,
+    forceIdle: forcePlaybackIdle,
+  } = useIdleTimer(isMobileDevice ? 5000 : 3000, 5000);
 
   const handleToggleQueue = useCallback(() => {
-    if (local.isActive) handleTogglePanel('playlist');
-  }, [local.isActive, handleTogglePanel]);
+    handleTogglePanel('playlist');
+  }, [handleTogglePanel]);
 
   const handlePlayPause = useCallback(() => {
     if (!playbackAdapter.canControl) return;
@@ -652,11 +666,7 @@ function MainApp() {
                 <PresetNotification message={currentPreset} mode={presetNameDisplay} />
               )}
               <RateLimitToast />
-              <NowPlaying
-                visible={showNowPlaying}
-                songInfoDisplay={songInfoDisplay}
-                track={nowPlayingTrack}
-              />
+              <NowPlaying enabled={songInfoDisplay !== 'off'} track={nowPlayingTrack} />
               <ControlBar
                 onNextPreset={handleNextPreset}
                 onPreviousPreset={handlePreviousPreset}
@@ -665,8 +675,6 @@ function MainApp() {
                 onStop={handleStop}
                 onToggleFullscreen={handleToggleFullscreen}
                 isFullscreen={isFullscreen}
-                onToggleNowPlaying={handleToggleNowPlaying}
-                showNowPlaying={showNowPlaying}
                 presetList={presetList}
                 presetPackMap={presetPackMap}
                 currentPreset={currentPreset}
@@ -680,7 +688,8 @@ function MainApp() {
                 onToggleBlock={handleToggleBlock}
                 onAddLocalFiles={handleAddLocalFiles}
                 onClearPlaylist={local.clearQueue}
-                playbackAdapter={playbackAdapter}
+                onMobileMenuChange={setMobileMenuOpen}
+                onForcePlaybackIdle={forcePlaybackIdle}
               />
               <PlaybackPanel
                 adapter={playbackAdapter}
@@ -690,7 +699,34 @@ function MainApp() {
                 isMuted={local.isActive ? local.isMuted : undefined}
                 onToggleMute={local.isActive ? local.toggleMute : undefined}
                 isIdle={playbackPanelIdle}
+                onPauseIdle={pausePlaybackIdle}
+                onResumeIdle={resumePlaybackIdle}
+                nowPlayingEnabled={songInfoDisplay !== 'off'}
+                onToggleNowPlaying={handleToggleNowPlaying}
+                onToggleQueue={handleToggleQueue}
+                isQueueOpen={activePanel === 'playlist'}
+                hidden={mobileMenuOpen}
               />
+              {/* Mobile queue modal — desktop queue renders inside ControlBar */}
+              {isMobileDevice && activePanel === 'playlist' && (
+                <div className="fixed inset-0 z-[60] flex items-stretch justify-center bg-black/50 backdrop-blur-sm">
+                  <div className="relative mx-2 my-2 flex max-h-full w-full flex-col overflow-hidden rounded-lg bg-gray-900/95">
+                    <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+                      <h3 className="text-sm font-semibold text-white">Queue</h3>
+                      <button
+                        onClick={() => setActivePanel('none')}
+                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-none bg-white/10 text-sm text-white/70 hover:bg-white/20"
+                        aria-label="Close"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-3">
+                      <MediaPlaylist onAddFiles={handleAddLocalFiles} onClear={local.clearQueue} />
+                    </div>
+                  </div>
+                </div>
+              )}
               <ActionToast />
               <ShortcutOverlay visible={showShortcutOverlay} onClose={toggleShortcutOverlay} />
             </>

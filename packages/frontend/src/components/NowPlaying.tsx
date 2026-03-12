@@ -8,8 +8,7 @@ export interface NowPlayingTrackInfo {
 }
 
 interface NowPlayingProps {
-  visible: boolean;
-  songInfoDisplay: 'off' | 'always' | number;
+  enabled: boolean;
   track: NowPlayingTrackInfo | null;
 }
 
@@ -19,14 +18,13 @@ interface AutoShowStore {
   listeners: Set<() => void>;
 }
 
+const AUTO_SHOW_DURATION_MS = 5000;
+
 /**
- * Triggers auto-show on track change with optional timed auto-hide.
+ * Triggers auto-show on track change with 5s timed auto-hide.
  * StrictMode-safe: cleanup clears the timer and the re-run restarts it.
  */
-function useAutoShow(
-  track: NowPlayingTrackInfo | null,
-  songInfoDisplay: 'off' | 'always' | number,
-) {
+function useAutoShow(track: NowPlayingTrackInfo | null, enabled: boolean) {
   const storeRef = useRef<AutoShowStore>({
     autoShow: false,
     timer: null,
@@ -52,7 +50,7 @@ function useAutoShow(
       store.timer = null;
     }
 
-    if (!trackKey || songInfoDisplay === 'off') {
+    if (!trackKey || !enabled) {
       if (store.autoShow) {
         store.autoShow = false;
         store.listeners.forEach((l) => l());
@@ -63,13 +61,11 @@ function useAutoShow(
     store.autoShow = true;
     store.listeners.forEach((l) => l());
 
-    if (typeof songInfoDisplay === 'number') {
-      store.timer = setTimeout(() => {
-        store.autoShow = false;
-        store.timer = null;
-        store.listeners.forEach((l) => l());
-      }, songInfoDisplay * 1000);
-    }
+    store.timer = setTimeout(() => {
+      store.autoShow = false;
+      store.timer = null;
+      store.listeners.forEach((l) => l());
+    }, AUTO_SHOW_DURATION_MS);
 
     return () => {
       if (store.timer) {
@@ -77,14 +73,14 @@ function useAutoShow(
         store.timer = null;
       }
     };
-  }, [trackKey, songInfoDisplay]);
+  }, [trackKey, enabled]);
 
   return useSyncExternalStore(subscribe, getSnapshot);
 }
 
-export function NowPlaying({ visible, songInfoDisplay, track }: NowPlayingProps) {
-  const autoShow = useAutoShow(track, songInfoDisplay);
-  const shouldShow = (visible || autoShow) && track;
+export function NowPlaying({ enabled, track }: NowPlayingProps) {
+  const autoShow = useAutoShow(track, enabled);
+  const shouldShow = autoShow && track;
 
   return (
     <div

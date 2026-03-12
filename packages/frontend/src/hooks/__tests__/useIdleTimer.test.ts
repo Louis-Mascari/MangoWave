@@ -15,14 +15,14 @@ describe('useIdleTimer', () => {
     const { result } = renderHook(() => useIdleTimer(3000));
     // Flush the initial setTimeout(resetTimer, 0)
     act(() => vi.advanceTimersByTime(0));
-    expect(result.current).toBe(false);
+    expect(result.current.isIdle).toBe(false);
   });
 
   it('becomes idle after timeout', () => {
     const { result } = renderHook(() => useIdleTimer(3000));
     act(() => vi.advanceTimersByTime(0)); // flush init
     act(() => vi.advanceTimersByTime(3000));
-    expect(result.current).toBe(true);
+    expect(result.current.isIdle).toBe(true);
   });
 
   it('resets on mouse movement', () => {
@@ -31,7 +31,7 @@ describe('useIdleTimer', () => {
 
     // Advance partway
     act(() => vi.advanceTimersByTime(2000));
-    expect(result.current).toBe(false);
+    expect(result.current.isIdle).toBe(false);
 
     // Simulate mouse movement
     act(() => {
@@ -40,11 +40,11 @@ describe('useIdleTimer', () => {
 
     // Advance past original timeout — should still not be idle because timer reset
     act(() => vi.advanceTimersByTime(2000));
-    expect(result.current).toBe(false);
+    expect(result.current.isIdle).toBe(false);
 
     // Now wait the full timeout from the reset
     act(() => vi.advanceTimersByTime(1000));
-    expect(result.current).toBe(true);
+    expect(result.current.isIdle).toBe(true);
   });
 
   it('delays initial idle timer when initialDelayMs is set', () => {
@@ -52,15 +52,15 @@ describe('useIdleTimer', () => {
 
     // After initial delay hasn't elapsed, timer hasn't started
     act(() => vi.advanceTimersByTime(4000));
-    expect(result.current).toBe(false);
+    expect(result.current.isIdle).toBe(false);
 
     // After initial delay elapses, resetTimer fires (starts the 3s idle timer)
     act(() => vi.advanceTimersByTime(1000));
-    expect(result.current).toBe(false);
+    expect(result.current.isIdle).toBe(false);
 
     // After the idle timeout, becomes idle
     act(() => vi.advanceTimersByTime(3000));
-    expect(result.current).toBe(true);
+    expect(result.current.isIdle).toBe(true);
   });
 
   it('skips initial delay when user interacts before it elapses', () => {
@@ -74,6 +74,6 @@ describe('useIdleTimer', () => {
 
     // Normal idle timeout from interaction
     act(() => vi.advanceTimersByTime(3000));
-    expect(result.current).toBe(true);
+    expect(result.current.isIdle).toBe(true);
   });
 });

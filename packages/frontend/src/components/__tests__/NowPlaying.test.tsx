@@ -19,21 +19,25 @@ describe('NowPlaying', () => {
     vi.useRealTimers();
   });
 
-  it('is hidden when not visible and no auto-show', () => {
-    const { container } = render(<NowPlaying visible={false} songInfoDisplay={5} track={null} />);
+  it('is hidden when disabled and no track', () => {
+    const { container } = render(<NowPlaying enabled={false} track={null} />);
     const wrapper = container.firstChild as HTMLElement;
     expect(wrapper.className).toContain('opacity-0');
   });
 
-  it('is hidden when visible but no track', () => {
-    const { container } = render(<NowPlaying visible={true} songInfoDisplay={5} track={null} />);
+  it('is hidden when enabled but no track', () => {
+    const { container } = render(<NowPlaying enabled={true} track={null} />);
     const wrapper = container.firstChild as HTMLElement;
     expect(wrapper.className).toContain('opacity-0');
   });
 
-  it('renders track info when visible and track exists', () => {
-    render(<NowPlaying visible={true} songInfoDisplay={5} track={track} />);
+  it('renders track info when enabled and track exists', () => {
+    const { container, rerender } = render(<NowPlaying enabled={true} track={null} />);
 
+    // Set track — triggers auto-show
+    rerender(<NowPlaying enabled={true} track={track} />);
+
+    expect((container.firstChild as HTMLElement).className).toContain('opacity-100');
     expect(screen.getByText('Test Song')).toBeInTheDocument();
     expect(screen.getByText('Test Artist')).toBeInTheDocument();
     expect(screen.getByText('Test Album')).toBeInTheDocument();
@@ -43,63 +47,36 @@ describe('NowPlaying', () => {
     );
   });
 
-  it('auto-shows when track changes and songInfoDisplay is a number', () => {
-    const { container, rerender } = render(
-      <NowPlaying visible={false} songInfoDisplay={5} track={null} />,
-    );
+  it('auto-shows when track changes and enabled', () => {
+    const { container, rerender } = render(<NowPlaying enabled={true} track={null} />);
 
     // Set track — triggers auto-show
-    rerender(<NowPlaying visible={false} songInfoDisplay={5} track={track} />);
+    rerender(<NowPlaying enabled={true} track={track} />);
 
     const wrapper = container.firstChild as HTMLElement;
     expect(wrapper.className).toContain('opacity-100');
   });
 
-  it('auto-show fades after timeout', () => {
-    const { container, rerender } = render(
-      <NowPlaying visible={false} songInfoDisplay={3} track={null} />,
-    );
+  it('auto-show fades after 5s timeout', () => {
+    const { container, rerender } = render(<NowPlaying enabled={true} track={null} />);
 
-    rerender(<NowPlaying visible={false} songInfoDisplay={3} track={track} />);
+    rerender(<NowPlaying enabled={true} track={track} />);
 
     expect((container.firstChild as HTMLElement).className).toContain('opacity-100');
 
-    // Advance past timeout
-    act(() => vi.advanceTimersByTime(3000));
-    rerender(<NowPlaying visible={false} songInfoDisplay={3} track={track} />);
+    // Advance past 5s timeout
+    act(() => vi.advanceTimersByTime(5000));
+    rerender(<NowPlaying enabled={true} track={track} />);
 
     expect((container.firstChild as HTMLElement).className).toContain('opacity-0');
   });
 
-  it('auto-show stays visible when songInfoDisplay is always', () => {
-    const { container, rerender } = render(
-      <NowPlaying visible={false} songInfoDisplay="always" track={null} />,
-    );
+  it('does not auto-show when disabled', () => {
+    const { container, rerender } = render(<NowPlaying enabled={false} track={null} />);
 
-    rerender(<NowPlaying visible={false} songInfoDisplay="always" track={track} />);
-
-    expect((container.firstChild as HTMLElement).className).toContain('opacity-100');
-
-    // No timeout — should stay visible
-    act(() => vi.advanceTimersByTime(10000));
-    rerender(<NowPlaying visible={false} songInfoDisplay="always" track={track} />);
-
-    expect((container.firstChild as HTMLElement).className).toContain('opacity-100');
-  });
-
-  it('does not auto-show when songInfoDisplay is off', () => {
-    const { container, rerender } = render(
-      <NowPlaying visible={false} songInfoDisplay="off" track={null} />,
-    );
-
-    rerender(<NowPlaying visible={false} songInfoDisplay="off" track={track} />);
+    rerender(<NowPlaying enabled={false} track={track} />);
 
     expect((container.firstChild as HTMLElement).className).toContain('opacity-0');
-  });
-
-  it('manual toggle still works independently of auto-show', () => {
-    const { container } = render(<NowPlaying visible={true} songInfoDisplay="off" track={track} />);
-    expect((container.firstChild as HTMLElement).className).toContain('opacity-100');
   });
 
   it('displays local track with no artist/album', () => {
@@ -109,7 +86,8 @@ describe('NowPlaying', () => {
       albumName: '',
       albumArtUrl: null,
     };
-    render(<NowPlaying visible={true} songInfoDisplay="always" track={localTrack} />);
+    const { rerender } = render(<NowPlaying enabled={true} track={null} />);
+    rerender(<NowPlaying enabled={true} track={localTrack} />);
     expect(screen.getByText('my-song.mp3')).toBeInTheDocument();
   });
 });

@@ -4,7 +4,6 @@ import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
-import { buildPkceAuthUrl } from '../services/spotifyPkce.ts';
 import { Tooltip } from './Tooltip.tsx';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { SHORTCUTS } from '../constants/shortcuts.ts';
@@ -407,8 +406,6 @@ function PresetsTab() {
   const setTransitionTime = useSettingsStore((s) => s.setTransitionTime);
   const presetNameDisplay = useSettingsStore((s) => s.presetNameDisplay);
   const setPresetNameDisplay = useSettingsStore((s) => s.setPresetNameDisplay);
-  const songInfoDisplay = useSettingsStore((s) => s.songInfoDisplay);
-  const setSongInfoDisplay = useSettingsStore((s) => s.setSongInfoDisplay);
   const autopilot = useSettingsStore((s) => s.autopilot);
   const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
   const setAutopilotInterval = useSettingsStore((s) => s.setAutopilotInterval);
@@ -487,61 +484,6 @@ function PresetsTab() {
               step="1"
               value={presetNameDisplay}
               onChange={(e) => setPresetNameDisplay(parseInt(e.target.value))}
-              className="w-full accent-orange-500"
-            />
-          </div>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label className="flex items-center text-xs text-white/60">
-          Song Info Display
-          <Tooltip text="How long the Now Playing banner shows when the song changes. Available with local files and Spotify — not available for system audio or microphone" />
-        </label>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setSongInfoDisplay('off')}
-            className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
-              songInfoDisplay === 'off'
-                ? 'bg-orange-500 text-white'
-                : 'bg-white/10 text-white/70 hover:bg-white/20'
-            }`}
-          >
-            Off
-          </button>
-          <button
-            onClick={() => setSongInfoDisplay('always')}
-            className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
-              songInfoDisplay === 'always'
-                ? 'bg-orange-500 text-white'
-                : 'bg-white/10 text-white/70 hover:bg-white/20'
-            }`}
-          >
-            Always
-          </button>
-          <button
-            onClick={() =>
-              setSongInfoDisplay(typeof songInfoDisplay === 'number' ? songInfoDisplay : 5)
-            }
-            className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
-              typeof songInfoDisplay === 'number'
-                ? 'bg-orange-500 text-white'
-                : 'bg-white/10 text-white/70 hover:bg-white/20'
-            }`}
-          >
-            Timed
-          </button>
-        </div>
-        {typeof songInfoDisplay === 'number' && (
-          <div className="mt-1">
-            <label className="text-xs text-white/60">Duration: {songInfoDisplay}s</label>
-            <input
-              type="range"
-              min="1"
-              max="10"
-              step="1"
-              value={songInfoDisplay}
-              onChange={(e) => setSongInfoDisplay(parseInt(e.target.value))}
               className="w-full accent-orange-500"
             />
           </div>
@@ -795,32 +737,12 @@ function SpotifyTab() {
   const user = useSpotifyStore((s) => s.user);
   const accessToken = useSpotifyStore((s) => s.accessToken);
   const sessionId = useSpotifyStore((s) => s.sessionId);
-  const byocClientId = useSpotifyStore((s) => s.byocClientId);
   const getAuthMode = useSpotifyStore((s) => s.getAuthMode);
-  const setByocClientId = useSpotifyStore((s) => s.setByocClientId);
   const logout = useSpotifyStore((s) => s.logout);
   const authMode = getAuthMode();
 
   const isConnected = !!(accessToken || sessionId);
-  const [byocInput, setByocInput] = useState(byocClientId ?? '');
   const [isConnecting, setIsConnecting] = useState(false);
-
-  const handleByocConnect = async () => {
-    const trimmed = byocInput.trim();
-    if (!trimmed || isConnecting) return;
-    setIsConnecting(true);
-    try {
-      setByocClientId(trimmed);
-      const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
-      const { url } = await buildPkceAuthUrl(trimmed, redirectUri);
-      const popup = window.open(url, 'spotify-auth', 'popup,width=500,height=700');
-      if (!popup || popup.closed) {
-        window.location.href = url;
-      }
-    } catch {
-      setIsConnecting(false);
-    }
-  };
 
   const handleOwnerConnect = () => {
     if (isConnecting) return;
@@ -836,6 +758,18 @@ function SpotifyTab() {
     }
   };
 
+  if (authMode !== 'owner' && !isConnected) {
+    return (
+      <>
+        <h3 className="text-sm font-semibold text-white">Spotify</h3>
+        <p className="text-xs text-white/40">
+          Spotify integration is not available. If you are self-hosting MangoWave, see the README
+          for setup instructions.
+        </p>
+      </>
+    );
+  }
+
   return (
     <>
       <h3 className="text-sm font-semibold text-white">Spotify</h3>
@@ -847,16 +781,11 @@ function SpotifyTab() {
             <span className="text-white/80">
               {user?.displayName ? `Connected as ${user.displayName}` : 'Connected'}
             </span>
-            {byocClientId && (
-              <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] text-white/50">
-                BYOC
-              </span>
-            )}
           </div>
           <p className="text-xs text-white/40">
-            Now-playing metadata &amp; cloud-synced settings active. Playback controls require
-            Premium. Seek, shuffle, and repeat controls sync with your active Spotify session. Share
-            a screen, window, or tab playing Spotify so the visualizer can hear audio.
+            Now-playing metadata &amp; cloud-synced MangoWave settings active. Playback controls
+            require Premium. Share a screen, window, or tab playing Spotify so the visualizer can
+            hear audio.
           </p>
           <button
             onClick={logout}
@@ -868,73 +797,23 @@ function SpotifyTab() {
       ) : (
         <div className="flex flex-col gap-3">
           <p className="text-xs text-white/50">
-            Connect Spotify for now-playing metadata and cloud-synced settings. Spotify Premium also
-            enables playback controls. You&apos;ll still need to share a screen, window, or tab
-            playing Spotify for the visualizer to react to audio.
+            Connect Spotify for now-playing metadata and cloud-synced MangoWave settings. Spotify
+            Premium also enables playback controls. You&apos;ll still need to share a screen,
+            window, or tab playing Spotify for the visualizer to react to audio.
           </p>
-
-          {authMode === 'owner' ? (
-            <div className="flex flex-col gap-1">
-              <button
-                onClick={handleOwnerConnect}
-                disabled={isConnecting}
-                className="w-fit cursor-pointer rounded border-none bg-[#1DB954]/20 px-3 py-1 text-xs text-[#1DB954] hover:bg-[#1DB954]/30 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                {isConnecting ? 'Connecting...' : 'Connect Spotify'}
-              </button>
-              <p className="text-[10px] text-white/30">
-                Authorized users don&apos;t need Spotify Premium. If you are not the app creator,
-                ensure they&apos;ve added your name and email associated with your Spotify account
-                to their app&apos;s User Management tab.
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2 rounded border border-white/10 bg-white/[0.03] p-3">
-              <div className="flex flex-col gap-1.5 text-xs text-white/50">
-                <p>Requires a Spotify Premium account to create a developer app.</p>
-                <ul className="flex list-disc flex-col gap-1 pl-4">
-                  <li>
-                    Register at{' '}
-                    <a
-                      href="https://developer.spotify.com/dashboard"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-white/70 underline hover:text-white/90"
-                    >
-                      developer.spotify.com
-                    </a>
-                  </li>
-                  <li>
-                    Add{' '}
-                    <code className="rounded bg-white/10 px-1 text-[10px]">
-                      {import.meta.env.VITE_SPOTIFY_REDIRECT_URI}
-                    </code>{' '}
-                    as a redirect URI
-                  </li>
-                  <li>Paste your Client ID (not your secret key) below</li>
-                  <li>
-                    Add up to 5 users in the User Management tab — they don&apos;t need Premium for
-                    song metadata and cloud-synced MangoWave settings (Premium only needed for
-                    playback controls)
-                  </li>
-                </ul>
-              </div>
-              <input
-                type="text"
-                value={byocInput}
-                onChange={(e) => setByocInput(e.target.value)}
-                placeholder="Client ID (not secret key)"
-                className="w-full rounded border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-[#1DB954] focus:outline-none"
-              />
-              <button
-                onClick={handleByocConnect}
-                disabled={!byocInput.trim() || isConnecting}
-                className="w-fit cursor-pointer rounded border-none bg-[#1DB954]/20 px-3 py-1 text-xs text-[#1DB954] hover:bg-[#1DB954]/30 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                {isConnecting ? 'Connecting...' : 'Connect with PKCE'}
-              </button>
-            </div>
-          )}
+          <div className="flex flex-col gap-1">
+            <button
+              onClick={handleOwnerConnect}
+              disabled={isConnecting}
+              className="w-fit cursor-pointer rounded border-none bg-[#1DB954]/20 px-3 py-1 text-xs text-[#1DB954] hover:bg-[#1DB954]/30 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {isConnecting ? 'Connecting...' : 'Connect Spotify'}
+            </button>
+            <p className="text-[10px] text-white/30">
+              If you are not the app owner, ensure they&apos;ve added your name and email associated
+              with your Spotify account to their developer app&apos;s User Management tab.
+            </p>
+          </div>
         </div>
       )}
     </>

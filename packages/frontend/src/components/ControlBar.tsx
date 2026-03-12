@@ -1,9 +1,7 @@
 import { useIdleTimer } from '../hooks/useIdleTimer.ts';
-import { useSpotifyStore } from '../store/useSpotifyStore.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { SettingsPanel } from './SettingsPanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
-import type { PlaybackAdapter } from './PlaybackControls.tsx';
 import { MediaPlaylist } from './MediaPlaylist.tsx';
 import { MobileControlBar } from './MobileControlBar.tsx';
 
@@ -17,8 +15,6 @@ interface ControlBarProps {
   onStop: () => void;
   onToggleFullscreen: () => void;
   isFullscreen: boolean;
-  onToggleNowPlaying: () => void;
-  showNowPlaying: boolean;
   presetList: string[];
   presetPackMap: Map<string, string>;
   currentPreset: string;
@@ -32,7 +28,8 @@ interface ControlBarProps {
   onToggleBlock: () => void;
   onAddLocalFiles?: (files: File[]) => void;
   onClearPlaylist?: () => void;
-  playbackAdapter: PlaybackAdapter;
+  onMobileMenuChange?: (open: boolean) => void;
+  onForcePlaybackIdle?: () => void;
 }
 
 export function ControlBar(props: ControlBarProps) {
@@ -54,8 +51,8 @@ export function ControlBar(props: ControlBarProps) {
         onToggleAutopilot={props.onToggleAutopilot}
         activePanel={props.activePanel}
         onTogglePanel={props.onTogglePanel}
-        onAddLocalFiles={props.onAddLocalFiles}
-        onClearPlaylist={props.onClearPlaylist}
+        onMenuOpenChange={props.onMobileMenuChange}
+        onForcePlaybackIdle={props.onForcePlaybackIdle}
       />
     </>
   );
@@ -69,8 +66,6 @@ function DesktopControlBar({
   onStop,
   onToggleFullscreen,
   isFullscreen,
-  onToggleNowPlaying,
-  showNowPlaying,
   presetList,
   presetPackMap,
   currentPreset,
@@ -84,20 +79,21 @@ function DesktopControlBar({
   onToggleBlock,
   onAddLocalFiles,
   onClearPlaylist,
-  playbackAdapter,
 }: ControlBarProps) {
-  const isIdle = useIdleTimer(3000, 5000);
-  const isSpotifyConnected = !!useSpotifyStore((s) => s.accessToken);
-  const isLocalSource = playbackAdapter.source === 'local';
-  const hasPlaybackSource =
-    playbackAdapter.source === 'local' || playbackAdapter.source === 'spotify';
+  const { isIdle, pause, resume } = useIdleTimer(3000, 5000);
 
   return (
     <div
+      onMouseEnter={pause}
+      onMouseLeave={resume}
       className={`fixed inset-x-0 bottom-0 z-50 hidden transition-opacity duration-500 md:block ${
         isIdle && activePanel === 'none' ? 'pointer-events-none opacity-0' : 'opacity-100'
       }`}
     >
+      {/* Click-outside backdrop to close panels */}
+      {activePanel !== 'none' && (
+        <div className="fixed inset-0 z-[-1]" onClick={() => onTogglePanel('none')} />
+      )}
       {activePanel !== 'none' && (
         <div
           className={`mx-4 mb-2 lg:max-w-[42%] ${
@@ -119,12 +115,16 @@ function DesktopControlBar({
             />
           )}
           {activePanel === 'playlist' && onAddLocalFiles && onClearPlaylist && (
-            <MediaPlaylist onAddFiles={onAddLocalFiles} onClear={onClearPlaylist} />
+            <MediaPlaylist
+              onAddFiles={onAddLocalFiles}
+              onClear={onClearPlaylist}
+              onClose={() => onTogglePanel('none')}
+            />
           )}
         </div>
       )}
 
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 bg-black/50 px-4 py-2 backdrop-blur-sm">
+      <div className="flex items-center justify-between gap-2 bg-black/50 px-4 py-2 backdrop-blur-sm">
         {/* LEFT: Preset Controls */}
         <div className="flex items-center gap-2">
           <BarButton onClick={() => onTogglePanel('presets')} active={activePanel === 'presets'}>
@@ -193,31 +193,8 @@ function DesktopControlBar({
           </BarButton>
         </div>
 
-        {/* CENTER: Now Playing + Queue (playback controls moved to PlaybackPanel) */}
-        <div className="flex items-center justify-center gap-2">
-          {hasPlaybackSource && (
-            <>
-              {(isLocalSource || isSpotifyConnected) && (
-                <BarButton onClick={onToggleNowPlaying} active={showNowPlaying}>
-                  Now Playing
-                </BarButton>
-              )}
-              {isLocalSource && (
-                <BarButton
-                  onClick={() => onTogglePanel('playlist')}
-                  active={activePanel === 'playlist'}
-                  title="Toggle queue (Q)"
-                  hotkey="Q"
-                >
-                  Queue
-                </BarButton>
-              )}
-            </>
-          )}
-        </div>
-
         {/* RIGHT: App Controls */}
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center gap-2">
           <BarButton onClick={() => onTogglePanel('settings')} active={activePanel === 'settings'}>
             Settings
           </BarButton>

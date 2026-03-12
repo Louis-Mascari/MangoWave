@@ -19,6 +19,13 @@ interface PlaybackPanelProps {
   isMuted?: boolean;
   onToggleMute?: () => void;
   isIdle: boolean;
+  onPauseIdle: () => void;
+  onResumeIdle: () => void;
+  nowPlayingEnabled: boolean;
+  onToggleNowPlaying: () => void;
+  onToggleQueue?: () => void;
+  isQueueOpen?: boolean;
+  hidden?: boolean;
 }
 
 /**
@@ -78,9 +85,7 @@ function SeekBar({
             setSeekDragValue(null);
           }
         }}
-        className={`seek-bar h-1 cursor-pointer appearance-none rounded-full bg-white/20 accent-orange-500 ${
-          isMobileDevice ? 'min-w-0 flex-1' : 'w-48'
-        }`}
+        className="seek-bar h-1 min-w-0 flex-1 cursor-pointer appearance-none rounded-full bg-white/20 accent-orange-500"
         aria-label="Seek"
       />
       <span className="text-[10px] tabular-nums text-white/50">{formatTime(duration)}</span>
@@ -96,111 +101,191 @@ export function PlaybackPanel({
   isMuted,
   onToggleMute,
   isIdle,
+  onPauseIdle,
+  onResumeIdle,
+  nowPlayingEnabled,
+  onToggleNowPlaying,
+  onToggleQueue,
+  isQueueOpen,
+  hidden,
 }: PlaybackPanelProps) {
   const spotifyDeviceName = useSpotifyStore((s) => s.nowPlaying?.deviceName);
 
   if (adapter.source !== 'local' && adapter.source !== 'spotify') return null;
+  if (hidden) return null;
 
   const isDisabled = !adapter.canControl;
-  const showVolume =
-    !isMobileDevice && volume != null && onVolumeChange != null && onToggleMute != null;
+  const showVolume = volume != null && onVolumeChange != null && onToggleMute != null;
   const showDevice = !isMobileDevice && adapter.source === 'spotify' && spotifyDeviceName;
+  const showQueue = adapter.source === 'local' && onToggleQueue;
+
+  const hasShuffle = adapter.onToggleShuffle != null;
+  const hasRepeat = adapter.onCycleRepeat != null;
+
+  // Shared button elements
+  const prevBtn = (
+    <TransportButton
+      onClick={adapter.onPrevious}
+      disabled={isDisabled}
+      label="Previous track"
+      title={isDisabled ? (adapter.tooltip ?? '') : 'Previous track (J)'}
+    >
+      ⏮
+    </TransportButton>
+  );
+
+  const playBtn = (
+    <TransportButton
+      onClick={adapter.isPlaying ? adapter.onPause : adapter.onPlay}
+      disabled={isDisabled}
+      label={adapter.isPlaying ? 'Pause' : 'Play'}
+      title={isDisabled ? (adapter.tooltip ?? '') : adapter.isPlaying ? 'Pause (K)' : 'Play (K)'}
+      primary
+    >
+      {adapter.isPlaying ? '⏸' : '▶'}
+    </TransportButton>
+  );
+
+  const nextBtn = (
+    <TransportButton
+      onClick={adapter.onNext}
+      disabled={isDisabled}
+      label="Next track"
+      title={isDisabled ? (adapter.tooltip ?? '') : 'Next track (L)'}
+    >
+      ⏭
+    </TransportButton>
+  );
+
+  const shuffleBtn = hasShuffle ? (
+    <TransportToggle
+      onClick={adapter.onToggleShuffle!}
+      active={adapter.shuffle ?? false}
+      label={adapter.shuffle ? 'Shuffle: on' : 'Shuffle: off'}
+    >
+      🔀
+    </TransportToggle>
+  ) : null;
+
+  const repeatBtn = hasRepeat ? (
+    <TransportToggle
+      onClick={adapter.onCycleRepeat!}
+      active={adapter.repeatMode !== 'off'}
+      label={
+        adapter.repeatMode === 'one'
+          ? 'Repeat: one'
+          : adapter.repeatMode === 'all'
+            ? 'Repeat: all'
+            : 'Repeat: off'
+      }
+    >
+      {adapter.repeatMode === 'one' ? '🔂' : '🔁'}
+    </TransportToggle>
+  ) : null;
+
+  const nowPlayingBtn = (
+    <TransportToggle
+      onClick={onToggleNowPlaying}
+      active={nowPlayingEnabled}
+      label={
+        nowPlayingEnabled
+          ? 'Now Playing: on (shows 5s per track)'
+          : 'Now Playing: off (shows 5s per track)'
+      }
+    >
+      <svg
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        className="h-4 w-4"
+      >
+        <path d="M7 4v12l10-6z" />
+        <rect x="1" y="6" width="4" height="8" rx="0.5" />
+      </svg>
+    </TransportToggle>
+  );
+
+  const queueBtn = showQueue ? (
+    <TransportToggle onClick={onToggleQueue} active={isQueueOpen ?? false} label="Queue (Q)">
+      <svg
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        className="h-4 w-4"
+      >
+        <line x1="3" y1="5" x2="17" y2="5" />
+        <line x1="3" y1="10" x2="17" y2="10" />
+        <line x1="3" y1="15" x2="13" y2="15" />
+      </svg>
+    </TransportToggle>
+  ) : null;
+
+  const volumeControl = showVolume ? (
+    <div className="flex items-center gap-1">
+      <button
+        onClick={onToggleMute}
+        className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 hover:text-white/70"
+        title={isMuted ? 'Unmute' : 'Mute'}
+        aria-label={isMuted ? 'Unmute' : 'Mute'}
+      >
+        {isMuted ? '🔇' : '🔊'}
+      </button>
+      <input
+        type="range"
+        min={0}
+        max={1}
+        step={0.05}
+        value={volume}
+        onChange={(e) => onVolumeChange!(Number(e.target.value))}
+        className="seek-bar h-1 w-16 cursor-pointer appearance-none rounded-full bg-white/20 accent-orange-500"
+        aria-label="Volume"
+      />
+    </div>
+  ) : null;
+
+  const deviceLabel = showDevice ? (
+    <span
+      className="ml-1 max-w-[120px] truncate text-[10px] text-white/30"
+      title={`Playing on ${spotifyDeviceName}`}
+    >
+      {spotifyDeviceName}
+    </span>
+  ) : null;
 
   return (
     <div
+      onMouseEnter={onPauseIdle}
+      onMouseLeave={onResumeIdle}
       className={`fixed z-[48] transition-opacity duration-500 ${
         isIdle ? 'pointer-events-none opacity-0' : 'opacity-100'
       } ${
-        isMobileDevice ? 'bottom-20 left-4 right-4' : 'bottom-14 left-1/2 -translate-x-1/2'
+        isMobileDevice ? 'bottom-24 left-4 right-4' : 'bottom-16 left-1/2 -translate-x-1/2'
       } rounded-lg bg-black/60 backdrop-blur-sm ${isMobileDevice ? 'px-3 py-2' : 'px-4 py-2'}`}
     >
       <SeekBar source={adapter.source} onSeek={onSeek} />
 
-      {/* Transport row */}
-      <div className="mt-1 flex items-center justify-center gap-2">
-        {adapter.onToggleShuffle != null && (
-          <TransportToggle
-            onClick={adapter.onToggleShuffle}
-            active={adapter.shuffle ?? false}
-            label={adapter.shuffle ? 'Shuffle: on' : 'Shuffle: off'}
-          >
-            🔀
-          </TransportToggle>
-        )}
-        <TransportButton
-          onClick={adapter.onPrevious}
-          disabled={isDisabled}
-          label="Previous track"
-          title={isDisabled ? (adapter.tooltip ?? '') : 'Previous track (J)'}
-        >
-          ⏮
-        </TransportButton>
-        <TransportButton
-          onClick={adapter.isPlaying ? adapter.onPause : adapter.onPlay}
-          disabled={isDisabled}
-          label={adapter.isPlaying ? 'Pause' : 'Play'}
-          title={
-            isDisabled ? (adapter.tooltip ?? '') : adapter.isPlaying ? 'Pause (K)' : 'Play (K)'
-          }
-          primary
-        >
-          {adapter.isPlaying ? '⏸' : '▶'}
-        </TransportButton>
-        <TransportButton
-          onClick={adapter.onNext}
-          disabled={isDisabled}
-          label="Next track"
-          title={isDisabled ? (adapter.tooltip ?? '') : 'Next track (L)'}
-        >
-          ⏭
-        </TransportButton>
-        {adapter.onCycleRepeat != null && (
-          <TransportToggle
-            onClick={adapter.onCycleRepeat}
-            active={adapter.repeatMode !== 'off'}
-            label={
-              adapter.repeatMode === 'one'
-                ? 'Repeat: one'
-                : adapter.repeatMode === 'all'
-                  ? 'Repeat: all'
-                  : 'Repeat: off'
-            }
-          >
-            {adapter.repeatMode === 'one' ? '🔂' : '🔁'}
-          </TransportToggle>
-        )}
-
-        {showVolume && (
-          <div className="ml-2 flex items-center gap-1">
-            <button
-              onClick={onToggleMute}
-              className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 hover:text-white/70"
-              title={isMuted ? 'Unmute' : 'Mute'}
-              aria-label={isMuted ? 'Unmute' : 'Mute'}
-            >
-              {isMuted ? '🔇' : '🔊'}
-            </button>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.05}
-              value={volume}
-              onChange={(e) => onVolumeChange!(Number(e.target.value))}
-              className="seek-bar h-1 w-16 cursor-pointer appearance-none rounded-full bg-white/20 accent-orange-500"
-              aria-label="Volume"
-            />
-          </div>
-        )}
-
-        {showDevice && (
-          <span
-            className="ml-2 max-w-[120px] truncate text-[10px] text-white/30"
-            title={`Playing on ${spotifyDeviceName}`}
-          >
-            {spotifyDeviceName}
-          </span>
-        )}
+      {/* Controls: wraps responsively. Core transport stays together,
+          secondary group (shuffle/repeat/nowplaying/queue) wraps as a unit,
+          volume wraps last */}
+      <div className="mt-1 flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+        {/* Core transport — stays together */}
+        <div className="flex items-center gap-2">
+          {prevBtn}
+          {playBtn}
+          {nextBtn}
+        </div>
+        {/* Secondary controls — wraps as a group */}
+        <div className="flex items-center gap-2">
+          {shuffleBtn}
+          {repeatBtn}
+          {nowPlayingBtn}
+          {queueBtn}
+        </div>
+        {/* Volume — wraps independently as last resort */}
+        {volumeControl}
+        {deviceLabel}
       </div>
     </div>
   );

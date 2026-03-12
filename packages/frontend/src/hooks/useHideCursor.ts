@@ -5,7 +5,7 @@ import { useIdleTimer } from './useIdleTimer.ts';
  * Hides the cursor after idle timeout when in fullscreen.
  */
 export function useHideCursor(timeoutMs = 3000): void {
-  const isIdle = useIdleTimer(timeoutMs);
+  const { isIdle } = useIdleTimer(timeoutMs);
 
   useEffect(() => {
     if (isIdle && document.fullscreenElement) {

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
 import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
-import { buildPkceAuthUrl } from '../services/spotifyPkce.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import logoSrc from '../assets/logo.png';
 
@@ -18,32 +17,14 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
   const sessionId = useSpotifyStore((s) => s.sessionId);
   const user = useSpotifyStore((s) => s.user);
   const accessToken = useSpotifyStore((s) => s.accessToken);
-  const byocClientId = useSpotifyStore((s) => s.byocClientId);
   const logout = useSpotifyStore((s) => s.logout);
   const getAuthMode = useSpotifyStore((s) => s.getAuthMode);
-  const setByocClientId = useSpotifyStore((s) => s.setByocClientId);
   const authMode = getAuthMode();
 
   const [activeModal, setActiveModal] = useState<ModalView>('none');
-  const [byocInput, setByocInput] = useState(byocClientId ?? '');
-  const [isConnecting, setIsConnecting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isSpotifyConnected = !!(sessionId || accessToken);
-
-  const handleByocConnect = async () => {
-    const trimmed = byocInput.trim();
-    if (!trimmed || isConnecting) return;
-    setIsConnecting(true);
-    try {
-      setByocClientId(trimmed);
-      const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
-      const { url } = await buildPkceAuthUrl(trimmed, redirectUri);
-      window.location.href = url;
-    } catch {
-      setIsConnecting(false);
-    }
-  };
 
   const handleFileSelect = () => {
     fileInputRef.current?.click();
@@ -216,10 +197,6 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
             user={user}
             logout={logout}
             isOwnerMode={authMode === 'owner'}
-            byocInput={byocInput}
-            setByocInput={setByocInput}
-            handleByocConnect={handleByocConnect}
-            isConnecting={isConnecting}
           />
 
           <button
@@ -317,21 +294,16 @@ function SpotifySection({
   user,
   logout,
   isOwnerMode,
-  byocInput,
-  setByocInput,
-  handleByocConnect,
-  isConnecting,
 }: {
   isSpotifyConnected: boolean;
   user: { displayName?: string | null } | null;
   logout: () => void;
   isOwnerMode: boolean;
-  byocInput: string;
-  setByocInput: (v: string) => void;
-  handleByocConnect: () => void;
-  isConnecting: boolean;
 }) {
   const [expanded, setExpanded] = useState(isSpotifyConnected);
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  if (!isOwnerMode && !isSpotifyConnected) return null;
 
   return (
     <div className="mt-4 border-t border-white/10 pt-4">
@@ -350,8 +322,8 @@ function SpotifySection({
             </button>
           </div>
           <p className="text-[10px] text-[#666]">
-            Now-playing metadata &amp; cloud-synced settings active. Playback controls require
-            Premium. Share a screen, window, or tab playing Spotify for audio.
+            Now-playing metadata &amp; cloud-synced MangoWave settings active. Playback controls
+            require Premium. Share a screen, window, or tab playing Spotify for audio.
           </p>
         </div>
       ) : (
@@ -375,74 +347,27 @@ function SpotifySection({
             <div className="min-h-0">
               <div className="flex flex-col items-center gap-2 pt-1">
                 <p className="text-center text-xs text-[#888]">
-                  Connect Spotify for now-playing metadata and cloud-synced settings. Spotify
-                  Premium also enables playback controls. You&apos;ll still need to share a screen,
-                  window, or tab playing Spotify for the visualizer to react to audio.
+                  Connect Spotify for now-playing metadata and cloud-synced MangoWave settings.
+                  Spotify Premium also enables playback controls. You&apos;ll still need to share a
+                  screen, window, or tab playing Spotify for the visualizer to react to audio.
                 </p>
-                {isOwnerMode ? (
-                  <div className="flex flex-col items-center gap-1">
-                    <button
-                      onClick={() => {
-                        window.location.href = buildSpotifyAuthUrl();
-                      }}
-                      disabled={isConnecting}
-                      className="spotify-btn cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-medium text-[#1DB954] hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      {isConnecting ? 'Connecting...' : 'Connect Spotify'}
-                    </button>
-                    <p className="text-[10px] text-[#666]">
-                      Authorized users don&apos;t need Spotify Premium. If you are not the app
-                      creator, ensure they&apos;ve added your name and email associated with your
-                      Spotify account to their app&apos;s User Management tab.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="flex w-full flex-col items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-3">
-                    <div className="flex flex-col gap-1.5 text-xs text-[#888]">
-                      <p>Requires a Spotify Premium account to create a developer app.</p>
-                      <ul className="flex list-disc flex-col gap-1 pl-4">
-                        <li>
-                          Register at{' '}
-                          <a
-                            href="https://developer.spotify.com/dashboard"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[#aaa] underline hover:text-[#ccc]"
-                          >
-                            developer.spotify.com
-                          </a>
-                        </li>
-                        <li>
-                          Add{' '}
-                          <code className="rounded bg-white/10 px-1 text-[10px]">
-                            {import.meta.env.VITE_SPOTIFY_REDIRECT_URI}
-                          </code>{' '}
-                          as a redirect URI
-                        </li>
-                        <li>Paste your Client ID (not your secret key) below</li>
-                        <li>
-                          Add up to 5 users in the User Management tab — they don&apos;t need
-                          Premium for song metadata and cloud-synced MangoWave settings (Premium
-                          only needed for playback controls)
-                        </li>
-                      </ul>
-                    </div>
-                    <input
-                      type="text"
-                      value={byocInput}
-                      onChange={(e) => setByocInput(e.target.value)}
-                      placeholder="Client ID (not secret key)"
-                      className="w-full rounded border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-[#1DB954] focus:outline-none"
-                    />
-                    <button
-                      onClick={handleByocConnect}
-                      disabled={!byocInput.trim() || isConnecting}
-                      className="cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-1.5 text-sm font-medium text-[#1DB954] hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      {isConnecting ? 'Connecting...' : 'Connect with PKCE'}
-                    </button>
-                  </div>
-                )}
+                <div className="flex flex-col items-center gap-1">
+                  <button
+                    onClick={() => {
+                      setIsConnecting(true);
+                      window.location.href = buildSpotifyAuthUrl();
+                    }}
+                    disabled={isConnecting}
+                    className="spotify-btn cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-medium text-[#1DB954] hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {isConnecting ? 'Connecting...' : 'Connect Spotify'}
+                  </button>
+                  <p className="text-[10px] text-[#666]">
+                    If you are not the app owner, ensure they&apos;ve added your name and email
+                    associated with your Spotify account to their developer app&apos;s User
+                    Management tab.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

@@ -49,7 +49,6 @@ describe('SettingsPanel', () => {
 
     expect(screen.getByText(/Transition Time/)).toBeInTheDocument();
     expect(screen.getByText('Preset Name Display')).toBeInTheDocument();
-    expect(screen.getByText('Song Info Display')).toBeInTheDocument();
     expect(screen.getByText('Autopilot')).toBeInTheDocument();
   });
 

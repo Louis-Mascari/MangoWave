@@ -28,7 +28,7 @@
 - **Preset history** with previous/next navigation and browseable history tab
 - **Keyboard shortcuts** for preset navigation, fullscreen, favorites, and more
 - **Mobile-optimized UI** with radial FAB menu and full-screen modal panels
-- **Optional Spotify integration** for Now Playing metadata and playback controls (bring your own Client ID via PKCE — Spotify limits each app key to 5 users)
+- **Optional Spotify integration** — Now Playing metadata for all authorized users; seek, shuffle, and repeat controls for Premium users. Cloud-synced settings. Owner-mode only due to Spotify's dev mode policy (1 Client ID per developer, max 5 authorized users, Premium required to register the app). Self-hosters can set up their own Spotify developer app via the included PKCE code
 - **Visual quality controls** — mesh resolution, texture quality, FXAA anti-aliasing, plus FPS cap, resolution scaling, FFT size, smoothing
 - **Settings export/import** — transfer settings between browsers or devices via JSON file
 - **Zero install** — runs entirely in the browser, no extensions needed
@@ -38,6 +38,12 @@
 The core visualizer is **100% client-side**. Audio sources (system capture, local files, microphone), rendering, EQ, presets, and all settings run in the browser with zero backend calls.
 
 The backend only serves **optional Spotify integration** — 4 Lambda endpoints behind API Gateway handle OAuth token exchange, token refresh, and settings sync to DynamoDB.
+
+### Spotify Integration
+
+Spotify's dev mode policy (as of March 2026) restricts each developer app to 1 Client ID, the app owner plus up to 5 authorized users, and requires a Premium account to register the app. Because of these limits, MangoWave's hosted site exposes Spotify only in **owner mode** — the app owner connects via backend-proxied OAuth, and authorized users must be added to the developer app's User Management tab. Authorized users don't need Premium themselves, but playback controls (seek, shuffle, repeat) require Premium; non-Premium users still see Now Playing metadata.
+
+The BYOC (bring your own client) PKCE flow is retained in the codebase (`spotifyPkce.ts`) but the UI for it has been removed from the hosted site. Self-hosters who fork the repo can re-enable it and connect their own Spotify developer app.
 
 ```
 Source -> GainNode (pre-amp) -> 10x BiquadFilter (EQ) -> AnalyserNode -> butterchurn

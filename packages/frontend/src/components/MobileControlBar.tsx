@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { useIdleTimer } from '../hooks/useIdleTimer.ts';
 import { SettingsPanel } from './SettingsPanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
-import { MediaPlaylist } from './MediaPlaylist.tsx';
 import type { PanelView } from './ControlBar.tsx';
 import logoUrl from '../assets/logo.png';
 
@@ -24,8 +23,8 @@ interface MobileControlBarProps {
   onToggleAutopilot: () => void;
   activePanel: PanelView;
   onTogglePanel: (panel: PanelView) => void;
-  onAddLocalFiles?: (files: File[]) => void;
-  onClearPlaylist?: () => void;
+  onMenuOpenChange?: (open: boolean) => void;
+  onForcePlaybackIdle?: () => void;
 }
 
 export function MobileControlBar({
@@ -43,10 +42,10 @@ export function MobileControlBar({
   onToggleAutopilot,
   activePanel,
   onTogglePanel,
-  onAddLocalFiles,
-  onClearPlaylist,
+  onMenuOpenChange,
+  onForcePlaybackIdle,
 }: MobileControlBarProps) {
-  const isIdle = useIdleTimer(3000, 5000);
+  const { isIdle, forceIdle } = useIdleTimer(5000, 5000);
   const [menuOpen, setMenuOpen] = useState(false);
   const [modalPanel, setModalPanel] = useState<PanelView>('none');
 
@@ -65,29 +64,33 @@ export function MobileControlBar({
 
   const openMenu = useCallback(() => {
     setMenuOpen(true);
+    onMenuOpenChange?.(true);
     pushHistory();
-  }, [pushHistory]);
+  }, [pushHistory, onMenuOpenChange]);
 
   const closeMenu = useCallback(() => {
     setMenuOpen(false);
+    onMenuOpenChange?.(false);
     popHistory();
-  }, [popHistory]);
+  }, [popHistory, onMenuOpenChange]);
 
   const openModal = useCallback(
     (panel: PanelView) => {
       setModalPanel(panel);
       onTogglePanel(panel);
+      onMenuOpenChange?.(true);
       pushHistory();
     },
-    [onTogglePanel, pushHistory],
+    [onTogglePanel, pushHistory, onMenuOpenChange],
   );
 
   const closeModal = useCallback(() => {
     const wasOpen = modalPanel !== 'none';
     setModalPanel('none');
     onTogglePanel('none');
+    onMenuOpenChange?.(false);
     if (wasOpen) popHistory();
-  }, [modalPanel, onTogglePanel, popHistory]);
+  }, [modalPanel, onTogglePanel, popHistory, onMenuOpenChange]);
 
   // Handle browser back button
   useEffect(() => {
@@ -100,12 +103,13 @@ export function MobileControlBar({
         onTogglePanel('none');
       } else if (menuOpen) {
         setMenuOpen(false);
+        onMenuOpenChange?.(false);
       }
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [menuOpen, modalPanel, onTogglePanel]);
+  }, [menuOpen, modalPanel, onTogglePanel, onMenuOpenChange]);
 
   // Auto-close radial menu after 10s of inactivity (resets on interaction)
   useEffect(() => {
@@ -116,6 +120,7 @@ export function MobileControlBar({
       clearTimeout(timer);
       timer = setTimeout(() => {
         setMenuOpen(false);
+        onMenuOpenChange?.(false);
         while (historyDepth > 0) {
           historyDepth -= 1;
           history.back();
@@ -132,15 +137,36 @@ export function MobileControlBar({
       clearTimeout(timer);
       events.forEach((e) => window.removeEventListener(e, resetTimer));
     };
-  }, [menuOpen]);
+  }, [menuOpen, onMenuOpenChange]);
+
+  // Transition from radial menu directly to a modal without dropping mobileMenuOpen.
+  // closeMenu() sets mobileMenuOpen(false), which would flash the PlaybackPanel
+  // before openModal() sets it back to true. Instead, close the menu visually
+  // but keep mobileMenuOpen true, then open the modal.
+  const menuToModal = useCallback(
+    (panel: PanelView) => {
+      setMenuOpen(false);
+      popHistory();
+      // Don't call onMenuOpenChange(false) — keep it true through the transition
+      setTimeout(() => openModal(panel), 50);
+    },
+    [popHistory, openModal],
+  );
 
   const radialItems = [
+    {
+      label: 'Presets',
+      icon: 'P',
+      action: () => menuToModal('presets'),
+    },
     {
       label: 'Previous',
       icon: '◀',
       action: () => {
         onPreviousPreset?.();
         closeMenu();
+        forceIdle();
+        onForcePlaybackIdle?.();
       },
       disabled: !canGoBack,
     },
@@ -150,6 +176,8 @@ export function MobileControlBar({
       action: () => {
         onNextPreset();
         closeMenu();
+        forceIdle();
+        onForcePlaybackIdle?.();
       },
     },
     {
@@ -158,24 +186,15 @@ export function MobileControlBar({
       action: () => {
         onToggleAutopilot();
         closeMenu();
+        forceIdle();
+        onForcePlaybackIdle?.();
       },
       active: autopilotEnabled,
     },
     {
-      label: 'Presets',
-      icon: '☰',
-      action: () => {
-        closeMenu();
-        setTimeout(() => openModal('presets'), 50);
-      },
-    },
-    {
       label: 'Settings',
       icon: '⚙',
-      action: () => {
-        closeMenu();
-        setTimeout(() => openModal('settings'), 50);
-      },
+      action: () => menuToModal('settings'),
     },
     {
       label: isFullscreen ? 'Exit FS' : 'Fullscreen',
@@ -183,6 +202,8 @@ export function MobileControlBar({
       action: () => {
         onToggleFullscreen();
         closeMenu();
+        forceIdle();
+        onForcePlaybackIdle?.();
       },
       active: isFullscreen,
     },
@@ -194,18 +215,6 @@ export function MobileControlBar({
         closeMenu();
       },
     },
-    ...(onAddLocalFiles
-      ? [
-          {
-            label: 'Queue',
-            icon: '📋',
-            action: () => {
-              closeMenu();
-              setTimeout(() => openModal('playlist'), 50);
-            },
-          },
-        ]
-      : []),
   ];
 
   // Radial layout: items fan out in a 140° arc above the centered FAB
@@ -318,9 +327,6 @@ export function MobileControlBar({
                   onSelectPreset={onSelectPreset}
                   onNextPreset={onNextPreset}
                 />
-              )}
-              {activePanel === 'playlist' && onAddLocalFiles && onClearPlaylist && (
-                <MediaPlaylist onAddFiles={onAddLocalFiles} onClear={onClearPlaylist} />
               )}
             </div>
           </div>

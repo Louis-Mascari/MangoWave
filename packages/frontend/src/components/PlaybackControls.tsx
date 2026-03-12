@@ -1,7 +1,7 @@
 import type { RepeatMode } from '../store/useMediaPlayerStore.ts';
 
 export interface PlaybackAdapter {
-  source: 'spotify' | 'local' | 'mic' | 'none';
+  source: 'spotify' | 'local' | 'mic' | 'system' | 'none';
   isPlaying: boolean;
   canControl: boolean;
   onPlay: () => void;
@@ -28,6 +28,7 @@ const repeatLabels: Record<RepeatMode, string> = {
 const defaultTooltips: Record<PlaybackAdapter['source'], string> = {
   local: 'Add songs to your queue',
   mic: 'Microphone input — no playback controls',
+  system: 'Sharing audio — no playback controls',
   spotify: 'Playback controls unavailable',
   none: 'Sharing audio — no playback controls',
 };

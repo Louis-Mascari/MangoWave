@@ -188,10 +188,22 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
   }, []);
 
   const next = useCallback(() => {
+    const { tracks } = useMediaPlayerStore.getState();
+    if (tracks.length <= 1 && audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {});
+      return;
+    }
     nextTrack();
   }, [nextTrack]);
 
   const previous = useCallback(() => {
+    const { tracks } = useMediaPlayerStore.getState();
+    if (tracks.length <= 1 && audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {});
+      return;
+    }
     previousTrack();
   }, [previousTrack]);
 

@@ -2,28 +2,6 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ControlBar } from '../ControlBar.tsx';
-import type { PlaybackAdapter } from '../PlaybackControls.tsx';
-import { useSpotifyStore } from '../../store/useSpotifyStore.ts';
-
-const noneAdapter: PlaybackAdapter = {
-  source: 'none',
-  isPlaying: false,
-  canControl: false,
-  onPlay: vi.fn(),
-  onPause: vi.fn(),
-  onNext: vi.fn(),
-  onPrevious: vi.fn(),
-};
-
-const spotifyAdapter: PlaybackAdapter = {
-  source: 'spotify',
-  isPlaying: false,
-  canControl: true,
-  onPlay: vi.fn(),
-  onPause: vi.fn(),
-  onNext: vi.fn(),
-  onPrevious: vi.fn(),
-};
 
 const defaultProps = {
   onNextPreset: vi.fn(),
@@ -33,8 +11,6 @@ const defaultProps = {
   onStop: vi.fn(),
   onToggleFullscreen: vi.fn(),
   isFullscreen: false,
-  onToggleNowPlaying: vi.fn(),
-  showNowPlaying: false,
   presetList: ['Preset A', 'Preset B'],
   presetPackMap: new Map([
     ['Preset A', 'Base'],
@@ -49,7 +25,6 @@ const defaultProps = {
   isBlocked: false,
   onToggleFavorite: vi.fn(),
   onToggleBlock: vi.fn(),
-  playbackAdapter: noneAdapter,
 };
 
 describe('ControlBar', () => {
@@ -140,17 +115,5 @@ describe('ControlBar', () => {
     render(<ControlBar {...defaultProps} isFullscreen={true} />);
     const btn = screen.getByText('Fullscreen');
     expect(btn.className).toContain('bg-orange-500');
-  });
-
-  it('shows Now Playing button when Spotify is connected', () => {
-    useSpotifyStore.setState({ accessToken: 'test-token' });
-    render(<ControlBar {...defaultProps} playbackAdapter={spotifyAdapter} />);
-    expect(screen.getByText('Now Playing')).toBeInTheDocument();
-  });
-
-  it('hides Now Playing button when Spotify is not connected', () => {
-    useSpotifyStore.setState({ accessToken: null });
-    render(<ControlBar {...defaultProps} />);
-    expect(screen.queryByText('Now Playing')).not.toBeInTheDocument();
   });
 });

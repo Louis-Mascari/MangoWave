@@ -62,7 +62,7 @@ Zustand with `localStorage` persistence. Key sections:
 | `performance`         | `fpsCap`, `resolutionScale`, `meshWidth`, `meshHeight`, `textureRatio`, `fxaa` | 0 (uncapped), 1.0, 48, 36, 1.0, false |
 | `audio`               | `smoothingConstant`, `fftSize`                                                 | 0.3, 1024                             |
 | `autopilot`           | `enabled`, `interval`, `mode`, `favoriteWeight`                                | true, 15s, `'all'`, 2                 |
-| `eq`                  | `preAmpGain`, `bandGains[10]`                                                  | 1.0, all 0dB                          |
+| `eq`                  | `preAmpGain`, `bandGains[10]`                                                  | 1.5, all 0dB                          |
 | `blockedPresets`      | string[]                                                                       | []                                    |
 | `favoritePresets`     | string[]                                                                       | []                                    |
 | `presetNameDisplay`   | `'off' \| 'always' \| number`                                                  | 5                                     |
@@ -79,7 +79,7 @@ Blocked and favorited presets are mutually exclusive.
 
 `usePresetHistoryStore` tracks preset navigation history (max 100 entries, cursor-based) for previous/next preset navigation. Also tracks `playedSet` for shuffle-style autopilot rounds. Not persisted.
 
-`useToastStore` drives single-message action toasts (favorite/block confirmations). Auto-clears after 3.5s.
+`useToastStore` drives single-message action toasts (favorite/block confirmations). Default 3.5s auto-clear, optional `durationMs` param for longer error toasts.
 
 ## Environment Variables
 
@@ -104,4 +104,5 @@ All are optional — the app runs fully without them. Spotify integration requir
 - **butterchurn is untyped** — type declarations live in `src/types/butterchurn.d.ts`.
 - **`vite.config.ts`** imports `defineConfig` from `vitest/config` (not `vite`) to support the `test` property.
 - **555+ presets** loaded from 6 butterchurn packs, organized by source pack with virtualized browsing (`react-virtuoso`). Users can import `.milk` files (lazy-loaded converter, zero main bundle impact).
-- **`secure-json-parse`** used for prototype pollution protection on all JSON import surfaces (custom packs, .milk conversion).
+- **`secure-json-parse`** used for prototype pollution protection on all JSON import surfaces (settings import, .milk conversion).
+- **Settings import sanitization** — all imported values clamped to UI-enforced ranges. Whitelisted data keys only (store functions can't be overwritten).

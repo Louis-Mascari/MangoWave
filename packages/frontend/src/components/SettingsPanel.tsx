@@ -142,7 +142,7 @@ function EqualizerTab() {
           <span>-12</span>
         </div>
         <div className="relative flex flex-1 justify-between">
-          <div className="pointer-events-none absolute left-0 right-0 top-1/2 border-t border-dashed border-white/15" />
+          <div className="pointer-events-none absolute left-0 right-0 top-12 border-t border-dashed border-white/15" />
           {EQ_BANDS.map((freq, i) => (
             <div key={freq} className="flex flex-col items-center gap-1">
               <input

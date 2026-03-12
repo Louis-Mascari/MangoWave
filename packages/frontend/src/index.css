@@ -1,16 +1,75 @@
 @import 'tailwindcss';
 
+@property --glow-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes glow-rotate {
+  to {
+    --glow-angle: 360deg;
+  }
+}
+
 body {
   margin: 0;
 }
 
-/* StartScreen hover effects */
-.start-logo {
-  filter: drop-shadow(0 0 48px rgba(255, 140, 50, 0.45));
-  transition: filter 0.3s;
+/* Logo rotating ambient glow */
+.logo-glow {
+  position: relative;
+  display: inline-block;
+  isolation: isolate;
 }
-.start-logo:hover {
-  filter: drop-shadow(0 0 64px rgba(255, 140, 50, 0.6));
+.logo-glow::before {
+  content: '';
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+  background: conic-gradient(from var(--glow-angle), #ff8c32, #e050e0, #ff8c32);
+  filter: blur(32px);
+  opacity: 0.4;
+  z-index: -1;
+  animation: glow-rotate 6s linear infinite;
+  transition:
+    opacity 0.3s,
+    filter 0.3s;
+}
+.logo-glow:hover::before {
+  opacity: 0.65;
+  filter: blur(40px);
+}
+
+/* Card rotating spotlight glow */
+.mode-card {
+  position: relative;
+  overflow: visible;
+  isolation: isolate;
+}
+.mode-card::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 22px;
+  background: conic-gradient(
+    from var(--glow-angle),
+    var(--glow-color),
+    transparent 40%,
+    transparent 60%,
+    var(--glow-color)
+  );
+  filter: blur(18px);
+  opacity: 0.25;
+  z-index: -1;
+  animation: glow-rotate 8s linear infinite;
+  transition:
+    opacity 0.3s,
+    filter 0.3s;
+}
+.mode-card:hover::before {
+  opacity: 0.5;
+  filter: blur(24px);
 }
 
 .start-btn {

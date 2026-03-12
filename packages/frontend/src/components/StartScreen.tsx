@@ -71,11 +71,9 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
         {/* Logo + Title */}
         <div className="flex flex-col items-center gap-3">
           <a href="https://mangowave.app" target="_blank" rel="noopener noreferrer">
-            <img
-              src={logoSrc}
-              alt="MangoWave logo"
-              className="start-logo h-32 w-32 sm:h-40 sm:w-40"
-            />
+            <div className="logo-glow">
+              <img src={logoSrc} alt="MangoWave logo" className="h-32 w-32 sm:h-40 sm:w-40" />
+            </div>
           </a>
           <h1
             className="text-4xl font-extrabold leading-[1.3] tracking-tight sm:text-5xl"
@@ -384,6 +382,8 @@ const cardColors = {
   cyan: 'border-cyan-500/40 hover:border-cyan-500/70',
 } as const;
 
+const glowColors = { orange: '#ff8c32', purple: '#e050e0', cyan: '#22d3ee' } as const;
+
 function ModeCard({
   icon,
   title,
@@ -401,6 +401,7 @@ function ModeCard({
     <button
       onClick={onClick}
       className={`mode-card flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-2xl border bg-white/[0.04] px-5 py-6 text-center transition-all duration-200 hover:bg-white/[0.08] ${cardColors[color]}`}
+      style={{ '--glow-color': glowColors[color] } as React.CSSProperties}
     >
       <span className="text-3xl">{icon}</span>
       <span className="text-sm font-semibold text-white">{title}</span>

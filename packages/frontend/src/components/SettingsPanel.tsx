@@ -752,6 +752,13 @@ function SpotifyTab() {
       const popup = window.open(url, 'spotify-auth', 'popup,width=500,height=700');
       if (!popup || popup.closed) {
         window.location.href = url;
+      } else {
+        const check = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(check);
+            setIsConnecting(false);
+          }
+        }, 500);
       }
     } catch {
       setIsConnecting(false);

@@ -354,8 +354,28 @@ function SpotifySection({
                 <div className="flex flex-col items-center gap-1">
                   <button
                     onClick={() => {
+                      if (isConnecting) return;
                       setIsConnecting(true);
-                      window.location.href = buildSpotifyAuthUrl();
+                      try {
+                        const url = buildSpotifyAuthUrl();
+                        const popup = window.open(
+                          url,
+                          'spotify-auth',
+                          'popup,width=500,height=700',
+                        );
+                        if (!popup || popup.closed) {
+                          window.location.href = url;
+                        } else {
+                          const check = setInterval(() => {
+                            if (popup.closed) {
+                              clearInterval(check);
+                              setIsConnecting(false);
+                            }
+                          }, 500);
+                        }
+                      } catch {
+                        setIsConnecting(false);
+                      }
                     }}
                     disabled={isConnecting}
                     className="spotify-btn cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-2 text-sm font-medium text-[#1DB954] hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"

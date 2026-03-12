@@ -7,6 +7,7 @@ import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { buildPkceAuthUrl } from '../services/spotifyPkce.ts';
 import { Tooltip } from './Tooltip.tsx';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
+import { SHORTCUTS } from '../constants/shortcuts.ts';
 import {
   EXPORT_CATEGORIES,
   buildExport,
@@ -899,23 +900,10 @@ function SpotifyTab() {
   );
 }
 
-const SHORTCUTS = [
-  { key: 'Space / N', action: 'Next preset' },
-  { key: 'P', action: 'Previous preset' },
-  { key: 'F', action: 'Toggle fullscreen' },
-  { key: 'Double-click', action: 'Toggle fullscreen' },
-  { key: 'A', action: 'Toggle autopilot' },
-  { key: 'S', action: 'Toggle favorite' },
-  { key: 'B', action: 'Toggle block' },
-  { key: 'Q', action: 'Toggle queue (local files)' },
-  { key: 'Escape', action: 'Close panel / overlay' },
-  { key: '? / H', action: 'Toggle shortcut overlay' },
-];
-
 function ShortcutsTab() {
   return (
     <>
-      <h3 className="text-sm font-semibold text-white">Keyboard Shortcuts</h3>
+      <h3 className="text-sm font-semibold text-white">Shortcuts</h3>
       <div className="flex flex-col gap-2">
         {SHORTCUTS.map((s) => (
           <div key={s.key} className="flex items-center justify-between">

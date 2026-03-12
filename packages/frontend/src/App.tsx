@@ -497,6 +497,25 @@ function MainApp() {
     if (local.isActive) handleTogglePanel('playlist');
   }, [local.isActive, handleTogglePanel]);
 
+  const handlePlayPause = useCallback(() => {
+    if (!playbackAdapter.canControl) return;
+    if (playbackAdapter.isPlaying) {
+      playbackAdapter.onPause();
+    } else {
+      playbackAdapter.onPlay();
+    }
+  }, [playbackAdapter]);
+
+  const handleNextTrack = useCallback(() => {
+    if (!playbackAdapter.canControl) return;
+    playbackAdapter.onNext();
+  }, [playbackAdapter]);
+
+  const handlePreviousTrack = useCallback(() => {
+    if (!playbackAdapter.canControl) return;
+    playbackAdapter.onPrevious();
+  }, [playbackAdapter]);
+
   const { showShortcutOverlay, toggleShortcutOverlay } = useKeyboardShortcuts({
     onNextPreset: handleNextPreset,
     onPreviousPreset: handlePreviousPreset,
@@ -506,6 +525,9 @@ function MainApp() {
     onToggleFavorite: handleToggleFavorite,
     onToggleBlock: handleToggleBlock,
     onToggleQueue: handleToggleQueue,
+    onPlayPause: handlePlayPause,
+    onNextTrack: handleNextTrack,
+    onPreviousTrack: handlePreviousTrack,
   });
 
   if (!webgl2) {

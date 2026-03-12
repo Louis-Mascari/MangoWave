@@ -1,19 +1,9 @@
+import { SHORTCUTS } from '../constants/shortcuts.ts';
+
 interface ShortcutOverlayProps {
   visible: boolean;
   onClose: () => void;
 }
-
-const SHORTCUTS = [
-  { key: 'Space / N', action: 'Next preset' },
-  { key: 'P', action: 'Previous preset' },
-  { key: 'F', action: 'Toggle fullscreen' },
-  { key: 'A', action: 'Toggle autopilot' },
-  { key: 'S', action: 'Toggle favorite' },
-  { key: 'B', action: 'Toggle block' },
-  { key: 'Q', action: 'Toggle queue (local files)' },
-  { key: 'Escape', action: 'Close panel / overlay' },
-  { key: '? / H', action: 'Toggle this overlay' },
-];
 
 export function ShortcutOverlay({ visible, onClose }: ShortcutOverlayProps) {
   if (!visible) return null;
@@ -27,7 +17,7 @@ export function ShortcutOverlay({ visible, onClose }: ShortcutOverlayProps) {
         className="w-80 rounded-lg bg-gray-900/95 p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="mb-4 text-center text-sm font-semibold text-white">Keyboard Shortcuts</h2>
+        <h2 className="mb-4 text-center text-sm font-semibold text-white">Shortcuts</h2>
         <div className="flex flex-col gap-2">
           {SHORTCUTS.map((s) => (
             <div key={s.key} className="flex items-center justify-between">

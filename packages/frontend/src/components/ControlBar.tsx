@@ -1,5 +1,6 @@
 import { useIdleTimer } from '../hooks/useIdleTimer.ts';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
+import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { SettingsPanel } from './SettingsPanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
 import { PlaybackControls } from './PlaybackControls.tsx';
@@ -204,6 +205,7 @@ function DesktopControlBar({
             onClick={onToggleAutopilot}
             active={autopilotEnabled}
             title="Toggle autopilot (A)"
+            hotkey="A"
           >
             Autopilot
           </BarButton>
@@ -233,6 +235,7 @@ function DesktopControlBar({
                   onClick={() => onTogglePanel('playlist')}
                   active={activePanel === 'playlist'}
                   title="Toggle queue (Q)"
+                  hotkey="Q"
                 >
                   Queue
                 </BarButton>
@@ -250,6 +253,7 @@ function DesktopControlBar({
             onClick={onToggleFullscreen}
             active={isFullscreen}
             title="Toggle fullscreen (F)"
+            hotkey="F"
           >
             Fullscreen
           </BarButton>
@@ -264,11 +268,13 @@ function BarButton({
   onClick,
   active = false,
   title,
+  hotkey,
   children,
 }: {
   onClick: () => void;
   active?: boolean;
   title?: string;
+  hotkey?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -280,6 +286,11 @@ function BarButton({
       }`}
     >
       {children}
+      {hotkey && !isMobileDevice && (
+        <kbd className="ml-1.5 rounded bg-white/10 px-1 py-0.5 font-mono text-[10px] text-white/40">
+          {hotkey}
+        </kbd>
+      )}
     </button>
   );
 }

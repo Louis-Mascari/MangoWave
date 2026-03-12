@@ -70,10 +70,10 @@ describe('SettingsPanel', () => {
 
     await user.click(screen.getByRole('button', { name: 'Shortcuts' }));
 
-    expect(screen.getByText('Keyboard Shortcuts')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Shortcuts' })).toBeInTheDocument();
     expect(screen.getByText('Space / N')).toBeInTheDocument();
     expect(screen.getByText('Next preset')).toBeInTheDocument();
-    expect(screen.getByText('Double-click')).toBeInTheDocument();
+    expect(screen.getByText('F / Double-click')).toBeInTheDocument();
   });
 
   it('shows Data tab with export and import', async () => {

@@ -52,7 +52,7 @@ export function PlaybackControls({ adapter }: PlaybackControlsProps) {
         onClick={adapter.onPrevious}
         disabled={isDisabled}
         label="Previous track"
-        title={isDisabled ? disabledTooltip : 'Previous track'}
+        title={isDisabled ? disabledTooltip : 'Previous track (J)'}
       >
         ⏮
       </PlaybackButton>
@@ -60,7 +60,7 @@ export function PlaybackControls({ adapter }: PlaybackControlsProps) {
         onClick={adapter.isPlaying ? adapter.onPause : adapter.onPlay}
         disabled={isDisabled}
         label={adapter.isPlaying ? 'Pause' : 'Play'}
-        title={isDisabled ? disabledTooltip : adapter.isPlaying ? 'Pause' : 'Play'}
+        title={isDisabled ? disabledTooltip : adapter.isPlaying ? 'Pause (K)' : 'Play (K)'}
       >
         {adapter.isPlaying ? '⏸' : '▶'}
       </PlaybackButton>
@@ -68,7 +68,7 @@ export function PlaybackControls({ adapter }: PlaybackControlsProps) {
         onClick={adapter.onNext}
         disabled={isDisabled}
         label="Next track"
-        title={isDisabled ? disabledTooltip : 'Next track'}
+        title={isDisabled ? disabledTooltip : 'Next track (L)'}
       >
         ⏭
       </PlaybackButton>

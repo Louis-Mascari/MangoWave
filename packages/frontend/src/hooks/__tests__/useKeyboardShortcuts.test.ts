@@ -15,6 +15,9 @@ const handlers = {
   onToggleFavorite: vi.fn(),
   onToggleBlock: vi.fn(),
   onToggleQueue: vi.fn(),
+  onPlayPause: vi.fn(),
+  onNextTrack: vi.fn(),
+  onPreviousTrack: vi.fn(),
 };
 
 describe('useKeyboardShortcuts', () => {
@@ -73,5 +76,41 @@ describe('useKeyboardShortcuts', () => {
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'n', bubbles: true }));
     expect(handlers.onNextPreset).not.toHaveBeenCalled();
     document.body.removeChild(input);
+  });
+
+  it('K calls onPlayPause', () => {
+    renderHook(() => useKeyboardShortcuts(handlers));
+    act(() => fireKey('k'));
+    expect(handlers.onPlayPause).toHaveBeenCalledTimes(1);
+  });
+
+  it('J calls onPreviousTrack', () => {
+    renderHook(() => useKeyboardShortcuts(handlers));
+    act(() => fireKey('j'));
+    expect(handlers.onPreviousTrack).toHaveBeenCalledTimes(1);
+  });
+
+  it('L calls onNextTrack', () => {
+    renderHook(() => useKeyboardShortcuts(handlers));
+    act(() => fireKey('l'));
+    expect(handlers.onNextTrack).toHaveBeenCalledTimes(1);
+  });
+
+  it('media keys are no-ops when handlers are undefined', () => {
+    const minimalHandlers = {
+      onNextPreset: vi.fn(),
+      onPreviousPreset: vi.fn(),
+      onToggleFullscreen: vi.fn(),
+      onClosePanel: vi.fn(),
+      onToggleAutopilot: vi.fn(),
+      onToggleFavorite: vi.fn(),
+      onToggleBlock: vi.fn(),
+      onToggleQueue: vi.fn(),
+    };
+    renderHook(() => useKeyboardShortcuts(minimalHandlers));
+    // Should not throw
+    act(() => fireKey('k'));
+    act(() => fireKey('j'));
+    act(() => fireKey('l'));
   });
 });

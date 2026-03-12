@@ -9,6 +9,9 @@ interface KeyboardHandlers {
   onToggleFavorite: () => void;
   onToggleBlock: () => void;
   onToggleQueue: () => void;
+  onPlayPause?: () => void;
+  onNextTrack?: () => void;
+  onPreviousTrack?: () => void;
 }
 
 export function useKeyboardShortcuts(handlers: KeyboardHandlers) {
@@ -66,6 +69,18 @@ export function useKeyboardShortcuts(handlers: KeyboardHandlers) {
         case 'q':
         case 'Q':
           handlers.onToggleQueue();
+          break;
+        case 'k':
+        case 'K':
+          handlers.onPlayPause?.();
+          break;
+        case 'j':
+        case 'J':
+          handlers.onPreviousTrack?.();
+          break;
+        case 'l':
+        case 'L':
+          handlers.onNextTrack?.();
           break;
         case '?':
         case 'h':

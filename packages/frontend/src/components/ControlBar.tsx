@@ -225,7 +225,7 @@ function DesktopControlBar({
                   onToggleMute={onToggleMute}
                 />
               )}
-              {isSpotifyConnected && (
+              {(isLocalSource || isSpotifyConnected) && (
                 <BarButton onClick={onToggleNowPlaying} active={showNowPlaying}>
                   Now Playing
                 </BarButton>

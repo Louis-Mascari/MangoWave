@@ -417,7 +417,10 @@ function PresetsTab() {
 
   return (
     <>
-      <h3 className="text-sm font-semibold text-white">Presets</h3>
+      <h3 className="flex items-center text-sm font-semibold text-white">
+        Presets
+        <Tooltip text="Presets vary in how reactive they are to sound. If visuals feel too subtle or too intense, adjust Pre-Amp gain in the Equalizer tab" />
+      </h3>
 
       <div className="flex flex-col gap-1">
         <label className="flex items-center text-xs text-white/60">
@@ -493,7 +496,7 @@ function PresetsTab() {
       <div className="flex flex-col gap-1">
         <label className="flex items-center text-xs text-white/60">
           Song Info Display
-          <Tooltip text="How long the Now Playing banner shows when the song changes" />
+          <Tooltip text="How long the Now Playing banner shows when the song changes. Available with local files and Spotify — not available for system audio or microphone" />
         </label>
         <div className="flex gap-2">
           <button

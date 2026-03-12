@@ -103,7 +103,7 @@ export function NowPlaying({ visible, songInfoDisplay, track }: NowPlayingProps)
           )}
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-white">{track.title}</p>
-            <p className="truncate text-xs text-white/70">{track.artist}</p>
+            {track.artist && <p className="truncate text-xs text-white/70">{track.artist}</p>}
             {track.albumName && <p className="truncate text-xs text-white/50">{track.albumName}</p>}
           </div>
         </>

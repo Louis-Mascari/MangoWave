@@ -21,7 +21,7 @@
 - **Pack filtering** — enable/disable built-in packs to control which presets appear and which autopilot draws from
 - **Quarantine system** — suspected broken or vibe-killing presets hidden by default, with per-preset unquarantine
 - **Multiple audio sources** — system/tab audio, local files, or microphone input
-- **Local file playback** with queue, shuffle, repeat, seek, and volume controls
+- **Local file playback** with queue, shuffle, repeat, seek, volume controls, and ID3 metadata display (title, artist, album, album art)
 - **10-band EQ** that shapes which frequencies drive the visuals
 - **Pre-amp gain** to boost quiet audio sources
 - **Autopilot** with shuffle-style rounds (no repeats), all or favorites-only mode, proportional favorite weighting (1–10x)
@@ -104,6 +104,9 @@ npm run build -w packages/frontend   # tsc + vite build
 | S            | Toggle favorite            |
 | B            | Toggle block               |
 | Q            | Toggle queue (local files) |
+| J            | Previous track             |
+| K            | Play/pause                 |
+| L            | Next track                 |
 | Escape       | Close panel/overlay        |
 | ? / H        | Shortcut help              |
 
@@ -111,7 +114,7 @@ npm run build -w packages/frontend   # tsc + vite build
 
 - **Frontend:** React 19, Vite 7, TypeScript 5.9, Tailwind CSS 4, Zustand
 - **Visual engine:** butterchurn (WebGL 2 MilkDrop port)
-- **Audio:** Web Audio API (`getDisplayMedia`, `HTMLAudioElement`, `getUserMedia`)
+- **Audio:** Web Audio API (`getDisplayMedia`, `HTMLAudioElement`, `getUserMedia`), music-metadata (ID3 parsing)
 - **Backend:** AWS Lambda (Node.js/TypeScript), API Gateway, DynamoDB
 - **Infrastructure:** AWS CDK v2
 - **CI/CD:** GitHub Actions (OIDC deploy to AWS)

@@ -1,3 +1,4 @@
+import { parseBlob } from 'music-metadata';
 import { create } from 'zustand';
 
 export interface MediaTrack {
@@ -6,6 +7,9 @@ export interface MediaTrack {
   name: string;
   duration: number;
   objectUrl: string | null;
+  artist?: string;
+  album?: string;
+  albumArtUrl?: string | null;
 }
 
 export type RepeatMode = 'off' | 'all' | 'one';
@@ -22,6 +26,10 @@ interface MediaPlayerState {
 
   addTracks: (files: File[]) => void;
   setTrackDuration: (id: string, duration: number) => void;
+  setTrackMetadata: (
+    id: string,
+    meta: { name?: string; artist?: string; album?: string; albumArtUrl?: string | null },
+  ) => void;
   removeTrack: (id: string) => void;
   moveTrack: (fromIndex: number, toIndex: number) => void;
   clearPlaylist: () => void;
@@ -82,11 +90,50 @@ export const useMediaPlayerStore = create<MediaPlayerState>()((set, get) => ({
       );
       probe.src = url;
     }
+
+    // Parse ID3 metadata in the background
+    for (const track of newTracks) {
+      parseBlob(track.file, { skipCovers: false })
+        .then((metadata) => {
+          const title = metadata.common.title;
+          const artist = metadata.common.artist;
+          const album = metadata.common.album;
+          const picture = metadata.common.picture?.[0];
+          let albumArtUrl: string | null = null;
+          if (picture) {
+            const blob = new Blob([picture.data], { type: picture.format });
+            albumArtUrl = URL.createObjectURL(blob);
+          }
+          get().setTrackMetadata(track.id, {
+            name: title || undefined,
+            artist,
+            album,
+            albumArtUrl,
+          });
+        })
+        .catch(() => {
+          // No metadata — filename fallback already in place
+        });
+    }
   },
 
   setTrackDuration: (id, duration) => {
     set((state) => ({
       tracks: state.tracks.map((t) => (t.id === id ? { ...t, duration } : t)),
+    }));
+  },
+
+  setTrackMetadata: (id, meta) => {
+    set((state) => ({
+      tracks: state.tracks.map((t) => {
+        if (t.id !== id) return t;
+        const update: Partial<MediaTrack> = {};
+        if (meta.name !== undefined) update.name = meta.name;
+        if (meta.artist !== undefined) update.artist = meta.artist;
+        if (meta.album !== undefined) update.album = meta.album;
+        if (meta.albumArtUrl !== undefined) update.albumArtUrl = meta.albumArtUrl;
+        return { ...t, ...update };
+      }),
     }));
   },
 
@@ -98,6 +145,9 @@ export const useMediaPlayerStore = create<MediaPlayerState>()((set, get) => ({
     const track = tracks[removeIndex];
     if (track.objectUrl) {
       URL.revokeObjectURL(track.objectUrl);
+    }
+    if (track.albumArtUrl) {
+      URL.revokeObjectURL(track.albumArtUrl);
     }
 
     const newTracks = tracks.filter((t) => t.id !== id);
@@ -164,6 +214,7 @@ export const useMediaPlayerStore = create<MediaPlayerState>()((set, get) => ({
     const { tracks } = get();
     tracks.forEach((t) => {
       if (t.objectUrl) URL.revokeObjectURL(t.objectUrl);
+      if (t.albumArtUrl) URL.revokeObjectURL(t.albumArtUrl);
     });
     set({
       tracks: [],

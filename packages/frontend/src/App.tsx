@@ -477,9 +477,9 @@ function MainApp() {
     if (local.isActive && localCurrentTrack) {
       return {
         title: localCurrentTrack.name,
-        artist: '',
-        albumName: '',
-        albumArtUrl: null,
+        artist: localCurrentTrack.artist ?? '',
+        albumName: localCurrentTrack.album ?? '',
+        albumArtUrl: localCurrentTrack.albumArtUrl ?? null,
       };
     }
     if (spotifyNowPlaying) {

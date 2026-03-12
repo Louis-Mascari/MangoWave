@@ -23,7 +23,7 @@ Source -> GainNode (pre-amp) -> 10x BiquadFilter (EQ) -> AnalyserNode -> butterc
 Three source modes:
 
 - **System audio** (`getDisplayMedia`) — captures tab/screen audio
-- **Local files** (`HTMLAudioElement` via `createMediaElementSource`) — forked pipeline: EQ → analyser for visuals, direct → speakers for audio output
+- **Local files** (`HTMLAudioElement` via `createMediaElementSource`) — forked pipeline: EQ → analyser for visuals, direct → speakers for audio output. ID3 metadata (title, artist, album, album art) parsed via `music-metadata`
 - **Microphone** (`getUserMedia`) — silent mode, no speaker output to prevent feedback
 
 Key details:
@@ -49,7 +49,7 @@ src/
 ├── store/         # Zustand stores: useSettingsStore, useSpotifyStore, useMediaPlayerStore,
 │                  #     usePresetHistoryStore, useToastStore
 ├── utils/         # Shared utilities (isMobileDevice, settingsPortability)
-├── types/         # butterchurn.d.ts (type declarations for untyped packages)
+├── types/         # butterchurn.d.ts, music-metadata.d.ts (type declarations for untyped packages)
 └── test/          # Vitest global setup
 ```
 

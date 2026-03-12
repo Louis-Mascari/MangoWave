@@ -66,10 +66,10 @@ describe('buildImportPayload', () => {
   };
 
   it('picks only selected categories', () => {
-    const result = buildImportPayload(validExport, new Set(['eq']));
-    expect(result.eq).toBeDefined();
-    expect(result.performance).toBeUndefined();
-    expect(result.volume).toBeUndefined();
+    const { payload } = buildImportPayload(validExport, new Set(['eq']));
+    expect(payload.eq).toBeDefined();
+    expect(payload.performance).toBeUndefined();
+    expect(payload.volume).toBeUndefined();
   });
 
   it('clamps numeric values to valid ranges', () => {
@@ -79,14 +79,14 @@ describe('buildImportPayload', () => {
       volume: 100,
       transitionTime: -10,
     };
-    const result = buildImportPayload(extreme, new Set(['rendering', 'display']));
-    const perf = result.performance as unknown as Record<string, number>;
+    const { payload } = buildImportPayload(extreme, new Set(['rendering', 'display']));
+    const perf = payload.performance as unknown as Record<string, number>;
     expect(perf.fpsCap).toBe(300);
     expect(perf.resolutionScale).toBe(1.0);
     expect(perf.meshWidth).toBe(128);
     expect(perf.textureRatio).toBe(0.25);
-    expect(result.volume).toBe(1);
-    expect(result.transitionTime).toBe(0);
+    expect(payload.volume).toBe(1);
+    expect(payload.transitionTime).toBe(0);
   });
 
   it('validates enum values', () => {
@@ -94,8 +94,8 @@ describe('buildImportPayload', () => {
       _meta: validExport._meta,
       autopilot: { mode: 'evil', enabled: 'yes', interval: 0.001 },
     };
-    const result = buildImportPayload(bad, new Set(['autopilot']));
-    const ap = result.autopilot as unknown as Record<string, unknown>;
+    const { payload } = buildImportPayload(bad, new Set(['autopilot']));
+    const ap = payload.autopilot as unknown as Record<string, unknown>;
     expect(ap.mode).toBe('all');
     expect(ap.enabled).toBe(true);
     expect(ap.interval).toBe(5);
@@ -106,8 +106,8 @@ describe('buildImportPayload', () => {
       _meta: validExport._meta,
       audio: { fftSize: 9999, smoothingConstant: 5 },
     };
-    const result = buildImportPayload(bad, new Set(['audioAnalysis']));
-    const audio = result.audio as unknown as Record<string, number>;
+    const { payload } = buildImportPayload(bad, new Set(['audioAnalysis']));
+    const audio = payload.audio as unknown as Record<string, number>;
     expect(audio.fftSize).toBe(1024);
     expect(audio.smoothingConstant).toBe(1);
   });
@@ -117,8 +117,8 @@ describe('buildImportPayload', () => {
       _meta: validExport._meta,
       eq: { bandGains: [5, 5, 5] },
     };
-    const result = buildImportPayload(short, new Set(['eq']));
-    const eq = result.eq as { bandGains: number[] };
+    const { payload } = buildImportPayload(short, new Set(['eq']));
+    const eq = payload.eq as { bandGains: number[] };
     expect(eq.bandGains).toHaveLength(10);
     expect(eq.bandGains.slice(0, 3)).toEqual([5, 5, 5]);
     expect(eq.bandGains.slice(3)).toEqual([0, 0, 0, 0, 0, 0, 0]);
@@ -129,8 +129,8 @@ describe('buildImportPayload', () => {
       _meta: validExport._meta,
       favoritePresets: ['good', 123, null, 'also good', { bad: true }],
     };
-    const result = buildImportPayload(bad, new Set(['favorites']));
-    expect(result.favoritePresets).toEqual(['good', 'also good']);
+    const { payload } = buildImportPayload(bad, new Set(['favorites']));
+    expect(payload.favoritePresets).toEqual(['good', 'also good']);
   });
 
   it('rounds fractional fpsCap and clamps low values to 15', () => {
@@ -138,36 +138,44 @@ describe('buildImportPayload', () => {
       _meta: validExport._meta,
       performance: { fpsCap: 59.7 },
     };
-    const result = buildImportPayload(fractional, new Set(['rendering']));
-    const perf = result.performance as unknown as Record<string, number>;
+    const { payload } = buildImportPayload(fractional, new Set(['rendering']));
+    const perf = payload.performance as unknown as Record<string, number>;
     expect(perf.fpsCap).toBe(60);
 
     const low = {
       _meta: validExport._meta,
       performance: { fpsCap: 7 },
     };
-    const result2 = buildImportPayload(low, new Set(['rendering']));
-    const perf2 = result2.performance as unknown as Record<string, number>;
+    const { payload: payload2 } = buildImportPayload(low, new Set(['rendering']));
+    const perf2 = payload2.performance as unknown as Record<string, number>;
     expect(perf2.fpsCap).toBe(15);
   });
 
-  it('rejects non-object performance', () => {
+  it('rejects non-object performance and adds warning', () => {
     const bad = { _meta: validExport._meta, performance: 'not an object' };
-    const result = buildImportPayload(bad, new Set(['rendering']));
-    expect(result.performance).toBeUndefined();
+    const { payload, warnings } = buildImportPayload(bad, new Set(['rendering']));
+    expect(payload.performance).toBeUndefined();
+    expect(warnings).toContain('"performance" could not be applied');
   });
 
   it('handles presetNameDisplay enum values', () => {
     const off = { _meta: validExport._meta, presetNameDisplay: 'off' };
-    expect(buildImportPayload(off, new Set(['display'])).presetNameDisplay).toBe('off');
+    expect(buildImportPayload(off, new Set(['display'])).payload.presetNameDisplay).toBe('off');
 
     const always = { _meta: validExport._meta, presetNameDisplay: 'always' };
-    expect(buildImportPayload(always, new Set(['display'])).presetNameDisplay).toBe('always');
+    expect(buildImportPayload(always, new Set(['display'])).payload.presetNameDisplay).toBe(
+      'always',
+    );
 
     const num = { _meta: validExport._meta, presetNameDisplay: 7 };
-    expect(buildImportPayload(num, new Set(['display'])).presetNameDisplay).toBe(7);
+    expect(buildImportPayload(num, new Set(['display'])).payload.presetNameDisplay).toBe(7);
 
     const bad = { _meta: validExport._meta, presetNameDisplay: 'evil' };
-    expect(buildImportPayload(bad, new Set(['display'])).presetNameDisplay).toBe(5);
+    expect(buildImportPayload(bad, new Set(['display'])).payload.presetNameDisplay).toBe(5);
+  });
+
+  it('returns empty warnings when all fields import successfully', () => {
+    const { warnings } = buildImportPayload(validExport, new Set(['eq', 'rendering', 'display']));
+    expect(warnings).toEqual([]);
   });
 });

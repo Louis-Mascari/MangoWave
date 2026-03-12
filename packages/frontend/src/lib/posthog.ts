@@ -5,6 +5,7 @@ const POSTHOG_HOST =
   (import.meta.env.VITE_PUBLIC_POSTHOG_HOST as string) || 'https://us.i.posthog.com';
 
 export function initPostHog(): void {
+  if (!import.meta.env.PROD) return;
   if (!POSTHOG_KEY) return;
 
   posthog.init(POSTHOG_KEY, {

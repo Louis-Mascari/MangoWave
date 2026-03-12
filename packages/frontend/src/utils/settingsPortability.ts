@@ -1,3 +1,4 @@
+import posthog from 'posthog-js';
 import sjson from 'secure-json-parse';
 import type { SettingsState } from '../store/useSettingsStore.ts';
 
@@ -94,17 +95,19 @@ export function downloadExport(data: ExportData): void {
 }
 
 export type ParseResult =
-  | { ok: true; data: ExportData; categories: string[] }
+  | { ok: true; data: ExportData; categories: string[]; versionWarning?: string }
   | { ok: false; error: string };
 
 export function parseImportFile(file: File): Promise<ParseResult> {
   return new Promise((resolve) => {
     if (!file.name.endsWith('.json') && file.type !== 'application/json') {
+      captureImportFailure('File must be a .json file');
       resolve({ ok: false, error: 'File must be a .json file' });
       return;
     }
 
     if (file.size > MAX_IMPORT_SIZE) {
+      captureImportFailure('File too large');
       resolve({ ok: false, error: 'File too large' });
       return;
     }
@@ -115,12 +118,8 @@ export function parseImportFile(file: File): Promise<ParseResult> {
         const parsed = sjson(reader.result as string);
 
         if (!parsed._meta || parsed._meta.source !== 'mangowave') {
+          captureImportFailure('Not a MangoWave settings file');
           resolve({ ok: false, error: 'Not a MangoWave settings file' });
-          return;
-        }
-
-        if (parsed._meta.version > EXPORT_VERSION) {
-          resolve({ ok: false, error: 'Settings file is from a newer version' });
           return;
         }
 
@@ -130,14 +129,29 @@ export function parseImportFile(file: File): Promise<ParseResult> {
           if (hasAny) detected.push(category.key);
         }
 
-        resolve({ ok: true, data: parsed, categories: detected });
+        const versionWarning =
+          parsed._meta.version > EXPORT_VERSION
+            ? 'Settings file is from a newer app version — some settings may not apply'
+            : undefined;
+
+        resolve({ ok: true, data: parsed, categories: detected, versionWarning });
       } catch {
+        captureImportFailure('Invalid settings file');
         resolve({ ok: false, error: 'Invalid settings file' });
       }
     };
-    reader.onerror = () => resolve({ ok: false, error: 'Invalid settings file' });
+    reader.onerror = () => {
+      captureImportFailure('Invalid settings file');
+      resolve({ ok: false, error: 'Invalid settings file' });
+    };
     reader.readAsText(file);
   });
+}
+
+function captureImportFailure(reason: string): void {
+  if (posthog.__loaded) {
+    posthog.capture('settings_import_failed', { reason });
+  }
 }
 
 function clamp(val: unknown, min: number, max: number, fallback: number): number {
@@ -226,11 +240,17 @@ const SANITIZERS: Record<string, (val: unknown) => unknown> = {
   showQuarantined: (v) => (typeof v === 'boolean' ? v : false),
 };
 
+export interface ImportResult {
+  payload: Partial<SettingsState>;
+  warnings: string[];
+}
+
 export function buildImportPayload(
   data: ExportData,
   selectedCategories: Set<string>,
-): Partial<SettingsState> {
+): ImportResult {
   const payload: Record<string, unknown> = {};
+  const warnings: string[] = [];
 
   for (const category of EXPORT_CATEGORIES) {
     if (!selectedCategories.has(category.key)) continue;
@@ -240,10 +260,12 @@ export function buildImportPayload(
         const sanitized = sanitizer ? sanitizer(data[field]) : undefined;
         if (sanitized !== undefined) {
           payload[field] = sanitized;
+        } else {
+          warnings.push(`"${field}" could not be applied`);
         }
       }
     }
   }
 
-  return payload as Partial<SettingsState>;
+  return { payload: payload as Partial<SettingsState>, warnings };
 }

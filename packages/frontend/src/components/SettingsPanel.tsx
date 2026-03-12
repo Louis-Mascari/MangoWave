@@ -662,10 +662,17 @@ function DataTab() {
 
   const handleApplyImport = () => {
     if (!importResult) return;
-    const payload = buildImportPayload(importResult.data, importSelected);
+    const { payload, warnings } = buildImportPayload(importResult.data, importSelected);
     useSettingsStore.getState().importSettings(payload);
     setImportResult(null);
-    showToast('Settings imported successfully');
+    const allWarnings = importResult.versionWarning
+      ? [importResult.versionWarning, ...warnings]
+      : warnings;
+    if (allWarnings.length > 0) {
+      showToast('Settings imported — some settings could not be applied due to app changes', 6000);
+    } else {
+      showToast('Settings imported successfully');
+    }
   };
 
   const toggleImportCategory = (key: string) => {

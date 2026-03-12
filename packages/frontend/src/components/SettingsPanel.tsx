@@ -676,7 +676,7 @@ function DataTab() {
         </button>
       </div>
 
-      <div className="mt-1 border-t border-white/10 pt-3">
+      <div className="mt-1 flex flex-col gap-2 border-t border-white/10 pt-3">
         <label className="text-xs font-semibold text-white/80">Import</label>
         <input
           ref={fileInputRef}
@@ -687,7 +687,7 @@ function DataTab() {
         />
 
         {importResult ? (
-          <div className="mt-2 flex flex-col gap-2">
+          <div className="flex flex-col gap-2">
             <p className="text-xs text-white/60">Select categories to import:</p>
             <div className="grid grid-cols-2 gap-1.5">
               {EXPORT_CATEGORIES.filter((cat) => importResult.categories.includes(cat.key)).map(
@@ -723,7 +723,7 @@ function DataTab() {
         ) : (
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="mt-2 w-fit cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
+            className="w-fit cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
           >
             Import Settings
           </button>

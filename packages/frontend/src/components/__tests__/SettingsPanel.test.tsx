@@ -96,11 +96,11 @@ describe('SettingsPanel', () => {
 
     const checkboxes = screen.getAllByRole('checkbox');
     expect(checkboxes).toHaveLength(8);
-    expect(screen.getByText('Audio Analysis')).toBeInTheDocument();
+    expect(screen.getByText('Audio Smoothing & FFT')).toBeInTheDocument();
     expect(screen.getByText('EQ')).toBeInTheDocument();
-    expect(screen.getByText('Display')).toBeInTheDocument();
+    expect(screen.getByText('Display & Volume')).toBeInTheDocument();
     expect(screen.getByText('Favorites')).toBeInTheDocument();
     expect(screen.getByText('Blocked Presets')).toBeInTheDocument();
-    expect(screen.getByText('Pack Settings')).toBeInTheDocument();
+    expect(screen.getByText('Packs & Quarantine')).toBeInTheDocument();
   });
 });

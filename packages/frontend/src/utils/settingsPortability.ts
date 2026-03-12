@@ -18,7 +18,7 @@ export const EXPORT_CATEGORIES: ExportCategory[] = [
   },
   {
     key: 'audioAnalysis',
-    label: 'Audio Analysis',
+    label: 'Audio Smoothing & FFT',
     fields: ['audio'],
   },
   {
@@ -33,7 +33,7 @@ export const EXPORT_CATEGORIES: ExportCategory[] = [
   },
   {
     key: 'display',
-    label: 'Display',
+    label: 'Display & Volume',
     fields: ['presetNameDisplay', 'songInfoDisplay', 'transitionTime', 'volume'],
   },
   {
@@ -48,7 +48,7 @@ export const EXPORT_CATEGORIES: ExportCategory[] = [
   },
   {
     key: 'packs',
-    label: 'Pack Settings',
+    label: 'Packs & Quarantine',
     fields: ['enabledPacks', 'showQuarantined', 'quarantineOverrides'],
   },
 ];

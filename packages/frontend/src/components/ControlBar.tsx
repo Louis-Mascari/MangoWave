@@ -3,10 +3,8 @@ import { useSpotifyStore } from '../store/useSpotifyStore.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { SettingsPanel } from './SettingsPanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
-import { PlaybackControls } from './PlaybackControls.tsx';
 import type { PlaybackAdapter } from './PlaybackControls.tsx';
 import { MediaPlaylist } from './MediaPlaylist.tsx';
-import { LocalSeekBar } from './LocalSeekBar.tsx';
 import { MobileControlBar } from './MobileControlBar.tsx';
 
 export type PanelView = 'none' | 'settings' | 'presets' | 'playlist';
@@ -34,11 +32,6 @@ interface ControlBarProps {
   onToggleBlock: () => void;
   onAddLocalFiles?: (files: File[]) => void;
   onClearPlaylist?: () => void;
-  onSeek?: (time: number) => void;
-  onVolumeChange?: (volume: number) => void;
-  volume?: number;
-  isMuted?: boolean;
-  onToggleMute?: () => void;
   playbackAdapter: PlaybackAdapter;
 }
 
@@ -63,12 +56,6 @@ export function ControlBar(props: ControlBarProps) {
         onTogglePanel={props.onTogglePanel}
         onAddLocalFiles={props.onAddLocalFiles}
         onClearPlaylist={props.onClearPlaylist}
-        onSeek={props.onSeek}
-        onVolumeChange={props.onVolumeChange}
-        volume={props.volume}
-        isMuted={props.isMuted}
-        onToggleMute={props.onToggleMute}
-        playbackAdapter={props.playbackAdapter}
       />
     </>
   );
@@ -97,17 +84,12 @@ function DesktopControlBar({
   onToggleBlock,
   onAddLocalFiles,
   onClearPlaylist,
-  onSeek,
-  onVolumeChange,
-  volume,
-  isMuted,
-  onToggleMute,
   playbackAdapter,
 }: ControlBarProps) {
   const isIdle = useIdleTimer(3000, 5000);
   const isSpotifyConnected = !!useSpotifyStore((s) => s.accessToken);
   const isLocalSource = playbackAdapter.source === 'local';
-  const hasPlaybackControls =
+  const hasPlaybackSource =
     playbackAdapter.source === 'local' || playbackAdapter.source === 'spotify';
 
   return (
@@ -211,20 +193,10 @@ function DesktopControlBar({
           </BarButton>
         </div>
 
-        {/* CENTER: Media (only when there's a controllable source) */}
+        {/* CENTER: Now Playing + Queue (playback controls moved to PlaybackPanel) */}
         <div className="flex items-center justify-center gap-2">
-          {hasPlaybackControls && (
+          {hasPlaybackSource && (
             <>
-              <PlaybackControls adapter={playbackAdapter} />
-              {onSeek && onVolumeChange != null && volume != null && onToggleMute != null && (
-                <LocalSeekBar
-                  onSeek={onSeek}
-                  onVolumeChange={onVolumeChange}
-                  volume={volume}
-                  isMuted={isMuted ?? false}
-                  onToggleMute={onToggleMute}
-                />
-              )}
               {(isLocalSource || isSpotifyConnected) && (
                 <BarButton onClick={onToggleNowPlaying} active={showNowPlaying}>
                   Now Playing

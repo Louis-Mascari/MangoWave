@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useIdleTimer } from './hooks/useIdleTimer.ts';
 import { useAudioCapture } from './hooks/useAudioCapture.ts';
 import { useLocalPlayback } from './hooks/useLocalPlayback.ts';
 import { useMediaPlayerStore } from './store/useMediaPlayerStore.ts';
@@ -25,8 +26,15 @@ import { useSettingsStore } from './store/useSettingsStore.ts';
 import { useSpotifyStore } from './store/useSpotifyStore.ts';
 import { usePresetHistoryStore } from './store/usePresetHistoryStore.ts';
 import { useToastStore } from './store/useToastStore.ts';
-import { controlPlayback, RateLimitedError } from './services/spotifyApi.ts';
+import {
+  controlPlayback,
+  seekToPosition,
+  toggleShuffle as apiToggleShuffle,
+  setRepeatMode,
+  RateLimitedError,
+} from './services/spotifyApi.ts';
 import type { PlaybackAdapter } from './components/PlaybackControls.tsx';
+import { PlaybackPanel } from './components/PlaybackPanel.tsx';
 import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
 import { isMobileDevice } from './utils/isMobileDevice.ts';
 import quarantinedData from './data/quarantined-presets.json';
@@ -395,6 +403,63 @@ function MainApp() {
     [updateIsPlaying, requestPoll, setRateLimited, clearRateLimited],
   );
 
+  const handleSpotifySeek = useCallback(
+    async (positionMs: number) => {
+      const token = useSpotifyStore.getState().accessToken;
+      if (!token) return;
+      try {
+        await seekToPosition(token, positionMs);
+        requestPoll();
+      } catch (err) {
+        if (err instanceof RateLimitedError) {
+          setRateLimited(err.retryAfterSeconds * 1000);
+          rateLimitTimeoutRef.current = setTimeout(
+            () => clearRateLimited(),
+            err.retryAfterSeconds * 1000,
+          );
+        }
+      }
+    },
+    [requestPoll, setRateLimited, clearRateLimited],
+  );
+
+  const handleSpotifyToggleShuffle = useCallback(async () => {
+    const token = useSpotifyStore.getState().accessToken;
+    const current = useSpotifyStore.getState().nowPlaying?.shuffleState ?? false;
+    if (!token) return;
+    try {
+      await apiToggleShuffle(token, !current);
+      requestPoll();
+    } catch (err) {
+      if (err instanceof RateLimitedError) {
+        setRateLimited(err.retryAfterSeconds * 1000);
+        rateLimitTimeoutRef.current = setTimeout(
+          () => clearRateLimited(),
+          err.retryAfterSeconds * 1000,
+        );
+      }
+    }
+  }, [requestPoll, setRateLimited, clearRateLimited]);
+
+  const handleSpotifyCycleRepeat = useCallback(async () => {
+    const token = useSpotifyStore.getState().accessToken;
+    const current = useSpotifyStore.getState().nowPlaying?.repeatState ?? 'off';
+    if (!token) return;
+    const next = current === 'off' ? 'context' : current === 'context' ? 'track' : 'off';
+    try {
+      await setRepeatMode(token, next);
+      requestPoll();
+    } catch (err) {
+      if (err instanceof RateLimitedError) {
+        setRateLimited(err.retryAfterSeconds * 1000);
+        rateLimitTimeoutRef.current = setTimeout(
+          () => clearRateLimited(),
+          err.retryAfterSeconds * 1000,
+        );
+      }
+    }
+  }, [requestPoll, setRateLimited, clearRateLimited]);
+
   const playbackAdapter: PlaybackAdapter = useMemo(() => {
     if (local.isActive) {
       const handleLocalPlay = () => {
@@ -441,6 +506,15 @@ function MainApp() {
         onPause: () => handleSpotifyAction('pause'),
         onNext: () => handleSpotifyAction('next'),
         onPrevious: () => handleSpotifyAction('previous'),
+        shuffle: spotifyNowPlaying?.shuffleState ?? false,
+        repeatMode:
+          spotifyNowPlaying?.repeatState === 'track'
+            ? 'one'
+            : spotifyNowPlaying?.repeatState === 'context'
+              ? 'all'
+              : 'off',
+        onToggleShuffle: handleSpotifyToggleShuffle,
+        onCycleRepeat: handleSpotifyCycleRepeat,
         tooltip: premiumError
           ? 'Spotify Premium required for playback controls'
           : isRateLimited
@@ -467,10 +541,12 @@ function MainApp() {
     cycleRepeatMode,
     capture,
     isSpotifyConnected,
-    spotifyNowPlaying?.isPlaying,
+    spotifyNowPlaying,
     premiumError,
     isRateLimited,
     handleSpotifyAction,
+    handleSpotifyToggleShuffle,
+    handleSpotifyCycleRepeat,
   ]);
 
   const nowPlayingTrack: NowPlayingTrackInfo | null = useMemo(() => {
@@ -492,6 +568,20 @@ function MainApp() {
     }
     return null;
   }, [local.isActive, localCurrentTrack, spotifyNowPlaying]);
+
+  // Playback panel
+  const handlePlaybackPanelSeek = useCallback(
+    (time: number) => {
+      if (local.isActive) {
+        local.seek(time);
+      } else if (isSpotifyConnected) {
+        handleSpotifySeek(time * 1000);
+      }
+    },
+    [local, isSpotifyConnected, handleSpotifySeek],
+  );
+
+  const playbackPanelIdle = useIdleTimer(3000, 5000);
 
   const handleToggleQueue = useCallback(() => {
     if (local.isActive) handleTogglePanel('playlist');
@@ -590,12 +680,16 @@ function MainApp() {
                 onToggleBlock={handleToggleBlock}
                 onAddLocalFiles={handleAddLocalFiles}
                 onClearPlaylist={local.clearQueue}
-                onSeek={local.isActive ? local.seek : undefined}
-                onVolumeChange={local.isActive ? local.setVolume : undefined}
+                playbackAdapter={playbackAdapter}
+              />
+              <PlaybackPanel
+                adapter={playbackAdapter}
+                onSeek={handlePlaybackPanelSeek}
                 volume={local.isActive ? local.volume : undefined}
+                onVolumeChange={local.isActive ? local.setVolume : undefined}
                 isMuted={local.isActive ? local.isMuted : undefined}
                 onToggleMute={local.isActive ? local.toggleMute : undefined}
-                playbackAdapter={playbackAdapter}
+                isIdle={playbackPanelIdle}
               />
               <ActionToast />
               <ShortcutOverlay visible={showShortcutOverlay} onClose={toggleShortcutOverlay} />

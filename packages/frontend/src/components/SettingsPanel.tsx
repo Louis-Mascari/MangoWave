@@ -796,7 +796,6 @@ function SpotifyTab() {
   const accessToken = useSpotifyStore((s) => s.accessToken);
   const sessionId = useSpotifyStore((s) => s.sessionId);
   const byocClientId = useSpotifyStore((s) => s.byocClientId);
-  const isSpotifyUnlocked = useSpotifyStore((s) => s.isSpotifyUnlocked);
   const getAuthMode = useSpotifyStore((s) => s.getAuthMode);
   const setByocClientId = useSpotifyStore((s) => s.setByocClientId);
   const logout = useSpotifyStore((s) => s.logout);
@@ -804,35 +803,38 @@ function SpotifyTab() {
 
   const isConnected = !!(accessToken || sessionId);
   const [byocInput, setByocInput] = useState(byocClientId ?? '');
+  const [isConnecting, setIsConnecting] = useState(false);
 
   const handleByocConnect = async () => {
     const trimmed = byocInput.trim();
-    if (!trimmed) return;
-    setByocClientId(trimmed);
-    const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
-    const { url } = await buildPkceAuthUrl(trimmed, redirectUri);
-    const popup = window.open(url, 'spotify-auth', 'popup,width=500,height=700');
-    if (!popup || popup.closed) {
-      window.location.href = url;
+    if (!trimmed || isConnecting) return;
+    setIsConnecting(true);
+    try {
+      setByocClientId(trimmed);
+      const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
+      const { url } = await buildPkceAuthUrl(trimmed, redirectUri);
+      const popup = window.open(url, 'spotify-auth', 'popup,width=500,height=700');
+      if (!popup || popup.closed) {
+        window.location.href = url;
+      }
+    } catch {
+      setIsConnecting(false);
     }
   };
 
   const handleOwnerConnect = () => {
-    const url = buildSpotifyAuthUrl();
-    const popup = window.open(url, 'spotify-auth', 'popup,width=500,height=700');
-    if (!popup || popup.closed) {
-      window.location.href = url;
+    if (isConnecting) return;
+    setIsConnecting(true);
+    try {
+      const url = buildSpotifyAuthUrl();
+      const popup = window.open(url, 'spotify-auth', 'popup,width=500,height=700');
+      if (!popup || popup.closed) {
+        window.location.href = url;
+      }
+    } catch {
+      setIsConnecting(false);
     }
   };
-
-  if (authMode === 'locked') {
-    return (
-      <>
-        <h3 className="text-sm font-semibold text-white">Spotify</h3>
-        <p className="text-xs text-white/50">Spotify integration is not available.</p>
-      </>
-    );
-  }
 
   return (
     <>
@@ -853,7 +855,8 @@ function SpotifyTab() {
           </div>
           <p className="text-xs text-white/40">
             Now-playing metadata &amp; cloud-synced settings active. Playback controls require
-            Premium. Share a screen, window, or tab playing Spotify for audio.
+            Premium. Seek, shuffle, and repeat controls sync with your active Spotify session. Share
+            a screen, window, or tab playing Spotify so the visualizer can hear audio.
           </p>
           <button
             onClick={logout}
@@ -870,24 +873,52 @@ function SpotifyTab() {
             playing Spotify for the visualizer to react to audio.
           </p>
 
-          {isSpotifyUnlocked ? (
-            <button
-              onClick={handleOwnerConnect}
-              className="w-fit cursor-pointer rounded border-none bg-[#1DB954]/20 px-3 py-1 text-xs text-[#1DB954] hover:bg-[#1DB954]/30"
-            >
-              Connect Spotify
-            </button>
+          {authMode === 'owner' ? (
+            <div className="flex flex-col gap-1">
+              <button
+                onClick={handleOwnerConnect}
+                disabled={isConnecting}
+                className="w-fit cursor-pointer rounded border-none bg-[#1DB954]/20 px-3 py-1 text-xs text-[#1DB954] hover:bg-[#1DB954]/30 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {isConnecting ? 'Connecting...' : 'Connect Spotify'}
+              </button>
+              <p className="text-[10px] text-white/30">
+                Authorized users don&apos;t need Spotify Premium. If you are not the app creator,
+                ensure they&apos;ve added your name and email associated with your Spotify account
+                to their app&apos;s User Management tab.
+              </p>
+            </div>
           ) : (
             <div className="flex flex-col gap-2 rounded border border-white/10 bg-white/[0.03] p-3">
-              <p className="text-xs text-white/50">
-                Spotify&apos;s API limits each app key to 5 users, so you&apos;ll need your own.
-                Register a free Spotify app at{' '}
-                <span className="text-white/70">developer.spotify.com</span>, add{' '}
-                <code className="rounded bg-white/10 px-1 text-[10px]">
-                  {import.meta.env.VITE_SPOTIFY_REDIRECT_URI}
-                </code>{' '}
-                as a redirect URI, then paste your Client ID (not your secret key) below.
-              </p>
+              <div className="flex flex-col gap-1.5 text-xs text-white/50">
+                <p>Requires a Spotify Premium account to create a developer app.</p>
+                <ul className="flex list-disc flex-col gap-1 pl-4">
+                  <li>
+                    Register at{' '}
+                    <a
+                      href="https://developer.spotify.com/dashboard"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white/70 underline hover:text-white/90"
+                    >
+                      developer.spotify.com
+                    </a>
+                  </li>
+                  <li>
+                    Add{' '}
+                    <code className="rounded bg-white/10 px-1 text-[10px]">
+                      {import.meta.env.VITE_SPOTIFY_REDIRECT_URI}
+                    </code>{' '}
+                    as a redirect URI
+                  </li>
+                  <li>Paste your Client ID (not your secret key) below</li>
+                  <li>
+                    Add up to 5 users in the User Management tab — they don&apos;t need Premium for
+                    song metadata and cloud-synced MangoWave settings (Premium only needed for
+                    playback controls)
+                  </li>
+                </ul>
+              </div>
               <input
                 type="text"
                 value={byocInput}
@@ -897,10 +928,10 @@ function SpotifyTab() {
               />
               <button
                 onClick={handleByocConnect}
-                disabled={!byocInput.trim()}
+                disabled={!byocInput.trim() || isConnecting}
                 className="w-fit cursor-pointer rounded border-none bg-[#1DB954]/20 px-3 py-1 text-xs text-[#1DB954] hover:bg-[#1DB954]/30 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Connect with PKCE
+                {isConnecting ? 'Connecting...' : 'Connect with PKCE'}
               </button>
             </div>
           )}

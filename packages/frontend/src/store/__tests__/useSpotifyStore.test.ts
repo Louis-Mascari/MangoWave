@@ -100,6 +100,9 @@ describe('useSpotifyStore', () => {
       isPlaying: true,
       progressMs: 0,
       durationMs: 300000,
+      deviceName: null,
+      shuffleState: false,
+      repeatState: 'off' as const,
     };
     setNowPlaying(track);
     expect(useSpotifyStore.getState().nowPlaying).toEqual(track);
@@ -115,6 +118,9 @@ describe('useSpotifyStore', () => {
         isPlaying: true,
         progressMs: 0,
         durationMs: 300000,
+        deviceName: null,
+        shuffleState: false,
+        repeatState: 'off',
       },
     });
     useSpotifyStore.getState().updateIsPlaying(false);

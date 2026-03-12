@@ -1,11 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useIdleTimer } from '../hooks/useIdleTimer.ts';
-import { useMediaPlayerStore } from '../store/useMediaPlayerStore.ts';
 import { SettingsPanel } from './SettingsPanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
 import { MediaPlaylist } from './MediaPlaylist.tsx';
 import type { PanelView } from './ControlBar.tsx';
-import type { PlaybackAdapter } from './PlaybackControls.tsx';
 import logoUrl from '../assets/logo.png';
 
 // Module-level counter (not a ref) to avoid React Compiler refs-during-render lint
@@ -28,105 +26,6 @@ interface MobileControlBarProps {
   onTogglePanel: (panel: PanelView) => void;
   onAddLocalFiles?: (files: File[]) => void;
   onClearPlaylist?: () => void;
-  onSeek?: (time: number) => void;
-  onVolumeChange?: (volume: number) => void;
-  volume?: number;
-  isMuted?: boolean;
-  onToggleMute?: () => void;
-  playbackAdapter: PlaybackAdapter;
-}
-
-function formatTime(s: number): string {
-  const m = Math.floor(s / 60);
-  const sec = Math.floor(s % 60);
-  return `${m}:${sec.toString().padStart(2, '0')}`;
-}
-
-function MobileSeekBar({
-  onSeek,
-  playbackAdapter,
-}: {
-  onSeek: (time: number) => void;
-  playbackAdapter: PlaybackAdapter;
-}) {
-  const currentTime = useMediaPlayerStore((s) => s.currentTime);
-  const duration = useMediaPlayerStore((s) => s.duration);
-
-  if (!duration || duration <= 0) return null;
-
-  return (
-    <div className="flex flex-col items-center gap-1 rounded-2xl bg-black/60 px-3 py-2 backdrop-blur-sm">
-      {/* Seek bar row */}
-      <div className="flex w-full items-center gap-1.5">
-        <span className="text-[10px] tabular-nums text-white/50">{formatTime(currentTime)}</span>
-        <input
-          type="range"
-          min={0}
-          max={duration}
-          value={currentTime}
-          onChange={(e) => onSeek(Number(e.target.value))}
-          className="seek-bar h-1 min-w-0 flex-1 cursor-pointer appearance-none rounded-full bg-white/20 accent-orange-500"
-          aria-label="Seek"
-        />
-        <span className="text-[10px] tabular-nums text-white/50">{formatTime(duration)}</span>
-      </div>
-      {/* Transport controls row */}
-      <div className="flex items-center gap-3">
-        {playbackAdapter.onToggleShuffle != null && (
-          <button
-            onClick={playbackAdapter.onToggleShuffle}
-            className={`border-none bg-transparent p-0 text-sm ${
-              playbackAdapter.shuffle ? 'text-orange-400' : 'text-white/40'
-            }`}
-            aria-label={playbackAdapter.shuffle ? 'Disable shuffle' : 'Enable shuffle'}
-          >
-            🔀
-          </button>
-        )}
-        <button
-          onClick={playbackAdapter.onPrevious}
-          disabled={!playbackAdapter.canControl}
-          className="border-none bg-transparent p-0 text-sm text-white/70"
-          aria-label="Previous track"
-        >
-          ⏮
-        </button>
-        <button
-          onClick={playbackAdapter.isPlaying ? playbackAdapter.onPause : playbackAdapter.onPlay}
-          disabled={!playbackAdapter.canControl}
-          className="flex h-9 w-9 items-center justify-center rounded-full border-none bg-white/15 text-base text-white"
-          aria-label={playbackAdapter.isPlaying ? 'Pause' : 'Play'}
-        >
-          {playbackAdapter.isPlaying ? '⏸' : '▶'}
-        </button>
-        <button
-          onClick={playbackAdapter.onNext}
-          disabled={!playbackAdapter.canControl}
-          className="border-none bg-transparent p-0 text-sm text-white/70"
-          aria-label="Next track"
-        >
-          ⏭
-        </button>
-        {playbackAdapter.onCycleRepeat != null && (
-          <button
-            onClick={playbackAdapter.onCycleRepeat}
-            className={`border-none bg-transparent p-0 text-sm ${
-              playbackAdapter.repeatMode !== 'off' ? 'text-orange-400' : 'text-white/40'
-            }`}
-            aria-label={
-              playbackAdapter.repeatMode === 'one'
-                ? 'Repeat one'
-                : playbackAdapter.repeatMode === 'all'
-                  ? 'Repeat all'
-                  : 'Repeat off'
-            }
-          >
-            {playbackAdapter.repeatMode === 'one' ? '🔂' : '🔁'}
-          </button>
-        )}
-      </div>
-    </div>
-  );
 }
 
 export function MobileControlBar({
@@ -146,13 +45,10 @@ export function MobileControlBar({
   onTogglePanel,
   onAddLocalFiles,
   onClearPlaylist,
-  onSeek,
-  playbackAdapter,
 }: MobileControlBarProps) {
   const isIdle = useIdleTimer(3000, 5000);
   const [menuOpen, setMenuOpen] = useState(false);
   const [modalPanel, setModalPanel] = useState<PanelView>('none');
-  const isLocalSource = playbackAdapter.source === 'local';
 
   // History management for Android back button
   const pushHistory = useCallback(() => {
@@ -298,7 +194,7 @@ export function MobileControlBar({
         closeMenu();
       },
     },
-    ...(isLocalSource
+    ...(onAddLocalFiles
       ? [
           {
             label: 'Queue',
@@ -328,17 +224,6 @@ export function MobileControlBar({
 
   return (
     <div className="md:hidden">
-      {/* Mobile seek bar (local files only, hidden when radial menu open) */}
-      {isLocalSource && onSeek && !menuOpen && (
-        <div
-          className={`fixed bottom-20 left-4 right-4 z-50 flex justify-center transition-opacity duration-500 ${
-            isIdle ? 'pointer-events-none opacity-0' : 'opacity-100'
-          }`}
-        >
-          <MobileSeekBar onSeek={onSeek} playbackAdapter={playbackAdapter} />
-        </div>
-      )}
-
       {/* Backdrop overlay when menu is open */}
       {menuOpen && <div className="fixed inset-0 z-[54] bg-black/30" onClick={closeMenu} />}
 

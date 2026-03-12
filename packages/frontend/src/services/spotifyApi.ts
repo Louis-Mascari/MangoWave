@@ -15,6 +15,9 @@ export interface NowPlayingTrack {
   isPlaying: boolean;
   progressMs: number;
   durationMs: number;
+  deviceName: string | null;
+  shuffleState: boolean;
+  repeatState: 'off' | 'track' | 'context';
 }
 
 export interface SpotifyAuthResponse {
@@ -86,7 +89,7 @@ export async function refreshToken(
 }
 
 export async function getNowPlaying(accessToken: string): Promise<NowPlayingTrack | null> {
-  const response = await fetch(`${SPOTIFY_API_BASE}/me/player/currently-playing`, {
+  const response = await fetch(`${SPOTIFY_API_BASE}/me/player`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 
@@ -120,6 +123,9 @@ export async function getNowPlaying(accessToken: string): Promise<NowPlayingTrac
     isPlaying: data.is_playing,
     progressMs: data.progress_ms ?? 0,
     durationMs: data.item.duration_ms,
+    deviceName: data.device?.name ?? null,
+    shuffleState: data.shuffle_state ?? false,
+    repeatState: data.repeat_state ?? 'off',
   };
 }
 
@@ -170,6 +176,59 @@ export async function controlPlayback(
   if (!response.ok) {
     throw new Error(`Playback control failed (${response.status})`);
   }
+}
+
+export async function seekToPosition(accessToken: string, positionMs: number): Promise<void> {
+  const response = await fetch(
+    `${SPOTIFY_API_BASE}/me/player/seek?position_ms=${Math.round(positionMs)}`,
+    {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  );
+
+  if (response.status === 403) throw new PremiumRequiredError();
+  if (response.status === 401) throw new TokenExpiredError();
+  if (response.status === 429) {
+    const retryAfter = parseInt(response.headers.get('Retry-After') ?? '5', 10);
+    throw new RateLimitedError(retryAfter);
+  }
+  if (!response.ok) throw new Error(`Seek failed (${response.status})`);
+}
+
+export async function toggleShuffle(accessToken: string, state: boolean): Promise<void> {
+  const url = `${SPOTIFY_API_BASE}/me/player/shuffle?state=${state}`;
+  const response = await fetch(url, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (response.status === 403) throw new PremiumRequiredError();
+  if (response.status === 401) throw new TokenExpiredError();
+  if (response.status === 429) {
+    const retryAfter = parseInt(response.headers.get('Retry-After') ?? '5', 10);
+    throw new RateLimitedError(retryAfter);
+  }
+  if (!response.ok) throw new Error(`Toggle shuffle failed (${response.status})`);
+}
+
+export async function setRepeatMode(
+  accessToken: string,
+  state: 'off' | 'track' | 'context',
+): Promise<void> {
+  const url = `${SPOTIFY_API_BASE}/me/player/repeat?state=${state}`;
+  const response = await fetch(url, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (response.status === 403) throw new PremiumRequiredError();
+  if (response.status === 401) throw new TokenExpiredError();
+  if (response.status === 429) {
+    const retryAfter = parseInt(response.headers.get('Retry-After') ?? '5', 10);
+    throw new RateLimitedError(retryAfter);
+  }
+  if (!response.ok) throw new Error(`Set repeat mode failed (${response.status})`);
 }
 
 export interface CloudSettings {

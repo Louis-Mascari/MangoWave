@@ -605,7 +605,7 @@ function DataTab() {
 
     const result = await parseImportFile(file);
     if (!result.ok) {
-      showToast(result.error);
+      showToast(result.error, 6000);
       return;
     }
     setImportResult(result);

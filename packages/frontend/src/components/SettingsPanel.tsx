@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { EQ_BANDS } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
-import { useCustomPackStore } from '../store/useCustomPackStore.ts';
 import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { buildPkceAuthUrl } from '../services/spotifyPkce.ts';
 import { Tooltip } from './Tooltip.tsx';
@@ -163,9 +162,7 @@ function PerformanceTab() {
   const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
   const setAutopilotInterval = useSettingsStore((s) => s.setAutopilotInterval);
   const setAutopilotMode = useSettingsStore((s) => s.setAutopilotMode);
-  const setAutopilotPackId = useSettingsStore((s) => s.setAutopilotPackId);
   const setAutopilotFavoriteWeight = useSettingsStore((s) => s.setAutopilotFavoriteWeight);
-  const customPacks = useCustomPackStore((s) => s.packs);
 
   return (
     <>
@@ -397,13 +394,12 @@ function PerformanceTab() {
         <div className="mt-2 flex flex-col gap-1">
           <label className="flex items-center text-xs text-white/60">
             Mode
-            <Tooltip text="All = all enabled presets, Favorites = only favorited presets, Pack = a specific custom pack" />
+            <Tooltip text="All = all enabled presets, Favorites = only favorited presets" />
           </label>
           <div className="flex gap-2">
             {[
               { mode: 'all' as const, label: 'All' },
               { mode: 'favorites' as const, label: 'Favorites' },
-              ...(customPacks.length > 0 ? [{ mode: 'pack' as const, label: 'Pack' }] : []),
             ].map(({ mode, label }) => (
               <button
                 key={mode}
@@ -418,33 +414,17 @@ function PerformanceTab() {
               </button>
             ))}
           </div>
-          {autopilot.mode === 'pack' && (
-            <select
-              value={autopilot.packId ?? ''}
-              onChange={(e) => setAutopilotPackId(e.target.value || null)}
-              className="mt-1 rounded border-none bg-white/10 px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
-            >
-              <option value="" className="bg-neutral-900">
-                Select a pack...
-              </option>
-              {customPacks.map((p) => (
-                <option key={p.id} value={p.id} className="bg-neutral-900">
-                  {p.name} ({p.presets.length})
-                </option>
-              ))}
-            </select>
-          )}
         </div>
 
         <div className="mt-2 flex flex-col gap-1">
           <label className="flex items-center text-xs text-white/60">
             Favorite frequency: {autopilot.favoriteWeight}x
-            <Tooltip text="How much more likely favorites are to appear earlier in each shuffle round" />
+            <Tooltip text="How much more likely each favorite is to be picked vs a non-favorite. At 2x with 10 favorites in a 200-preset pool, favorites appear ~10% of the time instead of ~5%" />
           </label>
           <input
             type="range"
             min="1"
-            max="5"
+            max="10"
             step="1"
             value={autopilot.favoriteWeight}
             onChange={(e) => setAutopilotFavoriteWeight(parseInt(e.target.value))}

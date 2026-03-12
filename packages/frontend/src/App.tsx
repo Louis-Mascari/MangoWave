@@ -24,9 +24,7 @@ import { useUnlockCheck } from './hooks/useUnlockCheck.ts';
 import { useSettingsStore } from './store/useSettingsStore.ts';
 import { useSpotifyStore } from './store/useSpotifyStore.ts';
 import { usePresetHistoryStore } from './store/usePresetHistoryStore.ts';
-import { useCustomPackStore } from './store/useCustomPackStore.ts';
 import { useToastStore } from './store/useToastStore.ts';
-import mangosPicks from './data/mangos-picks.json';
 import { controlPlayback, RateLimitedError } from './services/spotifyApi.ts';
 import type { PlaybackAdapter } from './components/PlaybackControls.tsx';
 import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
@@ -35,8 +33,6 @@ import quarantinedData from './data/quarantined-presets.json';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
 
 const quarantinedSet = new Set(quarantinedData.presets as string[]);
-const mangosPicksSet = new Set(mangosPicks as string[]);
-const MANGOS_PICKS_PACK = "Mango's Picks";
 
 /**
  * Minimal shell for OAuth popup callbacks.
@@ -112,6 +108,7 @@ function MainApp() {
   const [activePanel, setActivePanel] = useState<PanelView>('none');
   const [showLaunchAnimation, setShowLaunchAnimation] = useState(false);
   const resetAutopilotRef = useRef<() => void>(() => {});
+  const rateLimitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Build effective quarantine set (quarantined minus user overrides)
   const effectiveQuarantineSet = useMemo(() => {
@@ -135,18 +132,13 @@ function MainApp() {
     return set;
   }, [blockedPresets, effectiveQuarantineSet]);
 
-  // Check if a preset belongs to any enabled pack
+  // Check if a preset belongs to any enabled built-in pack
   const enabledPackSet = useMemo(() => new Set(enabledPacks), [enabledPacks]);
   const isInEnabledPack = useCallback(
     (name: string) => {
-      // If no packs are enabled, nothing passes
       if (enabledPackSet.size === 0) return false;
-      // Check Mango's Picks membership
-      if (mangosPicksSet.has(name) && enabledPackSet.has(MANGOS_PICKS_PACK)) return true;
-      // Check source pack
       const sourcePack = presetPackMap.get(name);
-      if (sourcePack && enabledPackSet.has(sourcePack)) return true;
-      return false;
+      return !!sourcePack && enabledPackSet.has(sourcePack);
     },
     [enabledPackSet, presetPackMap],
   );
@@ -201,9 +193,11 @@ function MainApp() {
 
     const allPresets = renderer.presetList;
 
-    // Build pool: not blocked, in an enabled pack
     let pool: string[];
-    if (enabledPacks.length > 0) {
+    if (autopilot.mode === 'favorites' && favoritePresets.length > 0) {
+      // Favorites mode: pool is favorites only (not blocked), ignores pack filtering
+      pool = favoritePresets.filter((p) => !mergedBlockedSet.has(p));
+    } else if (enabledPacks.length > 0) {
       pool = allPresets.filter((p) => !mergedBlockedSet.has(p) && isInEnabledPack(p));
     } else if (presetPackMap.size > 0) {
       pool = []; // Packs initialized but none enabled
@@ -222,18 +216,30 @@ function MainApp() {
       available = pool;
     }
 
-    // Weighted selection: favorites more likely to be picked early
-    const favSet = new Set(favoritePresets);
-    const weight = autopilot.favoriteWeight;
-    const availableFavorites = available.filter((p) => favSet.has(p));
+    // Weighted selection: in 'all' mode, each favorite gets `weight`x the chance of a non-favorite.
+    // e.g. 10 favorites, 540 others, weight=2 → favorites get 2x probability each.
     let pick: string;
+    if (autopilot.mode !== 'favorites') {
+      const favSet = new Set(favoritePresets);
+      const weight = autopilot.favoriteWeight;
+      const favCount = available.filter((p) => favSet.has(p)).length;
+      const nonFavCount = available.length - favCount;
+      const totalWeight = favCount * weight + nonFavCount;
+      const favGroupProb = (favCount * weight) / totalWeight;
 
-    if (availableFavorites.length > 0 && Math.random() < weight / (weight + 1)) {
-      pick = availableFavorites[Math.floor(Math.random() * availableFavorites.length)];
+      if (favCount > 0 && Math.random() < favGroupProb) {
+        const favAvailable = available.filter((p) => favSet.has(p));
+        pick = favAvailable[Math.floor(Math.random() * favAvailable.length)];
+      } else {
+        const nonFav = available.filter((p) => !favSet.has(p));
+        pick =
+          nonFav.length > 0
+            ? nonFav[Math.floor(Math.random() * nonFav.length)]
+            : available[Math.floor(Math.random() * available.length)];
+      }
     } else {
       pick = available[Math.floor(Math.random() * available.length)];
     }
-
     historyStore.markPlayed(pick);
     renderer.loadPreset(pick, transitionTime);
   }, [
@@ -242,6 +248,7 @@ function MainApp() {
     isInEnabledPack,
     presetPackMap,
     favoritePresets,
+    autopilot.mode,
     autopilot.favoriteWeight,
     transitionTime,
   ]);
@@ -293,60 +300,21 @@ function MainApp() {
     setActivePanel('none');
   }, []);
 
-  // Autopilot: delegates to pickNextPreset for 'all' mode,
-  // overrides pool for 'favorites' and 'pack' modes
+  // Autopilot advance — pickNextPreset already respects mode (all vs favorites)
   const handleAutopilotAdvance = useCallback(() => {
-    if (autopilot.mode === 'all') {
-      pickNextPreset();
-      return;
-    }
-
-    const renderer = rendererRef.current;
-    if (!renderer) return;
-
-    // Build mode-specific pool
-    let pool: string[];
-    if (autopilot.mode === 'favorites' && favoritePresets.length > 0) {
-      pool = favoritePresets.filter((p) => !mergedBlockedSet.has(p));
-    } else if (autopilot.mode === 'pack' && autopilot.packId) {
-      const customPack = useCustomPackStore.getState().packs.find((p) => p.id === autopilot.packId);
-      if (customPack) {
-        pool = customPack.presets.filter((p) => !mergedBlockedSet.has(p));
-      } else {
-        return; // Pack deleted — nothing to play
-      }
-    } else {
-      return; // No valid pool
-    }
-
-    if (pool.length === 0) return;
-
-    const historyStore = usePresetHistoryStore.getState();
-    let available = pool.filter((p) => !historyStore.playedSet.has(p));
-    if (available.length === 0) {
-      historyStore.resetRound();
-      available = pool;
-    }
-
-    const favSet = new Set(favoritePresets);
-    const weight = autopilot.favoriteWeight;
-    const availableFavorites = available.filter((p) => favSet.has(p));
-    let pick: string;
-
-    if (availableFavorites.length > 0 && Math.random() < weight / (weight + 1)) {
-      pick = availableFavorites[Math.floor(Math.random() * availableFavorites.length)];
-    } else {
-      pick = available[Math.floor(Math.random() * available.length)];
-    }
-
-    historyStore.markPlayed(pick);
-    renderer.loadPreset(pick, transitionTime);
-  }, [autopilot, favoritePresets, mergedBlockedSet, pickNextPreset, transitionTime]);
+    pickNextPreset();
+  }, [pickNextPreset]);
 
   const { reset: resetAutopilot } = useAutopilot(handleAutopilotAdvance);
   useEffect(() => {
     resetAutopilotRef.current = resetAutopilot;
   });
+  useEffect(() => {
+    return () => {
+      if (rateLimitTimeoutRef.current) clearTimeout(rateLimitTimeoutRef.current);
+    };
+  }, []);
+
   useHideCursor(3000);
   const isFullscreen = useFullscreen();
 
@@ -354,7 +322,7 @@ function MainApp() {
   useEffect(() => {
     resetAutopilot();
     usePresetHistoryStore.getState().resetRound();
-  }, [autopilot.mode, autopilot.packId, enabledPacks, resetAutopilot]);
+  }, [autopilot.mode, enabledPacks, resetAutopilot]);
 
   // If initial preset isn't in an enabled pack, pick one that is
   const didFixInitialPreset = useRef(false);
@@ -417,7 +385,10 @@ function MainApp() {
       } catch (err) {
         if (err instanceof RateLimitedError) {
           setRateLimited(err.retryAfterSeconds * 1000);
-          setTimeout(() => clearRateLimited(), err.retryAfterSeconds * 1000);
+          rateLimitTimeoutRef.current = setTimeout(
+            () => clearRateLimited(),
+            err.retryAfterSeconds * 1000,
+          );
         }
       }
     },

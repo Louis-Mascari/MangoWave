@@ -64,7 +64,3 @@ declare module 'butterchurn-presets/lib/butterchurnPresetsMinimal.min' {
 
   export default butterchurnPresetsMinimal;
 }
-
-declare module 'milkdrop-preset-converter' {
-  export function convertPreset(milkText: string): object;
-}

@@ -19,7 +19,7 @@ export const useToastStore = create<ToastState>((set, get) => ({
     activeTimer = setTimeout(() => {
       activeTimer = null;
       set({ message: null });
-    }, 2000);
+    }, 3500);
   },
 
   clear: () => {

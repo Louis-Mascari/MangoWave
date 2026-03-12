@@ -40,10 +40,6 @@ vi.mock('butterchurn-presets/lib/butterchurnPresetsMinimal.min', () => ({
   default: { getPresets: () => ({}) },
 }));
 
-vi.mock('../../data/mangos-picks.json', () => ({
-  default: [],
-}));
-
 describe('VisualizerRenderer', () => {
   let renderer: VisualizerRenderer;
 
@@ -152,20 +148,6 @@ describe('VisualizerRenderer', () => {
       expect(mockRaf).toHaveBeenCalledTimes(1);
 
       mockRaf.mockRestore();
-    });
-  });
-
-  describe('custom presets', () => {
-    it('registers and unregisters custom presets', () => {
-      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
-      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
-
-      renderer.registerCustomPreset('Custom 1', { code: 'custom' });
-      expect(renderer.presetList).toContain('Custom 1');
-      expect(renderer.presetPackMap.get('Custom 1')).toBe('My Imports');
-
-      renderer.unregisterCustomPreset('Custom 1');
-      expect(renderer.presetList).not.toContain('Custom 1');
     });
   });
 

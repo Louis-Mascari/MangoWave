@@ -18,15 +18,13 @@
 ## Features
 
 - **555+ MilkDrop presets** from 6 butterchurn packs, organized by source pack with virtualized browsing
-- **Import .milk presets** — drag-and-drop MilkDrop preset files, converted client-side via lazy-loaded converter
-- **Custom packs** — create named collections, export/import as JSON for sharing and backup
-- **"Mango's Picks"** — curated built-in pack for an immediate high-quality experience
-- **Quarantine system** — suspected broken or vibe-killing presets hidden by default, revealable in settings with per-preset override
+- **Pack filtering** — enable/disable built-in packs to control which presets appear and which autopilot draws from
+- **Quarantine system** — suspected broken or vibe-killing presets hidden by default, with per-preset unquarantine
 - **Multiple audio sources** — system/tab audio, local files, or microphone input
 - **Local file playback** with queue, shuffle, repeat, seek, and volume controls
 - **10-band EQ** that shapes which frequencies drive the visuals
 - **Pre-amp gain** to boost quiet audio sources
-- **Autopilot** with shuffle-style rounds (no repeats), favorite weighting, and pack-cycling mode
+- **Autopilot** with shuffle-style rounds (no repeats), all or favorites-only mode, proportional favorite weighting (1–10x)
 - **Preset history** with previous/next navigation and browseable history tab
 - **Keyboard shortcuts** for preset navigation, fullscreen, favorites, and more
 - **Mobile-optimized UI** with radial FAB menu and full-screen modal panels

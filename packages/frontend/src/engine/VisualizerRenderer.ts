@@ -5,7 +5,6 @@ import butterchurnPresetsExtra2 from 'butterchurn-presets/lib/butterchurnPresets
 import butterchurnPresetsMD1 from 'butterchurn-presets/lib/butterchurnPresetsMD1.min';
 import butterchurnPresetsNonMinimal from 'butterchurn-presets/lib/butterchurnPresetsNonMinimal.min';
 import butterchurnPresetsMinimal from 'butterchurn-presets/lib/butterchurnPresetsMinimal.min';
-import mangosPicks from '../data/mangos-picks.json';
 
 const PACK_SOURCES = [
   { label: 'Base', getPresets: () => butterchurnPresets.getPresets() },
@@ -26,7 +25,6 @@ export class VisualizerRenderer {
   private lastFrameTime = 0;
   private onPresetChange?: (name: string) => void;
   private _presetPackMap: Map<string, string> = new Map();
-  private customPresets: Map<string, object> = new Map();
 
   get currentPresetName(): string {
     return this.presetKeys[this.currentPresetIndex] ?? '';
@@ -56,27 +54,15 @@ export class VisualizerRenderer {
 
     this.visualizer.connectAudio(analyserNode);
 
-    // Build presets and track pack origins
     this._presetPackMap = new Map();
     this.presets = {};
-
-    const mangosPicksSet = new Set(mangosPicks as string[]);
 
     for (const { label, getPresets } of PACK_SOURCES) {
       const packPresets = getPresets();
       for (const [name, preset] of Object.entries(packPresets)) {
         this.presets[name] = preset;
         this._presetPackMap.set(name, label);
-        if (mangosPicksSet.has(name)) {
-          mangosPicksSet.delete(name);
-        }
       }
-    }
-
-    // Register any stored custom presets
-    for (const [name, preset] of this.customPresets) {
-      this.presets[name] = preset;
-      // Pack map entry already set during registerCustomPreset
     }
 
     this.presetKeys = Object.keys(this.presets);
@@ -114,20 +100,6 @@ export class VisualizerRenderer {
     if (available.length === 0) return;
     const randomIndex = Math.floor(Math.random() * available.length);
     this.loadPreset(available[randomIndex], blendTime);
-  }
-
-  registerCustomPreset(name: string, preset: object, packName = 'My Imports'): void {
-    this.customPresets.set(name, preset);
-    this.presets[name] = preset;
-    this._presetPackMap.set(name, packName);
-    this.presetKeys = Object.keys(this.presets);
-  }
-
-  unregisterCustomPreset(name: string): void {
-    this.customPresets.delete(name);
-    delete this.presets[name];
-    this._presetPackMap.delete(name);
-    this.presetKeys = Object.keys(this.presets);
   }
 
   start(): void {

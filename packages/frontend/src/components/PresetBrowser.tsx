@@ -1,16 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { GroupedVirtuoso } from 'react-virtuoso';
 
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { usePresetHistoryStore } from '../store/usePresetHistoryStore.ts';
-import { useCustomPackStore } from '../store/useCustomPackStore.ts';
-import { useCustomPresetsStore } from '../store/useCustomPresetsStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
-import { convertMilkFile } from '../engine/milkdropConverter.ts';
-import mangosPicks from '../data/mangos-picks.json';
 import quarantinedData from '../data/quarantined-presets.json';
 
-type FilterTab = 'all' | 'favorites' | 'blocked' | 'quarantined' | 'history' | 'packs';
+type FilterTab = 'all' | 'favorites' | 'blocked' | 'quarantined' | 'history';
 
 interface PresetBrowserProps {
   presetList: string[];
@@ -20,14 +16,10 @@ interface PresetBrowserProps {
   onNextPreset: () => void;
 }
 
-const MANGOS_PICKS_PACK = "Mango's Picks";
-const mangosPicksSet = new Set(mangosPicks as string[]);
 const quarantinedSet = new Set(quarantinedData.presets as string[]);
 
 function getAllBuiltinPacks(packMap: Map<string, string>): string[] {
   const packs = new Set<string>();
-  // Always include Mango's Picks first
-  packs.add(MANGOS_PICKS_PACK);
   for (const pack of packMap.values()) {
     packs.add(pack);
   }
@@ -44,8 +36,6 @@ function PresetRow({
   onToggleFavorite,
   onToggleBlock,
   onUnquarantine,
-  onAddToPack,
-  hasCustomPacks,
 }: {
   name: string;
   isCurrent: boolean;
@@ -56,8 +46,6 @@ function PresetRow({
   onToggleFavorite: () => void;
   onToggleBlock: () => void;
   onUnquarantine: () => void;
-  onAddToPack: () => void;
-  hasCustomPacks: boolean;
 }) {
   return (
     <div
@@ -77,17 +65,6 @@ function PresetRow({
         {name}
       </button>
       <div className="flex gap-1.5">
-        {hasCustomPacks && (
-          <button
-            onClick={onAddToPack}
-            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-white/10 hover:text-white/60"
-            title="Add to pack..."
-          >
-            <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
-              <path d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" />
-            </svg>
-          </button>
-        )}
         <button
           onClick={onToggleFavorite}
           className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
@@ -159,44 +136,6 @@ function HistoryRow({
   );
 }
 
-function PackPickerModal({
-  packs,
-  onSelect,
-  onClose,
-}: {
-  packs: { id: string; name: string }[];
-  onSelect: (id: string) => void;
-  onClose: () => void;
-}) {
-  return (
-    <div className="absolute inset-0 z-10 flex flex-col rounded-lg bg-black/90 p-4 backdrop-blur-sm">
-      <div className="mb-2 flex items-center justify-between">
-        <h4 className="text-xs font-semibold text-white">Add to pack</h4>
-        <button
-          onClick={onClose}
-          className="cursor-pointer rounded border-none bg-white/10 px-2 py-0.5 text-[10px] text-white/60 hover:bg-white/20"
-        >
-          Cancel
-        </button>
-      </div>
-      <div className="flex flex-col gap-1 overflow-y-auto">
-        {packs.map((pack) => (
-          <button
-            key={pack.id}
-            onClick={() => onSelect(pack.id)}
-            className="cursor-pointer rounded border-none bg-white/10 px-2 py-1.5 text-left text-xs text-white/80 hover:bg-white/20"
-          >
-            {pack.name}
-          </button>
-        ))}
-        {packs.length === 0 && (
-          <p className="py-2 text-center text-xs text-white/40">No custom packs yet</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export function PresetBrowser({
   presetList,
   currentPreset,
@@ -210,37 +149,18 @@ export function PresetBrowser({
   const setEnabledPacks = useSettingsStore((s) => s.setEnabledPacks);
   const togglePack = useSettingsStore((s) => s.togglePack);
   const showQuarantined = useSettingsStore((s) => s.showQuarantined);
-  const autopilot = useSettingsStore((s) => s.autopilot);
-  const setAutopilotMode = useSettingsStore((s) => s.setAutopilotMode);
-  const setAutopilotPackId = useSettingsStore((s) => s.setAutopilotPackId);
-  const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
   const quarantineOverrides = useSettingsStore((s) => s.quarantineOverrides);
   const addQuarantineOverride = useSettingsStore((s) => s.addQuarantineOverride);
   const blockPreset = useSettingsStore((s) => s.blockPreset);
   const unblockPreset = useSettingsStore((s) => s.unblockPreset);
   const toggleFavoritePreset = useSettingsStore((s) => s.toggleFavoritePreset);
 
-  const customPacks = useCustomPackStore((s) => s.packs);
-  const addPresetToPack = useCustomPackStore((s) => s.addPresetToPack);
-  const createPack = useCustomPackStore((s) => s.createPack);
-  const deletePack = useCustomPackStore((s) => s.deletePack);
-  const renamePack = useCustomPackStore((s) => s.renamePack);
-  const exportPack = useCustomPackStore((s) => s.exportPack);
-  const importPack = useCustomPackStore((s) => s.importPack);
-
   const presetHistory = usePresetHistoryStore((s) => s.history);
 
   const [filter, setFilter] = useState<FilterTab>('all');
   const [search, setSearch] = useState('');
-  const [packPickerPreset, setPackPickerPreset] = useState<string | null>(null);
+  const deferredSearch = useDeferredValue(search);
   const [collapsedPacks, setCollapsedPacks] = useState<Set<string>>(new Set());
-  const [newPackName, setNewPackName] = useState('');
-  const [renamingPackId, setRenamingPackId] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState('');
-  const [milkImporting, setMilkImporting] = useState(false);
-
-  const importInputRef = useRef<HTMLInputElement>(null);
-  const milkInputRef = useRef<HTMLInputElement>(null);
 
   const blockedSet = useMemo(() => new Set(blockedPresets), [blockedPresets]);
   const favoriteSet = useMemo(() => new Set(favoritePresets), [favoritePresets]);
@@ -249,7 +169,6 @@ export function PresetBrowser({
   const allPacks = useMemo(() => getAllBuiltinPacks(presetPackMap), [presetPackMap]);
 
   // Initialize enabledPacks on first load (only if never set before).
-  // We use a ref to ensure this runs only once, so "Deselect All" isn't overridden.
   const didInitPacks = useRef(false);
   useEffect(() => {
     if (!didInitPacks.current && enabledPacks.length === 0 && allPacks.length > 0) {
@@ -270,7 +189,7 @@ export function PresetBrowser({
     [overrideSet],
   );
 
-  // Get pack for a preset (Mango's Picks membership + source pack)
+  // Get pack for a preset
   const getPresetPack = useCallback(
     (name: string): string => {
       return presetPackMap.get(name) ?? 'Unknown';
@@ -280,12 +199,11 @@ export function PresetBrowser({
 
   // Build grouped data for "all" tab
   const { groupCounts, groupNames, flatPresets } = useMemo(() => {
-    if (filter !== 'all' || search) {
+    if (filter !== 'all' || deferredSearch) {
       return { groupCounts: [], groupNames: [], flatPresets: [] };
     }
 
-    // Determine visible presets per pack
-    const packOrder = [MANGOS_PICKS_PACK, ...allPacks.filter((p) => p !== MANGOS_PICKS_PACK)];
+    const packOrder = allPacks;
     const names: string[] = [];
     const counts: number[] = [];
     const flat: string[] = [];
@@ -293,32 +211,19 @@ export function PresetBrowser({
     for (const pack of packOrder) {
       if (!enabledPackSet.has(pack)) continue;
       if (collapsedPacks.has(pack)) {
-        // Still show header with count, just no items
         const packPresets = presetList.filter((name) => {
-          if (pack === MANGOS_PICKS_PACK) {
-            if (!mangosPicksSet.has(name)) return false;
-          } else {
-            if (getPresetPack(name) !== pack) return false;
-            // Don't double-show Mango's Picks presets under their source pack
-          }
+          if (getPresetPack(name) !== pack) return false;
           if (blockedSet.has(name)) return false;
           if (!showQuarantined && isQuarantined(name)) return false;
           return true;
         });
-        names.push(pack);
+        names.push(`${pack}|||${packPresets.length}`);
         counts.push(0);
-        // Store count in header for display, but no items
-        // We'll use a hack: store the real count in the pack name
-        names[names.length - 1] = `${pack}|||${packPresets.length}`;
         continue;
       }
 
       const packPresets = presetList.filter((name) => {
-        if (pack === MANGOS_PICKS_PACK) {
-          if (!mangosPicksSet.has(name)) return false;
-        } else {
-          if (getPresetPack(name) !== pack) return false;
-        }
+        if (getPresetPack(name) !== pack) return false;
         if (blockedSet.has(name)) return false;
         if (!showQuarantined && isQuarantined(name)) return false;
         return true;
@@ -334,7 +239,7 @@ export function PresetBrowser({
     return { groupCounts: counts, groupNames: names, flatPresets: flat };
   }, [
     filter,
-    search,
+    deferredSearch,
     presetList,
     allPacks,
     enabledPackSet,
@@ -347,17 +252,15 @@ export function PresetBrowser({
 
   // Flat filtered list for search, favorites, blocked, quarantined tabs
   const filteredPresets = useMemo(() => {
-    if (filter === 'all' && !search) return [];
+    if (filter === 'all' && !deferredSearch) return [];
     if (filter === 'history') return [];
-    if (filter === 'packs') return [];
 
-    const lowerSearch = search.toLowerCase();
+    const lowerSearch = deferredSearch.toLowerCase();
     return presetList.filter((name) => {
-      if (search && !name.toLowerCase().includes(lowerSearch)) return false;
+      if (deferredSearch && !name.toLowerCase().includes(lowerSearch)) return false;
       if (filter === 'favorites') return favoriteSet.has(name);
       if (filter === 'blocked') return blockedSet.has(name);
       if (filter === 'quarantined') {
-        // Show quarantined presets that haven't been overridden
         return quarantinedSet.has(name) && !overrideSet.has(name);
       }
       // 'all' with search
@@ -367,7 +270,7 @@ export function PresetBrowser({
     });
   }, [
     presetList,
-    search,
+    deferredSearch,
     filter,
     blockedSet,
     favoriteSet,
@@ -380,10 +283,10 @@ export function PresetBrowser({
   const historyList = useMemo(() => {
     if (filter !== 'history') return [];
     const reversed = [...presetHistory].reverse();
-    if (!search) return reversed;
-    const lowerSearch = search.toLowerCase();
+    if (!deferredSearch) return reversed;
+    const lowerSearch = deferredSearch.toLowerCase();
     return reversed.filter((name) => name.toLowerCase().includes(lowerSearch));
-  }, [filter, presetHistory, search]);
+  }, [filter, presetHistory, deferredSearch]);
 
   const handleToggleFavorite = useCallback(
     (name: string) => {
@@ -417,15 +320,6 @@ export function PresetBrowser({
     [blockedSet, blockPreset, unblockPreset, currentPreset, onNextPreset],
   );
 
-  const handleAddToPack = useCallback(
-    (presetName: string, packId: string) => {
-      addPresetToPack(packId, presetName);
-      setPackPickerPreset(null);
-      useToastStore.getState().show('Added to pack');
-    },
-    [addPresetToPack],
-  );
-
   const toggleCollapsePack = useCallback((pack: string) => {
     setCollapsedPacks((prev) => {
       const next = new Set(prev);
@@ -445,94 +339,6 @@ export function PresetBrowser({
   const handleDeselectAll = useCallback(() => {
     setEnabledPacks([]);
   }, [setEnabledPacks]);
-
-  const handleCreatePack = useCallback(() => {
-    const name = newPackName.trim();
-    if (!name) return;
-    createPack(name);
-    setNewPackName('');
-    useToastStore.getState().show('Pack created');
-  }, [newPackName, createPack]);
-
-  const handleImportFile = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      const result = await importPack(file);
-      if (result.success) {
-        useToastStore.getState().show('Pack imported');
-      } else {
-        useToastStore.getState().show(result.error ?? 'Import failed');
-      }
-      // Reset input
-      if (importInputRef.current) importInputRef.current.value = '';
-    },
-    [importPack],
-  );
-
-  const handleMilkImport = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-      if (!files || files.length === 0) return;
-
-      setMilkImporting(true);
-      const addPreset = useCustomPresetsStore.getState().addPreset;
-      let success = 0;
-      let failed = 0;
-
-      for (const file of Array.from(files)) {
-        try {
-          const { name, preset } = await convertMilkFile(file);
-          await addPreset(name, preset, 'milk-import');
-
-          // Find or create "My Imports" custom pack
-          const packs = useCustomPackStore.getState().packs;
-          let importsPack = packs.find((p) => p.name === 'My Imports');
-          if (!importsPack) {
-            const id = createPack('My Imports');
-            importsPack = useCustomPackStore.getState().packs.find((p) => p.id === id);
-          }
-          if (importsPack) {
-            addPresetToPack(importsPack.id, name);
-          }
-          success++;
-        } catch (err) {
-          failed++;
-          const msg = err instanceof Error ? err.message : 'Unknown error';
-          useToastStore.getState().show(`Failed: ${file.name} — ${msg}`);
-        }
-      }
-
-      setMilkImporting(false);
-      if (success > 0) {
-        useToastStore
-          .getState()
-          .show(
-            `Imported ${success} preset${success > 1 ? 's' : ''}${failed > 0 ? ` (${failed} failed)` : ''}`,
-          );
-      }
-      if (milkInputRef.current) milkInputRef.current.value = '';
-    },
-    [createPack, addPresetToPack],
-  );
-
-  const hasCustomPacks = customPacks.length > 0;
-
-  const handlePlayPack = useCallback(
-    (packId: string) => {
-      setAutopilotMode('pack');
-      setAutopilotPackId(packId);
-      setAutopilotEnabled(true);
-      useToastStore.getState().show('Autopilot: playing pack');
-    },
-    [setAutopilotMode, setAutopilotPackId, setAutopilotEnabled],
-  );
-
-  const handleStopPackPlay = useCallback(() => {
-    setAutopilotMode('all');
-    setAutopilotPackId(null);
-    useToastStore.getState().show('Autopilot: all presets');
-  }, [setAutopilotMode, setAutopilotPackId]);
 
   // Render the grouped "all" tab
   const renderGroupedAll = () => (
@@ -607,8 +413,6 @@ export function PresetBrowser({
                 onToggleFavorite={() => handleToggleFavorite(name)}
                 onToggleBlock={() => handleToggleBlock(name)}
                 onUnquarantine={() => handleUnquarantine(name)}
-                onAddToPack={() => setPackPickerPreset(name)}
-                hasCustomPacks={hasCustomPacks}
               />
             );
           }}
@@ -634,8 +438,6 @@ export function PresetBrowser({
           onToggleFavorite={() => handleToggleFavorite(name)}
           onToggleBlock={() => handleToggleBlock(name)}
           onUnquarantine={() => handleUnquarantine(name)}
-          onAddToPack={() => setPackPickerPreset(name)}
-          hasCustomPacks={hasCustomPacks}
         />
       ))}
       {filteredPresets.length === 0 && (
@@ -700,234 +502,50 @@ export function PresetBrowser({
     </div>
   );
 
-  // Render custom packs tab
-  const renderPacks = () => (
-    <div className="flex max-h-[280px] flex-col gap-3 overflow-y-auto">
-      {/* Section: Import MilkDrop presets */}
-      <div className="flex flex-col gap-1.5">
-        <h4 className="text-[10px] font-semibold uppercase tracking-wider text-orange-400">
-          Import Presets
-        </h4>
-        <p className="text-[10px] leading-snug text-white/40">
-          Add MilkDrop .milk preset files to expand your library beyond the built-in 555. You can
-          find thousands of .milk files at community sites like geisswerks.com/milkdrop. Converted
-          presets are stored locally in your browser (IndexedDB) and work with all features.
-        </p>
-        <button
-          onClick={() => milkInputRef.current?.click()}
-          disabled={milkImporting}
-          className="w-fit cursor-pointer rounded border-none bg-orange-500/30 px-2 py-1 text-xs text-orange-300 hover:bg-orange-500/40 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {milkImporting ? 'Converting...' : 'Import .milk files'}
-        </button>
-        <input
-          ref={milkInputRef}
-          type="file"
-          accept=".milk"
-          multiple
-          onChange={handleMilkImport}
-          className="hidden"
-        />
-      </div>
-
-      <div className="border-t border-white/10" />
-
-      {/* Section: Custom packs */}
-      <div className="flex flex-col gap-1.5">
-        <h4 className="text-[10px] font-semibold uppercase tracking-wider text-orange-400">
-          Custom Packs
-        </h4>
-        <p className="text-[10px] leading-snug text-white/40">
-          Organize presets into named collections. Add presets from the{' '}
-          <span className="text-white/60">All</span> tab using the + button on each preset. Use
-          packs with autopilot (Settings &gt; Pack mode) or export as JSON to share with others.
-        </p>
-        <div className="flex gap-1">
-          <input
-            type="text"
-            placeholder="New pack name..."
-            value={newPackName}
-            onChange={(e) => setNewPackName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleCreatePack()}
-            className="min-w-0 flex-1 rounded border-none bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
-          />
-          <button
-            onClick={handleCreatePack}
-            disabled={!newPackName.trim()}
-            className="cursor-pointer rounded border-none bg-orange-500/30 px-2 py-1 text-xs text-orange-300 hover:bg-orange-500/40 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Create
-          </button>
-        </div>
-        <button
-          onClick={() => importInputRef.current?.click()}
-          className="w-fit cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-[10px] text-white/50 hover:bg-white/20"
-        >
-          Import pack (.json exported from MangoWave)
-        </button>
-        <input
-          ref={importInputRef}
-          type="file"
-          accept=".json"
-          onChange={handleImportFile}
-          className="hidden"
-        />
-      </div>
-
-      {/* List of custom packs */}
-      {customPacks.map((pack) => (
-        <div key={pack.id} className="rounded bg-white/5 p-2">
-          <div className="mb-1 flex items-center justify-between">
-            {renamingPackId === pack.id ? (
-              <input
-                type="text"
-                value={renameValue}
-                onChange={(e) => setRenameValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && renameValue.trim()) {
-                    renamePack(pack.id, renameValue.trim());
-                    setRenamingPackId(null);
-                  }
-                  if (e.key === 'Escape') setRenamingPackId(null);
-                }}
-                onBlur={() => {
-                  if (renameValue.trim()) renamePack(pack.id, renameValue.trim());
-                  setRenamingPackId(null);
-                }}
-                autoFocus
-                className="min-w-0 flex-1 rounded border-none bg-white/10 px-1 py-0.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
-              />
-            ) : (
-              <span className="text-xs font-semibold text-white/80">
-                {pack.name}{' '}
-                <span className="font-normal text-white/40">({pack.presets.length})</span>
-              </span>
-            )}
-            <div className="flex gap-1">
-              {pack.presets.length > 0 &&
-                (autopilot.mode === 'pack' && autopilot.packId === pack.id ? (
-                  <button
-                    onClick={handleStopPackPlay}
-                    className="cursor-pointer rounded border-none bg-orange-500/30 px-1.5 py-0.5 text-[10px] text-orange-300 hover:bg-orange-500/40"
-                  >
-                    Stop
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handlePlayPack(pack.id)}
-                    className="cursor-pointer rounded border-none bg-orange-500/20 px-1.5 py-0.5 text-[10px] text-orange-300 hover:bg-orange-500/30"
-                  >
-                    Play
-                  </button>
-                ))}
-              <button
-                onClick={() => {
-                  setRenamingPackId(pack.id);
-                  setRenameValue(pack.name);
-                }}
-                className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[10px] text-white/50 hover:bg-white/20"
-              >
-                Rename
-              </button>
-              <button
-                onClick={() => exportPack(pack.id)}
-                className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[10px] text-white/50 hover:bg-white/20"
-              >
-                Export
-              </button>
-              <button
-                onClick={() => deletePack(pack.id)}
-                className="cursor-pointer rounded border-none bg-red-500/20 px-1.5 py-0.5 text-[10px] text-red-400 hover:bg-red-500/30"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-          {pack.presets.length > 0 ? (
-            <div className="flex max-h-24 flex-col gap-0.5 overflow-y-auto">
-              {pack.presets.map((name) => (
-                <div
-                  key={name}
-                  className="flex items-center justify-between text-[11px] text-white/60"
-                >
-                  <button
-                    onClick={() => onSelectPreset(name)}
-                    className="min-w-0 flex-1 cursor-pointer truncate border-none bg-transparent text-left text-inherit"
-                  >
-                    {name}
-                  </button>
-                  <button
-                    onClick={() =>
-                      useCustomPackStore.getState().removePresetFromPack(pack.id, name)
-                    }
-                    className="cursor-pointer border-none bg-transparent text-[10px] text-white/30 hover:text-red-400"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="py-1 text-[10px] text-white/30">
-              Empty — use the + button on presets in the All tab to add them here.
-            </p>
-          )}
-        </div>
-      ))}
-
-      {customPacks.length === 0 && (
-        <p className="py-2 text-center text-xs text-white/40">
-          No packs yet — create one above, then add presets from the All tab.
-        </p>
-      )}
-    </div>
-  );
-
   return (
     <div className="relative flex max-h-96 flex-col gap-2 rounded-lg bg-black/60 p-4 backdrop-blur-sm">
-      {/* Pack picker modal */}
-      {packPickerPreset && (
-        <PackPickerModal
-          packs={customPacks}
-          onSelect={(id) => handleAddToPack(packPickerPreset, id)}
-          onClose={() => setPackPickerPreset(null)}
-        />
-      )}
-
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-white">Presets</h3>
         <div className="flex flex-wrap gap-1">
-          {(['all', 'favorites', 'blocked', 'quarantined', 'history', 'packs'] as const).map(
-            (f) => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`cursor-pointer rounded border-none px-2 py-0.5 text-[10px] capitalize ${
-                  filter === f
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-white/10 text-white/60 hover:bg-white/20'
-                }`}
-              >
-                {f}
-              </button>
-            ),
-          )}
+          {(['all', 'favorites', 'blocked', 'quarantined', 'history'] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`cursor-pointer rounded border-none px-2 py-0.5 text-[10px] capitalize ${
+                filter === f
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-white/10 text-white/60 hover:bg-white/20'
+              }`}
+            >
+              {f}
+            </button>
+          ))}
         </div>
       </div>
 
-      <input
-        type="text"
-        placeholder="Search presets..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="rounded border-none bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
-      />
+      <div className="relative">
+        <input
+          type="text"
+          placeholder="Search presets..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full rounded border-none bg-white/10 px-2 py-1 pr-7 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
+        />
+        <button
+          onClick={() => setSearch('')}
+          className={`absolute top-1/2 right-1.5 flex h-4 w-4 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-none bg-white/20 text-[10px] leading-none text-white/60 hover:bg-white/30 hover:text-white ${
+            search ? 'visible' : 'invisible'
+          }`}
+          aria-label="Clear search"
+        >
+          ✕
+        </button>
+      </div>
 
-      {filter === 'all' && !search && renderGroupedAll()}
+      {filter === 'all' && !deferredSearch && renderGroupedAll()}
       {filter === 'quarantined' && renderQuarantined()}
       {filter === 'history' && renderHistory()}
-      {filter === 'packs' && renderPacks()}
-      {(filter === 'favorites' || filter === 'blocked' || (search && filter === 'all')) &&
+      {(filter === 'favorites' || filter === 'blocked' || (deferredSearch && filter === 'all')) &&
         renderFlatList()}
     </div>
   );

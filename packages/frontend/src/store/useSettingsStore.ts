@@ -17,13 +17,12 @@ export interface AudioSettings {
   fftSize: number; // 512, 1024, 2048, 4096
 }
 
-export type AutopilotMode = 'all' | 'favorites' | 'pack';
+export type AutopilotMode = 'all' | 'favorites';
 
 export interface AutopilotSettings {
   enabled: boolean;
   interval: number; // seconds
   mode: AutopilotMode;
-  packId: string | null; // custom pack ID for 'pack' mode
   favoriteWeight: number; // 1–5, weight for favorites in shuffle
 }
 
@@ -49,7 +48,6 @@ export interface SettingsState {
   setAutopilotEnabled: (enabled: boolean) => void;
   setAutopilotInterval: (interval: number) => void;
   setAutopilotMode: (mode: AutopilotMode) => void;
-  setAutopilotPackId: (packId: string | null) => void;
   setAutopilotFavoriteWeight: (weight: number) => void;
 
   // Presets
@@ -60,7 +58,7 @@ export interface SettingsState {
   toggleBlockPreset: (name: string) => void;
   toggleFavoritePreset: (name: string) => void;
 
-  // Pack filtering
+  // Pack filtering (built-in butterchurn packs)
   enabledPacks: string[];
   setEnabledPacks: (packs: string[]) => void;
   togglePack: (pack: string) => void;
@@ -125,7 +123,6 @@ export const useSettingsStore = create<SettingsState>()(
         enabled: true,
         interval: 15,
         mode: 'all',
-        packId: null,
         favoriteWeight: 2,
       },
       setAutopilotEnabled: (enabled) =>
@@ -139,10 +136,6 @@ export const useSettingsStore = create<SettingsState>()(
       setAutopilotMode: (mode) =>
         set((state) => ({
           autopilot: { ...state.autopilot, mode },
-        })),
-      setAutopilotPackId: (packId) =>
-        set((state) => ({
-          autopilot: { ...state.autopilot, packId },
         })),
       setAutopilotFavoriteWeight: (weight) =>
         set((state) => ({
@@ -204,7 +197,7 @@ export const useSettingsStore = create<SettingsState>()(
             : state.blockedPresets.filter((p) => p !== name),
         })),
 
-      // Pack filtering
+      // Pack filtering (built-in butterchurn packs)
       enabledPacks: [],
       setEnabledPacks: (packs) => set({ enabledPacks: packs }),
       togglePack: (pack) =>
@@ -252,9 +245,14 @@ export const useSettingsStore = create<SettingsState>()(
           const autopilot = state.autopilot as Record<string, unknown> | undefined;
           if (autopilot && 'favoritesOnly' in autopilot) {
             autopilot.mode = autopilot.favoritesOnly ? 'favorites' : 'all';
-            autopilot.packId = autopilot.packId ?? null;
             autopilot.favoriteWeight = autopilot.favoriteWeight ?? 2;
             delete autopilot.favoritesOnly;
+            delete autopilot.packId;
+          }
+          // Clean up removed pack fields
+          if (autopilot && 'packId' in autopilot) {
+            delete autopilot.packId;
+            if (autopilot.mode === 'pack') autopilot.mode = 'all';
           }
         }
         return state as unknown as SettingsState;

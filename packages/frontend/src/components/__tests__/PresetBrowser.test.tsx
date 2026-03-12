@@ -26,7 +26,6 @@ describe('PresetBrowser', () => {
     expect(screen.getByText('favorites')).toBeInTheDocument();
     expect(screen.getByText('blocked')).toBeInTheDocument();
     expect(screen.getByText('history')).toBeInTheDocument();
-    expect(screen.getByText('packs')).toBeInTheDocument();
   });
 
   it('renders search input', () => {
@@ -128,23 +127,5 @@ describe('PresetBrowser', () => {
 
     await user.click(screen.getByText('history'));
     expect(screen.getByText('No history yet')).toBeInTheDocument();
-  });
-
-  it('shows packs tab with create controls', async () => {
-    const user = userEvent.setup();
-    render(
-      <PresetBrowser
-        presetList={PRESETS}
-        presetPackMap={PACK_MAP}
-        currentPreset=""
-        onSelectPreset={vi.fn()}
-        onNextPreset={vi.fn()}
-      />,
-    );
-
-    await user.click(screen.getByText('packs'));
-    expect(screen.getByPlaceholderText('New pack name...')).toBeInTheDocument();
-    expect(screen.getByText('Import .milk files')).toBeInTheDocument();
-    expect(screen.getByText('Import pack (.json exported from MangoWave)')).toBeInTheDocument();
   });
 });

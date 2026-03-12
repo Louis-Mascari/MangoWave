@@ -119,7 +119,7 @@ export const useSettingsStore = create<SettingsState>()(
     (set) => ({
       // Performance
       performance: {
-        fpsCap: 0,
+        fpsCap: 60,
         resolutionScale: 1.0,
         meshWidth: 48,
         meshHeight: 36,

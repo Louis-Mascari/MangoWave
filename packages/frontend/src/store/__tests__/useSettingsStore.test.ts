@@ -8,7 +8,7 @@ describe('useSettingsStore', () => {
     const { result } = renderHook(() => useSettingsStore());
     act(() => {
       result.current.resetEQ();
-      result.current.setFpsCap(0);
+      result.current.setFpsCap(60);
       result.current.setResolutionScale(1.0);
       result.current.setMeshSize(48, 36);
       result.current.setTextureRatio(1.0);
@@ -32,7 +32,7 @@ describe('useSettingsStore', () => {
   describe('performance', () => {
     it('has sensible defaults', () => {
       const { result } = renderHook(() => useSettingsStore());
-      expect(result.current.performance.fpsCap).toBe(0);
+      expect(result.current.performance.fpsCap).toBe(60);
       expect(result.current.performance.resolutionScale).toBe(1.0);
       expect(result.current.performance.meshWidth).toBe(48);
       expect(result.current.performance.meshHeight).toBe(36);
@@ -386,7 +386,7 @@ describe('useSettingsStore', () => {
       expect(result.current.transitionTime).toBe(5.0);
       expect(result.current.favoritePresets).toEqual(['Preset A', 'Preset B']);
       // Other settings unchanged
-      expect(result.current.performance.fpsCap).toBe(0);
+      expect(result.current.performance.fpsCap).toBe(60);
     });
 
     it('deep-merges nested objects preserving unset fields', () => {

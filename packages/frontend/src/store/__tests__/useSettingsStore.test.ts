@@ -72,7 +72,7 @@ describe('useSettingsStore', () => {
   describe('EQ', () => {
     it('starts with flat EQ and unity pre-amp', () => {
       const { result } = renderHook(() => useSettingsStore());
-      expect(result.current.eq.preAmpGain).toBe(1.0);
+      expect(result.current.eq.preAmpGain).toBe(1.5);
       expect(result.current.eq.bandGains).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
     });
 
@@ -103,7 +103,7 @@ describe('useSettingsStore', () => {
         result.current.setEQBandGain(0, 12);
       });
       act(() => result.current.resetEQ());
-      expect(result.current.eq.preAmpGain).toBe(1.0);
+      expect(result.current.eq.preAmpGain).toBe(1.5);
       expect(result.current.eq.bandGains[0]).toBe(0);
     });
   });

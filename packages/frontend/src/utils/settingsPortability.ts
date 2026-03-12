@@ -174,7 +174,7 @@ function sanitizeEQ(raw: unknown): Record<string, unknown> | undefined {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
   const e = raw as Record<string, unknown>;
   const out: Record<string, unknown> = {};
-  if ('preAmpGain' in e) out.preAmpGain = clamp(e.preAmpGain, 0, 3, 1.0);
+  if ('preAmpGain' in e) out.preAmpGain = clamp(e.preAmpGain, 0, 3, 1.5);
   if ('bandGains' in e && Array.isArray(e.bandGains)) {
     out.bandGains = e.bandGains.slice(0, 10).map((g) => clamp(g, -12, 12, 0));
   }

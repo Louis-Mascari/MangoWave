@@ -187,7 +187,7 @@ export const useSettingsStore = create<SettingsState>()(
 
       // EQ
       eq: {
-        preAmpGain: 1.0,
+        preAmpGain: 1.5,
         bandGains: [...DEFAULT_BAND_GAINS],
       },
       setPreAmpGain: (gain) =>
@@ -204,7 +204,7 @@ export const useSettingsStore = create<SettingsState>()(
         }),
       resetEQ: () =>
         set(() => ({
-          eq: { preAmpGain: 1.0, bandGains: [...DEFAULT_BAND_GAINS] },
+          eq: { preAmpGain: 1.5, bandGains: [...DEFAULT_BAND_GAINS] },
         })),
 
       // Presets

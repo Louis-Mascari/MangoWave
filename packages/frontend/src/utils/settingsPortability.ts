@@ -231,7 +231,9 @@ const SANITIZERS: Record<string, (val: unknown) => unknown> = {
     return 5;
   },
   songInfoDisplay: (v) => {
-    if (v === 'off' || v === 'always') return v;
+    if (v === 'off') return v;
+    // Accept 'always' from older exports gracefully — treat as enabled (5s)
+    if (v === 'always') return 5;
     if (typeof v === 'number' && isFinite(v)) return Math.min(10, Math.max(1, Math.round(v)));
     return 5;
   },

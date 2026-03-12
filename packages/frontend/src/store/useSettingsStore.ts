@@ -80,8 +80,8 @@ export interface SettingsState {
   // Display
   presetNameDisplay: 'off' | 'always' | number; // 'off', 'always', or seconds
   setPresetNameDisplay: (value: 'off' | 'always' | number) => void;
-  songInfoDisplay: 'off' | 'always' | number; // 'off', 'always', or seconds
-  setSongInfoDisplay: (value: 'off' | 'always' | number) => void;
+  songInfoDisplay: 'off' | number; // 'off' or duration in seconds (hardcoded to 5)
+  setSongInfoDisplay: (value: 'off' | number) => void;
 
   // Transitions
   transitionTime: number; // seconds for preset blend
@@ -332,9 +332,15 @@ export const useSettingsStore = create<SettingsState>()(
             perf.fxaa = perf.fxaa ?? false;
           }
         }
+        // v2 → v3: songInfoDisplay no longer supports 'always' — convert to 5s
+        if ((version ?? 0) < 3) {
+          if (state.songInfoDisplay === 'always') {
+            state.songInfoDisplay = 5;
+          }
+        }
         return state as unknown as SettingsState;
       },
-      version: 2,
+      version: 3,
     },
   ),
 );

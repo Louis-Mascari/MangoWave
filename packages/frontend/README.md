@@ -67,7 +67,7 @@ Zustand with `localStorage` persistence. Key sections:
 | `blockedPresets`      | string[]                                                                       | []                          |
 | `favoritePresets`     | string[]                                                                       | []                          |
 | `presetNameDisplay`   | `'off' \| 'always' \| number`                                                  | 5                           |
-| `songInfoDisplay`     | `'off' \| number`                                                              | 5                           |
+| `songInfoDisplay`     | `'off' \| number` (on/off toggle, hardcoded 5s when on)                        | 5                           |
 | `transitionTime`      | number (seconds)                                                               | 2.0                         |
 | `volume`              | number (0.0–1.0)                                                               | 0.5                         |
 | `enabledPacks`        | string[]                                                                       | all packs                   |

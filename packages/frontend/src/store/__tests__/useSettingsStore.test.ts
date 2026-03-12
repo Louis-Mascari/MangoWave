@@ -305,16 +305,10 @@ describe('useSettingsStore', () => {
       expect(result.current.songInfoDisplay).toBe('off');
     });
 
-    it('sets to always', () => {
+    it('sets to number duration', () => {
       const { result } = renderHook(() => useSettingsStore());
-      act(() => result.current.setSongInfoDisplay('always'));
-      expect(result.current.songInfoDisplay).toBe('always');
-    });
-
-    it('sets to custom duration', () => {
-      const { result } = renderHook(() => useSettingsStore());
-      act(() => result.current.setSongInfoDisplay(8));
-      expect(result.current.songInfoDisplay).toBe(8);
+      act(() => result.current.setSongInfoDisplay(5));
+      expect(result.current.songInfoDisplay).toBe(5);
     });
   });
 

@@ -97,6 +97,23 @@ export interface SettingsState {
 
 const DEFAULT_BAND_GAINS = EQ_BANDS.map(() => 0);
 
+// Only these keys can be set via importSettings — prevents overwriting store actions
+const IMPORTABLE_KEYS: (keyof SettingsState)[] = [
+  'performance',
+  'eq',
+  'audio',
+  'autopilot',
+  'blockedPresets',
+  'favoritePresets',
+  'enabledPacks',
+  'showQuarantined',
+  'quarantineOverrides',
+  'presetNameDisplay',
+  'songInfoDisplay',
+  'transitionTime',
+  'volume',
+];
+
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
@@ -262,8 +279,26 @@ export const useSettingsStore = create<SettingsState>()(
       volume: 0.5,
       setVolume: (volume) => set({ volume }),
 
-      // Import
-      importSettings: (partial) => set((state) => ({ ...state, ...partial })),
+      // Import — whitelist data keys only (never overwrite store actions/functions)
+      importSettings: (partial) =>
+        set((state) => {
+          const safe: Record<string, unknown> = {};
+          for (const key of IMPORTABLE_KEYS) {
+            if (key in partial) {
+              // Deep-merge nested objects to preserve defaults for missing fields
+              const val = partial[key as keyof typeof partial];
+              const cur = state[key as keyof typeof state];
+              const isObj = val && typeof val === 'object' && !Array.isArray(val);
+              const curIsObj = cur && typeof cur === 'object' && !Array.isArray(cur);
+              if (isObj && curIsObj) {
+                safe[key] = { ...cur, ...val };
+              } else {
+                safe[key] = val;
+              }
+            }
+          }
+          return { ...state, ...safe };
+        }),
     }),
     {
       name: 'mangowave-settings',

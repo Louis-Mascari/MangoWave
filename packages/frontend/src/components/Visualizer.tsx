@@ -83,7 +83,13 @@ export function Visualizer({
       meshHeight: performance.meshHeight,
       textureRatio: performance.textureRatio,
     });
-  }, [performance, rendererRef]);
+  }, [
+    performance.resolutionScale,
+    performance.meshWidth,
+    performance.meshHeight,
+    performance.textureRatio,
+    rendererRef,
+  ]);
 
   useEffect(() => {
     const renderer = rendererRef.current;

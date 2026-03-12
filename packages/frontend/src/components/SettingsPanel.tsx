@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent } from 'react';
+import { useRef, useState } from 'react';
 import { EQ_BANDS } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
@@ -196,6 +196,20 @@ function RenderingTab() {
   const setSmoothingConstant = useSettingsStore((s) => s.setSmoothingConstant);
   const setFftSize = useSettingsStore((s) => s.setFftSize);
 
+  const [fpsEditing, setFpsEditing] = useState<string | null>(null);
+  const fpsDisplayValue =
+    fpsEditing !== null ? fpsEditing : performance.fpsCap === 0 ? '' : String(performance.fpsCap);
+
+  const commitFpsInput = (raw: string) => {
+    setFpsEditing(null);
+    const val = parseInt(raw, 10);
+    if (isNaN(val) || raw === '') {
+      setFpsCap(0);
+    } else {
+      setFpsCap(val);
+    }
+  };
+
   return (
     <>
       <h3 className="text-sm font-semibold text-white">Rendering</h3>
@@ -210,15 +224,13 @@ function RenderingTab() {
           min={15}
           max={300}
           step={1}
-          value={performance.fpsCap === 0 ? '' : performance.fpsCap}
+          value={fpsDisplayValue}
           placeholder="15–300"
-          onChange={(e: ChangeEvent<HTMLInputElement>) => {
-            const val = parseInt(e.target.value, 10);
-            if (!isNaN(val)) setFpsCap(val);
-          }}
-          onBlur={(e) => {
-            const val = parseInt(e.target.value, 10);
-            if (isNaN(val) || e.target.value === '') setFpsCap(0);
+          onFocus={(e) => setFpsEditing(e.target.value)}
+          onChange={(e) => setFpsEditing(e.target.value)}
+          onBlur={(e) => commitFpsInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') commitFpsInput(fpsDisplayValue);
           }}
           className="w-[72px] rounded border border-white/10 bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/30 [appearance:textfield] focus:border-orange-500 focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         />

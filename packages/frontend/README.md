@@ -103,6 +103,6 @@ All are optional — the app runs fully without them. Spotify integration requir
 - **WebGL 2 required.** `isWebGL2Supported()` checks on mount and shows a fallback if unavailable.
 - **butterchurn is untyped** — type declarations live in `src/types/butterchurn.d.ts`.
 - **`vite.config.ts`** imports `defineConfig` from `vitest/config` (not `vite`) to support the `test` property.
-- **555+ presets** loaded from 6 butterchurn packs, organized by source pack with virtualized browsing (`react-virtuoso`). Users can import `.milk` files (lazy-loaded converter, zero main bundle impact).
-- **`secure-json-parse`** used for prototype pollution protection on all JSON import surfaces (settings import, .milk conversion).
+- **555+ presets** loaded from 6 butterchurn packs, organized by source pack with virtualized browsing (`react-virtuoso`).
+- **`secure-json-parse`** used for prototype pollution protection on settings import.
 - **Settings import sanitization** — all imported values clamped to UI-enforced ranges. Whitelisted data keys only (store functions can't be overwritten).

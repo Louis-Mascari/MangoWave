@@ -154,24 +154,31 @@ function EqualizerTab() {
         </div>
       </div>
 
-      <div className="flex w-full justify-between">
-        {EQ_BANDS.map((freq, i) => (
-          <div key={freq} className="flex flex-col items-center gap-1">
-            <input
-              type="range"
-              min="-12"
-              max="12"
-              step="1"
-              value={eq.bandGains[i]}
-              onChange={(e) => setEQBandGain(i, parseFloat(e.target.value))}
-              // @ts-expect-error - orient="vertical" is a non-standard Firefox attribute
-              orient="vertical"
-              className="h-24 accent-orange-500"
-              style={{ writingMode: 'vertical-lr', direction: 'rtl' }}
-            />
-            <span className="text-[10px] text-white/50">{formatFreq(freq)}</span>
-          </div>
-        ))}
+      <div className="flex w-full items-start">
+        <div className="flex h-24 flex-col justify-between pr-1.5 text-[10px] text-white/30">
+          <span>+12</span>
+          <span>0 dB</span>
+          <span>-12</span>
+        </div>
+        <div className="flex flex-1 justify-between">
+          {EQ_BANDS.map((freq, i) => (
+            <div key={freq} className="flex flex-col items-center gap-1">
+              <input
+                type="range"
+                min="-12"
+                max="12"
+                step="1"
+                value={eq.bandGains[i]}
+                onChange={(e) => setEQBandGain(i, parseFloat(e.target.value))}
+                // @ts-expect-error - orient="vertical" is a non-standard Firefox attribute
+                orient="vertical"
+                className="h-24 accent-orange-500"
+                style={{ writingMode: 'vertical-lr', direction: 'rtl' }}
+              />
+              <span className="text-[10px] text-white/50">{formatFreq(freq)}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </>
   );

@@ -205,36 +205,23 @@ function RenderingTab() {
           Frame Rate
           <Tooltip text="Lower frame rates reduce GPU usage" />
         </label>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setFpsCap(0)}
-            className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
-              performance.fpsCap === 0
-                ? 'bg-orange-500 text-white'
-                : 'bg-white/10 text-white/70 hover:bg-white/20'
-            }`}
-          >
-            Uncapped
-          </button>
-          {performance.fpsCap !== 0 && (
-            <input
-              type="number"
-              min={15}
-              max={300}
-              step={1}
-              value={performance.fpsCap}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                const val = parseInt(e.target.value, 10);
-                if (!isNaN(val)) setFpsCap(val);
-              }}
-              onBlur={(e) => {
-                const val = parseInt(e.target.value, 10);
-                if (isNaN(val)) setFpsCap(60);
-              }}
-              className="w-[60px] rounded border border-white/10 bg-white/10 px-2 py-1 text-xs text-white [appearance:textfield] focus:border-orange-500 focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            />
-          )}
-        </div>
+        <input
+          type="number"
+          min={15}
+          max={300}
+          step={1}
+          value={performance.fpsCap === 0 ? '' : performance.fpsCap}
+          placeholder="15–300"
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            const val = parseInt(e.target.value, 10);
+            if (!isNaN(val)) setFpsCap(val);
+          }}
+          onBlur={(e) => {
+            const val = parseInt(e.target.value, 10);
+            if (isNaN(val) || e.target.value === '') setFpsCap(0);
+          }}
+          className="w-[72px] rounded border border-white/10 bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/30 [appearance:textfield] focus:border-orange-500 focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        />
         <div className="flex gap-1.5">
           {FPS_QUICK_PICKS.map((fps) => (
             <button
@@ -249,6 +236,16 @@ function RenderingTab() {
               {fps}
             </button>
           ))}
+          <button
+            onClick={() => setFpsCap(0)}
+            className={`cursor-pointer rounded border-none px-2 py-0.5 text-[11px] ${
+              performance.fpsCap === 0
+                ? 'bg-orange-500 text-white'
+                : 'bg-white/10 text-white/70 hover:bg-white/20'
+            }`}
+          >
+            Uncapped
+          </button>
         </div>
       </div>
 

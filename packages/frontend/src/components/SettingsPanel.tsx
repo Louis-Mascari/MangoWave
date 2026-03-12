@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, type ChangeEvent } from 'react';
 import { EQ_BANDS } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
@@ -18,11 +18,7 @@ import type { ParseResult } from '../utils/settingsPortability.ts';
 
 type Tab = 'equalizer' | 'rendering' | 'presets' | 'shortcuts' | 'data' | 'spotify';
 
-const FPS_OPTIONS = [
-  { label: 'Uncapped', value: 0 },
-  { label: '60 FPS', value: 60 },
-  { label: '30 FPS', value: 30 },
-];
+const FPS_QUICK_PICKS = [30, 60, 120, 144, 240];
 
 const RESOLUTION_OPTIONS = [
   { label: '100%', value: 1.0 },
@@ -209,18 +205,48 @@ function RenderingTab() {
           Frame Rate
           <Tooltip text="Lower frame rates reduce GPU usage" />
         </label>
-        <div className="flex gap-2">
-          {FPS_OPTIONS.map((opt) => (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setFpsCap(0)}
+            className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
+              performance.fpsCap === 0
+                ? 'bg-orange-500 text-white'
+                : 'bg-white/10 text-white/70 hover:bg-white/20'
+            }`}
+          >
+            Uncapped
+          </button>
+          {performance.fpsCap !== 0 && (
+            <input
+              type="number"
+              min={15}
+              max={300}
+              step={1}
+              value={performance.fpsCap}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                const val = parseInt(e.target.value, 10);
+                if (!isNaN(val)) setFpsCap(val);
+              }}
+              onBlur={(e) => {
+                const val = parseInt(e.target.value, 10);
+                if (isNaN(val)) setFpsCap(60);
+              }}
+              className="w-[60px] rounded border border-white/10 bg-white/10 px-2 py-1 text-xs text-white [appearance:textfield] focus:border-orange-500 focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            />
+          )}
+        </div>
+        <div className="flex gap-1.5">
+          {FPS_QUICK_PICKS.map((fps) => (
             <button
-              key={opt.value}
-              onClick={() => setFpsCap(opt.value)}
-              className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
-                performance.fpsCap === opt.value
+              key={fps}
+              onClick={() => setFpsCap(fps)}
+              className={`cursor-pointer rounded border-none px-2 py-0.5 text-[11px] ${
+                performance.fpsCap === fps
                   ? 'bg-orange-500 text-white'
                   : 'bg-white/10 text-white/70 hover:bg-white/20'
               }`}
             >
-              {opt.label}
+              {fps}
             </button>
           ))}
         </div>

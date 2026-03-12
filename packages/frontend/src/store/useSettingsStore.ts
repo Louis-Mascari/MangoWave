@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { EQ_BANDS } from '../engine/AudioEngine.ts';
 
 export interface PerformanceSettings {
-  fpsCap: number; // 0 = uncapped, 30, 60
+  fpsCap: number; // 0 = uncapped, 15–300
   resolutionScale: number; // 0.25 to 1.0
   meshWidth: number; // vertex grid width for warp distortions (default 48)
   meshHeight: number; // vertex grid height for warp distortions (default 36)
@@ -128,7 +128,10 @@ export const useSettingsStore = create<SettingsState>()(
       },
       setFpsCap: (fps) =>
         set((state) => ({
-          performance: { ...state.performance, fpsCap: fps },
+          performance: {
+            ...state.performance,
+            fpsCap: fps <= 0 ? 0 : Math.round(Math.min(300, Math.max(15, fps))),
+          },
         })),
       setResolutionScale: (scale) =>
         set((state) => ({

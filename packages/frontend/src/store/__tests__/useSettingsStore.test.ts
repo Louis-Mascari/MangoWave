@@ -46,6 +46,30 @@ describe('useSettingsStore', () => {
       expect(result.current.performance.fpsCap).toBe(30);
     });
 
+    it('clamps fps cap above max to 300', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setFpsCap(999));
+      expect(result.current.performance.fpsCap).toBe(300);
+    });
+
+    it('clamps fps cap below min to 15', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setFpsCap(5));
+      expect(result.current.performance.fpsCap).toBe(15);
+    });
+
+    it('treats negative fps cap as uncapped (0)', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setFpsCap(-1));
+      expect(result.current.performance.fpsCap).toBe(0);
+    });
+
+    it('rounds fractional fps cap', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setFpsCap(59.7));
+      expect(result.current.performance.fpsCap).toBe(60);
+    });
+
     it('sets resolution scale', () => {
       const { result } = renderHook(() => useSettingsStore());
       act(() => result.current.setResolutionScale(0.5));

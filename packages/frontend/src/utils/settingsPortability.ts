@@ -149,7 +149,10 @@ function sanitizePerformance(raw: unknown): Record<string, unknown> | undefined 
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
   const p = raw as Record<string, unknown>;
   const out: Record<string, unknown> = {};
-  if ('fpsCap' in p) out.fpsCap = clamp(p.fpsCap, 0, 240, 0);
+  if ('fpsCap' in p) {
+    const clamped = Math.round(clamp(p.fpsCap, 0, 300, 0));
+    out.fpsCap = clamped > 0 && clamped < 15 ? 15 : clamped;
+  }
   if ('resolutionScale' in p) out.resolutionScale = clamp(p.resolutionScale, 0.25, 1.0, 1.0);
   if ('meshWidth' in p) out.meshWidth = clamp(p.meshWidth, 16, 128, 48);
   if ('meshHeight' in p) out.meshHeight = clamp(p.meshHeight, 12, 96, 36);

@@ -81,7 +81,7 @@ describe('buildImportPayload', () => {
     };
     const result = buildImportPayload(extreme, new Set(['rendering', 'display']));
     const perf = result.performance as unknown as Record<string, number>;
-    expect(perf.fpsCap).toBe(240);
+    expect(perf.fpsCap).toBe(300);
     expect(perf.resolutionScale).toBe(1.0);
     expect(perf.meshWidth).toBe(128);
     expect(perf.textureRatio).toBe(0.25);
@@ -131,6 +131,24 @@ describe('buildImportPayload', () => {
     };
     const result = buildImportPayload(bad, new Set(['favorites']));
     expect(result.favoritePresets).toEqual(['good', 'also good']);
+  });
+
+  it('rounds fractional fpsCap and clamps low values to 15', () => {
+    const fractional = {
+      _meta: validExport._meta,
+      performance: { fpsCap: 59.7 },
+    };
+    const result = buildImportPayload(fractional, new Set(['rendering']));
+    const perf = result.performance as unknown as Record<string, number>;
+    expect(perf.fpsCap).toBe(60);
+
+    const low = {
+      _meta: validExport._meta,
+      performance: { fpsCap: 7 },
+    };
+    const result2 = buildImportPayload(low, new Set(['rendering']));
+    const perf2 = result2.performance as unknown as Record<string, number>;
+    expect(perf2.fpsCap).toBe(15);
   });
 
   it('rejects non-object performance', () => {

@@ -10,6 +10,9 @@ describe('useSettingsStore', () => {
       result.current.resetEQ();
       result.current.setFpsCap(0);
       result.current.setResolutionScale(1.0);
+      result.current.setMeshSize(48, 36);
+      result.current.setTextureRatio(1.0);
+      result.current.setFxaa(false);
       result.current.setTransitionTime(2.0);
       result.current.setSmoothingConstant(0.3);
       result.current.setFftSize(1024);
@@ -360,6 +363,32 @@ describe('useSettingsStore', () => {
       expect(result.current.favoritePresets).toEqual(['Preset A', 'Preset B']);
       // Other settings unchanged
       expect(result.current.performance.fpsCap).toBe(0);
+    });
+
+    it('deep-merges nested objects preserving unset fields', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() =>
+        result.current.importSettings({
+          performance: { fpsCap: 30 } as typeof result.current.performance,
+        }),
+      );
+      expect(result.current.performance.fpsCap).toBe(30);
+      // Fields not in import are preserved from current state
+      expect(result.current.performance.resolutionScale).toBe(1.0);
+      expect(result.current.performance.meshWidth).toBe(48);
+      expect(result.current.performance.fxaa).toBe(false);
+    });
+
+    it('ignores non-data keys like store functions', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      const original = result.current.setVolume;
+      act(() =>
+        result.current.importSettings({
+          setVolume: 'hacked' as unknown as typeof result.current.setVolume,
+        }),
+      );
+      // Function should not be overwritten
+      expect(result.current.setVolume).toBe(original);
     });
   });
 });

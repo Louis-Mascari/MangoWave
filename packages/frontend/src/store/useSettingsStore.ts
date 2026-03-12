@@ -5,6 +5,10 @@ import { EQ_BANDS } from '../engine/AudioEngine.ts';
 export interface PerformanceSettings {
   fpsCap: number; // 0 = uncapped, 30, 60
   resolutionScale: number; // 0.25 to 1.0
+  meshWidth: number; // vertex grid width for warp distortions (default 48)
+  meshHeight: number; // vertex grid height for warp distortions (default 36)
+  textureRatio: number; // internal render resolution multiplier (default 1.0)
+  fxaa: boolean; // fast anti-aliasing on output (default false)
 }
 
 export interface EQSettings {
@@ -31,6 +35,9 @@ export interface SettingsState {
   performance: PerformanceSettings;
   setFpsCap: (fps: number) => void;
   setResolutionScale: (scale: number) => void;
+  setMeshSize: (width: number, height: number) => void;
+  setTextureRatio: (ratio: number) => void;
+  setFxaa: (enabled: boolean) => void;
 
   // EQ
   eq: EQSettings;
@@ -83,6 +90,9 @@ export interface SettingsState {
   // Volume (persisted for local file playback)
   volume: number; // 0.0 to 1.0
   setVolume: (volume: number) => void;
+
+  // Import
+  importSettings: (partial: Partial<SettingsState>) => void;
 }
 
 const DEFAULT_BAND_GAINS = EQ_BANDS.map(() => 0);
@@ -94,6 +104,10 @@ export const useSettingsStore = create<SettingsState>()(
       performance: {
         fpsCap: 0,
         resolutionScale: 1.0,
+        meshWidth: 48,
+        meshHeight: 36,
+        textureRatio: 1.0,
+        fxaa: false,
       },
       setFpsCap: (fps) =>
         set((state) => ({
@@ -102,6 +116,18 @@ export const useSettingsStore = create<SettingsState>()(
       setResolutionScale: (scale) =>
         set((state) => ({
           performance: { ...state.performance, resolutionScale: scale },
+        })),
+      setMeshSize: (width, height) =>
+        set((state) => ({
+          performance: { ...state.performance, meshWidth: width, meshHeight: height },
+        })),
+      setTextureRatio: (ratio) =>
+        set((state) => ({
+          performance: { ...state.performance, textureRatio: ratio },
+        })),
+      setFxaa: (enabled) =>
+        set((state) => ({
+          performance: { ...state.performance, fxaa: enabled },
         })),
 
       // Audio
@@ -235,12 +261,15 @@ export const useSettingsStore = create<SettingsState>()(
       // Volume
       volume: 0.5,
       setVolume: (volume) => set({ volume }),
+
+      // Import
+      importSettings: (partial) => set((state) => ({ ...state, ...partial })),
     }),
     {
       name: 'mangowave-settings',
       migrate: (persisted, version) => {
         const state = persisted as Record<string, unknown>;
-        // Migrate from favoritesOnly boolean to mode enum
+        // v0 → v1: Migrate from favoritesOnly boolean to mode enum
         if (version === 0 || version === undefined) {
           const autopilot = state.autopilot as Record<string, unknown> | undefined;
           if (autopilot && 'favoritesOnly' in autopilot) {
@@ -255,9 +284,19 @@ export const useSettingsStore = create<SettingsState>()(
             if (autopilot.mode === 'pack') autopilot.mode = 'all';
           }
         }
+        // v1 → v2: Backfill butterchurn config defaults
+        if ((version ?? 0) < 2) {
+          const perf = state.performance as Record<string, unknown> | undefined;
+          if (perf) {
+            perf.meshWidth = perf.meshWidth ?? 48;
+            perf.meshHeight = perf.meshHeight ?? 36;
+            perf.textureRatio = perf.textureRatio ?? 1.0;
+            perf.fxaa = perf.fxaa ?? false;
+          }
+        }
         return state as unknown as SettingsState;
       },
-      version: 1,
+      version: 2,
     },
   ),
 );

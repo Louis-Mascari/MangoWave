@@ -31,6 +31,10 @@ describe('useSettingsStore', () => {
       const { result } = renderHook(() => useSettingsStore());
       expect(result.current.performance.fpsCap).toBe(0);
       expect(result.current.performance.resolutionScale).toBe(1.0);
+      expect(result.current.performance.meshWidth).toBe(48);
+      expect(result.current.performance.meshHeight).toBe(36);
+      expect(result.current.performance.textureRatio).toBe(1.0);
+      expect(result.current.performance.fxaa).toBe(false);
     });
 
     it('sets fps cap', () => {
@@ -43,6 +47,25 @@ describe('useSettingsStore', () => {
       const { result } = renderHook(() => useSettingsStore());
       act(() => result.current.setResolutionScale(0.5));
       expect(result.current.performance.resolutionScale).toBe(0.5);
+    });
+
+    it('sets mesh size', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setMeshSize(64, 48));
+      expect(result.current.performance.meshWidth).toBe(64);
+      expect(result.current.performance.meshHeight).toBe(48);
+    });
+
+    it('sets texture ratio', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setTextureRatio(1.5));
+      expect(result.current.performance.textureRatio).toBe(1.5);
+    });
+
+    it('sets fxaa', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setFxaa(true));
+      expect(result.current.performance.fxaa).toBe(true);
     });
   });
 
@@ -319,6 +342,24 @@ describe('useSettingsStore', () => {
       expect(result.current.enabledPacks).toEqual(['Extra']);
       act(() => result.current.togglePack('Base'));
       expect(result.current.enabledPacks).toContain('Base');
+    });
+  });
+
+  describe('importSettings', () => {
+    it('merges partial state into store', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() =>
+        result.current.importSettings({
+          volume: 0.8,
+          transitionTime: 5.0,
+          favoritePresets: ['Preset A', 'Preset B'],
+        }),
+      );
+      expect(result.current.volume).toBe(0.8);
+      expect(result.current.transitionTime).toBe(5.0);
+      expect(result.current.favoritePresets).toEqual(['Preset A', 'Preset B']);
+      // Other settings unchanged
+      expect(result.current.performance.fpsCap).toBe(0);
     });
   });
 });

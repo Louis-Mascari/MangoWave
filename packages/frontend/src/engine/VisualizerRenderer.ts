@@ -43,6 +43,7 @@ export class VisualizerRenderer {
     audioContext: AudioContext,
     analyserNode: AnalyserNode,
     onPresetChange?: (name: string) => void,
+    opts?: { meshWidth?: number; meshHeight?: number; textureRatio?: number; fxaa?: boolean },
   ): void {
     this.onPresetChange = onPresetChange;
 
@@ -50,6 +51,10 @@ export class VisualizerRenderer {
       width: canvas.width,
       height: canvas.height,
       pixelRatio: window.devicePixelRatio || 1,
+      meshWidth: opts?.meshWidth,
+      meshHeight: opts?.meshHeight,
+      textureRatio: opts?.textureRatio,
+      outputFXAA: opts?.fxaa,
     });
 
     this.visualizer.connectAudio(analyserNode);
@@ -76,9 +81,19 @@ export class VisualizerRenderer {
     }
   }
 
-  setSize(width: number, height: number): void {
+  setSize(
+    width: number,
+    height: number,
+    opts?: { meshWidth?: number; meshHeight?: number; textureRatio?: number },
+  ): void {
     if (this.visualizer) {
-      this.visualizer.setRendererSize(width, height);
+      this.visualizer.setRendererSize(width, height, opts);
+    }
+  }
+
+  setOutputAA(useAA: boolean): void {
+    if (this.visualizer) {
+      this.visualizer.setOutputAA(useAA);
     }
   }
 

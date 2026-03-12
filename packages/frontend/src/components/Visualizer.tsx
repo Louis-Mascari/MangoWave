@@ -41,7 +41,12 @@ export function Visualizer({
     };
 
     updateSize();
-    renderer.init(canvas, ctx, analyser, onPresetChange);
+    renderer.init(canvas, ctx, analyser, onPresetChange, {
+      meshWidth: performance.meshWidth,
+      meshHeight: performance.meshHeight,
+      textureRatio: performance.textureRatio,
+      fxaa: performance.fxaa,
+    });
     renderer.start();
     onPresetsLoaded(renderer.presetList, renderer.presetPackMap);
 
@@ -73,8 +78,18 @@ export function Visualizer({
     const height = Math.floor(window.innerHeight * performance.resolutionScale);
     canvas.width = width;
     canvas.height = height;
-    renderer.setSize(width, height);
-  }, [performance.resolutionScale, rendererRef]);
+    renderer.setSize(width, height, {
+      meshWidth: performance.meshWidth,
+      meshHeight: performance.meshHeight,
+      textureRatio: performance.textureRatio,
+    });
+  }, [performance, rendererRef]);
+
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    if (!renderer) return;
+    renderer.setOutputAA(performance.fxaa);
+  }, [performance.fxaa, rendererRef]);
 
   // Sync audio settings to engine
   useEffect(() => {

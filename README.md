@@ -29,7 +29,8 @@
 - **Keyboard shortcuts** for preset navigation, fullscreen, favorites, and more
 - **Mobile-optimized UI** with radial FAB menu and full-screen modal panels
 - **Optional Spotify integration** for Now Playing metadata and playback controls (bring your own Client ID via PKCE — Spotify limits each app key to 5 users)
-- **Configurable performance** — FPS cap, resolution scaling, FFT size, smoothing
+- **Visual quality controls** — mesh resolution, texture quality, FXAA anti-aliasing, plus FPS cap, resolution scaling, FFT size, smoothing
+- **Settings export/import** — transfer settings between browsers or devices via JSON file
 - **Zero install** — runs entirely in the browser, no extensions needed
 
 ## Architecture

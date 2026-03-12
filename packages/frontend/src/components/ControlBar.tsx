@@ -117,7 +117,7 @@ function DesktopControlBar({
     >
       {activePanel !== 'none' && (
         <div
-          className={`mx-4 mb-2 lg:max-w-[36%] ${
+          className={`mx-4 mb-2 lg:max-w-[42%] ${
             activePanel === 'settings'
               ? 'lg:ml-auto'
               : activePanel === 'playlist'

@@ -37,7 +37,7 @@ Key details:
 
 ```
 src/
-├── components/    # UI: ControlBar, SettingsPanel (tabbed: EQ/Performance/Shortcuts/Spotify),
+├── components/    # UI: ControlBar, SettingsPanel (tabbed: EQ/Rendering/Presets/Shortcuts/Data/Spotify),
 │                  #     PresetBrowser, MediaPlaylist, NowPlaying, StartScreen, etc.
 ├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (butterchurn),
 │                  # isWebGL2Supported
@@ -48,7 +48,7 @@ src/
 ├── services/      # Spotify Web API client, PKCE auth utilities
 ├── store/         # Zustand stores: useSettingsStore, useSpotifyStore, useMediaPlayerStore,
 │                  #     usePresetHistoryStore, useToastStore
-├── utils/         # Shared utilities (isMobileDevice)
+├── utils/         # Shared utilities (isMobileDevice, settingsPortability)
 ├── types/         # butterchurn.d.ts (type declarations for untyped packages)
 └── test/          # Vitest global setup
 ```
@@ -57,21 +57,21 @@ src/
 
 Zustand with `localStorage` persistence. Key sections:
 
-| Section               | Fields                                          | Defaults              |
-| --------------------- | ----------------------------------------------- | --------------------- |
-| `performance`         | `fpsCap`, `resolutionScale`                     | 0 (uncapped), 1.0     |
-| `audio`               | `smoothingConstant`, `fftSize`                  | 0.3, 1024             |
-| `autopilot`           | `enabled`, `interval`, `mode`, `favoriteWeight` | true, 15s, `'all'`, 2 |
-| `eq`                  | `preAmpGain`, `bandGains[10]`                   | 1.0, all 0dB          |
-| `blockedPresets`      | string[]                                        | []                    |
-| `favoritePresets`     | string[]                                        | []                    |
-| `presetNameDisplay`   | `'off' \| 'always' \| number`                   | 5                     |
-| `songInfoDisplay`     | `'off' \| 'always' \| number`                   | 5                     |
-| `transitionTime`      | number (seconds)                                | 2.0                   |
-| `volume`              | number (0.0–1.0)                                | 0.5                   |
-| `enabledPacks`        | string[]                                        | all packs             |
-| `showQuarantined`     | boolean                                         | false                 |
-| `quarantineOverrides` | string[]                                        | []                    |
+| Section               | Fields                                                                         | Defaults                              |
+| --------------------- | ------------------------------------------------------------------------------ | ------------------------------------- |
+| `performance`         | `fpsCap`, `resolutionScale`, `meshWidth`, `meshHeight`, `textureRatio`, `fxaa` | 0 (uncapped), 1.0, 48, 36, 1.0, false |
+| `audio`               | `smoothingConstant`, `fftSize`                                                 | 0.3, 1024                             |
+| `autopilot`           | `enabled`, `interval`, `mode`, `favoriteWeight`                                | true, 15s, `'all'`, 2                 |
+| `eq`                  | `preAmpGain`, `bandGains[10]`                                                  | 1.0, all 0dB                          |
+| `blockedPresets`      | string[]                                                                       | []                                    |
+| `favoritePresets`     | string[]                                                                       | []                                    |
+| `presetNameDisplay`   | `'off' \| 'always' \| number`                                                  | 5                                     |
+| `songInfoDisplay`     | `'off' \| 'always' \| number`                                                  | 5                                     |
+| `transitionTime`      | number (seconds)                                                               | 2.0                                   |
+| `volume`              | number (0.0–1.0)                                                               | 0.5                                   |
+| `enabledPacks`        | string[]                                                                       | all packs                             |
+| `showQuarantined`     | boolean                                                                        | false                                 |
+| `quarantineOverrides` | string[]                                                                       | []                                    |
 
 Blocked and favorited presets are mutually exclusive.
 

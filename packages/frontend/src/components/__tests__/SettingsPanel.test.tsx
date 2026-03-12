@@ -10,40 +10,46 @@ describe('SettingsPanel', () => {
     expect(screen.getByText('Pre-Amp')).toBeInTheDocument();
   });
 
-  it('switches to Performance tab', async () => {
+  it('switches to Rendering tab', async () => {
     const user = userEvent.setup();
     render(<SettingsPanel />);
 
-    await user.click(screen.getByRole('button', { name: 'Performance' }));
+    await user.click(screen.getByRole('button', { name: 'Rendering' }));
 
     expect(screen.getByText('Frame Rate')).toBeInTheDocument();
     expect(screen.getByText('Resolution')).toBeInTheDocument();
   });
 
-  it('shows Song Info Display on Performance tab', async () => {
+  it('shows butterchurn config controls on Rendering tab', async () => {
     const user = userEvent.setup();
     render(<SettingsPanel />);
 
-    await user.click(screen.getByRole('button', { name: 'Performance' }));
+    await user.click(screen.getByRole('button', { name: 'Rendering' }));
 
-    expect(screen.getByText('Song Info Display')).toBeInTheDocument();
+    expect(screen.getByText('Mesh Resolution')).toBeInTheDocument();
+    expect(screen.getByText('Texture Quality')).toBeInTheDocument();
+    expect(screen.getByText('Anti-Aliasing')).toBeInTheDocument();
   });
 
-  it('shows Preset Name Display on Performance tab', async () => {
+  it('shows Analysis section on Rendering tab', async () => {
     const user = userEvent.setup();
     render(<SettingsPanel />);
 
-    await user.click(screen.getByRole('button', { name: 'Performance' }));
+    await user.click(screen.getByRole('button', { name: 'Rendering' }));
 
+    expect(screen.getByText('Analysis')).toBeInTheDocument();
+    expect(screen.getByText('FFT Size')).toBeInTheDocument();
+  });
+
+  it('shows Presets tab with Transition Time, Display, and Autopilot', async () => {
+    const user = userEvent.setup();
+    render(<SettingsPanel />);
+
+    await user.click(screen.getByRole('button', { name: 'Presets' }));
+
+    expect(screen.getByText(/Transition Time/)).toBeInTheDocument();
     expect(screen.getByText('Preset Name Display')).toBeInTheDocument();
-  });
-
-  it('shows Autopilot section on Performance tab', async () => {
-    const user = userEvent.setup();
-    render(<SettingsPanel />);
-
-    await user.click(screen.getByRole('button', { name: 'Performance' }));
-
+    expect(screen.getByText('Song Info Display')).toBeInTheDocument();
     expect(screen.getByText('Autopilot')).toBeInTheDocument();
   });
 
@@ -51,7 +57,7 @@ describe('SettingsPanel', () => {
     const user = userEvent.setup();
     render(<SettingsPanel />);
 
-    await user.click(screen.getByRole('button', { name: 'Performance' }));
+    await user.click(screen.getByRole('button', { name: 'Rendering' }));
     expect(screen.getByText('Frame Rate')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Equalizer' }));
@@ -68,5 +74,33 @@ describe('SettingsPanel', () => {
     expect(screen.getByText('Space / N')).toBeInTheDocument();
     expect(screen.getByText('Next preset')).toBeInTheDocument();
     expect(screen.getByText('Double-click')).toBeInTheDocument();
+  });
+
+  it('shows Data tab with export and import', async () => {
+    const user = userEvent.setup();
+    render(<SettingsPanel />);
+
+    await user.click(screen.getByRole('button', { name: 'Data' }));
+
+    expect(screen.getByText('Data', { selector: 'h3' })).toBeInTheDocument();
+    expect(screen.getByText('Export')).toBeInTheDocument();
+    expect(screen.getByText('Export Settings')).toBeInTheDocument();
+    expect(screen.getByText('Import Settings')).toBeInTheDocument();
+  });
+
+  it('shows all 8 export category checkboxes on Data tab', async () => {
+    const user = userEvent.setup();
+    render(<SettingsPanel />);
+
+    await user.click(screen.getByRole('button', { name: 'Data' }));
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    expect(checkboxes).toHaveLength(8);
+    expect(screen.getByText('Audio Analysis')).toBeInTheDocument();
+    expect(screen.getByText('EQ')).toBeInTheDocument();
+    expect(screen.getByText('Display')).toBeInTheDocument();
+    expect(screen.getByText('Favorites')).toBeInTheDocument();
+    expect(screen.getByText('Blocked Presets')).toBeInTheDocument();
+    expect(screen.getByText('Pack Settings')).toBeInTheDocument();
   });
 });

@@ -135,32 +135,14 @@ function EqualizerTab() {
         </button>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label className="flex items-center text-xs text-white/60">
-          Pre-Amp
-          <Tooltip text="Scales the overall signal — higher makes visuals more reactive, lower calms them. Purely visual, does not affect audio output" />
-        </label>
-        <div className="flex items-center gap-2">
-          <input
-            type="range"
-            min="0"
-            max="3"
-            step="0.1"
-            value={eq.preAmpGain}
-            onChange={(e) => setPreAmpGain(parseFloat(e.target.value))}
-            className="flex-1 accent-orange-500"
-          />
-          <span className="w-8 text-right text-xs text-white/50">{eq.preAmpGain.toFixed(1)}x</span>
-        </div>
-      </div>
-
       <div className="flex w-full items-start">
         <div className="flex h-24 flex-col justify-between pr-1.5 text-[10px] text-white/30">
           <span>+12</span>
           <span>0 dB</span>
           <span>-12</span>
         </div>
-        <div className="flex flex-1 justify-between">
+        <div className="relative flex flex-1 justify-between">
+          <div className="pointer-events-none absolute left-0 right-0 top-1/2 border-t border-dashed border-white/15" />
           {EQ_BANDS.map((freq, i) => (
             <div key={freq} className="flex flex-col items-center gap-1">
               <input
@@ -178,6 +160,29 @@ function EqualizerTab() {
               <span className="text-[10px] text-white/50">{formatFreq(freq)}</span>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="mt-1 border-t border-white/10 pt-3">
+        <div className="flex flex-col gap-1">
+          <label className="flex items-center text-xs text-white/60">
+            Pre-Amp
+            <Tooltip text="Scales the overall signal — higher makes visuals more reactive, lower calms them. Purely visual, does not affect audio output" />
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              type="range"
+              min="0"
+              max="3"
+              step="0.1"
+              value={eq.preAmpGain}
+              onChange={(e) => setPreAmpGain(parseFloat(e.target.value))}
+              className="flex-1 accent-orange-500"
+            />
+            <span className="w-8 text-right text-xs text-white/50">
+              {eq.preAmpGain.toFixed(1)}x
+            </span>
+          </div>
         </div>
       </div>
     </>

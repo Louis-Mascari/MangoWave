@@ -20,6 +20,12 @@ export interface SessionRecord {
   refreshToken: string;
 }
 
+const SESSION_TTL_SECONDS = 90 * 24 * 60 * 60; // 90 days
+
+function ttlEpoch(): number {
+  return Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS;
+}
+
 export async function storeSession(
   sessionId: string,
   spotifyUserId: string,
@@ -34,6 +40,7 @@ export async function storeSession(
         spotifyUserId,
         refreshToken,
         createdAt: new Date().toISOString(),
+        ttl: ttlEpoch(),
       },
     }),
   );
@@ -66,10 +73,14 @@ export async function updateSessionToken(sessionId: string, refreshToken: string
         PK: `SESSION#${sessionId}`,
         SK: 'AUTH',
       },
-      UpdateExpression: 'SET refreshToken = :rt, updatedAt = :ua',
+      UpdateExpression: 'SET refreshToken = :rt, updatedAt = :ua, #ttl = :ttl',
+      ExpressionAttributeNames: {
+        '#ttl': 'ttl',
+      },
       ExpressionAttributeValues: {
         ':rt': refreshToken,
         ':ua': new Date().toISOString(),
+        ':ttl': ttlEpoch(),
       },
     }),
   );

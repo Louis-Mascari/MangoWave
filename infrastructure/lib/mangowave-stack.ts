@@ -38,6 +38,7 @@ export class MangoWaveStack extends cdk.Stack {
       sortKey: { name: 'SK', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
+      timeToLiveAttribute: 'ttl',
     });
 
     // ─── S3 bucket (frontend assets) ──────────────────────────
@@ -150,7 +151,13 @@ export class MangoWaveStack extends cdk.Stack {
 
     // Grant DynamoDB access to all functions
     table.grantReadWriteData(authCallbackFn);
-    table.grantReadWriteData(authRefreshFn);
+    // authRefreshFn only reads sessions and updates tokens — no PutItem/DeleteItem needed
+    authRefreshFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['dynamodb:GetItem', 'dynamodb:UpdateItem'],
+        resources: [table.tableArn],
+      }),
+    );
     table.grantReadWriteData(settingsSaveFn);
     table.grantReadData(settingsLoadFn);
 

@@ -41,7 +41,7 @@ src/
 │                  #     PresetBrowser, MediaPlaylist, NowPlaying, PlaybackPanel, StartScreen, etc.
 ├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (butterchurn),
 │                  # isWebGL2Supported
-├── data/          # quarantined-presets.json
+├── data/          # quarantined-presets.json, mobile-safe-presets.json
 ├── constants/     # shortcuts.ts (keyboard/mouse shortcut definitions)
 ├── hooks/         # useAudioCapture, useLocalPlayback, useAutopilot, useKeyboardShortcuts,
 │                  # useIdleTimer, useHideCursor, useFullscreen, useSpotifyAuth, useNowPlaying,

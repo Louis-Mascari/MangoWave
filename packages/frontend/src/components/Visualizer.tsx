@@ -6,6 +6,8 @@ import quarantinedData from '../data/quarantined-presets.json';
 import mobileSafeData from '../data/mobile-safe-presets.json';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 
+const mobileSafeSet = new Set(mobileSafeData.presets as string[]);
+
 interface VisualizerProps {
   audioEngine: AudioEngine;
   rendererRef: React.RefObject<VisualizerRenderer | null>;
@@ -52,8 +54,6 @@ export function Visualizer({
     for (const name of quarantinedData.presets as string[]) {
       if (!overrideSet.has(name)) excludedPresets.add(name);
     }
-
-    const mobileSafeSet = new Set(mobileSafeData.presets as string[]);
 
     renderer.init(canvas, ctx, analyser, onPresetChange, {
       meshWidth: performance.meshWidth,

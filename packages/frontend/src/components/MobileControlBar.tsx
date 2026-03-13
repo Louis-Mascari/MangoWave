@@ -161,23 +161,15 @@ export function MobileControlBar({
     [popHistory, openModal],
   );
 
+  // Radial items: clockwise from top, preset actions on left half, app actions on right half
   const radialItems = [
+    // Top: primary action
     {
       label: 'Presets',
       icon: 'P',
       action: () => menuToModal('presets'),
     },
-    {
-      label: 'Previous',
-      icon: '◀',
-      action: () => {
-        onPreviousPreset?.();
-        closeMenu();
-        forceIdle();
-        onForcePlaybackIdle?.();
-      },
-      disabled: !canGoBack,
-    },
+    // Upper-right → lower-right: navigation + app actions
     {
       label: 'Next',
       icon: '▶',
@@ -204,6 +196,16 @@ export function MobileControlBar({
       icon: '⚙',
       action: () => menuToModal('settings'),
     },
+    // Bottom: exit
+    {
+      label: 'Exit',
+      icon: '✕',
+      action: () => {
+        onStop();
+        closeMenu();
+      },
+    },
+    // Lower-left → upper-left: app + preset actions
     {
       label: isFullscreen ? 'Exit FS' : 'Fullscreen',
       icon: '⛶',
@@ -214,18 +216,6 @@ export function MobileControlBar({
         onForcePlaybackIdle?.();
       },
       active: isFullscreen,
-    },
-    {
-      label: isFavorite ? 'Unfavorite' : 'Favorite',
-      icon: '★',
-      action: () => {
-        onToggleFavorite();
-        closeMenu();
-        forceIdle();
-        onForcePlaybackIdle?.();
-      },
-      active: isFavorite,
-      activeColor: 'yellow' as const,
     },
     {
       label: isBlocked ? 'Unblock' : 'Block',
@@ -240,23 +230,33 @@ export function MobileControlBar({
       activeColor: 'red' as const,
     },
     {
-      label: 'Exit',
-      icon: '✕',
+      label: 'Previous',
+      icon: '◀',
       action: () => {
-        onStop();
+        onPreviousPreset?.();
         closeMenu();
+        forceIdle();
+        onForcePlaybackIdle?.();
       },
+      disabled: !canGoBack,
+    },
+    {
+      label: isFavorite ? 'Unfavorite' : 'Favorite',
+      icon: '★',
+      action: () => {
+        onToggleFavorite();
+        closeMenu();
+        forceIdle();
+        onForcePlaybackIdle?.();
+      },
+      active: isFavorite,
+      activeColor: 'yellow' as const,
     },
   ];
 
-  // Radial layout: items fan out in a 140° arc above the centered FAB
+  // Radial layout: 360° circle, items evenly spaced starting from top (90°) going clockwise
   const itemCount = radialItems.length;
-  const radius = 130;
-  // Standard math angles: 0°=right, 90°=up, 180°=left
-  // CSS mapping: positive sin → positive `bottom` (upward), positive cos → positive `right` (leftward)
-  // Arc from 20° (upper-right) to 160° (upper-left) gives a wide symmetric spread above the FAB
-  const startAngle = 20;
-  const endAngle = 160;
+  const radius = 110;
 
   // FAB size (px) — used for centering items relative to hub
   const fabSize = 56; // h-14 w-14
@@ -268,19 +268,19 @@ export function MobileControlBar({
       {/* Backdrop overlay when menu is open */}
       {menuOpen && <div className="fixed inset-0 z-[54] bg-black/30" onClick={closeMenu} />}
 
-      {/* FAB hub — slides from bottom-right to bottom-center when open */}
+      {/* FAB hub — slides from bottom-right to center when open */}
       <div
         className="fixed z-[55] transition-all duration-400"
         style={{
-          bottom: '16px',
+          bottom: menuOpen ? `calc(50% - ${fabSize / 2}px)` : '16px',
           right: menuOpen ? `calc(50% - ${fabSize / 2}px)` : '16px',
         }}
       >
         {/* Radial menu items (positioned relative to FAB center) */}
         {radialItems.map((item, i) => {
-          const angle = startAngle + (i * (endAngle - startAngle)) / (itemCount - 1);
+          // 360° circle starting at 90° (top), going clockwise
+          const angle = 90 - (i * 360) / itemCount;
           const rad = (angle * Math.PI) / 180;
-          // x/y offsets from FAB center
           const dx = Math.cos(rad) * radius;
           const dy = Math.sin(rad) * radius;
 
@@ -309,9 +309,9 @@ export function MobileControlBar({
                     : 'cursor-pointer bg-white/15 text-white/80 backdrop-blur-sm'
               }`}
               style={{
-                // Position relative to FAB's top-left corner, centered on FAB center
+                // Position relative to FAB center: cos→horizontal, sin→vertical
                 bottom: `${dy + itemOffset}px`,
-                right: `${dx + itemOffset}px`,
+                left: `${-dx + itemOffset}px`,
                 transitionDelay: menuOpen ? `${i * 40}ms` : '0ms',
                 transitionDuration: '250ms',
               }}

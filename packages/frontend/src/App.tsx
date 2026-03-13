@@ -305,7 +305,9 @@ function MainApp() {
   }, [songInfoDisplay, setSongInfoDisplay]);
 
   const handleToggleAutopilot = useCallback(() => {
-    setAutopilotEnabled(!autopilot.enabled);
+    const next = !autopilot.enabled;
+    setAutopilotEnabled(next);
+    useToastStore.getState().show(next ? 'Autopilot on' : 'Autopilot off');
   }, [autopilot.enabled, setAutopilotEnabled]);
 
   const handleTogglePanel = useCallback((panel: PanelView) => {

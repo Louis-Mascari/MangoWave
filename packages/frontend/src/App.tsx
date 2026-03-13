@@ -39,9 +39,11 @@ import { MediaPlaylist } from './components/MediaPlaylist.tsx';
 import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
 import { isMobileDevice } from './utils/isMobileDevice.ts';
 import quarantinedData from './data/quarantined-presets.json';
+import mobileSafeData from './data/mobile-safe-presets.json';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
 
 const quarantinedSet = new Set(quarantinedData.presets as string[]);
+const mobileSafeSet = new Set(mobileSafeData.presets as string[]);
 
 /**
  * Minimal shell for OAuth popup callbacks.
@@ -212,6 +214,11 @@ function MainApp() {
       pool = []; // Packs initialized but none enabled
     } else {
       pool = allPresets.filter((p) => !mergedBlockedSet.has(p));
+    }
+
+    // On mobile, restrict to safe presets if the allowlist is populated
+    if (isMobileDevice && mobileSafeSet.size > 0) {
+      pool = pool.filter((p) => mobileSafeSet.has(p));
     }
 
     if (pool.length === 0) return;
@@ -560,6 +567,9 @@ function MainApp() {
     handleSpotifyCycleRepeat,
   ]);
 
+  // Whether the PlaybackPanel is visible (local or Spotify source)
+  const hasPlaybackPanel = local.isActive || (isSpotifyConnected && !premiumError);
+
   const nowPlayingTrack: NowPlayingTrackInfo | null = useMemo(() => {
     if (local.isActive && localCurrentTrack) {
       return {
@@ -692,6 +702,7 @@ function MainApp() {
                 onClearPlaylist={local.clearQueue}
                 onMobileMenuChange={setMobileMenuOpen}
                 onForcePlaybackIdle={forcePlaybackIdle}
+                hasPlaybackPanel={hasPlaybackPanel}
               />
               <PlaybackPanel
                 adapter={playbackAdapter}

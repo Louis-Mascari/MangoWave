@@ -30,6 +30,7 @@ interface ControlBarProps {
   onClearPlaylist?: () => void;
   onMobileMenuChange?: (open: boolean) => void;
   onForcePlaybackIdle?: () => void;
+  hasPlaybackPanel?: boolean;
 }
 
 export function ControlBar(props: ControlBarProps) {
@@ -57,6 +58,7 @@ export function ControlBar(props: ControlBarProps) {
         onToggleBlock={props.onToggleBlock}
         onMenuOpenChange={props.onMobileMenuChange}
         onForcePlaybackIdle={props.onForcePlaybackIdle}
+        hasPlaybackPanel={props.hasPlaybackPanel}
       />
     </>
   );

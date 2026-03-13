@@ -49,6 +49,7 @@ export class VisualizerRenderer {
       textureRatio?: number;
       fxaa?: boolean;
       excludedPresets?: Set<string>;
+      mobileSafePresets?: Set<string>;
     },
   ): void {
     this.onPresetChange = onPresetChange;
@@ -81,9 +82,14 @@ export class VisualizerRenderer {
     // Load a random initial preset, filtering out excluded presets
     if (this.presetKeys.length > 0) {
       const excluded = opts?.excludedPresets;
-      const candidates = excluded?.size
+      const mobileSafe = opts?.mobileSafePresets;
+      let candidates = excluded?.size
         ? this.presetKeys.filter((k) => !excluded.has(k))
         : this.presetKeys;
+      // On mobile, restrict to safe presets if the allowlist is populated
+      if (mobileSafe?.size) {
+        candidates = candidates.filter((k) => mobileSafe.has(k));
+      }
       const pool = candidates.length > 0 ? candidates : this.presetKeys;
       const presetName = pool[Math.floor(Math.random() * pool.length)];
       this.currentPresetIndex = this.presetKeys.indexOf(presetName);

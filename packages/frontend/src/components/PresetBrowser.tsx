@@ -5,6 +5,8 @@ import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { usePresetHistoryStore } from '../store/usePresetHistoryStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import quarantinedData from '../data/quarantined-presets.json';
+import mobileSafeData from '../data/mobile-safe-presets.json';
+import { isMobileDevice } from '../utils/isMobileDevice.ts';
 
 type FilterTab = 'all' | 'favorites' | 'blocked' | 'quarantined' | 'history';
 
@@ -17,6 +19,11 @@ interface PresetBrowserProps {
 }
 
 const quarantinedSet = new Set(quarantinedData.presets as string[]);
+const mobileSafeSet = new Set(mobileSafeData.presets as string[]);
+
+function isMobileUnsafe(name: string): boolean {
+  return isMobileDevice && mobileSafeSet.size > 0 && !mobileSafeSet.has(name);
+}
 
 function getAllBuiltinPacks(packMap: Map<string, string>): string[] {
   const packs = new Set<string>();
@@ -32,6 +39,7 @@ function PresetRow({
   isFavorite,
   isBlocked,
   isQuarantined,
+  mobileUnsafe,
   onSelect,
   onToggleFavorite,
   onToggleBlock,
@@ -42,6 +50,7 @@ function PresetRow({
   isFavorite: boolean;
   isBlocked: boolean;
   isQuarantined: boolean;
+  mobileUnsafe: boolean;
   onSelect: () => void;
   onToggleFavorite: () => void;
   onToggleBlock: () => void;
@@ -51,13 +60,22 @@ function PresetRow({
     <div
       onClick={onSelect}
       className={`flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs ${
-        isCurrent ? 'bg-orange-500/30 text-white' : 'text-white/70 hover:bg-white/10'
+        isCurrent
+          ? 'bg-orange-500/30 text-white'
+          : mobileUnsafe
+            ? 'text-white/30 hover:bg-white/10'
+            : 'text-white/70 hover:bg-white/10'
       }`}
     >
       <span className="min-w-0 flex-1 truncate text-left">
         {isQuarantined && (
           <span className="mr-1 text-yellow-500/60" title="Quarantined">
             !
+          </span>
+        )}
+        {mobileUnsafe && (
+          <span className="mr-1 text-orange-400/60" title="May freeze on mobile">
+            ⚠
           </span>
         )}
         {name}
@@ -193,6 +211,7 @@ export function PresetBrowser({
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
   const [collapsedPacks, setCollapsedPacks] = useState<Set<string>>(new Set());
+  const [confirmPreset, setConfirmPreset] = useState<string | null>(null);
 
   const blockedSet = useMemo(() => new Set(blockedPresets), [blockedPresets]);
   const favoriteSet = useMemo(() => new Set(favoritePresets), [favoritePresets]);
@@ -364,6 +383,28 @@ export function PresetBrowser({
     });
   }, []);
 
+  const handleSelectPreset = useCallback(
+    (name: string) => {
+      if (isMobileUnsafe(name)) {
+        setConfirmPreset(name);
+      } else {
+        onSelectPreset(name);
+      }
+    },
+    [onSelectPreset],
+  );
+
+  const handleConfirmLoad = useCallback(() => {
+    if (confirmPreset) {
+      onSelectPreset(confirmPreset);
+      setConfirmPreset(null);
+    }
+  }, [confirmPreset, onSelectPreset]);
+
+  const handleCancelLoad = useCallback(() => {
+    setConfirmPreset(null);
+  }, []);
+
   const handleSelectAll = useCallback(() => {
     setEnabledPacks(allPacks);
   }, [allPacks, setEnabledPacks]);
@@ -441,7 +482,8 @@ export function PresetBrowser({
                 isFavorite={favoriteSet.has(name)}
                 isBlocked={blockedSet.has(name)}
                 isQuarantined={quarantinedSet.has(name)}
-                onSelect={() => onSelectPreset(name)}
+                mobileUnsafe={isMobileUnsafe(name)}
+                onSelect={() => handleSelectPreset(name)}
                 onToggleFavorite={() => handleToggleFavorite(name)}
                 onToggleBlock={() => handleToggleBlock(name)}
                 onUnquarantine={() => handleUnquarantine(name)}
@@ -466,7 +508,8 @@ export function PresetBrowser({
           isFavorite={favoriteSet.has(name)}
           isBlocked={blockedSet.has(name)}
           isQuarantined={quarantinedSet.has(name)}
-          onSelect={() => onSelectPreset(name)}
+          mobileUnsafe={isMobileUnsafe(name)}
+          onSelect={() => handleSelectPreset(name)}
           onToggleFavorite={() => handleToggleFavorite(name)}
           onToggleBlock={() => handleToggleBlock(name)}
           onUnquarantine={() => handleUnquarantine(name)}
@@ -487,7 +530,7 @@ export function PresetBrowser({
           name={name}
           isFavorite={favoriteSet.has(name)}
           isBlocked={blockedSet.has(name)}
-          onSelect={() => onSelectPreset(name)}
+          onSelect={() => handleSelectPreset(name)}
           onToggleFavorite={() => handleToggleFavorite(name)}
           onToggleBlock={() => handleToggleBlock(name)}
         />
@@ -508,7 +551,7 @@ export function PresetBrowser({
       {filteredPresets.map((name) => (
         <div
           key={name}
-          onClick={() => onSelectPreset(name)}
+          onClick={() => handleSelectPreset(name)}
           className="flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs text-white/70 hover:bg-white/10"
         >
           <span className="min-w-0 flex-1 truncate text-left">{name}</span>
@@ -581,6 +624,29 @@ export function PresetBrowser({
       {filter === 'history' && renderHistory()}
       {(filter === 'favorites' || filter === 'blocked' || (deferredSearch && filter === 'all')) &&
         renderFlatList()}
+
+      {/* Mobile-unsafe preset confirmation */}
+      {confirmPreset && (
+        <div className="absolute inset-x-0 bottom-0 z-10 rounded-b-lg bg-black/90 px-4 py-3 backdrop-blur-sm">
+          <p className="mb-2 text-xs text-orange-300">
+            May freeze on mobile. Load &ldquo;{confirmPreset}&rdquo; anyway?
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={handleConfirmLoad}
+              className="cursor-pointer rounded border-none bg-orange-500 px-3 py-1 text-xs font-medium text-white hover:bg-orange-600"
+            >
+              Load
+            </button>
+            <button
+              onClick={handleCancelLoad}
+              className="cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

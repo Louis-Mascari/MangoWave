@@ -80,6 +80,56 @@ describe('VisualizerRenderer', () => {
       expect(packMap.get('Preset B')).toBe('Base');
       expect(packMap.get('Preset C')).toBe('Base');
     });
+
+    it('filters initial preset to mobile-safe set when provided', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      const onPresetChange = vi.fn();
+
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode, onPresetChange, {
+        mobileSafePresets: new Set(['Preset B']),
+      });
+
+      expect(renderer.currentPresetName).toBe('Preset B');
+      expect(onPresetChange).toHaveBeenCalledWith('Preset B');
+    });
+
+    it('falls back to all presets when mobile-safe set excludes everything', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      const onPresetChange = vi.fn();
+
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode, onPresetChange, {
+        mobileSafePresets: new Set(['NonexistentPreset']),
+      });
+
+      // Should fall back to full list since no candidates matched
+      expect(renderer.currentPresetName).toBe('Preset A');
+      expect(onPresetChange).toHaveBeenCalledWith('Preset A');
+    });
+
+    it('bypasses mobile-safe filtering when set is empty', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      const onPresetChange = vi.fn();
+
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode, onPresetChange, {
+        mobileSafePresets: new Set(),
+      });
+
+      // Empty set = no filtering, picks first (Math.random mocked to 0)
+      expect(renderer.currentPresetName).toBe('Preset A');
+    });
+
+    it('combines excludedPresets and mobileSafePresets', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      const onPresetChange = vi.fn();
+
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode, onPresetChange, {
+        excludedPresets: new Set(['Preset B']),
+        mobileSafePresets: new Set(['Preset B', 'Preset C']),
+      });
+
+      // Preset B is excluded, Preset C is safe → picks Preset C
+      expect(renderer.currentPresetName).toBe('Preset C');
+    });
   });
 
   describe('nextPreset', () => {

@@ -3,6 +3,8 @@ import { VisualizerRenderer } from '../engine/VisualizerRenderer.ts';
 import type { AudioEngine } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import quarantinedData from '../data/quarantined-presets.json';
+import mobileSafeData from '../data/mobile-safe-presets.json';
+import { isMobileDevice } from '../utils/isMobileDevice.ts';
 
 interface VisualizerProps {
   audioEngine: AudioEngine;
@@ -51,12 +53,15 @@ export function Visualizer({
       if (!overrideSet.has(name)) excludedPresets.add(name);
     }
 
+    const mobileSafeSet = new Set(mobileSafeData.presets as string[]);
+
     renderer.init(canvas, ctx, analyser, onPresetChange, {
       meshWidth: performance.meshWidth,
       meshHeight: performance.meshHeight,
       textureRatio: performance.textureRatio,
       fxaa: performance.fxaa,
       excludedPresets,
+      mobileSafePresets: isMobileDevice && mobileSafeSet.size > 0 ? mobileSafeSet : undefined,
     });
     renderer.start();
     onPresetsLoaded(renderer.presetList, renderer.presetPackMap);

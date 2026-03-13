@@ -29,6 +29,7 @@ interface MobileControlBarProps {
   onToggleBlock: () => void;
   onMenuOpenChange?: (open: boolean) => void;
   onForcePlaybackIdle?: () => void;
+  hasPlaybackPanel?: boolean;
 }
 
 export function MobileControlBar({
@@ -52,6 +53,7 @@ export function MobileControlBar({
   onToggleBlock,
   onMenuOpenChange,
   onForcePlaybackIdle,
+  hasPlaybackPanel,
 }: MobileControlBarProps) {
   const { isIdle, forceIdle } = useIdleTimer(5000, 5000);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -270,7 +272,7 @@ export function MobileControlBar({
       <div
         className="fixed z-[55] transition-all duration-400"
         style={{
-          bottom: menuOpen ? `calc(50% - ${fabSize / 2}px)` : '16px',
+          bottom: menuOpen ? `calc(50% - ${fabSize / 2}px)` : hasPlaybackPanel ? '170px' : '16px',
           right: menuOpen ? `calc(50% - ${fabSize / 2}px)` : '16px',
         }}
       >

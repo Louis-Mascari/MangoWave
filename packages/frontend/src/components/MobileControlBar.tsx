@@ -161,15 +161,15 @@ export function MobileControlBar({
     [popHistory, openModal],
   );
 
-  // Radial items: clockwise from top, preset actions on left half, app actions on right half
+  // Radial items clockwise from 12 o'clock:
+  // Top half (preset): Block(10), Previous(11), Presets(12), Next(1), Favorite(2)
+  // Bottom half (app): Autopilot(3), Settings(4), Exit(6), Fullscreen(8)
   const radialItems = [
-    // Top: primary action
     {
       label: 'Presets',
       icon: 'P',
       action: () => menuToModal('presets'),
     },
-    // Upper-right → lower-right: navigation + app actions
     {
       label: 'Next',
       icon: '▶',
@@ -179,6 +179,18 @@ export function MobileControlBar({
         forceIdle();
         onForcePlaybackIdle?.();
       },
+    },
+    {
+      label: isFavorite ? 'Unfavorite' : 'Favorite',
+      icon: '★',
+      action: () => {
+        onToggleFavorite();
+        closeMenu();
+        forceIdle();
+        onForcePlaybackIdle?.();
+      },
+      active: isFavorite,
+      activeColor: 'yellow' as const,
     },
     {
       label: 'Autopilot',
@@ -196,7 +208,6 @@ export function MobileControlBar({
       icon: '⚙',
       action: () => menuToModal('settings'),
     },
-    // Bottom: exit
     {
       label: 'Exit',
       icon: '✕',
@@ -205,7 +216,6 @@ export function MobileControlBar({
         closeMenu();
       },
     },
-    // Lower-left → upper-left: app + preset actions
     {
       label: isFullscreen ? 'Exit FS' : 'Fullscreen',
       icon: '⛶',
@@ -216,18 +226,6 @@ export function MobileControlBar({
         onForcePlaybackIdle?.();
       },
       active: isFullscreen,
-    },
-    {
-      label: isBlocked ? 'Unblock' : 'Block',
-      icon: '⊘',
-      action: () => {
-        onToggleBlock();
-        closeMenu();
-        forceIdle();
-        onForcePlaybackIdle?.();
-      },
-      active: isBlocked,
-      activeColor: 'red' as const,
     },
     {
       label: 'Previous',
@@ -241,16 +239,16 @@ export function MobileControlBar({
       disabled: !canGoBack,
     },
     {
-      label: isFavorite ? 'Unfavorite' : 'Favorite',
-      icon: '★',
+      label: isBlocked ? 'Unblock' : 'Block',
+      icon: '⊘',
       action: () => {
-        onToggleFavorite();
+        onToggleBlock();
         closeMenu();
         forceIdle();
         onForcePlaybackIdle?.();
       },
-      active: isFavorite,
-      activeColor: 'yellow' as const,
+      active: isBlocked,
+      activeColor: 'red' as const,
     },
   ];
 

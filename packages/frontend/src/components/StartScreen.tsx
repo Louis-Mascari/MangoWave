@@ -196,6 +196,10 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
               visuals respond
             </li>
           </ol>
+          <p className="mt-2 text-xs text-[#888]">
+            Some presets are more ambient and less reactive than others — check the Settings panel
+            to adjust sensitivity and other parameters that feed the visualization engine.
+          </p>
 
           {/* Spotify connect inside Share Audio modal */}
           <SpotifySection

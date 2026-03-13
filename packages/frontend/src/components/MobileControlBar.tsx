@@ -162,8 +162,8 @@ export function MobileControlBar({
   );
 
   // Radial items clockwise from 12 o'clock:
-  // Top half (preset): Block(10), Previous(11), Presets(12), Next(1), Favorite(2)
-  // Bottom half (app): Autopilot(3), Settings(4), Exit(6), Fullscreen(8)
+  // Top half (preset): Previous(10), Block(11), Presets(12), Next(1), Favorite(2)
+  // Bottom half (app): Autopilot(3), Exit(4), Fullscreen(6), Settings(8)
   const radialItems = [
     {
       label: 'Presets',
@@ -204,11 +204,6 @@ export function MobileControlBar({
       active: autopilotEnabled,
     },
     {
-      label: 'Settings',
-      icon: '⚙',
-      action: () => menuToModal('settings'),
-    },
-    {
       label: 'Exit',
       icon: '✕',
       action: () => {
@@ -228,15 +223,9 @@ export function MobileControlBar({
       active: isFullscreen,
     },
     {
-      label: 'Previous',
-      icon: '◀',
-      action: () => {
-        onPreviousPreset?.();
-        closeMenu();
-        forceIdle();
-        onForcePlaybackIdle?.();
-      },
-      disabled: !canGoBack,
+      label: 'Settings',
+      icon: '⚙',
+      action: () => menuToModal('settings'),
     },
     {
       label: isBlocked ? 'Unblock' : 'Block',
@@ -249,6 +238,17 @@ export function MobileControlBar({
       },
       active: isBlocked,
       activeColor: 'red' as const,
+    },
+    {
+      label: 'Previous',
+      icon: '◀',
+      action: () => {
+        onPreviousPreset?.();
+        closeMenu();
+        forceIdle();
+        onForcePlaybackIdle?.();
+      },
+      disabled: !canGoBack,
     },
   ];
 
@@ -309,7 +309,7 @@ export function MobileControlBar({
               style={{
                 // Position relative to FAB center: cos→horizontal, sin→vertical
                 bottom: `${dy + itemOffset}px`,
-                left: `${-dx + itemOffset}px`,
+                left: `${dx + itemOffset}px`,
                 transitionDelay: menuOpen ? `${i * 40}ms` : '0ms',
                 transitionDuration: '250ms',
               }}

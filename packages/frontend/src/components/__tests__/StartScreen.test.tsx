@@ -108,8 +108,9 @@ describe('StartScreen', () => {
       render(<StartScreen {...defaultProps} />);
       await user.click(screen.getByText('Play Local Files'));
       expect(screen.getByText('Mobile Device Detected')).toBeInTheDocument();
-      expect(screen.getByText('Continue')).toBeInTheDocument();
-      expect(screen.getByText('Skip optimizations')).toBeInTheDocument();
+      expect(screen.getByText('Optimize')).toBeInTheDocument();
+      expect(screen.getByText('Skip')).toBeInTheDocument();
+      expect(screen.getByText('Remember my choice')).toBeInTheDocument();
       expect(screen.queryByText('Choose Files')).not.toBeInTheDocument();
     });
 
@@ -121,24 +122,44 @@ describe('StartScreen', () => {
       expect(screen.queryByText('Start Microphone')).not.toBeInTheDocument();
     });
 
-    it('Continue sets mobileNoticeShown and triggers action', async () => {
+    it('Optimize without remember does not set mobileNoticeShown', async () => {
       const user = userEvent.setup();
       render(<StartScreen {...defaultProps} />);
       await user.click(screen.getByText('Use Microphone'));
-      await user.click(screen.getByText('Continue'));
+      await user.click(screen.getByText('Optimize'));
+      expect(useSettingsStore.getState().mobileNoticeShown).toBe(false);
+      expect(defaultProps.onMicCapture).toHaveBeenCalled();
+    });
+
+    it('Optimize with remember sets mobileNoticeShown', async () => {
+      const user = userEvent.setup();
+      render(<StartScreen {...defaultProps} />);
+      await user.click(screen.getByText('Use Microphone'));
+      await user.click(screen.getByText('Remember my choice'));
+      await user.click(screen.getByText('Optimize'));
       expect(useSettingsStore.getState().mobileNoticeShown).toBe(true);
       expect(defaultProps.onMicCapture).toHaveBeenCalled();
     });
 
-    it('Skip optimizations resets to desktop performance', async () => {
+    it('Skip resets to desktop performance', async () => {
       const user = userEvent.setup();
       render(<StartScreen {...defaultProps} />);
       await user.click(screen.getByText('Use Microphone'));
-      await user.click(screen.getByText('Skip optimizations'));
-      expect(useSettingsStore.getState().mobileNoticeShown).toBe(true);
+      await user.click(screen.getByText('Skip'));
+      expect(useSettingsStore.getState().mobileNoticeShown).toBe(false);
       expect(useSettingsStore.getState().performance.fpsCap).toBe(60);
       expect(useSettingsStore.getState().performance.resolutionScale).toBe(1.0);
       expect(useSettingsStore.getState().performance.meshWidth).toBe(48);
+      expect(defaultProps.onMicCapture).toHaveBeenCalled();
+    });
+
+    it('Skip with remember sets mobileNoticeShown', async () => {
+      const user = userEvent.setup();
+      render(<StartScreen {...defaultProps} />);
+      await user.click(screen.getByText('Use Microphone'));
+      await user.click(screen.getByText('Remember my choice'));
+      await user.click(screen.getByText('Skip'));
+      expect(useSettingsStore.getState().mobileNoticeShown).toBe(true);
       expect(defaultProps.onMicCapture).toHaveBeenCalled();
     });
   });

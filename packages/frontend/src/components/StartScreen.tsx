@@ -25,6 +25,7 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
   const mobileNoticeShown = useSettingsStore((s) => s.mobileNoticeShown);
   const setMobileNoticeShown = useSettingsStore((s) => s.setMobileNoticeShown);
   const resetToDesktopPerformance = useSettingsStore((s) => s.resetToDesktopPerformance);
+  const resetToMobilePerformance = useSettingsStore((s) => s.resetToMobilePerformance);
 
   const [activeModal, setActiveModal] = useState<ModalView>('none');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -240,13 +241,14 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
           </div>
           {isMobileDevice && !mobileNoticeShown ? (
             <MobilePerformanceNotice
-              onContinue={() => {
-                setMobileNoticeShown(true);
+              onOptimize={(remember) => {
+                resetToMobilePerformance();
+                if (remember) setMobileNoticeShown(true);
                 handleFileSelect();
               }}
-              onSkip={() => {
+              onSkip={(remember) => {
                 resetToDesktopPerformance();
-                setMobileNoticeShown(true);
+                if (remember) setMobileNoticeShown(true);
                 handleFileSelect();
               }}
             />
@@ -275,13 +277,14 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
           </div>
           {isMobileDevice && !mobileNoticeShown ? (
             <MobilePerformanceNotice
-              onContinue={() => {
-                setMobileNoticeShown(true);
+              onOptimize={(remember) => {
+                resetToMobilePerformance();
+                if (remember) setMobileNoticeShown(true);
                 onMicCapture();
               }}
-              onSkip={() => {
+              onSkip={(remember) => {
                 resetToDesktopPerformance();
-                setMobileNoticeShown(true);
+                if (remember) setMobileNoticeShown(true);
                 onMicCapture();
               }}
             />
@@ -443,12 +446,14 @@ function SpotifySection({
 }
 
 function MobilePerformanceNotice({
-  onContinue,
+  onOptimize,
   onSkip,
 }: {
-  onContinue: () => void;
-  onSkip: () => void;
+  onOptimize: (remember: boolean) => void;
+  onSkip: (remember: boolean) => void;
 }) {
+  const [remember, setRemember] = useState(false);
+
   return (
     <div className="mt-5 flex flex-col gap-3">
       <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-4 py-3">
@@ -460,17 +465,26 @@ function MobilePerformanceNotice({
         </p>
       </div>
       <button
-        onClick={onContinue}
+        onClick={() => onOptimize(remember)}
         className="start-btn w-full cursor-pointer rounded-xl border-none px-10 py-3 text-lg font-semibold text-white"
       >
-        Continue
+        Optimize
       </button>
       <button
-        onClick={onSkip}
+        onClick={() => onSkip(remember)}
         className="w-full cursor-pointer rounded-xl border border-white/10 bg-transparent px-10 py-2 text-sm text-white/50 transition-colors hover:text-white/70"
       >
-        Skip optimizations
+        Skip
       </button>
+      <label className="flex items-center justify-center gap-2 text-xs text-white/40">
+        <input
+          type="checkbox"
+          checked={remember}
+          onChange={(e) => setRemember(e.target.checked)}
+          className="accent-orange-500"
+        />
+        Remember my choice
+      </label>
     </div>
   );
 }

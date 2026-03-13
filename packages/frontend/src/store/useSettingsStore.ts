@@ -92,6 +92,7 @@ export interface SettingsState {
   mobileNoticeShown: boolean;
   setMobileNoticeShown: (shown: boolean) => void;
   resetToDesktopPerformance: () => void;
+  resetToMobilePerformance: () => void;
 
   // Volume (persisted for local file playback)
   volume: number; // 0.0 to 1.0
@@ -290,6 +291,7 @@ export const useSettingsStore = create<SettingsState>()(
       mobileNoticeShown: false,
       setMobileNoticeShown: (shown) => set({ mobileNoticeShown: shown }),
       resetToDesktopPerformance: () => set({ performance: { ...DESKTOP_PERFORMANCE } }),
+      resetToMobilePerformance: () => set({ performance: { ...MOBILE_PERFORMANCE } }),
 
       // Display
       presetNameDisplay: 5,

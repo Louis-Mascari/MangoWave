@@ -173,8 +173,10 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
       {activeModal === 'share-audio' && (
         <Modal title="Share Audio" onClose={closeModal}>
           <p className="text-xs text-[#888]">
-            Works in Chrome, Edge, and Opera. Firefox and Safari don&apos;t support audio capture
-            via screen sharing — use local files or microphone instead.
+            Works in Chrome, Edge, and Opera.
+            <br />
+            Firefox and Safari don&apos;t support audio capture via screen sharing — use local files
+            or microphone instead.
           </p>
           <ol className="mt-3 flex flex-col gap-3 text-sm text-[#aaa]">
             <li>

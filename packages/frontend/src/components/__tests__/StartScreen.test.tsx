@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { StartScreen } from '../StartScreen.tsx';
 import { useSpotifyStore } from '../../store/useSpotifyStore.ts';
+import { useSettingsStore } from '../../store/useSettingsStore.ts';
 
 const defaultProps = {
   onStart: vi.fn(),
@@ -20,6 +21,8 @@ describe('StartScreen', () => {
       isSpotifyUnlocked: false,
       byocClientId: null,
     });
+    // jsdom is detected as mobile — mark notice as shown so existing tests see normal buttons
+    useSettingsStore.setState({ mobileNoticeShown: true });
   });
 
   it('renders epilepsy warning', () => {
@@ -93,5 +96,50 @@ describe('StartScreen', () => {
   it('hides Share Audio card in jsdom (mobile-like environment)', () => {
     render(<StartScreen {...defaultProps} />);
     expect(screen.queryByText('Share Audio')).not.toBeInTheDocument();
+  });
+
+  describe('mobile performance notice', () => {
+    beforeEach(() => {
+      useSettingsStore.setState({ mobileNoticeShown: false });
+    });
+
+    it('shows notice instead of action button on first mobile visit (local files)', async () => {
+      const user = userEvent.setup();
+      render(<StartScreen {...defaultProps} />);
+      await user.click(screen.getByText('Play Local Files'));
+      expect(screen.getByText('Mobile Device Detected')).toBeInTheDocument();
+      expect(screen.getByText('Continue')).toBeInTheDocument();
+      expect(screen.getByText('Skip optimizations')).toBeInTheDocument();
+      expect(screen.queryByText('Choose Files')).not.toBeInTheDocument();
+    });
+
+    it('shows notice instead of action button on first mobile visit (microphone)', async () => {
+      const user = userEvent.setup();
+      render(<StartScreen {...defaultProps} />);
+      await user.click(screen.getByText('Use Microphone'));
+      expect(screen.getByText('Mobile Device Detected')).toBeInTheDocument();
+      expect(screen.queryByText('Start Microphone')).not.toBeInTheDocument();
+    });
+
+    it('Continue sets mobileNoticeShown and triggers action', async () => {
+      const user = userEvent.setup();
+      render(<StartScreen {...defaultProps} />);
+      await user.click(screen.getByText('Use Microphone'));
+      await user.click(screen.getByText('Continue'));
+      expect(useSettingsStore.getState().mobileNoticeShown).toBe(true);
+      expect(defaultProps.onMicCapture).toHaveBeenCalled();
+    });
+
+    it('Skip optimizations resets to desktop performance', async () => {
+      const user = userEvent.setup();
+      render(<StartScreen {...defaultProps} />);
+      await user.click(screen.getByText('Use Microphone'));
+      await user.click(screen.getByText('Skip optimizations'));
+      expect(useSettingsStore.getState().mobileNoticeShown).toBe(true);
+      expect(useSettingsStore.getState().performance.fpsCap).toBe(60);
+      expect(useSettingsStore.getState().performance.resolutionScale).toBe(1.0);
+      expect(useSettingsStore.getState().performance.meshWidth).toBe(48);
+      expect(defaultProps.onMicCapture).toHaveBeenCalled();
+    });
   });
 });

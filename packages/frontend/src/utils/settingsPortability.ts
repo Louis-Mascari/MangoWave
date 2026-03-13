@@ -50,7 +50,7 @@ export const EXPORT_CATEGORIES: ExportCategory[] = [
   {
     key: 'packs',
     label: 'Packs & Quarantine',
-    fields: ['enabledPacks', 'showQuarantined', 'quarantineOverrides'],
+    fields: ['enabledPacks', 'showQuarantined', 'quarantineOverrides', 'mobileNoticeShown'],
   },
 ];
 
@@ -240,6 +240,7 @@ const SANITIZERS: Record<string, (val: unknown) => unknown> = {
   transitionTime: (v) => clamp(v, 0, 10, 2.0),
   volume: (v) => clamp(v, 0, 1, 0.5),
   showQuarantined: (v) => (typeof v === 'boolean' ? v : false),
+  mobileNoticeShown: (v) => (typeof v === 'boolean' ? v : false),
 };
 
 export interface ImportResult {

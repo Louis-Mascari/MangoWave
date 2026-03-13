@@ -214,6 +214,14 @@ function RenderingTab() {
     <>
       <h3 className="text-sm font-semibold text-white">Rendering</h3>
 
+      {isMobileDevice && (
+        <div className="rounded bg-yellow-500/10 px-3 py-2 text-[11px] leading-snug text-yellow-400/90">
+          <strong>Mobile mode:</strong> Rendering settings have been automatically reduced for your
+          device. Some presets may still cause freezing. For the best experience, use a desktop or
+          laptop. You can adjust these settings manually below.
+        </div>
+      )}
+
       <div className="flex flex-col gap-1">
         <label className="flex items-center text-xs text-white/60">
           Frame Rate

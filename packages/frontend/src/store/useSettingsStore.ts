@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { EQ_BANDS } from '../engine/AudioEngine.ts';
+import { isMobileDevice } from '../utils/isMobileDevice.ts';
 
 export interface PerformanceSettings {
   fpsCap: number; // 0 = uncapped, 15–300
@@ -87,6 +88,11 @@ export interface SettingsState {
   transitionTime: number; // seconds for preset blend
   setTransitionTime: (seconds: number) => void;
 
+  // Mobile
+  mobileNoticeShown: boolean;
+  setMobileNoticeShown: (shown: boolean) => void;
+  resetToDesktopPerformance: () => void;
+
   // Volume (persisted for local file playback)
   volume: number; // 0.0 to 1.0
   setVolume: (volume: number) => void;
@@ -96,6 +102,24 @@ export interface SettingsState {
 }
 
 const DEFAULT_BAND_GAINS = EQ_BANDS.map(() => 0);
+
+const DESKTOP_PERFORMANCE: PerformanceSettings = {
+  fpsCap: 60,
+  resolutionScale: 1.0,
+  meshWidth: 48,
+  meshHeight: 36,
+  textureRatio: 1.0,
+  fxaa: false,
+};
+
+const MOBILE_PERFORMANCE: PerformanceSettings = {
+  fpsCap: 30,
+  resolutionScale: 0.75,
+  meshWidth: 32,
+  meshHeight: 24,
+  textureRatio: 0.5,
+  fxaa: false,
+};
 
 // Only these keys can be set via importSettings — prevents overwriting store actions
 const IMPORTABLE_KEYS: (keyof SettingsState)[] = [
@@ -108,6 +132,7 @@ const IMPORTABLE_KEYS: (keyof SettingsState)[] = [
   'enabledPacks',
   'showQuarantined',
   'quarantineOverrides',
+  'mobileNoticeShown',
   'presetNameDisplay',
   'songInfoDisplay',
   'transitionTime',
@@ -118,14 +143,7 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       // Performance
-      performance: {
-        fpsCap: 60,
-        resolutionScale: 1.0,
-        meshWidth: 48,
-        meshHeight: 36,
-        textureRatio: 1.0,
-        fxaa: false,
-      },
+      performance: isMobileDevice ? { ...MOBILE_PERFORMANCE } : { ...DESKTOP_PERFORMANCE },
       setFpsCap: (fps) =>
         set((state) => ({
           performance: {
@@ -268,6 +286,11 @@ export const useSettingsStore = create<SettingsState>()(
           quarantineOverrides: state.quarantineOverrides.filter((p) => p !== name),
         })),
 
+      // Mobile
+      mobileNoticeShown: false,
+      setMobileNoticeShown: (shown) => set({ mobileNoticeShown: shown }),
+      resetToDesktopPerformance: () => set({ performance: { ...DESKTOP_PERFORMANCE } }),
+
       // Display
       presetNameDisplay: 5,
       setPresetNameDisplay: (value) => set({ presetNameDisplay: value }),
@@ -338,9 +361,15 @@ export const useSettingsStore = create<SettingsState>()(
             state.songInfoDisplay = 5;
           }
         }
+        // v3 → v4: Apply mobile performance defaults for existing mobile users
+        if ((version ?? 0) < 4) {
+          if (isMobileDevice) {
+            state.performance = { ...MOBILE_PERFORMANCE };
+          }
+        }
         return state as unknown as SettingsState;
       },
-      version: 3,
+      version: 4,
     },
   ),
 );

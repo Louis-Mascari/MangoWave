@@ -51,6 +51,10 @@ export function ControlBar(props: ControlBarProps) {
         onToggleAutopilot={props.onToggleAutopilot}
         activePanel={props.activePanel}
         onTogglePanel={props.onTogglePanel}
+        isFavorite={props.isFavorite}
+        isBlocked={props.isBlocked}
+        onToggleFavorite={props.onToggleFavorite}
+        onToggleBlock={props.onToggleBlock}
         onMenuOpenChange={props.onMobileMenuChange}
         onForcePlaybackIdle={props.onForcePlaybackIdle}
       />
@@ -96,7 +100,7 @@ function DesktopControlBar({
       )}
       {activePanel !== 'none' && (
         <div
-          className={`mx-4 mb-2 lg:max-w-[42%] ${
+          className={`mx-4 mb-2 lg:max-w-lg ${
             activePanel === 'settings'
               ? 'lg:ml-auto'
               : activePanel === 'playlist'

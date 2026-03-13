@@ -567,6 +567,10 @@ function PresetsTab() {
 }
 
 function DataTab() {
+  const accessToken = useSpotifyStore((s) => s.accessToken);
+  const sessionId = useSpotifyStore((s) => s.sessionId);
+  const isSpotifyConnected = !!(accessToken || sessionId);
+
   const [exportSelected, setExportSelected] = useState<Set<string>>(
     () => new Set(EXPORT_CATEGORIES.map((c) => c.key)),
   );
@@ -633,9 +637,9 @@ function DataTab() {
     <>
       <h3 className="text-sm font-semibold text-white">Data</h3>
       <p className="text-xs text-white/50">
-        Your settings are stored locally in this browser on this device. If connected via Spotify,
-        they also sync to the cloud. Use export and import to transfer settings between browsers or
-        devices, or to back them up.
+        Your settings are stored locally in this browser on this device.
+        {isSpotifyConnected && ' If connected via Spotify, they also sync to the cloud.'} Use export
+        and import to transfer settings between browsers or devices, or to back them up.
       </p>
 
       <div className="mt-1 flex flex-col gap-2">
@@ -656,13 +660,13 @@ function DataTab() {
         <div className="flex gap-3 text-[10px]">
           <button
             onClick={() => setExportSelected(new Set(EXPORT_CATEGORIES.map((c) => c.key)))}
-            className="cursor-pointer border-none bg-transparent p-0 text-orange-400 hover:text-orange-300"
+            className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
           >
             Select all
           </button>
           <button
             onClick={() => setExportSelected(new Set())}
-            className="cursor-pointer border-none bg-transparent p-0 text-orange-400 hover:text-orange-300"
+            className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
           >
             Deselect all
           </button>

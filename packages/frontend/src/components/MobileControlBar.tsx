@@ -23,6 +23,10 @@ interface MobileControlBarProps {
   onToggleAutopilot: () => void;
   activePanel: PanelView;
   onTogglePanel: (panel: PanelView) => void;
+  isFavorite: boolean;
+  isBlocked: boolean;
+  onToggleFavorite: () => void;
+  onToggleBlock: () => void;
   onMenuOpenChange?: (open: boolean) => void;
   onForcePlaybackIdle?: () => void;
 }
@@ -42,6 +46,10 @@ export function MobileControlBar({
   onToggleAutopilot,
   activePanel,
   onTogglePanel,
+  isFavorite,
+  isBlocked,
+  onToggleFavorite,
+  onToggleBlock,
   onMenuOpenChange,
   onForcePlaybackIdle,
 }: MobileControlBarProps) {
@@ -208,6 +216,30 @@ export function MobileControlBar({
       active: isFullscreen,
     },
     {
+      label: isFavorite ? 'Unfavorite' : 'Favorite',
+      icon: '★',
+      action: () => {
+        onToggleFavorite();
+        closeMenu();
+        forceIdle();
+        onForcePlaybackIdle?.();
+      },
+      active: isFavorite,
+      activeColor: 'yellow' as const,
+    },
+    {
+      label: isBlocked ? 'Unblock' : 'Block',
+      icon: '⊘',
+      action: () => {
+        onToggleBlock();
+        closeMenu();
+        forceIdle();
+        onForcePlaybackIdle?.();
+      },
+      active: isBlocked,
+      activeColor: 'red' as const,
+    },
+    {
       label: 'Exit',
       icon: '✕',
       action: () => {
@@ -267,7 +299,13 @@ export function MobileControlBar({
                 item.disabled
                   ? 'cursor-not-allowed bg-white/5 text-white/20'
                   : item.active
-                    ? 'cursor-pointer bg-orange-500 text-white'
+                    ? `cursor-pointer ${
+                        item.activeColor === 'yellow'
+                          ? 'bg-yellow-500/30 text-yellow-400'
+                          : item.activeColor === 'red'
+                            ? 'bg-red-500/30 text-red-400'
+                            : 'bg-orange-500 text-white'
+                      }`
                     : 'cursor-pointer bg-white/15 text-white/80 backdrop-blur-sm'
               }`}
               style={{
@@ -302,8 +340,8 @@ export function MobileControlBar({
       {/* Modal panels */}
       {modalPanel !== 'none' && (
         <div className="fixed inset-0 z-[60] flex items-stretch justify-center bg-black/50 backdrop-blur-sm">
-          <div className="relative mx-2 my-2 flex max-h-full w-full flex-col overflow-hidden rounded-lg bg-gray-900/95">
-            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+          <div className="relative mx-2 my-2 flex max-h-full w-full flex-col overflow-hidden rounded-lg bg-gray-900/95 landscape:my-1">
+            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 landscape:py-1.5">
               <h3 className="text-sm font-semibold text-white">
                 {activePanel === 'settings' && 'Settings'}
                 {activePanel === 'presets' && 'Presets'}
@@ -317,7 +355,7 @@ export function MobileControlBar({
                 ✕
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-3">
+            <div className="flex-1 overflow-y-auto p-3 landscape:p-2">
               {activePanel === 'settings' && <SettingsPanel />}
               {activePanel === 'presets' && (
                 <PresetBrowser

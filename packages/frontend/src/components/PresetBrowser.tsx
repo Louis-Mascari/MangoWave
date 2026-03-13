@@ -115,21 +115,55 @@ function PresetRow({
 function HistoryRow({
   name,
   isFavorite,
+  isBlocked,
   onSelect,
+  onToggleFavorite,
+  onToggleBlock,
 }: {
   name: string;
   isFavorite: boolean;
+  isBlocked: boolean;
   onSelect: () => void;
+  onToggleFavorite: () => void;
+  onToggleBlock: () => void;
 }) {
   return (
     <div
       onClick={onSelect}
       className="flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs text-white/70 hover:bg-white/10"
     >
-      <span className="min-w-0 flex-1 truncate text-left">
-        {isFavorite && <span className="mr-1 text-yellow-400">&#9733;</span>}
-        {name}
-      </span>
+      <span className="min-w-0 flex-1 truncate text-left">{name}</span>
+      <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
+        <button
+          onClick={onToggleFavorite}
+          className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
+            isFavorite ? 'text-yellow-400' : 'text-white/30 hover:bg-white/10 hover:text-yellow-400'
+          }`}
+          title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+        >
+          <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+        </button>
+        <button
+          onClick={onToggleBlock}
+          className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
+            isBlocked ? 'text-red-400' : 'text-white/30 hover:bg-white/10 hover:text-red-400'
+          }`}
+          title={isBlocked ? 'Unblock preset' : 'Block preset'}
+        >
+          <svg
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="h-3.5 w-3.5"
+          >
+            <circle cx="10" cy="10" r="8" />
+            <line x1="5" y1="5" x2="15" y2="15" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }
@@ -360,13 +394,13 @@ export function PresetBrowser({
       <div className="mb-1 flex items-center gap-2">
         <button
           onClick={handleSelectAll}
-          className="cursor-pointer border-none bg-transparent p-0 text-[9px] text-white/40 underline hover:text-white/60"
+          className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
         >
           Select all
         </button>
         <button
           onClick={handleDeselectAll}
-          className="cursor-pointer border-none bg-transparent p-0 text-[9px] text-white/40 underline hover:text-white/60"
+          className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
         >
           Deselect all
         </button>
@@ -452,7 +486,10 @@ export function PresetBrowser({
           key={`${name}-${i}`}
           name={name}
           isFavorite={favoriteSet.has(name)}
+          isBlocked={blockedSet.has(name)}
           onSelect={() => onSelectPreset(name)}
+          onToggleFavorite={() => handleToggleFavorite(name)}
+          onToggleBlock={() => handleToggleBlock(name)}
         />
       ))}
       {historyList.length === 0 && (
@@ -500,8 +537,8 @@ export function PresetBrowser({
   );
 
   return (
-    <div className="relative flex max-h-96 flex-col gap-2 rounded-lg bg-black/60 p-4 backdrop-blur-sm">
-      <div className="flex items-center justify-between">
+    <div className="relative flex max-h-96 flex-col gap-2 rounded-lg bg-black/60 p-4 backdrop-blur-sm landscape:max-h-[70vh]">
+      <div className="flex flex-col gap-1.5">
         <h3 className="text-sm font-semibold text-white">Presets</h3>
         <div className="flex flex-wrap gap-1">
           {(['all', 'favorites', 'blocked', 'quarantined', 'history'] as const).map((f) => (

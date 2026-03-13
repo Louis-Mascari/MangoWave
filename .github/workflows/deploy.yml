@@ -74,6 +74,8 @@ jobs:
           VITE_SPOTIFY_CLIENT_ID: ${{ secrets.VITE_SPOTIFY_CLIENT_ID }}
           VITE_SPOTIFY_REDIRECT_URI: ${{ secrets.VITE_SPOTIFY_REDIRECT_URI }}
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_LOCKED_MODE: ${{ secrets.VITE_LOCKED_MODE }}
+          VITE_UNLOCK_HASH: ${{ secrets.VITE_UNLOCK_HASH }}
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4

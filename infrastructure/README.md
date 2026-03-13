@@ -69,3 +69,5 @@ npx cdk deploy -c alertEmail=you@example.com -c acmCertArn=<arn> -c webAclArn=<a
 | `VITE_PUBLIC_POSTHOG_HOST`  | PostHog ingest host (frontend build)                   |
 | `VITE_SPOTIFY_CLIENT_ID`    | Spotify app client ID (frontend build)                 |
 | `VITE_SPOTIFY_REDIRECT_URI` | Spotify OAuth redirect URI (frontend build)            |
+| `VITE_LOCKED_MODE`          | Set to `true` to restrict Spotify to magic-link users  |
+| `VITE_UNLOCK_HASH`          | SHA-256 hash of the magic-link unlock passphrase       |

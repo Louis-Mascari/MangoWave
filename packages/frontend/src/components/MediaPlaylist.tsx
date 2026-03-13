@@ -79,14 +79,14 @@ export function MediaPlaylist({ onAddFiles, onClear, onClose }: MediaPlaylistPro
             <span className="min-w-0 flex-1 truncate">{track.name}</span>
             <span className="shrink-0 text-white/40">{formatDuration(track.duration)}</span>
             {!shuffle && tracks.length > 1 && (
-              <span className="flex shrink-0 flex-col">
+              <span className="flex shrink-0 gap-1">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     moveTrack(index, index - 1);
                   }}
                   disabled={index === 0}
-                  className="cursor-pointer border-none bg-transparent px-0.5 text-[10px] leading-none text-white/30 hover:text-white/70 disabled:cursor-default disabled:text-white/10"
+                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded border-none bg-white/10 text-xs text-white/30 hover:bg-white/20 hover:text-white/70 disabled:cursor-default disabled:bg-transparent disabled:text-white/10"
                   aria-label={`Move ${track.name} up`}
                 >
                   ▲
@@ -97,7 +97,7 @@ export function MediaPlaylist({ onAddFiles, onClear, onClose }: MediaPlaylistPro
                     moveTrack(index, index + 1);
                   }}
                   disabled={index === tracks.length - 1}
-                  className="cursor-pointer border-none bg-transparent px-0.5 text-[10px] leading-none text-white/30 hover:text-white/70 disabled:cursor-default disabled:text-white/10"
+                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded border-none bg-white/10 text-xs text-white/30 hover:bg-white/20 hover:text-white/70 disabled:cursor-default disabled:bg-transparent disabled:text-white/10"
                   aria-label={`Move ${track.name} down`}
                 >
                   ▼
@@ -109,7 +109,7 @@ export function MediaPlaylist({ onAddFiles, onClear, onClose }: MediaPlaylistPro
                 e.stopPropagation();
                 removeTrack(track.id);
               }}
-              className="shrink-0 cursor-pointer rounded border-none bg-transparent px-1 text-white/30 hover:text-red-400"
+              className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:text-red-400"
               aria-label={`Remove ${track.name}`}
             >
               ×

@@ -84,7 +84,7 @@ export function NowPlaying({ enabled, track }: NowPlayingProps) {
 
   return (
     <div
-      className={`pointer-events-none fixed left-4 top-4 z-40 flex max-w-xs items-center gap-3 rounded-lg bg-black/70 p-3 backdrop-blur-sm transition-opacity duration-500 ${
+      className={`pointer-events-none fixed left-4 top-12 z-40 flex max-w-xs items-center gap-3 rounded-lg bg-black/70 p-3 backdrop-blur-sm transition-opacity duration-500 ${
         shouldShow ? 'opacity-100' : 'opacity-0'
       }`}
     >

@@ -43,7 +43,13 @@ export class VisualizerRenderer {
     audioContext: AudioContext,
     analyserNode: AnalyserNode,
     onPresetChange?: (name: string) => void,
-    opts?: { meshWidth?: number; meshHeight?: number; textureRatio?: number; fxaa?: boolean },
+    opts?: {
+      meshWidth?: number;
+      meshHeight?: number;
+      textureRatio?: number;
+      fxaa?: boolean;
+      excludedPresets?: Set<string>;
+    },
   ): void {
     this.onPresetChange = onPresetChange;
 
@@ -72,10 +78,15 @@ export class VisualizerRenderer {
 
     this.presetKeys = Object.keys(this.presets);
 
-    // Load a random initial preset
+    // Load a random initial preset, filtering out excluded presets
     if (this.presetKeys.length > 0) {
-      this.currentPresetIndex = Math.floor(Math.random() * this.presetKeys.length);
-      const presetName = this.presetKeys[this.currentPresetIndex];
+      const excluded = opts?.excludedPresets;
+      const candidates = excluded?.size
+        ? this.presetKeys.filter((k) => !excluded.has(k))
+        : this.presetKeys;
+      const pool = candidates.length > 0 ? candidates : this.presetKeys;
+      const presetName = pool[Math.floor(Math.random() * pool.length)];
+      this.currentPresetIndex = this.presetKeys.indexOf(presetName);
       this.visualizer.loadPreset(this.presets[presetName], 0);
       this.onPresetChange?.(presetName);
     }

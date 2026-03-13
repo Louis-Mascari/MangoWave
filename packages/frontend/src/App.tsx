@@ -333,18 +333,20 @@ function MainApp() {
     usePresetHistoryStore.getState().resetRound();
   }, [autopilot.mode, enabledPacks, resetAutopilot]);
 
-  // If initial preset isn't in an enabled pack, pick one that is
+  // If initial preset isn't in an enabled pack, pick one that is.
+  // Only runs once — the renderer's init() already filters blocked/quarantined.
   const didFixInitialPreset = useRef(false);
   useEffect(() => {
     if (
       !didFixInitialPreset.current &&
       currentPreset &&
       enabledPacks.length > 0 &&
-      presetPackMap.size > 0 &&
-      !isInEnabledPack(currentPreset)
+      presetPackMap.size > 0
     ) {
       didFixInitialPreset.current = true;
-      pickNextPreset();
+      if (!isInEnabledPack(currentPreset)) {
+        pickNextPreset();
+      }
     }
   }, [currentPreset, enabledPacks, presetPackMap, isInEnabledPack, pickNextPreset]);
 

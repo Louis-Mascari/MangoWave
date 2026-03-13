@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { VisualizerRenderer } from '../engine/VisualizerRenderer.ts';
 import type { AudioEngine } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
+import quarantinedData from '../data/quarantined-presets.json';
 
 interface VisualizerProps {
   audioEngine: AudioEngine;
@@ -41,11 +42,21 @@ export function Visualizer({
     };
 
     updateSize();
+
+    // Build excluded set for initial preset pick: blocked + effective quarantine
+    const { blockedPresets, quarantineOverrides } = useSettingsStore.getState();
+    const overrideSet = new Set(quarantineOverrides);
+    const excludedPresets = new Set<string>(blockedPresets);
+    for (const name of quarantinedData.presets as string[]) {
+      if (!overrideSet.has(name)) excludedPresets.add(name);
+    }
+
     renderer.init(canvas, ctx, analyser, onPresetChange, {
       meshWidth: performance.meshWidth,
       meshHeight: performance.meshHeight,
       textureRatio: performance.textureRatio,
       fxaa: performance.fxaa,
+      excludedPresets,
     });
     renderer.start();
     onPresetsLoaded(renderer.presetList, renderer.presetPackMap);

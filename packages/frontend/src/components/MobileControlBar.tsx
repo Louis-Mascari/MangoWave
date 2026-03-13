@@ -272,7 +272,7 @@ export function MobileControlBar({
       <div
         className="fixed z-[55] transition-all duration-400"
         style={{
-          bottom: menuOpen ? `calc(50% - ${fabSize / 2}px)` : hasPlaybackPanel ? '170px' : '16px',
+          bottom: menuOpen ? `calc(50% - ${fabSize / 2}px)` : hasPlaybackPanel ? '110px' : '16px',
           right: menuOpen ? `calc(50% - ${fabSize / 2}px)` : '16px',
         }}
       >

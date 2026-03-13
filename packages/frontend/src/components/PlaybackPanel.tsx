@@ -261,7 +261,7 @@ export function PlaybackPanel({
       className={`fixed z-[48] transition-opacity duration-500 ${
         isIdle ? 'pointer-events-none opacity-0' : 'opacity-100'
       } ${
-        isMobileDevice ? 'bottom-24 left-4 right-4' : 'bottom-16 left-1/2 -translate-x-1/2'
+        isMobileDevice ? 'bottom-2 left-4 right-4' : 'bottom-[52px] left-1/2 -translate-x-1/2'
       } rounded-lg bg-black/60 backdrop-blur-sm ${isMobileDevice ? 'px-3 py-2' : 'px-4 py-2'}`}
     >
       <SeekBar source={adapter.source} onSeek={onSeek} />

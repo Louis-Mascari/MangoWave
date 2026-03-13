@@ -80,8 +80,9 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
         <div className="max-w-lg rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-center">
           <p className="text-xs font-semibold text-amber-400">Photosensitivity Warning</p>
           <p className="mt-1 text-xs text-amber-300/70">
-            This visualizer displays rapid flashing lights and patterns. If you have epilepsy or are
-            sensitive to flashing lights, please use caution.
+            This visualizer displays rapid flashing lights and patterns.
+            <br />
+            If you have epilepsy or are sensitive to flashing lights, viewer discretion is advised.
           </p>
         </div>
 
@@ -194,8 +195,7 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
               this is required for the visualizer to react to sound
             </li>
             <li>
-              <span className="font-medium text-[#e0e0e0]">3. Play music</span> and watch the
-              visuals respond
+              <span className="font-medium text-[#e0e0e0]">3. Play music</span> and lose yourself
             </li>
           </ol>
           <p className="mt-2 text-xs text-[#888]">

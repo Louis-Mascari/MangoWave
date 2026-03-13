@@ -190,6 +190,10 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
             Tip: Share your entire screen or a window for the cleanest experience — sharing a tab
             shows an unhideable browser banner. Go fullscreen (F) for full immersion.
           </p>
+          <p className="mt-2 text-xs text-[#888]">
+            Works in Chrome, Edge, and Opera. Firefox and Safari don&apos;t support audio capture
+            via screen sharing — use local files or microphone instead.
+          </p>
 
           {/* Spotify connect inside Share Audio modal */}
           <SpotifySection

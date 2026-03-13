@@ -12,7 +12,8 @@
 
 <p align="center">
   <a href="https://play.mangowave.app"><strong>Launch App</strong></a> &middot;
-  <a href="https://mangowave.app">Landing Page</a>
+  <a href="https://mangowave.app">Landing Page</a> &middot;
+  <a href="https://ko-fi.com/louismascari">Buy Mango a Treat 🐾</a>
 </p>
 
 ## Features
@@ -26,12 +27,12 @@
 - **Pre-amp gain** to boost quiet audio sources
 - **Autopilot** with shuffle-style rounds (no repeats), all or favorites-only mode, proportional favorite weighting (1–10x)
 - **Preset history** with previous/next navigation and browseable history tab
-- **Keyboard shortcuts** for preset navigation, fullscreen, favorites, and more
+- **Shortcuts** — keyboard and mouse shortcuts for preset navigation, fullscreen, favorites, and more
 - **Mobile-optimized UI** with radial FAB menu and full-screen modal panels
 - **Optional Spotify integration** — Now Playing metadata for all authorized users; seek, shuffle, and repeat controls for Premium users. Cloud-synced settings. Owner-mode only due to Spotify's dev mode policy (1 Client ID per developer, max 5 authorized users, Premium required to register the app). Self-hosters can set up their own Spotify developer app via the included PKCE code
 - **Visual quality controls** — mesh resolution, texture quality, FXAA anti-aliasing, plus FPS cap, resolution scaling, FFT size, smoothing
 - **Settings export/import** — transfer settings between browsers or devices via JSON file
-- **Zero install** — runs entirely in the browser, no extensions needed
+- **Zero setup** — no signup, no install, no ads — everything runs in the browser
 
 ## Architecture
 
@@ -39,17 +40,23 @@ The core visualizer is **100% client-side**. Audio sources (system capture, loca
 
 The backend only serves **optional Spotify integration** — 4 Lambda endpoints behind API Gateway handle OAuth token exchange, token refresh, and settings sync to DynamoDB.
 
+### Audio Pipeline
+
+```
+Source → GainNode (pre-amp) → 10× BiquadFilter (EQ) → AnalyserNode → butterchurn
+```
+
+Three audio sources feed the pipeline:
+
+- **System audio** ([`getDisplayMedia`](https://caniuse.com/mdn-api_mediadevices_getdisplaymedia_audio_capture_support)) — captures audio from a screen, window, or tab share. Desktop only (Chrome, Edge, Opera). Not available on mobile browsers, Safari, or Firefox (both support `getDisplayMedia` for video but not audio capture). On Windows and ChromeOS the entire system audio can be captured; on Linux and macOS only tab audio is available
+- **Local files** (`HTMLAudioElement`) — plays audio files directly in the browser. Works on all browsers and devices. EQ feeds the visualizer while audio plays directly to speakers
+- **Microphone** (`getUserMedia`) — captures live audio input. Works on all browsers and devices
+
 ### Spotify Integration
 
 Spotify's dev mode policy (as of March 2026) restricts each developer app to 1 Client ID, the app owner plus up to 5 authorized users, and requires a Premium account to register the app. Because of these limits, MangoWave's hosted site exposes Spotify only in **owner mode** — the app owner connects via backend-proxied OAuth, and authorized users must be added to the developer app's User Management tab. Authorized users don't need Premium themselves, but playback controls (seek, shuffle, repeat) require Premium; non-Premium users still see Now Playing metadata.
 
 The BYOC (bring your own client) PKCE flow is retained in the codebase (`spotifyPkce.ts`) but the UI for it has been removed from the hosted site. Self-hosters who fork the repo can re-enable it and connect their own Spotify developer app.
-
-```
-Source -> GainNode (pre-amp) -> 10x BiquadFilter (EQ) -> AnalyserNode -> butterchurn
-```
-
-Sources: `getDisplayMedia` (system audio), `HTMLAudioElement` (local files), or `getUserMedia` (microphone). Local files fork the pipeline — EQ feeds the visualizer while audio plays directly to speakers.
 
 ## Project Structure
 
@@ -98,23 +105,22 @@ npm run format                       # Prettier fix
 npm run build -w packages/frontend   # tsc + vite build
 ```
 
-## Keyboard Shortcuts
+## Shortcuts
 
-| Key          | Action                     |
-| ------------ | -------------------------- |
-| Space / N    | Next preset                |
-| P            | Previous preset            |
-| F            | Toggle fullscreen          |
-| Double-click | Toggle fullscreen          |
-| A            | Toggle autopilot           |
-| S            | Toggle favorite            |
-| B            | Toggle block               |
-| Q            | Toggle queue (local files) |
-| J            | Previous track             |
-| K            | Play/pause                 |
-| L            | Next track                 |
-| Escape       | Close panel/overlay        |
-| ? / H        | Shortcut help              |
+| Input            | Action                     |
+| ---------------- | -------------------------- |
+| Space / N        | Next preset                |
+| P                | Previous preset            |
+| F / Double-click | Toggle fullscreen          |
+| A                | Toggle autopilot           |
+| S                | Toggle favorite            |
+| B                | Toggle block               |
+| Q                | Toggle queue (local files) |
+| J                | Previous track             |
+| K                | Play/pause                 |
+| L                | Next track                 |
+| Escape           | Close panel/overlay        |
+| ? / H            | Shortcut help              |
 
 ## Tech Stack
 
@@ -135,10 +141,15 @@ Pushes to `main` auto-deploy via GitHub Actions:
 3. Frontend synced to S3 + CloudFront cache invalidated
 4. Landing page synced separately to S3
 
+Both the app (`play.mangowave.app`) and landing page (`mangowave.app`) are served from the same CloudFront distribution. A CloudFront Function routes requests by `Host` header to the appropriate S3 origin.
+
 ## Requirements
 
-- **[WebGL 2](https://caniuse.com/webgl2)** — required for butterchurn rendering
-- **Browser with `getDisplayMedia` support** for system audio — Chrome, Edge, Firefox (not Safari). Local files and microphone work on all browsers including mobile
+- **[WebGL 2](https://caniuse.com/webgl2)** — required for butterchurn rendering. A fallback message is shown if unsupported
+- **Audio source availability varies by browser and device:**
+  - **System audio** — desktop Chrome, Edge, or Opera (requires [`getDisplayMedia`](https://caniuse.com/mdn-api_mediadevices_getdisplaymedia_audio_capture_support) audio capture, not supported by Firefox, Safari, or mobile browsers)
+  - **Local files** — all modern browsers, desktop and mobile
+  - **Microphone** — all modern browsers, desktop and mobile
 - **Node >= 20** for local development
 
 ## Acknowledgments

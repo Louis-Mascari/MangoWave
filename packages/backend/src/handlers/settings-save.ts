@@ -4,10 +4,6 @@ import type { UserSettings } from '../lib/dynamo';
 import { jsonResponse, errorResponse } from '../types/api';
 
 export async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
-  if (event.requestContext.http.method === 'OPTIONS') {
-    return jsonResponse(200, {});
-  }
-
   let body: Record<string, unknown>;
   try {
     body = event.body ? JSON.parse(event.body) : {};

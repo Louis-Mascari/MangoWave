@@ -17,12 +17,12 @@ npm run lint       # ESLint
 ### Audio Pipeline
 
 ```
-Source -> GainNode (pre-amp) -> 10x BiquadFilter (EQ) -> AnalyserNode -> butterchurn
+Source → GainNode (pre-amp) → 10× BiquadFilter (EQ) → AnalyserNode → butterchurn
 ```
 
 Three source modes:
 
-- **System audio** (`getDisplayMedia`) — captures tab/screen audio
+- **System audio** ([`getDisplayMedia`](https://caniuse.com/mdn-api_mediadevices_getdisplaymedia_audio_capture_support)) — captures tab/screen audio. Desktop only (Chrome, Edge, Opera). Firefox and Safari support `getDisplayMedia` for video but not audio capture. On Windows/ChromeOS the entire system audio can be captured; on Linux/macOS only tab audio is available
 - **Local files** (`HTMLAudioElement` via `createMediaElementSource`) — forked pipeline: EQ → analyser for visuals, direct → speakers for audio output. ID3 metadata (title, artist, album, album art) parsed via `music-metadata`
 - **Microphone** (`getUserMedia`) — silent mode, no speaker output to prevent feedback
 
@@ -42,9 +42,10 @@ src/
 ├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (butterchurn),
 │                  # isWebGL2Supported
 ├── data/          # quarantined-presets.json
+├── constants/     # shortcuts.ts (keyboard/mouse shortcut definitions)
 ├── hooks/         # useAudioCapture, useLocalPlayback, useAutopilot, useKeyboardShortcuts,
-│                  # useIdleTimer, useHideCursor, useSpotifyAuth, useNowPlaying, useUnlockCheck,
-│                  # useSpotifyProgress (smooth seek interpolation via rAF)
+│                  # useIdleTimer, useHideCursor, useFullscreen, useSpotifyAuth, useNowPlaying,
+│                  # useUnlockCheck, useSettingsSync, useSpotifyProgress (smooth seek via rAF)
 ├── lib/           # PostHog & Sentry init (no-op when env vars absent)
 ├── services/      # Spotify Web API client (owner-mode OAuth + PKCE utilities for self-hosters)
 ├── store/         # Zustand stores: useSettingsStore, useSpotifyStore, useMediaPlayerStore,

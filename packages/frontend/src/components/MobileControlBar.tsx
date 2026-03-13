@@ -163,7 +163,7 @@ export function MobileControlBar({
 
   // Radial items clockwise from 12 o'clock:
   // Top half (preset): Previous(10), Block(11), Presets(12), Next(1), Favorite(2)
-  // Bottom half (app): Autopilot(3), Exit(4), Fullscreen(6), Settings(8)
+  // Bottom half (app): Settings(3), Exit(4), Fullscreen(6), Autopilot(8)
   const radialItems = [
     {
       label: 'Presets',
@@ -193,15 +193,9 @@ export function MobileControlBar({
       activeColor: 'yellow' as const,
     },
     {
-      label: 'Autopilot',
-      icon: 'A',
-      action: () => {
-        onToggleAutopilot();
-        closeMenu();
-        forceIdle();
-        onForcePlaybackIdle?.();
-      },
-      active: autopilotEnabled,
+      label: 'Settings',
+      icon: '⚙',
+      action: () => menuToModal('settings'),
     },
     {
       label: 'Exit',
@@ -223,9 +217,15 @@ export function MobileControlBar({
       active: isFullscreen,
     },
     {
-      label: 'Settings',
-      icon: '⚙',
-      action: () => menuToModal('settings'),
+      label: 'Autopilot',
+      icon: 'A',
+      action: () => {
+        onToggleAutopilot();
+        closeMenu();
+        forceIdle();
+        onForcePlaybackIdle?.();
+      },
+      active: autopilotEnabled,
     },
     {
       label: isBlocked ? 'Unblock' : 'Block',
@@ -331,7 +331,7 @@ export function MobileControlBar({
                 : 'opacity-100'
           } cursor-pointer`}
         >
-          <img src={logoUrl} alt="Menu" className="h-8 w-8 object-contain" />
+          <img src={logoUrl} alt="Menu" className="h-[52px] w-[52px] object-contain" />
         </button>
       </div>
 

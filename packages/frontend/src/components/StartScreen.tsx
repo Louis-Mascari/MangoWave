@@ -172,11 +172,21 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
       {/* Modals */}
       {activeModal === 'share-audio' && (
         <Modal title="Share Audio" onClose={closeModal}>
-          <ol className="flex flex-col gap-3 text-sm text-[#aaa]">
+          <p className="text-xs text-[#888]">
+            Works in Chrome, Edge, and Opera. Firefox and Safari don&apos;t support audio capture
+            via screen sharing — use local files or microphone instead.
+          </p>
+          <ol className="mt-3 flex flex-col gap-3 text-sm text-[#aaa]">
             <li>
               <span className="font-medium text-[#e0e0e0]">1. Click Start</span> and choose a
               screen, window, or tab to share
             </li>
+          </ol>
+          <p className="mt-2 text-xs text-[#888]">
+            Tip: Share your entire screen or a window for the cleanest experience — sharing a tab
+            shows an unhideable browser banner. Go fullscreen (F) for full immersion.
+          </p>
+          <ol className="mt-3 flex flex-col gap-3 text-sm text-[#aaa]">
             <li>
               <span className="font-medium text-[#ff8c32]">2. Check &quot;Share audio&quot;</span> —
               this is required for the visualizer to react to sound
@@ -186,14 +196,6 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
               visuals respond
             </li>
           </ol>
-          <p className="mt-3 text-xs text-[#888]">
-            Tip: Share your entire screen or a window for the cleanest experience — sharing a tab
-            shows an unhideable browser banner. Go fullscreen (F) for full immersion.
-          </p>
-          <p className="mt-2 text-xs text-[#888]">
-            Works in Chrome, Edge, and Opera. Firefox and Safari don&apos;t support audio capture
-            via screen sharing — use local files or microphone instead.
-          </p>
 
           {/* Spotify connect inside Share Audio modal */}
           <SpotifySection

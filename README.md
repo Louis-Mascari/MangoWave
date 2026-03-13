@@ -67,7 +67,7 @@ MangoWave/
 ├── packages/frontend/     # React 19 + Vite 7 + TypeScript — the visualizer app
 ├── packages/backend/      # Lambda handlers for Spotify OAuth & settings sync
 ├── packages/landing/      # Static landing page (HTML + CSS, no JS)
-├── infrastructure/        # AWS CDK v2 — DynamoDB, Lambda, API Gateway, CloudWatch
+├── infrastructure/        # AWS CDK v2 — DynamoDB, Lambda, API Gateway, S3, CloudFront, CloudWatch
 └── .github/workflows/     # CI (PR checks) + Deploy (OIDC -> CDK -> S3 -> CloudFront)
 ```
 
@@ -134,14 +134,14 @@ npm run build -w packages/frontend   # tsc + vite build
 
 ## Deployment
 
-Pushes to `main` auto-deploy via GitHub Actions:
+All infrastructure is managed via AWS CDK. Pushes to `main` auto-deploy via GitHub Actions:
 
-1. CDK deploys backend infrastructure
+1. CDK deploys all infrastructure (DynamoDB, Lambda, API Gateway, S3, CloudFront, CloudWatch)
 2. Vite builds the frontend
-3. Frontend synced to S3 + CloudFront cache invalidated
+3. Frontend synced to S3 (bucket name from CDK outputs) + CloudFront cache invalidated
 4. Landing page synced separately to S3
 
-Both the app (`play.mangowave.app`) and landing page (`mangowave.app`) are served from the same CloudFront distribution. A CloudFront Function routes requests by `Host` header to the appropriate S3 origin.
+Both the app (`play.mangowave.app`) and landing page (`mangowave.app`) are served from the same CloudFront distribution. A CloudFront Function routes requests by `Host` header to the appropriate S3 prefix.
 
 ## Requirements
 

@@ -9,6 +9,7 @@ describe('MangoWaveStack', () => {
     const app = new cdk.App();
     const stack = new MangoWaveStack(app, 'TestStack', {
       alertEmail: 'test@example.com',
+      acmCertArn: 'arn:aws:acm:us-east-1:123456789012:certificate/test-cert-id',
     });
     template = Template.fromStack(stack);
   });
@@ -153,8 +154,70 @@ describe('MangoWaveStack', () => {
     });
   });
 
+  // --- S3 + CloudFront (Epic 5) ---
+
+  it('creates an S3 bucket with BLOCK_ALL and RETAIN', () => {
+    template.hasResource('AWS::S3::Bucket', {
+      Properties: {
+        BucketName: 'mangowave-frontend',
+        PublicAccessBlockConfiguration: {
+          BlockPublicAcls: true,
+          BlockPublicPolicy: true,
+          IgnorePublicAcls: true,
+          RestrictPublicBuckets: true,
+        },
+      },
+      DeletionPolicy: 'Retain',
+      UpdateReplacePolicy: 'Retain',
+    });
+  });
+
+  it('creates a CloudFront distribution with correct aliases', () => {
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+      DistributionConfig: Match.objectLike({
+        Aliases: ['mangowave.app', 'play.mangowave.app'],
+        HttpVersion: 'http2',
+        ViewerCertificate: Match.objectLike({
+          MinimumProtocolVersion: 'TLSv1.3_2025',
+          SslSupportMethod: 'sni-only',
+        }),
+        CustomErrorResponses: [
+          Match.objectLike({
+            ErrorCode: 403,
+            ResponseCode: 200,
+            ResponsePagePath: '/index.html',
+            ErrorCachingMinTTL: 10,
+          }),
+        ],
+      }),
+    });
+  });
+
+  it('creates a CloudFront Function for host routing', () => {
+    template.hasResourceProperties('AWS::CloudFront::Function', {
+      Name: 'mangowave-host-router',
+      FunctionConfig: Match.objectLike({
+        Runtime: 'cloudfront-js-2.0',
+      }),
+    });
+  });
+
+  it('outputs FrontendBucketName and DistributionId', () => {
+    template.hasOutput('FrontendBucketName', {
+      Value: Match.objectLike({}),
+    });
+    template.hasOutput('DistributionId', {
+      Value: Match.objectLike({}),
+    });
+  });
+
   it('throws when alertEmail is missing', () => {
     const app = new cdk.App();
-    expect(() => new MangoWaveStack(app, 'NoEmailStack')).toThrow('alertEmail prop is required');
+    expect(
+      () =>
+        new MangoWaveStack(app, 'NoEmailStack', {
+          acmCertArn: 'arn:aws:acm:us-east-1:123456789012:certificate/test-cert-id',
+        }),
+    ).toThrow('alertEmail prop is required');
   });
 });

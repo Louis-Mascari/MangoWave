@@ -12,11 +12,19 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
 import * as cloudwatchActions from 'aws-cdk-lib/aws-cloudwatch-actions';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
+import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
+import * as fs from 'fs';
 import * as path from 'path';
 
 interface MangoWaveStackProps extends cdk.StackProps {
   alertEmail?: string;
   corsAllowOrigins?: string[];
+  acmCertArn: string;
+  webAclArn?: string;
+  domainNames?: string[];
 }
 
 export class MangoWaveStack extends cdk.Stack {
@@ -30,6 +38,52 @@ export class MangoWaveStack extends cdk.Stack {
       sortKey: { name: 'SK', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
+    // ─── S3 bucket (frontend assets) ──────────────────────────
+    const frontendBucket = new s3.Bucket(this, 'FrontendBucket', {
+      bucketName: 'mangowave-frontend',
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
+    // ─── CloudFront ─────────────────────────────────────────────
+    const hostRouterFn = new cloudfront.Function(this, 'HostRouterFunction', {
+      functionName: 'mangowave-host-router',
+      code: cloudfront.FunctionCode.fromInline(
+        fs.readFileSync(path.join(__dirname, 'cloudfront-functions/host-router.js'), 'utf-8'),
+      ),
+      runtime: cloudfront.FunctionRuntime.JS_2_0,
+    });
+
+    const certificate = acm.Certificate.fromCertificateArn(this, 'SiteCert', props!.acmCertArn);
+    const domainNames = props!.domainNames ?? ['mangowave.app', 'play.mangowave.app'];
+
+    const distribution = new cloudfront.Distribution(this, 'SiteDistribution', {
+      defaultBehavior: {
+        origin: origins.S3BucketOrigin.withOriginAccessControl(frontendBucket),
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        functionAssociations: [
+          {
+            function: hostRouterFn,
+            eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+          },
+        ],
+        cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+      },
+      domainNames,
+      certificate,
+      errorResponses: [
+        {
+          httpStatus: 403,
+          responseHttpStatus: 200,
+          responsePagePath: '/index.html',
+          ttl: cdk.Duration.seconds(10),
+        },
+      ],
+      httpVersion: cloudfront.HttpVersion.HTTP2,
+      minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_3_2025,
+      webAclId: props!.webAclArn,
     });
 
     // ─── SSM parameters for Spotify credentials ────────────────
@@ -360,6 +414,21 @@ export class MangoWaveStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'TableName', {
       value: table.tableName,
       description: 'DynamoDB table name',
+    });
+
+    new cdk.CfnOutput(this, 'FrontendBucketName', {
+      value: frontendBucket.bucketName,
+      description: 'S3 bucket for frontend assets',
+    });
+
+    new cdk.CfnOutput(this, 'DistributionId', {
+      value: distribution.distributionId,
+      description: 'CloudFront distribution ID',
+    });
+
+    new cdk.CfnOutput(this, 'DistributionDomainName', {
+      value: distribution.distributionDomainName,
+      description: 'CloudFront distribution domain name',
     });
   }
 }

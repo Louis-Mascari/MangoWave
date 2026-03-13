@@ -1,6 +1,6 @@
 # @mangowave/infrastructure
 
-AWS CDK v2 stack for MangoWave's backend infrastructure.
+AWS CDK v2 stack for MangoWave infrastructure (backend + frontend hosting).
 
 ## Development
 
@@ -8,7 +8,7 @@ AWS CDK v2 stack for MangoWave's backend infrastructure.
 npm run build          # tsc
 npm run test           # Jest (CDK template assertion tests)
 npx cdk synth          # Synthesize CloudFormation template
-npx cdk deploy -c alertEmail=<email>   # Deploy stack
+npx cdk deploy -c alertEmail=<email> -c acmCertArn=<arn> -c webAclArn=<arn>  # Deploy stack
 ```
 
 ## Resources
@@ -23,8 +23,9 @@ npx cdk deploy -c alertEmail=<email>   # Deploy stack
 | SNS topic          | Alerts           | All alarms notify via email                               |
 | Budget             | AWS Budgets      | Alerts and automated cost protection                      |
 | SSM parameters     | Spotify secrets  | OAuth credentials (encrypted)                             |
-
-S3 bucket and CloudFront distribution are pre-created outside this CDK stack. The deploy workflow references them via GitHub secrets.
+| S3 bucket          | Frontend hosting | Static assets for app + landing page                      |
+| CloudFront         | CDN              | Distribution with host-based routing (app vs landing)     |
+| CloudFront Func    | Edge routing     | Routes `mangowave.app` requests to `/landing/` prefix     |
 
 ### CORS
 
@@ -38,9 +39,10 @@ API throttling, budget kill-switch, no reserved concurrency — see CDK stack fo
 
 ```
 infrastructure/
-├── bin/mangowave.ts            # CDK app entry point
-├── lib/mangowave-stack.ts      # Main stack definition (all resources)
-├── test/infrastructure.test.ts # CDK template assertion tests
+├── bin/mangowave.ts                          # CDK app entry point
+├── lib/mangowave-stack.ts                    # Main stack definition (all resources)
+├── lib/cloudfront-functions/host-router.js   # CloudFront Function for host-based routing
+├── test/infrastructure.test.ts               # CDK template assertion tests
 ├── cdk.json
 └── tsconfig.json
 ```
@@ -50,5 +52,20 @@ infrastructure/
 Automated via GitHub Actions (`.github/workflows/deploy.yml`) using OIDC to assume an IAM role (pre-created outside this stack). Manual deploy:
 
 ```bash
-npx cdk deploy -c alertEmail=you@example.com
+npx cdk deploy -c alertEmail=you@example.com -c acmCertArn=<arn> -c webAclArn=<arn>
 ```
+
+### Required GitHub Secrets
+
+| Secret                      | Purpose                                                |
+| --------------------------- | ------------------------------------------------------ |
+| `AWS_DEPLOY_ROLE_ARN`       | IAM role ARN for GitHub OIDC credential assumption     |
+| `ALERT_EMAIL`               | Email for CloudWatch alarm + budget SNS notifications  |
+| `ACM_CERT_ARN`              | ACM certificate ARN for CloudFront (`*.mangowave.app`) |
+| `WEB_ACL_ARN`               | WAF WebACL ARN for CloudFront security protection      |
+| `VITE_API_URL`              | API Gateway endpoint URL (frontend build)              |
+| `VITE_SENTRY_DSN`           | Sentry DSN for error tracking (frontend build)         |
+| `VITE_PUBLIC_POSTHOG_KEY`   | PostHog project API key (frontend build)               |
+| `VITE_PUBLIC_POSTHOG_HOST`  | PostHog ingest host (frontend build)                   |
+| `VITE_SPOTIFY_CLIENT_ID`    | Spotify app client ID (frontend build)                 |
+| `VITE_SPOTIFY_REDIRECT_URI` | Spotify OAuth redirect URI (frontend build)            |

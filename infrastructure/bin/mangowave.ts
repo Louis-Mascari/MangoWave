@@ -7,4 +7,6 @@ const app = new cdk.App();
 // Pass config via CDK context: cdk deploy -c alertEmail=you@example.com
 new MangoWaveStack(app, 'MangoWaveStack', {
   alertEmail: app.node.tryGetContext('alertEmail'),
+  acmCertArn: app.node.tryGetContext('acmCertArn'),
+  webAclArn: app.node.tryGetContext('webAclArn'),
 });

@@ -18,6 +18,9 @@ env:
 jobs:
   deploy-backend:
     runs-on: ubuntu-latest
+    outputs:
+      s3-bucket: ${{ steps.cdk-outputs.outputs.bucket }}
+      distribution-id: ${{ steps.cdk-outputs.outputs.distro }}
     steps:
       - uses: actions/checkout@v4
 
@@ -35,8 +38,19 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: CDK deploy
-        run: npx cdk deploy --require-approval never -c alertEmail=${{ secrets.ALERT_EMAIL }}
+        run: >-
+          npx cdk deploy --require-approval never
+          -c alertEmail=${{ secrets.ALERT_EMAIL }}
+          -c acmCertArn=${{ secrets.ACM_CERT_ARN }}
+          -c webAclArn=${{ secrets.WEB_ACL_ARN }}
         working-directory: infrastructure
+
+      - name: Read CDK outputs
+        id: cdk-outputs
+        run: |
+          OUTPUTS=$(aws cloudformation describe-stacks --stack-name MangoWaveStack --query 'Stacks[0].Outputs')
+          echo "bucket=$(echo $OUTPUTS | jq -r '.[] | select(.OutputKey=="FrontendBucketName") | .OutputValue')" >> "$GITHUB_OUTPUT"
+          echo "distro=$(echo $OUTPUTS | jq -r '.[] | select(.OutputKey=="DistributionId") | .OutputValue')" >> "$GITHUB_OUTPUT"
 
   deploy-frontend:
     runs-on: ubuntu-latest
@@ -68,13 +82,13 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Sync app to S3
-        run: aws s3 sync packages/frontend/dist s3://${{ secrets.S3_BUCKET_NAME }} --delete --exclude 'landing/*'
+        run: aws s3 sync packages/frontend/dist s3://${{ needs.deploy-backend.outputs.s3-bucket }} --delete --exclude 'landing/*'
 
       - name: Sync landing page to S3
-        run: aws s3 sync packages/landing s3://${{ secrets.S3_BUCKET_NAME }}/landing --delete
+        run: aws s3 sync packages/landing s3://${{ needs.deploy-backend.outputs.s3-bucket }}/landing --delete
 
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --distribution-id ${{ needs.deploy-backend.outputs.distribution-id }} \
             --paths "/*"

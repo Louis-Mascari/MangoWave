@@ -266,26 +266,32 @@ export function PlaybackPanel({
     >
       <SeekBar source={adapter.source} onSeek={onSeek} />
 
-      {/* Controls: wraps responsively. Core transport stays together,
-          secondary group (shuffle/repeat/nowplaying/queue) wraps as a unit,
-          volume wraps last */}
-      <div className="mt-1 flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
-        {/* Core transport — stays together */}
-        <div className="flex items-center gap-2">
+      {/* Controls: 3-column grid on ≥610px centers transport, stacked flex on narrow */}
+      <div className="mt-1 flex flex-col items-center gap-y-1 min-[610px]:grid min-[610px]:grid-cols-[1fr_auto_1fr] min-[610px]:items-center min-[610px]:gap-x-2">
+        {/* Left column: shuffle + repeat + queue (wide), full secondary row (narrow) */}
+        <div className="order-2 flex items-center gap-2 min-[610px]:order-1 min-[610px]:justify-end">
+          {shuffleBtn}
+          {repeatBtn}
+          {queueBtn}
+          {/* These move to right column on wide screens */}
+          <span className="contents min-[610px]:hidden">
+            {nowPlayingBtn}
+            {volumeControl}
+            {deviceLabel}
+          </span>
+        </div>
+        {/* Center: core transport — always centered */}
+        <div className="order-1 flex items-center gap-2 min-[610px]:order-2">
           {prevBtn}
           {playBtn}
           {nextBtn}
         </div>
-        {/* Secondary controls — wraps as a group */}
-        <div className="flex items-center gap-2">
-          {shuffleBtn}
-          {repeatBtn}
+        {/* Right column: nowPlaying + volume (wide only) */}
+        <div className="hidden items-center gap-2 min-[610px]:flex min-[610px]:order-3">
           {nowPlayingBtn}
-          {queueBtn}
+          {volumeControl}
+          {deviceLabel}
         </div>
-        {/* Volume — wraps independently as last resort */}
-        {volumeControl}
-        {deviceLabel}
       </div>
     </div>
   );

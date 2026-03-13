@@ -31,6 +31,8 @@ interface ControlBarProps {
   onMobileMenuChange?: (open: boolean) => void;
   onForcePlaybackIdle?: () => void;
   hasPlaybackPanel?: boolean;
+  isIdle: boolean;
+  forceIdle: () => void;
 }
 
 export function ControlBar(props: ControlBarProps) {
@@ -59,6 +61,8 @@ export function ControlBar(props: ControlBarProps) {
         onMenuOpenChange={props.onMobileMenuChange}
         onForcePlaybackIdle={props.onForcePlaybackIdle}
         hasPlaybackPanel={props.hasPlaybackPanel}
+        isIdle={props.isIdle}
+        forceIdle={props.forceIdle}
       />
     </>
   );

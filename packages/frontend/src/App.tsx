@@ -475,9 +475,11 @@ function MainApp() {
   const playbackAdapter: PlaybackAdapter = useMemo(() => {
     if (local.isActive) {
       const handleLocalPlay = () => {
-        // If playback ended (not playing, at end), restart from the first track
-        const { tracks, currentTrackIndex, isPlaying } = useMediaPlayerStore.getState();
-        if (!isPlaying && tracks.length > 0 && currentTrackIndex === tracks.length - 1) {
+        // If the playlist fully ended (last track, not playing, audio at end), restart
+        const { tracks, currentTrackIndex, isPlaying, currentTime, duration } =
+          useMediaPlayerStore.getState();
+        const atEnd = duration > 0 && currentTime >= duration - 0.5;
+        if (!isPlaying && atEnd && tracks.length > 0 && currentTrackIndex === tracks.length - 1) {
           useMediaPlayerStore.getState().setCurrentTrack(0);
         } else {
           local.play();
@@ -674,78 +676,76 @@ function MainApp() {
           {showLaunchAnimation && (
             <LaunchAnimation onComplete={() => setShowLaunchAnimation(false)} />
           )}
-          {!showLaunchAnimation && (
-            <>
-              {presetNameDisplay !== 'off' && (
-                <PresetNotification message={currentPreset} mode={presetNameDisplay} />
-              )}
-              <RateLimitToast />
-              <NowPlaying enabled={songInfoDisplay !== 'off'} track={nowPlayingTrack} />
-              <ControlBar
-                onNextPreset={handleNextPreset}
-                onPreviousPreset={handlePreviousPreset}
-                canGoBack={canGoBack}
-                onSelectPreset={handleSelectPreset}
-                onStop={handleStop}
-                onToggleFullscreen={handleToggleFullscreen}
-                isFullscreen={isFullscreen}
-                presetList={presetList}
-                presetPackMap={presetPackMap}
-                currentPreset={currentPreset}
-                autopilotEnabled={autopilot.enabled}
-                onToggleAutopilot={handleToggleAutopilot}
-                activePanel={activePanel}
-                onTogglePanel={handleTogglePanel}
-                isFavorite={favoritePresets.includes(currentPreset)}
-                isBlocked={blockedPresets.includes(currentPreset)}
-                onToggleFavorite={handleToggleFavorite}
-                onToggleBlock={handleToggleBlock}
-                onAddLocalFiles={handleAddLocalFiles}
-                onClearPlaylist={local.clearQueue}
-                onMobileMenuChange={setMobileMenuOpen}
-                onForcePlaybackIdle={forcePlaybackIdle}
-                hasPlaybackPanel={hasPlaybackPanel}
-              />
-              <PlaybackPanel
-                adapter={playbackAdapter}
-                onSeek={handlePlaybackPanelSeek}
-                volume={local.isActive ? local.volume : undefined}
-                onVolumeChange={local.isActive ? local.setVolume : undefined}
-                isMuted={local.isActive ? local.isMuted : undefined}
-                onToggleMute={local.isActive ? local.toggleMute : undefined}
-                isIdle={playbackPanelIdle}
-                onPauseIdle={pausePlaybackIdle}
-                onResumeIdle={resumePlaybackIdle}
-                nowPlayingEnabled={songInfoDisplay !== 'off'}
-                onToggleNowPlaying={handleToggleNowPlaying}
-                onToggleQueue={handleToggleQueue}
-                isQueueOpen={activePanel === 'playlist'}
-                hidden={mobileMenuOpen}
-              />
-              {/* Mobile queue modal — desktop queue renders inside ControlBar */}
-              {isMobileDevice && activePanel === 'playlist' && (
-                <div className="fixed inset-0 z-[60] flex items-stretch justify-center bg-black/50 backdrop-blur-sm">
-                  <div className="relative mx-2 my-2 flex max-h-full w-full flex-col overflow-hidden rounded-lg bg-gray-900/95">
-                    <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-                      <h3 className="text-sm font-semibold text-white">Queue</h3>
-                      <button
-                        onClick={() => setActivePanel('none')}
-                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-none bg-white/10 text-sm text-white/70 hover:bg-white/20"
-                        aria-label="Close"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-3">
-                      <MediaPlaylist onAddFiles={handleAddLocalFiles} onClear={local.clearQueue} />
-                    </div>
-                  </div>
-                </div>
-              )}
-              <ActionToast />
-              <ShortcutOverlay visible={showShortcutOverlay} onClose={toggleShortcutOverlay} />
-            </>
+          {presetNameDisplay !== 'off' && (
+            <PresetNotification message={currentPreset} mode={presetNameDisplay} />
           )}
+          <RateLimitToast />
+          <NowPlaying enabled={songInfoDisplay !== 'off'} track={nowPlayingTrack} />
+          <ControlBar
+            onNextPreset={handleNextPreset}
+            onPreviousPreset={handlePreviousPreset}
+            canGoBack={canGoBack}
+            onSelectPreset={handleSelectPreset}
+            onStop={handleStop}
+            onToggleFullscreen={handleToggleFullscreen}
+            isFullscreen={isFullscreen}
+            presetList={presetList}
+            presetPackMap={presetPackMap}
+            currentPreset={currentPreset}
+            autopilotEnabled={autopilot.enabled}
+            onToggleAutopilot={handleToggleAutopilot}
+            activePanel={activePanel}
+            onTogglePanel={handleTogglePanel}
+            isFavorite={favoritePresets.includes(currentPreset)}
+            isBlocked={blockedPresets.includes(currentPreset)}
+            onToggleFavorite={handleToggleFavorite}
+            onToggleBlock={handleToggleBlock}
+            onAddLocalFiles={handleAddLocalFiles}
+            onClearPlaylist={local.clearQueue}
+            onMobileMenuChange={setMobileMenuOpen}
+            onForcePlaybackIdle={forcePlaybackIdle}
+            hasPlaybackPanel={hasPlaybackPanel}
+            isIdle={playbackPanelIdle}
+            forceIdle={forcePlaybackIdle}
+          />
+          <PlaybackPanel
+            adapter={playbackAdapter}
+            onSeek={handlePlaybackPanelSeek}
+            volume={local.isActive ? local.volume : undefined}
+            onVolumeChange={local.isActive ? local.setVolume : undefined}
+            isMuted={local.isActive ? local.isMuted : undefined}
+            onToggleMute={local.isActive ? local.toggleMute : undefined}
+            isIdle={playbackPanelIdle}
+            onPauseIdle={pausePlaybackIdle}
+            onResumeIdle={resumePlaybackIdle}
+            nowPlayingEnabled={songInfoDisplay !== 'off'}
+            onToggleNowPlaying={handleToggleNowPlaying}
+            onToggleQueue={handleToggleQueue}
+            isQueueOpen={activePanel === 'playlist'}
+            hidden={mobileMenuOpen}
+          />
+          {/* Mobile queue modal — desktop queue renders inside ControlBar */}
+          {isMobileDevice && activePanel === 'playlist' && (
+            <div className="fixed inset-0 z-[60] flex items-stretch justify-center bg-black/50 backdrop-blur-sm">
+              <div className="relative mx-2 my-2 flex max-h-full w-full flex-col overflow-hidden rounded-lg bg-gray-900/95">
+                <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+                  <h3 className="text-sm font-semibold text-white">Queue</h3>
+                  <button
+                    onClick={() => setActivePanel('none')}
+                    className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-none bg-white/10 text-sm text-white/70 hover:bg-white/20"
+                    aria-label="Close"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto p-3">
+                  <MediaPlaylist onAddFiles={handleAddLocalFiles} onClear={local.clearQueue} />
+                </div>
+              </div>
+            </div>
+          )}
+          <ActionToast />
+          <ShortcutOverlay visible={showShortcutOverlay} onClose={toggleShortcutOverlay} />
         </>
       ) : (
         <StartScreen

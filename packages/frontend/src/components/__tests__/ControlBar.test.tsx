@@ -25,6 +25,8 @@ const defaultProps = {
   isBlocked: false,
   onToggleFavorite: vi.fn(),
   onToggleBlock: vi.fn(),
+  isIdle: false,
+  forceIdle: vi.fn(),
 };
 
 describe('ControlBar', () => {

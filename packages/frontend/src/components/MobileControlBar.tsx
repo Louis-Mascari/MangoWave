@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useIdleTimer } from '../hooks/useIdleTimer.ts';
 import { SettingsPanel } from './SettingsPanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
 import type { PanelView } from './ControlBar.tsx';
@@ -30,6 +29,8 @@ interface MobileControlBarProps {
   onMenuOpenChange?: (open: boolean) => void;
   onForcePlaybackIdle?: () => void;
   hasPlaybackPanel?: boolean;
+  isIdle: boolean;
+  forceIdle: () => void;
 }
 
 export function MobileControlBar({
@@ -54,8 +55,9 @@ export function MobileControlBar({
   onMenuOpenChange,
   onForcePlaybackIdle,
   hasPlaybackPanel,
+  isIdle,
+  forceIdle,
 }: MobileControlBarProps) {
-  const { isIdle, forceIdle } = useIdleTimer(5000, 5000);
   const [menuOpen, setMenuOpen] = useState(false);
   const [modalPanel, setModalPanel] = useState<PanelView>('none');
 

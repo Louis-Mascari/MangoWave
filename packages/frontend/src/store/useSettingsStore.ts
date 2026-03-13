@@ -113,7 +113,7 @@ const DESKTOP_PERFORMANCE: PerformanceSettings = {
   fxaa: false,
 };
 
-const MOBILE_PERFORMANCE: PerformanceSettings = {
+export const MOBILE_PERFORMANCE: PerformanceSettings = {
   fpsCap: 30,
   resolutionScale: 0.75,
   meshWidth: 32,

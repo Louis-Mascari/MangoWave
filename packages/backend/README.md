@@ -22,7 +22,8 @@ src/
 │   └── settings-load.ts
 ├── lib/
 │   ├── spotify.ts      # Spotify API client (token exchange, refresh, profile)
-│   └── dynamo.ts       # DynamoDB operations (sessions, settings)
+│   ├── dynamo.ts       # DynamoDB operations (sessions, settings)
+│   └── validation.ts   # Server-side settings validation (type, range, size checks)
 └── types/
     ├── api.ts          # Response helpers (jsonResponse, errorResponse)
     └── spotify.ts      # Spotify API response types
@@ -69,8 +70,9 @@ Settings are keyed to the user's Spotify ID (resolved from their session). Spoti
 
 - **Spotify client secret** stored in SSM Parameter Store (encrypted at rest), never exposed to the client
 - **Session validation** on every request — all endpoints look up the `sessionId` in DynamoDB before proceeding
+- **Session TTL** — sessions expire after 90 days via DynamoDB TTL (auto-deleted). TTL is refreshed on each token rotation
 - **CORS** restricted to allowed origins at the API Gateway level (not open to `*`)
-- **Input validation** — JSON parsing with try-catch, required fields validated before use
+- **Settings validation** — `settings-save` validates all fields server-side: type checks, `Number.isFinite()` guards, range clamping (gains ±12, transition 0–30), preset list limits (10K items, 200 chars each), and extra key stripping. 1 MB body size limit (413 response)
 - **Error opacity** — generic 500 errors don't expose implementation details; 400/404 errors are specific
 
 ## Error Handling

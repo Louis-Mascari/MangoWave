@@ -53,7 +53,18 @@ const MOBILE_TIPS: Tip[] = [
     title: 'Navigate Presets',
     description:
       'Use Next (▶) and Previous (◀) to skip between presets. Each one reacts to your music in its own way.',
-    icon: '⏭',
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 36 36"
+        fill="none"
+        className="inline-block h-8 w-8"
+      >
+        <path d="M6 8l10 10L6 28V8z" fill="#f97316" />
+        <path d="M18 8l10 10-10 10V8z" fill="#f97316" />
+        <rect x="29" y="8" width="3" height="20" rx="1" fill="#f97316" />
+      </svg>
+    ),
   },
   {
     title: 'Curate Your Experience',

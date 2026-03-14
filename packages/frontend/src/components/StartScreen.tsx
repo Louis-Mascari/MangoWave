@@ -60,7 +60,10 @@ export function StartScreen({
     e.target.value = '';
   };
 
-  const closeModal = useCallback(() => setActiveModal('none'), [setActiveModal]);
+  const closeModal = useCallback(() => {
+    setActiveModal('none');
+    if (error) onClearError();
+  }, [setActiveModal, error, onClearError]);
 
   // Close modal on Escape
   useEffect(() => {

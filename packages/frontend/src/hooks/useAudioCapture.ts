@@ -89,8 +89,10 @@ export function useAudioCapture(): UseAudioCaptureReturn {
             'to check "Share audio" (or "Share system audio") in the browser dialog.\n\n' +
             'Audio sharing requires Chrome, Edge, or Opera on desktop. ' +
             'Firefox, Safari, and mobile browsers do not support audio capture.\n\n' +
-            'On macOS and Linux, audio is only available when sharing a browser tab. ' +
-            'On Windows and ChromeOS, all sharing modes (screen, window, and tab) support audio.',
+            'On Windows and ChromeOS, all sharing modes support audio. ' +
+            'On macOS (Sonoma or later), screen and window sharing support audio in Chrome — ' +
+            'older macOS versions are limited to tab sharing. ' +
+            'On Linux, tab sharing is the most reliable option for audio.',
         );
         setIsCapturing(false);
         return false;

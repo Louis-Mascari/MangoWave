@@ -228,8 +228,9 @@ export function StartScreen({
           </ol>
           <p className="mt-2 text-xs text-[#888]">
             Tip: On Windows and ChromeOS, sharing your entire screen or a window gives the cleanest
-            experience (no browser banner). On macOS and Linux, audio capture only works when
-            sharing a browser tab. Go fullscreen (F) for full immersion.
+            experience (no browser banner). On macOS (Sonoma+), screen and window sharing also
+            support audio. On older macOS or Linux, share a browser tab for audio. Go fullscreen (F)
+            for full immersion.
           </p>
           <ol className="mt-3 flex flex-col gap-3 text-sm text-[#aaa]">
             <li>

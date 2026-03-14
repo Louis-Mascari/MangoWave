@@ -51,7 +51,7 @@ src/
 ├── services/      # Spotify Web API client (owner-mode OAuth + PKCE utilities for self-hosters)
 ├── store/         # Zustand stores: useSettingsStore, useSpotifyStore, useMediaPlayerStore,
 │                  #     usePresetHistoryStore, useToastStore
-├── utils/         # Shared utilities (isMobileDevice, settingsPortability)
+├── utils/         # Shared utilities (isMobileDevice, settingsPortability, audioFileValidation)
 ├── types/         # butterchurn.d.ts, music-metadata.d.ts (type declarations for untyped packages)
 └── test/          # Vitest global setup
 ```
@@ -135,3 +135,7 @@ Floating panel (`components/PlaybackPanel.tsx`) rendered by App.tsx when source 
 - **400+ presets** loaded from 6 butterchurn packs, organized by source pack with virtualized browsing (`react-virtuoso`).
 - **`secure-json-parse`** used for prototype pollution protection on settings import.
 - **Settings import sanitization** — all imported values clamped to UI-enforced ranges. Whitelisted data keys only (store functions can't be overwritten).
+- **Audio capture errors** — `humanizeAudioError` in `useAudioCapture` maps DOMException names to user-friendly messages per source (system vs mic). Missing audio tracks on screen share (user forgot "Share audio") block launch with platform-specific guidance. `startCapture`/`startMicCapture` return `boolean` success so callers gate on result.
+- **Silence detection** — App.tsx checks FFT data 5s after system capture starts; warns via toast if no audio signal detected.
+- **File validation** — `audioFileValidation.ts` validates files by MIME type (`audio/*`) with extension fallback. StartScreen shows rejection errors in the modal; MediaPlaylist queue shows error toast. Defence-in-depth behind the `accept="audio/*"` attribute.
+- **WebGL context loss** — `Visualizer` listens for `webglcontextlost` on the canvas; App.tsx shows a z-200 reload overlay with user-facing explanation.

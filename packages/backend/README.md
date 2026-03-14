@@ -77,6 +77,6 @@ Settings are keyed to the user's Spotify ID (resolved from their session). Spoti
 
 ## Error Handling
 
-- `403` from Spotify → non-Premium users still see Now Playing metadata but the frontend hides playback controls (seek, shuffle, repeat)
-- `401` from Spotify → triggers automatic token refresh on the frontend
+- `403` from Spotify → frontend parses the response body; only `PREMIUM_REQUIRED` reason hides playback controls (non-Premium users still see Now Playing metadata). Other 403 reasons (player command failures, stale tokens) show a generic error toast without disabling controls
+- `401` from Spotify → frontend refreshes token via `refreshAccessToken` and retries the failed command once
 - `429` from Spotify → rate limit toast on frontend, polling pause with auto-resume

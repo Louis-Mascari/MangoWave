@@ -7,6 +7,17 @@ export interface SpotifyUser {
   product: string | null; // "premium", "free", "open"
 }
 
+export interface SpotifyDisallows {
+  pausing?: boolean;
+  resuming?: boolean;
+  seeking?: boolean;
+  skipping_next?: boolean;
+  skipping_prev?: boolean;
+  toggling_shuffle?: boolean;
+  toggling_repeat_context?: boolean;
+  toggling_repeat_track?: boolean;
+}
+
 export interface NowPlayingTrack {
   title: string;
   artist: string;
@@ -18,6 +29,7 @@ export interface NowPlayingTrack {
   deviceName: string | null;
   shuffleState: boolean;
   repeatState: 'off' | 'track' | 'context';
+  disallows: SpotifyDisallows;
 }
 
 export interface SpotifyAuthResponse {
@@ -126,6 +138,7 @@ export async function getNowPlaying(accessToken: string): Promise<NowPlayingTrac
     deviceName: data.device?.name ?? null,
     shuffleState: data.shuffle_state ?? false,
     repeatState: data.repeat_state ?? 'off',
+    disallows: (data.actions?.disallows as SpotifyDisallows) ?? {},
   };
 }
 
@@ -301,16 +314,14 @@ export class RateLimitedError extends Error {
  * Other 403 reasons (stale token, player command failure, etc.) throw a generic error.
  */
 async function handleForbidden(response: Response): Promise<never> {
+  let data: { error?: { reason?: string; message?: string } } | undefined;
   try {
-    const data = await response.json();
-    const reason: string | undefined = data?.error?.reason;
-    if (reason === 'PREMIUM_REQUIRED') {
-      throw new PremiumRequiredError();
-    }
-    throw new Error(data?.error?.message ?? `Spotify API error (403)`);
-  } catch (err) {
-    if (err instanceof PremiumRequiredError) throw err;
-    if (err instanceof Error && err.message !== 'Unexpected end of JSON input') throw err;
+    data = await response.json();
+  } catch {
     throw new Error('Spotify API error (403)');
   }
+  if (data?.error?.reason === 'PREMIUM_REQUIRED') {
+    throw new PremiumRequiredError();
+  }
+  throw new Error(data?.error?.message ?? 'Spotify API error (403)');
 }

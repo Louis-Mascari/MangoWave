@@ -1,12 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
-import {
-  getNowPlaying,
-  refreshToken,
-  TokenExpiredError,
-  RateLimitedError,
-} from '../services/spotifyApi.ts';
-import { refreshTokenPkce } from '../services/spotifyPkce.ts';
+import { getNowPlaying, TokenExpiredError, RateLimitedError } from '../services/spotifyApi.ts';
 
 const POLL_INTERVAL_MS = 5000;
 const REPOLL_DELAY_MS = 500;
@@ -22,14 +16,11 @@ export function useNowPlaying(enabled: boolean) {
   const accessToken = useSpotifyStore((s) => s.accessToken);
   const sessionId = useSpotifyStore((s) => s.sessionId);
   const byocClientId = useSpotifyStore((s) => s.byocClientId);
-  const byocRefreshToken = useSpotifyStore((s) => s.byocRefreshToken);
   const isRateLimited = useSpotifyStore((s) => s.isRateLimited);
   const setNowPlaying = useSpotifyStore((s) => s.setNowPlaying);
-  const setAccessToken = useSpotifyStore((s) => s.setAccessToken);
-  const setByocRefreshToken = useSpotifyStore((s) => s.setByocRefreshToken);
+  const refreshAccessToken = useSpotifyStore((s) => s.refreshAccessToken);
   const setRateLimited = useSpotifyStore((s) => s.setRateLimited);
   const clearRateLimited = useSpotifyStore((s) => s.clearRateLimited);
-  const logout = useSpotifyStore((s) => s.logout);
   const pollRequestedAt = useSpotifyStore((s) => s.pollRequestedAt);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const rateLimitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -76,40 +67,18 @@ export function useNowPlaying(enabled: boolean) {
       if (err instanceof RateLimitedError) {
         handleRateLimitError(err);
       } else if (err instanceof TokenExpiredError) {
+        const newToken = await refreshAccessToken();
+        if (!newToken) return;
+        tokenRef.current = newToken;
         try {
-          if (byocClientId && byocRefreshToken) {
-            // BYOC PKCE refresh
-            const result = await refreshTokenPkce(byocClientId, byocRefreshToken);
-            tokenRef.current = result.accessToken;
-            setAccessToken(result.accessToken, result.expiresIn);
-            setByocRefreshToken(result.refreshToken);
-          } else if (sessionId) {
-            // Owner backend refresh
-            const result = await refreshToken(sessionId);
-            tokenRef.current = result.accessToken;
-            setAccessToken(result.accessToken, result.expiresIn);
-          } else {
-            logout();
-            return;
-          }
-          const track = await getNowPlaying(tokenRef.current!);
+          const track = await getNowPlaying(newToken);
           setNowPlaying(track);
         } catch {
-          logout();
+          // Refresh succeeded but poll failed — will retry on next interval
         }
       }
     }
-  }, [
-    hasAuth,
-    sessionId,
-    byocClientId,
-    byocRefreshToken,
-    setNowPlaying,
-    setAccessToken,
-    setByocRefreshToken,
-    logout,
-    handleRateLimitError,
-  ]);
+  }, [hasAuth, setNowPlaying, refreshAccessToken, handleRateLimitError]);
 
   // Start/stop the regular polling interval
   useEffect(() => {

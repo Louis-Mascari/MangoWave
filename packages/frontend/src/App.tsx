@@ -103,14 +103,15 @@ function MainApp() {
 
   const accessToken = useSpotifyStore((s) => s.accessToken);
   const isSpotifyConnected = !!accessToken;
-  useNowPlaying(isSpotifyConnected);
-
   const capture = useAudioCapture();
   const local = useLocalPlayback();
 
   // Whichever source is active provides the engine
   const audioEngine = capture.audioEngine ?? local.audioEngine;
   const isActive = capture.isCapturing || local.isActive;
+
+  // Only poll Spotify when the visualizer is running — no need on the start screen
+  useNowPlaying(isSpotifyConnected && isActive);
   const rendererRef = useRef<VisualizerRenderer | null>(null);
   const blockedPresets = useSettingsStore((s) => s.blockedPresets);
   const favoritePresets = useSettingsStore((s) => s.favoritePresets);
@@ -472,6 +473,8 @@ function MainApp() {
   const toggleShuffle = useMediaPlayerStore((s) => s.toggleShuffle);
   const cycleRepeatMode = useMediaPlayerStore((s) => s.cycleRepeatMode);
 
+  const refreshAccessToken = useSpotifyStore((s) => s.refreshAccessToken);
+
   const handleSpotifyError = useCallback(
     (err: unknown) => {
       if (err instanceof RateLimitedError) {
@@ -502,60 +505,59 @@ function MainApp() {
     [setRateLimited, clearRateLimited, setPremiumError, requestPoll],
   );
 
-  const handleSpotifyAction = useCallback(
-    async (action: 'play' | 'pause' | 'next' | 'previous') => {
+  /** Run a Spotify API call with automatic token refresh + single retry on 401 */
+  const withTokenRetry = useCallback(
+    async (apiCall: (token: string) => Promise<void>) => {
       const token = useSpotifyStore.getState().accessToken;
       if (!token) return;
-      if (action === 'play') updateIsPlaying(true);
-      else if (action === 'pause') updateIsPlaying(false);
       try {
-        await controlPlayback(token, action);
+        await apiCall(token);
         requestPoll();
       } catch (err) {
+        if (err instanceof TokenExpiredError) {
+          const newToken = await refreshAccessToken();
+          if (!newToken) return;
+          try {
+            await apiCall(newToken);
+            requestPoll();
+            return;
+          } catch (retryErr) {
+            handleSpotifyError(retryErr);
+            return;
+          }
+        }
         handleSpotifyError(err);
       }
     },
-    [updateIsPlaying, requestPoll, handleSpotifyError],
+    [requestPoll, handleSpotifyError, refreshAccessToken],
+  );
+
+  const handleSpotifyAction = useCallback(
+    async (action: 'play' | 'pause' | 'next' | 'previous') => {
+      if (action === 'play') updateIsPlaying(true);
+      else if (action === 'pause') updateIsPlaying(false);
+      await withTokenRetry((t) => controlPlayback(t, action));
+    },
+    [updateIsPlaying, withTokenRetry],
   );
 
   const handleSpotifySeek = useCallback(
     async (positionMs: number) => {
-      const token = useSpotifyStore.getState().accessToken;
-      if (!token) return;
-      try {
-        await seekToPosition(token, positionMs);
-        requestPoll();
-      } catch (err) {
-        handleSpotifyError(err);
-      }
+      await withTokenRetry((t) => seekToPosition(t, positionMs));
     },
-    [requestPoll, handleSpotifyError],
+    [withTokenRetry],
   );
 
   const handleSpotifyToggleShuffle = useCallback(async () => {
-    const token = useSpotifyStore.getState().accessToken;
     const current = useSpotifyStore.getState().nowPlaying?.shuffleState ?? false;
-    if (!token) return;
-    try {
-      await apiToggleShuffle(token, !current);
-      requestPoll();
-    } catch (err) {
-      handleSpotifyError(err);
-    }
-  }, [requestPoll, handleSpotifyError]);
+    await withTokenRetry((t) => apiToggleShuffle(t, !current));
+  }, [withTokenRetry]);
 
   const handleSpotifyCycleRepeat = useCallback(async () => {
-    const token = useSpotifyStore.getState().accessToken;
     const current = useSpotifyStore.getState().nowPlaying?.repeatState ?? 'off';
-    if (!token) return;
     const next = current === 'off' ? 'context' : current === 'context' ? 'track' : 'off';
-    try {
-      await setRepeatMode(token, next);
-      requestPoll();
-    } catch (err) {
-      handleSpotifyError(err);
-    }
-  }, [requestPoll, handleSpotifyError]);
+    await withTokenRetry((t) => setRepeatMode(t, next));
+  }, [withTokenRetry]);
 
   const playbackAdapter: PlaybackAdapter = useMemo(() => {
     if (local.isActive) {
@@ -597,14 +599,23 @@ function MainApp() {
       };
     }
     if (isSpotifyConnected && !premiumError) {
+      const disallows = spotifyNowPlaying?.disallows ?? {};
       return {
         source: 'spotify',
         isPlaying: spotifyNowPlaying?.isPlaying ?? false,
         canControl: !isRateLimited,
-        onPlay: () => handleSpotifyAction('play'),
-        onPause: () => handleSpotifyAction('pause'),
-        onNext: () => handleSpotifyAction('next'),
-        onPrevious: () => handleSpotifyAction('previous'),
+        onPlay: () => {
+          if (!disallows.resuming) handleSpotifyAction('play');
+        },
+        onPause: () => {
+          if (!disallows.pausing) handleSpotifyAction('pause');
+        },
+        onNext: () => {
+          if (!disallows.skipping_next) handleSpotifyAction('next');
+        },
+        onPrevious: () => {
+          if (!disallows.skipping_prev) handleSpotifyAction('previous');
+        },
         shuffle: spotifyNowPlaying?.shuffleState ?? false,
         repeatMode:
           spotifyNowPlaying?.repeatState === 'track'
@@ -612,8 +623,13 @@ function MainApp() {
             : spotifyNowPlaying?.repeatState === 'context'
               ? 'all'
               : 'off',
-        onToggleShuffle: handleSpotifyToggleShuffle,
-        onCycleRepeat: handleSpotifyCycleRepeat,
+        onToggleShuffle: () => {
+          if (!disallows.toggling_shuffle) handleSpotifyToggleShuffle();
+        },
+        onCycleRepeat: () => {
+          if (!disallows.toggling_repeat_context && !disallows.toggling_repeat_track)
+            handleSpotifyCycleRepeat();
+        },
         tooltip: isRateLimited ? 'Spotify rate limited' : undefined,
       };
     }

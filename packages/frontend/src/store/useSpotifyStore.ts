@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { SpotifyUser, NowPlayingTrack } from '../services/spotifyApi.ts';
+import { refreshToken } from '../services/spotifyApi.ts';
+import { refreshTokenPkce } from '../services/spotifyPkce.ts';
 
 export type AuthMode = 'owner' | 'byoc' | 'locked';
 
@@ -46,6 +48,7 @@ interface SpotifyState {
   getAuthMode: () => AuthMode;
   logout: () => void;
   isTokenValid: () => boolean;
+  refreshAccessToken: () => Promise<string | null>;
 }
 
 export const useSpotifyStore = create<SpotifyState>()(
@@ -138,6 +141,31 @@ export const useSpotifyStore = create<SpotifyState>()(
           rateLimitResetsAt: null,
           pollRequestedAt: 0,
         }),
+
+      refreshAccessToken: async () => {
+        const { sessionId, byocClientId, byocRefreshToken: byocRefresh } = get();
+        try {
+          if (byocClientId && byocRefresh) {
+            const result = await refreshTokenPkce(byocClientId, byocRefresh);
+            set({
+              accessToken: result.accessToken,
+              tokenExpiresAt: Date.now() + result.expiresIn * 1000,
+              byocRefreshToken: result.refreshToken,
+            });
+            return result.accessToken;
+          } else if (sessionId) {
+            const result = await refreshToken(sessionId);
+            set({
+              accessToken: result.accessToken,
+              tokenExpiresAt: Date.now() + result.expiresIn * 1000,
+            });
+            return result.accessToken;
+          }
+        } catch {
+          get().logout();
+        }
+        return null;
+      },
 
       isTokenValid: () => {
         const { accessToken, tokenExpiresAt } = get();

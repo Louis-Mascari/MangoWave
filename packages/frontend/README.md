@@ -112,9 +112,11 @@ Spotify is optional and only available in **owner mode** (backend-proxied OAuth)
 Key details:
 
 - **PlaybackAdapter** — source-agnostic interface (`local | system | mic | spotify | none`). Spotify adapter only activates for Premium users; non-Premium falls to `'none'` (no PlaybackPanel, but Now Playing metadata still shown)
-- **`GET /me/player`** — full playback state (device name, shuffle, repeat) instead of `/me/player/currently-playing`
+- **`GET /me/player`** — full playback state (device name, shuffle, repeat, `disallows`) instead of `/me/player/currently-playing`
 - **`useSpotifyProgress`** — interpolates progress between 5s polls via `useSyncExternalStore` + `requestAnimationFrame` for smooth seek bar
-- **Seek/shuffle/repeat** — `PUT /me/player/seek`, `PUT /me/player/shuffle`, `PUT /me/player/repeat` with 401/403/429 error handling
+- **Seek/shuffle/repeat** — `PUT /me/player/seek`, `PUT /me/player/shuffle`, `PUT /me/player/repeat`. `disallows` from player state guards actions client-side (prevents sending commands Spotify would reject)
+- **Error handling** — 403 responses parsed via `handleForbidden`: only `PREMIUM_REQUIRED` reason sets `premiumError` flag; other 403s show generic toast. 401 triggers `withTokenRetry` (refresh + single retry). Token refresh centralized in `useSpotifyStore.refreshAccessToken` (owner + BYOC)
+- **Polling** — 5s interval via `useNowPlaying`, only active when visualizer is running (`isSpotifyConnected && isActive`). No API calls on the start screen
 - **Auth mode** — UI branches on `authMode === 'owner'` (not `isSpotifyUnlocked`)
 - **Connect button** — click guard (`isConnecting` state) prevents double-auth
 

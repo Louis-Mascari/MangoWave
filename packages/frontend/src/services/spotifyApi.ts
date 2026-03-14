@@ -160,12 +160,12 @@ export async function controlPlayback(
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 
-  if (response.status === 403) {
-    throw new PremiumRequiredError();
-  }
-
   if (response.status === 401) {
     throw new TokenExpiredError();
+  }
+
+  if (response.status === 403) {
+    await handleForbidden(response);
   }
 
   if (response.status === 429) {
@@ -187,8 +187,8 @@ export async function seekToPosition(accessToken: string, positionMs: number): P
     },
   );
 
-  if (response.status === 403) throw new PremiumRequiredError();
   if (response.status === 401) throw new TokenExpiredError();
+  if (response.status === 403) await handleForbidden(response);
   if (response.status === 429) {
     const retryAfter = parseInt(response.headers.get('Retry-After') ?? '5', 10);
     throw new RateLimitedError(retryAfter);
@@ -203,8 +203,8 @@ export async function toggleShuffle(accessToken: string, state: boolean): Promis
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 
-  if (response.status === 403) throw new PremiumRequiredError();
   if (response.status === 401) throw new TokenExpiredError();
+  if (response.status === 403) await handleForbidden(response);
   if (response.status === 429) {
     const retryAfter = parseInt(response.headers.get('Retry-After') ?? '5', 10);
     throw new RateLimitedError(retryAfter);
@@ -222,8 +222,8 @@ export async function setRepeatMode(
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 
-  if (response.status === 403) throw new PremiumRequiredError();
   if (response.status === 401) throw new TokenExpiredError();
+  if (response.status === 403) await handleForbidden(response);
   if (response.status === 429) {
     const retryAfter = parseInt(response.headers.get('Retry-After') ?? '5', 10);
     throw new RateLimitedError(retryAfter);
@@ -292,5 +292,25 @@ export class RateLimitedError extends Error {
     super(`Rate limited — retry after ${retryAfterSeconds}s`);
     this.name = 'RateLimitedError';
     this.retryAfterSeconds = retryAfterSeconds;
+  }
+}
+
+/**
+ * Parse a 403 response from Spotify and throw the appropriate error.
+ * Only throws PremiumRequiredError when Spotify explicitly indicates PREMIUM_REQUIRED.
+ * Other 403 reasons (stale token, player command failure, etc.) throw a generic error.
+ */
+async function handleForbidden(response: Response): Promise<never> {
+  try {
+    const data = await response.json();
+    const reason: string | undefined = data?.error?.reason;
+    if (reason === 'PREMIUM_REQUIRED') {
+      throw new PremiumRequiredError();
+    }
+    throw new Error(data?.error?.message ?? `Spotify API error (403)`);
+  } catch (err) {
+    if (err instanceof PremiumRequiredError) throw err;
+    if (err instanceof Error && err.message !== 'Unexpected end of JSON input') throw err;
+    throw new Error('Spotify API error (403)');
   }
 }

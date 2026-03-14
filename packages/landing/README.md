@@ -10,12 +10,15 @@ Static landing page served at [mangowave.app](https://mangowave.app). Pure HTML 
 
 ```
 landing/
-├── index.html       # Single-page landing with inline SVG icons
+├── index.html       # Single-page landing with inline SVG icons, JSON-LD structured data
 ├── style.css        # Extracted styles
+├── robots.txt       # Search engine directives + sitemap reference
+├── sitemap.xml      # Single-URL sitemap (mangowave.app)
 ├── favicon.ico      # Browser tab icon
 ├── images/          # Visual assets
 │   ├── logo.png     # MangoWave logo (transparent background)
-│   └── howling.png  # Background wolf image (subtle opacity layer)
+│   ├── howling.png  # Background dog image (subtle opacity layer)
+│   └── social-card.png  # 1200×630 OG/Twitter social share image
 └── icons/           # Favicons and touch icons
     ├── apple-touch-icon.png
     ├── android-chrome-192x192.png
@@ -30,7 +33,8 @@ landing/
 - **Features grid:** 500+ Visuals, Any Audio Source, Desktop & Mobile, No Signup, No Install, No Ads
 - **CTA:** links to [play.mangowave.app](https://play.mangowave.app)
 - **Footer:** GitHub repo link, Ko-fi "Buy Mango a Treat" link
-- **Social cards:** OG + Twitter meta tags with `howling.png` preview image
+- **Social cards:** OG + Twitter meta tags with `social-card.png` (1200×630, gradient branding)
+- **SEO:** canonical link, robots.txt, sitemap.xml, JSON-LD `SoftwareApplication` schema
 
 ## Deployment
 

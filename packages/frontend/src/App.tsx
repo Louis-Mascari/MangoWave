@@ -133,7 +133,7 @@ function MainApp() {
   const [showLaunchAnimation, setShowLaunchAnimation] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [webglContextLost, setWebglContextLost] = useState(false);
-  const silenceCheckRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const silenceCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const setOnboardingShown = useSettingsStore((s) => s.setOnboardingShown);
   const resetAutopilotRef = useRef<() => void>(() => {});
   const rateLimitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -320,32 +320,51 @@ function MainApp() {
   // Silence detection for system audio — warns if no audio is flowing after capture starts
   useEffect(() => {
     if (silenceCheckRef.current) {
-      clearTimeout(silenceCheckRef.current);
+      clearInterval(silenceCheckRef.current);
       silenceCheckRef.current = null;
     }
 
     if (!isActive || capture.captureSource !== 'system' || !audioEngine) return;
 
-    // Delay accounts for the ~2.5s launch animation so the toast appears after it fades
-    silenceCheckRef.current = setTimeout(() => {
-      silenceCheckRef.current = null;
+    let toastShown = false;
+    let checksRemaining = 4;
+
+    // Start checking after launch animation (~2.5s), then every 1s
+    silenceCheckRef.current = setInterval(() => {
       const data = audioEngine.getFrequencyData();
       if (data.length === 0) return;
       const hasSignal = data.some((v) => v > 2);
-      if (!hasSignal) {
+
+      if (hasSignal) {
+        // Audio detected — cancel warning and dismiss toast if it was shown
+        if (toastShown) useToastStore.getState().clear();
+        clearInterval(silenceCheckRef.current!);
+        silenceCheckRef.current = null;
+        return;
+      }
+
+      checksRemaining--;
+      if (checksRemaining <= 0 && !toastShown) {
+        toastShown = true;
         useToastStore
           .getState()
           .show(
-            'No audio detected — make sure audio is playing in the shared screen or tab, ' +
-              'and that you checked "Share audio" in the browser dialog.',
+            'No audio detected — make sure audio is playing in the shared screen, window, ' +
+              'or tab, and that you checked "Share audio" in the browser dialog.',
             { type: 'warning', durationMs: 8000 },
           );
       }
-    }, 8000);
+
+      // Keep checking for a few seconds after showing toast so we can dismiss it
+      if (toastShown && checksRemaining <= -5) {
+        clearInterval(silenceCheckRef.current!);
+        silenceCheckRef.current = null;
+      }
+    }, 1500);
 
     return () => {
       if (silenceCheckRef.current) {
-        clearTimeout(silenceCheckRef.current);
+        clearInterval(silenceCheckRef.current);
         silenceCheckRef.current = null;
       }
     };

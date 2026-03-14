@@ -86,7 +86,7 @@ On mobile, a notice appears in the StartScreen modals (Local Files, Microphone) 
 
 `usePresetHistoryStore` tracks preset navigation history (max 100 entries, cursor-based) for previous/next preset navigation. Also tracks `playedSet` for shuffle-style autopilot rounds. Not persisted.
 
-`useToastStore` drives single-message action toasts with typed variants (`info`, `error`, `warning`). API: `show(message, { type?, durationMs? })` — info auto-clears at 3.5s, error/warning at 6s. `ActionToast` renders styled variants: info (neutral), error (red border/bg), warning (amber border/bg).
+`useToastStore` drives single-message action toasts with typed variants (`info`, `error`, `warning`). API: `show(message, { type?, durationMs? })` — info auto-clears at 3.5s, error/warning at 6s. `durationMs` stored in state and drives both the JS cleanup timer and the CSS `toast-fade` animation duration (set dynamically via inline style). `ActionToast` renders styled variants: info (neutral), error (red border/bg), warning (amber border/bg).
 
 ## Environment Variables
 
@@ -136,6 +136,6 @@ Floating panel (`components/PlaybackPanel.tsx`) rendered by App.tsx when source 
 - **`secure-json-parse`** used for prototype pollution protection on settings import.
 - **Settings import sanitization** — all imported values clamped to UI-enforced ranges. Whitelisted data keys only (store functions can't be overwritten).
 - **Audio capture errors** — `humanizeAudioError` in `useAudioCapture` maps DOMException names to user-friendly messages per source (system vs mic). Missing audio tracks on screen share (user forgot "Share audio") block launch with platform-specific guidance. `startCapture`/`startMicCapture` return `boolean` success so callers gate on result.
-- **Silence detection** — App.tsx checks FFT data 5s after system capture starts; warns via toast if no audio signal detected.
+- **Silence detection** — App.tsx polls FFT data every 1.5s after system capture starts; warns via toast at ~6s if no signal. Auto-dismisses if audio starts flowing.
 - **File validation** — `audioFileValidation.ts` validates files by MIME type (`audio/*`) with extension fallback. StartScreen shows rejection errors in the modal; MediaPlaylist queue shows error toast. Defence-in-depth behind the `accept="audio/*"` attribute.
 - **WebGL context loss** — `Visualizer` listens for `webglcontextlost` on the canvas; App.tsx shows a z-200 reload overlay with user-facing explanation.

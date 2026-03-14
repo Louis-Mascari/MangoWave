@@ -187,8 +187,8 @@ export function StartScreen({
           </p>
         )}
 
-        {/* Error */}
-        {error && (
+        {/* Error — only on base page when no modal is covering it */}
+        {error && activeModal === 'none' && (
           <div className="max-w-lg rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-center">
             <p className="text-xs font-semibold text-red-400">Something went wrong</p>
             <p className="mt-1 whitespace-pre-line text-xs text-red-300/70">{error}</p>

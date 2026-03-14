@@ -18,13 +18,25 @@ import type { ParseResult } from '../utils/settingsPortability.ts';
 
 type Tab = 'equalizer' | 'rendering' | 'presets' | 'shortcuts' | 'data' | 'spotify';
 
+/** Compute CSS custom property for range-fill slider track */
+function rangeFillStyle(value: number, min: number, max: number) {
+  const pct = ((value - min) / (max - min)) * 100;
+  return { '--fill': `${pct}%` } as React.CSSProperties;
+}
+
+/** Compute CSS custom property for vertical range-fill slider (inverted axis) */
+function rangeFillVerticalStyle(value: number, min: number, max: number) {
+  const pct = ((value - min) / (max - min)) * 100;
+  return { '--fill-inv': `${100 - pct}%` } as React.CSSProperties;
+}
+
 const FPS_QUICK_PICKS = [30, 60, 120, 144, 240];
 
 const RESOLUTION_OPTIONS = [
-  { label: '100%', value: 1.0 },
-  { label: '75%', value: 0.75 },
-  { label: '50%', value: 0.5 },
   { label: '25%', value: 0.25 },
+  { label: '50%', value: 0.5 },
+  { label: '75%', value: 0.75 },
+  { label: '100%', value: 1.0 },
 ];
 
 const MESH_OPTIONS = [
@@ -150,8 +162,12 @@ function EqualizerTab() {
                 onChange={(e) => setEQBandGain(i, parseFloat(e.target.value))}
                 // @ts-expect-error - orient="vertical" is a non-standard Firefox attribute
                 orient="vertical"
-                className="h-24 accent-orange-500"
-                style={{ writingMode: 'vertical-lr', direction: 'rtl' }}
+                className="range-fill-vertical h-24"
+                style={{
+                  writingMode: 'vertical-lr',
+                  direction: 'rtl',
+                  ...rangeFillVerticalStyle(eq.bandGains[i], -12, 12),
+                }}
               />
               <span className="text-[10px] text-white/50">{formatFreq(freq)}</span>
             </div>
@@ -173,7 +189,8 @@ function EqualizerTab() {
               step="0.1"
               value={eq.preAmpGain}
               onChange={(e) => setPreAmpGain(parseFloat(e.target.value))}
-              className="flex-1 accent-orange-500"
+              className="range-fill flex-1"
+              style={rangeFillStyle(eq.preAmpGain, 0, 3)}
             />
             <span className="w-8 text-right text-xs text-white/50">
               {eq.preAmpGain.toFixed(1)}x
@@ -384,7 +401,8 @@ function RenderingTab() {
           step="0.05"
           value={audio.smoothingConstant}
           onChange={(e) => setSmoothingConstant(parseFloat(e.target.value))}
-          className="w-full accent-orange-500"
+          className="range-fill w-full"
+          style={rangeFillStyle(audio.smoothingConstant, 0, 1)}
         />
       </div>
 
@@ -443,7 +461,8 @@ function PresetsTab() {
           step="0.5"
           value={transitionTime}
           onChange={(e) => setTransitionTime(parseFloat(e.target.value))}
-          className="w-full accent-orange-500"
+          className="range-fill w-full"
+          style={rangeFillStyle(transitionTime, 0, 10)}
         />
       </div>
 
@@ -496,7 +515,8 @@ function PresetsTab() {
               step="1"
               value={presetNameDisplay}
               onChange={(e) => setPresetNameDisplay(parseInt(e.target.value))}
-              className="w-full accent-orange-500"
+              className="range-fill w-full"
+              style={rangeFillStyle(presetNameDisplay as number, 1, 10)}
             />
           </div>
         )}
@@ -529,7 +549,8 @@ function PresetsTab() {
             step="5"
             value={autopilot.interval}
             onChange={(e) => setAutopilotInterval(parseInt(e.target.value))}
-            className="w-full accent-orange-500"
+            className="range-fill w-full"
+            style={rangeFillStyle(autopilot.interval, 5, 120)}
           />
         </div>
 
@@ -570,7 +591,8 @@ function PresetsTab() {
             step="1"
             value={autopilot.favoriteWeight}
             onChange={(e) => setAutopilotFavoriteWeight(parseInt(e.target.value))}
-            className="w-full accent-orange-500"
+            className="range-fill w-full"
+            style={rangeFillStyle(autopilot.favoriteWeight, 1, 10)}
           />
         </div>
       </div>

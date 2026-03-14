@@ -94,6 +94,10 @@ export interface SettingsState {
   resetToDesktopPerformance: () => void;
   resetToMobilePerformance: () => void;
 
+  // Onboarding
+  onboardingShown: boolean;
+  setOnboardingShown: (shown: boolean) => void;
+
   // Volume (persisted for local file playback)
   volume: number; // 0.0 to 1.0
   setVolume: (volume: number) => void;
@@ -292,6 +296,10 @@ export const useSettingsStore = create<SettingsState>()(
       setMobileNoticeShown: (shown) => set({ mobileNoticeShown: shown }),
       resetToDesktopPerformance: () => set({ performance: { ...DESKTOP_PERFORMANCE } }),
       resetToMobilePerformance: () => set({ performance: { ...MOBILE_PERFORMANCE } }),
+
+      // Onboarding
+      onboardingShown: false,
+      setOnboardingShown: (shown) => set({ onboardingShown: shown }),
 
       // Display
       presetNameDisplay: 5,

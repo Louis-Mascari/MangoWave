@@ -85,7 +85,8 @@ function SeekBar({
             setSeekDragValue(null);
           }
         }}
-        className="seek-bar h-1 min-w-0 flex-1 cursor-pointer appearance-none rounded-full bg-white/20 accent-orange-500"
+        className="seek-bar h-1 min-w-0 flex-1 cursor-pointer appearance-none rounded-full"
+        style={{ '--fill': `${(currentTime / duration) * 100}%` } as React.CSSProperties}
         aria-label="Seek"
       />
       <span className="text-[10px] tabular-nums text-white/50">{formatTime(duration)}</span>
@@ -239,7 +240,8 @@ export function PlaybackPanel({
         step={0.05}
         value={volume}
         onChange={(e) => onVolumeChange!(Number(e.target.value))}
-        className="seek-bar h-1 w-16 cursor-pointer appearance-none rounded-full bg-white/20 accent-orange-500"
+        className="seek-bar h-1 w-16 cursor-pointer appearance-none rounded-full"
+        style={{ '--fill': `${(volume ?? 0) * 100}%` } as React.CSSProperties}
         aria-label="Volume"
       />
     </div>

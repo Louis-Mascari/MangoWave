@@ -21,6 +21,7 @@ import { ShortcutOverlay } from './components/ShortcutOverlay.tsx';
 import { LaunchAnimation } from './components/LaunchAnimation.tsx';
 import { RateLimitToast } from './components/RateLimitToast.tsx';
 import { ActionToast } from './components/ActionToast.tsx';
+import { OnboardingOverlay } from './components/OnboardingOverlay.tsx';
 import { useUnlockCheck } from './hooks/useUnlockCheck.ts';
 import { useSettingsStore } from './store/useSettingsStore.ts';
 import { useSpotifyStore } from './store/useSpotifyStore.ts';
@@ -119,6 +120,9 @@ function MainApp() {
   const [activePanel, setActivePanel] = useState<PanelView>('none');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLaunchAnimation, setShowLaunchAnimation] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const onboardingShown = useSettingsStore((s) => s.onboardingShown);
+  const setOnboardingShown = useSettingsStore((s) => s.setOnboardingShown);
   const resetAutopilotRef = useRef<() => void>(() => {});
   const rateLimitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -674,7 +678,20 @@ function MainApp() {
             onToggleFullscreen={handleToggleFullscreen}
           />
           {showLaunchAnimation && (
-            <LaunchAnimation onComplete={() => setShowLaunchAnimation(false)} />
+            <LaunchAnimation
+              onComplete={() => {
+                setShowLaunchAnimation(false);
+                if (!onboardingShown) setShowOnboarding(true);
+              }}
+            />
+          )}
+          {showOnboarding && (
+            <OnboardingOverlay
+              onComplete={() => {
+                setShowOnboarding(false);
+                setOnboardingShown(true);
+              }}
+            />
           )}
           {presetNameDisplay !== 'off' && (
             <PresetNotification message={currentPreset} mode={presetNameDisplay} />

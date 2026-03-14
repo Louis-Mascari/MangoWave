@@ -599,23 +599,14 @@ function MainApp() {
       };
     }
     if (isSpotifyConnected && !premiumError) {
-      const disallows = spotifyNowPlaying?.disallows ?? {};
       return {
         source: 'spotify',
         isPlaying: spotifyNowPlaying?.isPlaying ?? false,
         canControl: !isRateLimited,
-        onPlay: () => {
-          if (!disallows.resuming) handleSpotifyAction('play');
-        },
-        onPause: () => {
-          if (!disallows.pausing) handleSpotifyAction('pause');
-        },
-        onNext: () => {
-          if (!disallows.skipping_next) handleSpotifyAction('next');
-        },
-        onPrevious: () => {
-          if (!disallows.skipping_prev) handleSpotifyAction('previous');
-        },
+        onPlay: () => handleSpotifyAction('play'),
+        onPause: () => handleSpotifyAction('pause'),
+        onNext: () => handleSpotifyAction('next'),
+        onPrevious: () => handleSpotifyAction('previous'),
         shuffle: spotifyNowPlaying?.shuffleState ?? false,
         repeatMode:
           spotifyNowPlaying?.repeatState === 'track'
@@ -623,13 +614,8 @@ function MainApp() {
             : spotifyNowPlaying?.repeatState === 'context'
               ? 'all'
               : 'off',
-        onToggleShuffle: () => {
-          if (!disallows.toggling_shuffle) handleSpotifyToggleShuffle();
-        },
-        onCycleRepeat: () => {
-          if (!disallows.toggling_repeat_context && !disallows.toggling_repeat_track)
-            handleSpotifyCycleRepeat();
-        },
+        onToggleShuffle: handleSpotifyToggleShuffle,
+        onCycleRepeat: handleSpotifyCycleRepeat,
         tooltip: isRateLimited ? 'Spotify rate limited' : undefined,
       };
     }

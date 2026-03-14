@@ -11,12 +11,14 @@ interface ProgressStore {
  * Interpolates Spotify progress between 5s polls for a smooth seek bar.
  * Resets to the server value each time `progressMs` changes from the store.
  * Pauses interpolation when `!isPlaying`. Stops at `durationMs` ceiling.
+ * Returns [currentMs, setOptimistic] — setOptimistic lets callers jump
+ * to a position immediately (e.g., after seek) without waiting for a repoll.
  */
 export function useSpotifyProgress(
   progressMs: number,
   durationMs: number,
   isPlaying: boolean,
-): number {
+): [number, (ms: number) => void] {
   const storeRef = useRef<ProgressStore>({
     currentMs: 0,
     listeners: new Set(),
@@ -66,5 +68,12 @@ export function useSpotifyProgress(
 
   const getSnapshot = useCallback(() => storeRef.current.currentMs, []);
 
-  return useSyncExternalStore(subscribe, getSnapshot);
+  const setOptimistic = useCallback((ms: number) => {
+    storeRef.current.currentMs = ms;
+    storeRef.current.lastFrame = performance.now();
+    storeRef.current.listeners.forEach((l) => l());
+  }, []);
+
+  const currentMs = useSyncExternalStore(subscribe, getSnapshot);
+  return [currentMs, setOptimistic];
 }

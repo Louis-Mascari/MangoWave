@@ -42,7 +42,7 @@ function SeekBar({
 }) {
   // Spotify progress (smooth interpolation)
   const spotifyNowPlaying = useSpotifyStore((s) => s.nowPlaying);
-  const spotifyProgressMs = useSpotifyProgress(
+  const [spotifyProgressMs, setOptimisticProgress] = useSpotifyProgress(
     spotifyNowPlaying?.progressMs ?? 0,
     spotifyNowPlaying?.durationMs ?? 0,
     spotifyNowPlaying?.isPlaying ?? false,
@@ -81,6 +81,7 @@ function SeekBar({
         }}
         onPointerUp={() => {
           if (isSpotify && seekDragValue != null) {
+            setOptimisticProgress(seekDragValue * 1000);
             onSeek(seekDragValue);
             setSeekDragValue(null);
           }

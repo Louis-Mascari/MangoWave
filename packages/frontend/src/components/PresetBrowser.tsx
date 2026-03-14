@@ -619,7 +619,10 @@ export function PresetBrowser({
         </button>
       </div>
 
-      <div style={{ display: filter === 'all' && !deferredSearch ? undefined : 'none' }}>
+      <div
+        className="min-h-0 flex-1 flex-col"
+        style={{ display: filter === 'all' && !deferredSearch ? 'flex' : 'none' }}
+      >
         {renderGroupedAll()}
       </div>
       {filter === 'quarantined' && renderQuarantined()}

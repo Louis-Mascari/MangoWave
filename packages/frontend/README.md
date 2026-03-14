@@ -22,7 +22,7 @@ Source → GainNode (pre-amp) → 10× BiquadFilter (EQ) → AnalyserNode → bu
 
 Three source modes:
 
-- **System audio** ([`getDisplayMedia`](https://caniuse.com/mdn-api_mediadevices_getdisplaymedia_audio_capture_support)) — captures tab/screen audio. Desktop only (Chrome, Edge, Opera). Firefox and Safari support `getDisplayMedia` for video but not audio capture. On Windows/ChromeOS the entire system audio can be captured; on Linux/macOS only tab audio is available
+- **System audio** ([`getDisplayMedia`](https://caniuse.com/mdn-api_mediadevices_getdisplaymedia_audio_capture_support)) — captures tab/screen audio. Desktop only (Chrome, Edge, Opera). Firefox and Safari support `getDisplayMedia` for video but not audio capture. On Windows/ChromeOS all sharing modes support audio; on macOS (Sonoma+) screen and window sharing also support audio; on older macOS or Linux, tab sharing is most reliable
 - **Local files** (`HTMLAudioElement` via `createMediaElementSource`) — forked pipeline: EQ → analyser for visuals, direct → speakers for audio output. ID3 metadata (title, artist, album, album art) parsed via `music-metadata`
 - **Microphone** (`getUserMedia`) — silent mode, no speaker output to prevent feedback
 

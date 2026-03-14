@@ -11,11 +11,18 @@ interface StartScreenProps {
   onLocalFiles: (files: File[]) => void;
   onMicCapture: () => void;
   error: string | null;
+  onClearError: () => void;
 }
 
 type ModalView = 'none' | 'share-audio' | 'local-files' | 'microphone';
 
-export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: StartScreenProps) {
+export function StartScreen({
+  onStart,
+  onLocalFiles,
+  onMicCapture,
+  error,
+  onClearError,
+}: StartScreenProps) {
   const sessionId = useSpotifyStore((s) => s.sessionId);
   const user = useSpotifyStore((s) => s.user);
   const accessToken = useSpotifyStore((s) => s.accessToken);
@@ -28,7 +35,14 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
   const resetToDesktopPerformance = useSettingsStore((s) => s.resetToDesktopPerformance);
   const resetToMobilePerformance = useSettingsStore((s) => s.resetToMobilePerformance);
 
-  const [activeModal, setActiveModal] = useState<ModalView>('none');
+  const [activeModal, setActiveModalRaw] = useState<ModalView>('none');
+  const setActiveModal = useCallback(
+    (view: ModalView) => {
+      if (view !== 'none' && error) onClearError();
+      setActiveModalRaw(view);
+    },
+    [error, onClearError],
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isSpotifyConnected = !!(sessionId || accessToken);
@@ -46,7 +60,7 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
     e.target.value = '';
   };
 
-  const closeModal = useCallback(() => setActiveModal('none'), []);
+  const closeModal = useCallback(() => setActiveModal('none'), [setActiveModal]);
 
   // Close modal on Escape
   useEffect(() => {
@@ -177,7 +191,7 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
         {error && (
           <div className="max-w-lg rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-center">
             <p className="text-xs font-semibold text-red-400">Something went wrong</p>
-            <p className="mt-1 text-xs text-red-300/70">{error}</p>
+            <p className="mt-1 whitespace-pre-line text-xs text-red-300/70">{error}</p>
           </div>
         )}
       </div>
@@ -198,8 +212,9 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
             </li>
           </ol>
           <p className="mt-2 text-xs text-[#888]">
-            Tip: Share your entire screen or a window for the cleanest experience — sharing a tab
-            shows an unhideable browser banner. Go fullscreen (F) for full immersion.
+            Tip: On Windows and ChromeOS, sharing your entire screen or a window gives the cleanest
+            experience (no browser banner). On macOS and Linux, audio capture only works when
+            sharing a browser tab. Go fullscreen (F) for full immersion.
           </p>
           <ol className="mt-3 flex flex-col gap-3 text-sm text-[#aaa]">
             <li>
@@ -222,6 +237,13 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
             logout={logout}
             isOwnerMode={authMode === 'owner'}
           />
+
+          {error && (
+            <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3">
+              <p className="text-xs font-semibold text-red-400">Something went wrong</p>
+              <p className="mt-1 whitespace-pre-line text-xs text-red-300/70">{error}</p>
+            </div>
+          )}
 
           <button
             onClick={onStart}
@@ -281,6 +303,12 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
               <li>Requires microphone permission from your browser</li>
             </ul>
           </div>
+          {error && (
+            <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3">
+              <p className="text-xs font-semibold text-red-400">Something went wrong</p>
+              <p className="mt-1 whitespace-pre-line text-xs text-red-300/70">{error}</p>
+            </div>
+          )}
           {isMobileDevice && !mobileNoticeShown ? (
             <MobilePerformanceNotice
               onOptimize={(remember) => {

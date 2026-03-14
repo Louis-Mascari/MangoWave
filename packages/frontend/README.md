@@ -86,7 +86,7 @@ On mobile, a notice appears in the StartScreen modals (Local Files, Microphone) 
 
 `usePresetHistoryStore` tracks preset navigation history (max 100 entries, cursor-based) for previous/next preset navigation. Also tracks `playedSet` for shuffle-style autopilot rounds. Not persisted.
 
-`useToastStore` drives single-message action toasts (favorite/block confirmations). Default 3.5s auto-clear, optional `durationMs` param for longer error toasts.
+`useToastStore` drives single-message action toasts with typed variants (`info`, `error`, `warning`). API: `show(message, { type?, durationMs? })` — info auto-clears at 3.5s, error/warning at 6s. `ActionToast` renders styled variants: info (neutral), error (red border/bg), warning (amber border/bg).
 
 ## Environment Variables
 

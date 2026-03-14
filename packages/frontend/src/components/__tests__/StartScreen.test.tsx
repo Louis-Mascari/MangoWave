@@ -10,6 +10,7 @@ const defaultProps = {
   onLocalFiles: vi.fn(),
   onMicCapture: vi.fn(),
   error: null as string | null,
+  onClearError: vi.fn(),
 };
 
 describe('StartScreen', () => {
@@ -36,7 +37,8 @@ describe('StartScreen', () => {
   });
 
   it('renders error when provided', () => {
-    render(<StartScreen {...defaultProps} error="Something went wrong" />);
+    render(<StartScreen {...defaultProps} error="No audio was included" />);
+    expect(screen.getByText('No audio was included')).toBeInTheDocument();
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
   });
 

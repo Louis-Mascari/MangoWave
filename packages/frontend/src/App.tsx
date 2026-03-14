@@ -81,11 +81,20 @@ function MainApp() {
   useSpotifyAuth();
   useSettingsSync();
 
-  // Listen for popup OAuth completion to rehydrate Spotify store
+  // Listen for popup OAuth completion/failure to rehydrate or show error
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin === window.location.origin && event.data?.type === 'spotify-connected') {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type === 'spotify-connected') {
         useSpotifyStore.persist.rehydrate();
+      } else if (event.data?.type === 'spotify-auth-failed') {
+        useToastStore
+          .getState()
+          .show(
+            'Spotify connection failed. Please try again — if the issue persists, ' +
+              "check that your account has been added to the app's authorized users.",
+            { type: 'error' },
+          );
       }
     };
     window.addEventListener('message', handleMessage);
@@ -836,6 +845,7 @@ function MainApp() {
           onLocalFiles={handleLocalFiles}
           onMicCapture={handleMicCapture}
           error={capture.error}
+          onClearError={capture.clearError}
         />
       )}
     </div>

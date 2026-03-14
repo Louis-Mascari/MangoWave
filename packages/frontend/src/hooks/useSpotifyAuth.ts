@@ -9,6 +9,20 @@ import { exchangeCodePkce, getSpotifyProfile, refreshTokenPkce } from '../servic
  * on mount when a userId exists in localStorage.
  * Supports both owner (backend) and BYOC (PKCE) auth modes.
  */
+const AUTH_FAIL_MSG =
+  'Spotify connection failed. Please try again — if the issue persists, ' +
+  "check that your account has been added to the app's authorized users.";
+
+/** Show auth failure toast. In a popup, notify the opener and close; otherwise show locally. */
+function notifyAuthFailure() {
+  if (window.opener) {
+    window.opener.postMessage({ type: 'spotify-auth-failed' }, window.location.origin);
+    window.close();
+  } else {
+    useToastStore.getState().show(AUTH_FAIL_MSG, { type: 'error' });
+  }
+}
+
 export function useSpotifyAuth() {
   const setAuth = useSpotifyStore((s) => s.setAuth);
   const setAccessToken = useSpotifyStore((s) => s.setAccessToken);
@@ -66,13 +80,7 @@ export function useSpotifyAuth() {
           }
         })
         .catch(() => {
-          useToastStore
-            .getState()
-            .show(
-              'Spotify connection failed. Please try again — if the issue persists, ' +
-                "check that your account has been added to the app's authorized users.",
-              { type: 'error' },
-            );
+          notifyAuthFailure();
         });
     } else {
       // Owner backend flow
@@ -85,13 +93,7 @@ export function useSpotifyAuth() {
           }
         })
         .catch(() => {
-          useToastStore
-            .getState()
-            .show(
-              'Spotify connection failed. Please try again — if the issue persists, ' +
-                "check that your account has been added to the app's authorized users.",
-              { type: 'error' },
-            );
+          notifyAuthFailure();
         });
     }
   }, [setAuth, setByocAuth, getAuthMode, byocClientId]);

@@ -18,17 +18,16 @@ vi.mock('../../engine/AudioEngine.ts', () => {
           return Promise.reject(new Error('Permission denied'));
         }
         trackEndedListeners = [];
+        const audioTrack = {
+          addEventListener: (event: string, handler: () => void) => {
+            if (event === 'ended') trackEndedListeners.push(handler);
+          },
+          stop: vi.fn(),
+        };
         return Promise.resolve({
           getVideoTracks: () => [],
-          getAudioTracks: () => [],
-          getTracks: () => [
-            {
-              addEventListener: (event: string, handler: () => void) => {
-                if (event === 'ended') trackEndedListeners.push(handler);
-              },
-              stop: vi.fn(),
-            },
-          ],
+          getAudioTracks: () => [audioTrack],
+          getTracks: () => [audioTrack],
         });
       });
       initAudioPipeline = vi.fn();

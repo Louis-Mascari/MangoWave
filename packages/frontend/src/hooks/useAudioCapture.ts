@@ -8,6 +8,7 @@ export interface UseAudioCaptureReturn {
   isCapturing: boolean;
   captureSource: CaptureSource;
   error: string | null;
+  clearError: () => void;
   startCapture: () => Promise<void>;
   startMicCapture: () => Promise<void>;
   stopCapture: () => void;
@@ -84,10 +85,12 @@ export function useAudioCapture(): UseAudioCaptureReturn {
         stream.getTracks().forEach((track) => track.stop());
         engine.destroy();
         setError(
-          'No audio was included in the screen share. ' +
-            'Please try again and make sure to check "Share audio" (or "Share system audio") in the browser dialog. ' +
-            'Tip: Sharing a browser tab is the most reliable way to capture audio. ' +
-            'Sharing an entire screen or application window may not include audio on some systems.',
+          'No audio was included in the screen share. Please try again and make sure ' +
+            'to check "Share audio" (or "Share system audio") in the browser dialog.\n\n' +
+            'Audio sharing requires Chrome, Edge, or Opera on desktop. ' +
+            'Firefox, Safari, and mobile browsers do not support audio capture.\n\n' +
+            'On macOS and Linux, audio is only available when sharing a browser tab. ' +
+            'On Windows and ChromeOS, all sharing modes (screen, window, and tab) support audio.',
         );
         setIsCapturing(false);
         return;
@@ -137,11 +140,16 @@ export function useAudioCapture(): UseAudioCaptureReturn {
     cleanup();
   }, [cleanup]);
 
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
   return {
     audioEngine,
     isCapturing,
     captureSource,
     error,
+    clearError,
     startCapture,
     startMicCapture,
     stopCapture,

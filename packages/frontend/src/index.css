@@ -97,15 +97,12 @@ body {
   box-shadow: 0 2px 16px rgba(29, 185, 84, 0.3);
 }
 
-/* Action toast fade in/out */
+/* Action toast fade in/out — duration set dynamically via inline style */
 @keyframes toast-fade {
   0% { opacity: 0; }
   10% { opacity: 1; }
   85% { opacity: 1; }
   100% { opacity: 0; }
-}
-.action-toast {
-  animation: toast-fade 2s ease-in-out forwards;
 }
 
 /* Seek bar / volume — thin track with orange fill */

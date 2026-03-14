@@ -726,7 +726,10 @@ function DataTab() {
 
         {importResult ? (
           <div className="flex flex-col gap-2">
-            <p className="text-xs text-white/60">Select categories to import:</p>
+            <p className="text-xs text-white/60">
+              Select categories to import. Only selected categories will be overwritten — everything
+              else stays as-is.
+            </p>
             <div className="grid grid-cols-2 gap-1.5">
               {EXPORT_CATEGORIES.filter((cat) => importResult.categories.includes(cat.key)).map(
                 (cat) => (
@@ -759,12 +762,17 @@ function DataTab() {
             </div>
           </div>
         ) : (
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="w-fit cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
-          >
-            Import Settings
-          </button>
+          <>
+            <p className="text-xs text-white/50">
+              Load a settings file to choose which categories to apply.
+            </p>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="w-fit cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
+            >
+              Import Settings
+            </button>
+          </>
         )}
       </div>
     </>

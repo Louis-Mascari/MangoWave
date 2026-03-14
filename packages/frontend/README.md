@@ -38,7 +38,8 @@ Key details:
 ```
 src/
 ├── components/    # UI: ControlBar, SettingsPanel (tabbed: EQ/Rendering/Presets/Shortcuts/Data/Spotify),
-│                  #     PresetBrowser, MediaPlaylist, NowPlaying, PlaybackPanel, StartScreen, etc.
+│                  #     PresetBrowser, MediaPlaylist, NowPlaying, PlaybackPanel, StartScreen,
+│                  #     OnboardingOverlay (first-time tips), etc.
 ├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (butterchurn),
 │                  # isWebGL2Supported
 ├── data/          # quarantined-presets.json, mobile-safe-presets.json
@@ -75,6 +76,7 @@ Zustand with `localStorage` persistence. Key sections:
 | `showQuarantined`     | boolean                                                                        | false                                                                       |
 | `quarantineOverrides` | string[]                                                                       | []                                                                          |
 | `mobileNoticeShown`   | boolean                                                                        | false                                                                       |
+| `onboardingShown`     | boolean                                                                        | false                                                                       |
 
 Blocked and favorited presets are mutually exclusive.
 

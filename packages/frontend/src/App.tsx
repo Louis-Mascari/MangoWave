@@ -121,7 +121,6 @@ function MainApp() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLaunchAnimation, setShowLaunchAnimation] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const onboardingShown = useSettingsStore((s) => s.onboardingShown);
   const setOnboardingShown = useSettingsStore((s) => s.setOnboardingShown);
   const resetAutopilotRef = useRef<() => void>(() => {});
   const rateLimitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -159,22 +158,27 @@ function MainApp() {
     [enabledPackSet, presetPackMap],
   );
 
+  const startLaunch = useCallback(() => {
+    setShowLaunchAnimation(true);
+    if (!useSettingsStore.getState().onboardingShown) setShowOnboarding(true);
+  }, []);
+
   const handleStart = useCallback(async () => {
     await capture.startCapture();
-    setShowLaunchAnimation(true);
-  }, [capture]);
+    startLaunch();
+  }, [capture, startLaunch]);
 
   const handleMicCapture = useCallback(async () => {
     await capture.startMicCapture();
-    setShowLaunchAnimation(true);
-  }, [capture]);
+    startLaunch();
+  }, [capture, startLaunch]);
 
   const handleLocalFiles = useCallback(
     (files: File[]) => {
       local.startWithFiles(files);
-      setShowLaunchAnimation(true);
+      startLaunch();
     },
-    [local],
+    [local, startLaunch],
   );
 
   const handleAddLocalFiles = useCallback((files: File[]) => {
@@ -677,14 +681,6 @@ function MainApp() {
             onPresetsLoaded={handlePresetsLoaded}
             onToggleFullscreen={handleToggleFullscreen}
           />
-          {showLaunchAnimation && (
-            <LaunchAnimation
-              onComplete={() => {
-                setShowLaunchAnimation(false);
-                if (!onboardingShown) setShowOnboarding(true);
-              }}
-            />
-          )}
           {showOnboarding && (
             <OnboardingOverlay
               onComplete={() => {
@@ -692,6 +688,9 @@ function MainApp() {
                 setOnboardingShown(true);
               }}
             />
+          )}
+          {showLaunchAnimation && (
+            <LaunchAnimation onComplete={() => setShowLaunchAnimation(false)} />
           )}
           {presetNameDisplay !== 'off' && (
             <PresetNotification message={currentPreset} mode={presetNameDisplay} />

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
+import logoUrl from '../assets/logo.png';
 
 interface OnboardingOverlayProps {
   onComplete: () => void;
@@ -8,7 +9,7 @@ interface OnboardingOverlayProps {
 interface Tip {
   title: string;
   description: string;
-  icon: string;
+  icon: React.ReactNode;
 }
 
 const DESKTOP_TIPS: Tip[] = [
@@ -42,7 +43,11 @@ const MOBILE_TIPS: Tip[] = [
     title: 'The Menu',
     description:
       'Tap the logo in the corner to open the radial menu. It gives you quick access to everything — presets, settings, fullscreen, and more.',
-    icon: '🔘',
+    icon: (
+      <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-black/60">
+        <img src={logoUrl} alt="MangoWave logo" className="h-11 w-11 object-contain" />
+      </div>
+    ),
   },
   {
     title: 'Navigate Presets',
@@ -64,30 +69,43 @@ const MOBILE_TIPS: Tip[] = [
   },
 ];
 
+const FADE_OUT_MS = 800;
+
 export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
   const tips = isMobileDevice ? MOBILE_TIPS : DESKTOP_TIPS;
   const [step, setStep] = useState(0);
+  const [closing, setClosing] = useState(false);
+  const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clean up fade-out timer on unmount
+  useEffect(
+    () => () => {
+      if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+    },
+    [],
+  );
 
   const tip = tips[step];
   const isLast = step === tips.length - 1;
 
+  const handleClose = useCallback(() => {
+    if (closing) return;
+    setClosing(true);
+    fadeTimerRef.current = setTimeout(onComplete, FADE_OUT_MS);
+  }, [closing, onComplete]);
+
   return (
     <div
-      className="fixed inset-0 z-[90] flex items-center justify-center bg-black/85 backdrop-blur-sm"
+      className="fixed inset-0 z-[90] flex items-center justify-center bg-black/93 transition-opacity"
+      style={{
+        opacity: closing ? 0 : 1,
+        transitionDuration: `${FADE_OUT_MS}ms`,
+      }}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onComplete();
+        if (e.target === e.currentTarget) handleClose();
       }}
     >
-      <style>{`
-        @keyframes onboarding-card-in {
-          from { opacity: 0; transform: translateY(16px) scale(0.97); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-      `}</style>
-      <div
-        className="mx-4 w-full max-w-sm rounded-xl bg-gray-900/95 p-6 shadow-2xl"
-        style={{ animation: 'onboarding-card-in 600ms 300ms ease-out both' }}
-      >
+      <div className="mx-4 w-full max-w-sm rounded-xl bg-gray-900/95 p-6 shadow-2xl">
         {/* Progress dots */}
         <div className="mb-4 flex justify-center gap-1.5">
           {tips.map((_, i) => (
@@ -110,7 +128,7 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
         {/* Navigation */}
         <div className="mt-6 flex items-center justify-between">
           <button
-            onClick={onComplete}
+            onClick={handleClose}
             className="cursor-pointer border-none bg-transparent px-3 py-1.5 text-xs text-white/40 hover:text-white/60"
           >
             Skip
@@ -125,7 +143,7 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
               </button>
             )}
             <button
-              onClick={() => (isLast ? onComplete() : setStep(step + 1))}
+              onClick={() => (isLast ? handleClose() : setStep(step + 1))}
               className="cursor-pointer rounded-lg border-none bg-orange-500 px-4 py-1.5 text-xs font-medium text-white hover:bg-orange-600"
             >
               {isLast ? 'Got it' : 'Next'}

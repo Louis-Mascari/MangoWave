@@ -73,16 +73,12 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex animate-[onboarding-fade-in_800ms_ease-out_forwards] items-center justify-center bg-black/85 backdrop-blur-sm"
+      className="fixed inset-0 z-[90] flex items-center justify-center bg-black/85 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget) onComplete();
       }}
     >
       <style>{`
-        @keyframes onboarding-fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
         @keyframes onboarding-card-in {
           from { opacity: 0; transform: translateY(16px) scale(0.97); }
           to { opacity: 1; transform: translateY(0) scale(1); }

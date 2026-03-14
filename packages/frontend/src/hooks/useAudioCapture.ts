@@ -9,8 +9,8 @@ export interface UseAudioCaptureReturn {
   captureSource: CaptureSource;
   error: string | null;
   clearError: () => void;
-  startCapture: () => Promise<void>;
-  startMicCapture: () => Promise<void>;
+  startCapture: () => Promise<boolean>;
+  startMicCapture: () => Promise<boolean>;
   stopCapture: () => void;
 }
 
@@ -69,7 +69,7 @@ export function useAudioCapture(): UseAudioCaptureReturn {
     setCaptureSource(null);
   }, []);
 
-  const startCapture = useCallback(async () => {
+  const startCapture = useCallback(async (): Promise<boolean> => {
     try {
       if (engineRef.current) {
         engineRef.current.destroy();
@@ -93,7 +93,7 @@ export function useAudioCapture(): UseAudioCaptureReturn {
             'On Windows and ChromeOS, all sharing modes (screen, window, and tab) support audio.',
         );
         setIsCapturing(false);
-        return;
+        return false;
       }
 
       engine.initAudioPipeline(stream);
@@ -109,13 +109,15 @@ export function useAudioCapture(): UseAudioCaptureReturn {
       setAudioEngine(engine);
       setIsCapturing(true);
       setCaptureSource('system');
+      return true;
     } catch (err) {
       setError(humanizeAudioError(err, 'system'));
       setIsCapturing(false);
+      return false;
     }
   }, [cleanup]);
 
-  const startMicCapture = useCallback(async () => {
+  const startMicCapture = useCallback(async (): Promise<boolean> => {
     try {
       if (engineRef.current) {
         engineRef.current.destroy();
@@ -130,9 +132,11 @@ export function useAudioCapture(): UseAudioCaptureReturn {
       setAudioEngine(engine);
       setIsCapturing(true);
       setCaptureSource('mic');
+      return true;
     } catch (err) {
       setError(humanizeAudioError(err, 'mic'));
       setIsCapturing(false);
+      return false;
     }
   }, []);
 

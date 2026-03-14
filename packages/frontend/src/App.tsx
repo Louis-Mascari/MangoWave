@@ -177,13 +177,13 @@ function MainApp() {
   }, []);
 
   const handleStart = useCallback(async () => {
-    await capture.startCapture();
-    startLaunch();
+    const ok = await capture.startCapture();
+    if (ok) startLaunch();
   }, [capture, startLaunch]);
 
   const handleMicCapture = useCallback(async () => {
-    await capture.startMicCapture();
-    startLaunch();
+    const ok = await capture.startMicCapture();
+    if (ok) startLaunch();
   }, [capture, startLaunch]);
 
   const handleLocalFiles = useCallback(

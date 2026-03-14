@@ -73,12 +73,25 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex items-center justify-center bg-black/85 backdrop-blur-sm"
+      className="fixed inset-0 z-[90] flex animate-[onboarding-fade-in_800ms_ease-out_forwards] items-center justify-center bg-black/85 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget) onComplete();
       }}
     >
-      <div className="mx-4 w-full max-w-sm rounded-xl bg-gray-900/95 p-6 shadow-2xl">
+      <style>{`
+        @keyframes onboarding-fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes onboarding-card-in {
+          from { opacity: 0; transform: translateY(16px) scale(0.97); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+      `}</style>
+      <div
+        className="mx-4 w-full max-w-sm rounded-xl bg-gray-900/95 p-6 shadow-2xl"
+        style={{ animation: 'onboarding-card-in 600ms 300ms ease-out both' }}
+      >
         {/* Progress dots */}
         <div className="mb-4 flex justify-center gap-1.5">
           {tips.map((_, i) => (

@@ -60,14 +60,17 @@ export function StartScreen({
     const files = Array.from(e.target.files ?? []);
     if (files.length > 0) {
       const { valid, rejected } = validateAudioFiles(files);
-      if (rejected.length > 0) {
-        setFileError(rejectionMessage(rejected));
-      }
       if (valid.length > 0) {
+        if (rejected.length > 0) {
+          // Mixed: toast the rejection since modal is about to close
+          useToastStore.getState().show(rejectionMessage(rejected), { type: 'warning' });
+        }
         closeModal();
         onLocalFiles(valid);
+      } else if (rejected.length > 0) {
+        // All rejected: show error in modal so user can retry
+        setFileError(rejectionMessage(rejected));
       }
-      // If all files were rejected, stay in the modal with the error visible
     }
     e.target.value = '';
   };

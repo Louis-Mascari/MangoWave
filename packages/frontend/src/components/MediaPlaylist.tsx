@@ -1,5 +1,7 @@
 import { useRef } from 'react';
 import { useMediaPlayerStore } from '../store/useMediaPlayerStore.ts';
+import { useToastStore } from '../store/useToastStore.ts';
+import { validateAudioFiles, rejectionMessage } from '../utils/audioFileValidation.ts';
 
 function formatDuration(seconds: number): string {
   if (!seconds || !isFinite(seconds)) return '--:--';
@@ -30,7 +32,13 @@ export function MediaPlaylist({ onAddFiles, onClear, onClose }: MediaPlaylistPro
   const handleFilesChosen = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (files.length > 0) {
-      onAddFiles(files);
+      const { valid, rejected } = validateAudioFiles(files);
+      if (rejected.length > 0) {
+        useToastStore.getState().show(rejectionMessage(rejected), { type: 'error' });
+      }
+      if (valid.length > 0) {
+        onAddFiles(valid);
+      }
     }
     e.target.value = '';
   };

@@ -4,6 +4,7 @@ import { useSpotifyStore } from '../store/useSpotifyStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
+import { validateAudioFiles, rejectionMessage } from '../utils/audioFileValidation.ts';
 import logoSrc from '../assets/logo.png';
 
 interface StartScreenProps {
@@ -36,9 +37,13 @@ export function StartScreen({
   const resetToMobilePerformance = useSettingsStore((s) => s.resetToMobilePerformance);
 
   const [activeModal, setActiveModalRaw] = useState<ModalView>('none');
+  const [fileError, setFileError] = useState<string | null>(null);
   const setActiveModal = useCallback(
     (view: ModalView) => {
-      if (view !== 'none' && error) onClearError();
+      if (view !== 'none') {
+        if (error) onClearError();
+        setFileError(null);
+      }
       setActiveModalRaw(view);
     },
     [error, onClearError],
@@ -54,8 +59,15 @@ export function StartScreen({
   const handleFilesChosen = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (files.length > 0) {
-      closeModal();
-      onLocalFiles(files);
+      const { valid, rejected } = validateAudioFiles(files);
+      if (rejected.length > 0) {
+        setFileError(rejectionMessage(rejected));
+      }
+      if (valid.length > 0) {
+        closeModal();
+        onLocalFiles(valid);
+      }
+      // If all files were rejected, stay in the modal with the error visible
     }
     e.target.value = '';
   };
@@ -270,6 +282,12 @@ export function StartScreen({
               <li>Add or remove tracks at any time from the Queue panel</li>
             </ul>
           </div>
+          {fileError && (
+            <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3">
+              <p className="text-xs font-semibold text-red-400">Unsupported file</p>
+              <p className="mt-1 whitespace-pre-line text-xs text-red-300/70">{fileError}</p>
+            </div>
+          )}
           {isMobileDevice && !mobileNoticeShown ? (
             <MobilePerformanceNotice
               onOptimize={(remember) => {

@@ -49,7 +49,7 @@ Source → GainNode (pre-amp) → 10× BiquadFilter (EQ) → AnalyserNode → bu
 
 Three audio sources feed the pipeline:
 
-- **System audio** ([`getDisplayMedia`](https://caniuse.com/mdn-api_mediadevices_getdisplaymedia_audio_capture_support)) — captures audio from a screen, window, or tab share. Desktop only (Chrome, Edge, Opera). Not available on mobile browsers, Safari, or Firefox (both support `getDisplayMedia` for video but not audio capture). On Windows and ChromeOS all sharing modes support audio; on macOS (Sonoma+) screen and window sharing also support audio via ScreenCaptureKit; on older macOS or Linux, tab sharing is the most reliable option
+- **System audio** ([`getDisplayMedia`](https://caniuse.com/mdn-api_mediadevices_getdisplaymedia_audio_capture_support)) — captures audio from a screen, window, or tab share. Desktop only (Chrome, Edge, Opera). Not available on mobile browsers, Safari, or Firefox (both support `getDisplayMedia` for video but not audio capture). On Windows and ChromeOS all sharing modes support audio; on macOS 14.2+ screen and window sharing also support audio via ScreenCaptureKit; on older macOS or Linux, only tab sharing supports audio
 - **Local files** (`HTMLAudioElement`) — plays audio files directly in the browser. Works on all browsers and devices. EQ feeds the visualizer while audio plays directly to speakers
 - **Microphone** (`getUserMedia`) — captures live audio input. Works on all browsers and devices
 

@@ -326,6 +326,7 @@ function MainApp() {
 
     if (!isActive || capture.captureSource !== 'system' || !audioEngine) return;
 
+    // Delay accounts for the ~2.5s launch animation so the toast appears after it fades
     silenceCheckRef.current = setTimeout(() => {
       silenceCheckRef.current = null;
       const data = audioEngine.getFrequencyData();
@@ -340,7 +341,7 @@ function MainApp() {
             { type: 'warning', durationMs: 8000 },
           );
       }
-    }, 5000);
+    }, 8000);
 
     return () => {
       if (silenceCheckRef.current) {

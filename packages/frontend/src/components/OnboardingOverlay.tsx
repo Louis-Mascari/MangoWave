@@ -73,7 +73,7 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+      className="fixed inset-0 z-[90] flex items-center justify-center bg-black/85 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget) onComplete();
       }}

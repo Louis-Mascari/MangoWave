@@ -222,7 +222,12 @@ export function PresetBrowser({
   // Initialize enabledPacks on first load (only if never set before).
   const didInitPacks = useRef(false);
   useEffect(() => {
-    if (!didInitPacks.current && enabledPacks.length === 0 && allPacks.length > 0) {
+    if (didInitPacks.current) return;
+    if (enabledPacks.length > 0) {
+      didInitPacks.current = true;
+      return;
+    }
+    if (allPacks.length > 0) {
       didInitPacks.current = true;
       setEnabledPacks(allPacks);
     }
@@ -454,7 +459,7 @@ export function PresetBrowser({
 
       {groupNames.length > 0 ? (
         <GroupedVirtuoso
-          style={{ height: '280px' }}
+          style={{ height: isMobileDevice ? 'calc(100vh - 320px)' : '280px' }}
           groupCounts={groupCounts}
           groupContent={(index) => {
             const raw = groupNames[index];
@@ -474,7 +479,7 @@ export function PresetBrowser({
           }}
           itemContent={(index) => {
             const name = flatPresets[index];
-            if (!name) return null;
+            if (!name) return <div style={{ height: 1 }} />;
             return (
               <PresetRow
                 name={name}
@@ -499,7 +504,7 @@ export function PresetBrowser({
 
   // Render flat list (search, favorites, blocked)
   const renderFlatList = () => (
-    <div className="flex max-h-[280px] flex-col gap-0.5 overflow-y-auto">
+    <div className="flex flex-col gap-0.5 overflow-y-auto max-md:min-h-0 max-md:flex-1 md:max-h-[280px]">
       {filteredPresets.map((name) => (
         <PresetRow
           key={name}
@@ -523,7 +528,7 @@ export function PresetBrowser({
 
   // Render history tab
   const renderHistory = () => (
-    <div className="flex max-h-[280px] flex-col gap-0.5 overflow-y-auto">
+    <div className="flex flex-col gap-0.5 overflow-y-auto max-md:min-h-0 max-md:flex-1 md:max-h-[280px]">
       {historyList.map((name, i) => (
         <HistoryRow
           key={`${name}-${i}`}
@@ -543,7 +548,7 @@ export function PresetBrowser({
 
   // Render quarantined tab
   const renderQuarantined = () => (
-    <div className="flex max-h-[280px] flex-col gap-0.5 overflow-y-auto">
+    <div className="flex flex-col gap-0.5 overflow-y-auto max-md:min-h-0 max-md:flex-1 md:max-h-[280px]">
       <p className="mb-1 text-[10px] leading-snug text-white/40">
         Presets suspected broken or not conducive to good vibes. Click to preview, then unquarantine
         any you want to keep.
@@ -580,7 +585,7 @@ export function PresetBrowser({
   );
 
   return (
-    <div className="relative flex max-h-96 flex-col gap-2 rounded-lg bg-black/60 p-4 backdrop-blur-sm landscape:max-h-[70vh]">
+    <div className="relative flex flex-col gap-2 rounded-lg bg-black/60 p-4 backdrop-blur-sm max-md:min-h-0 max-md:flex-1 md:max-h-96 landscape:max-h-[70vh]">
       <div className="flex flex-col gap-1.5">
         <h3 className="text-sm font-semibold text-white">Presets</h3>
         <div className="flex flex-wrap gap-1">

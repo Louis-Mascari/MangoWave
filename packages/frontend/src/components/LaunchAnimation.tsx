@@ -22,7 +22,7 @@ export function LaunchAnimation({ onComplete }: LaunchAnimationProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black"
+      className="pointer-events-none fixed inset-0 z-[100] flex items-center justify-center bg-black"
       style={{ animation: `launch-fade ${LAUNCH_DURATION_MS}ms ease-in-out forwards` }}
     >
       <img

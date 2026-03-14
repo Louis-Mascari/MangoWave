@@ -7,7 +7,7 @@
 <p align="center">
   Browser-based audio-reactive visualizer inspired by Winamp/MilkDrop.<br>
   Plays local files, captures system audio, or listens via microphone — feeds real-time FFT data into
-  <a href="https://github.com/jberg/butterchurn">butterchurn</a> (a WebGL 2 MilkDrop port) with 500+ presets.
+  <a href="https://github.com/jberg/butterchurn">butterchurn</a> (a WebGL 2 MilkDrop port) with 400+ presets.
 </p>
 
 <p align="center">
@@ -18,7 +18,7 @@
 
 ## Features
 
-- **500+ MilkDrop presets** from 6 butterchurn packs, organized by source pack with virtualized browsing
+- **400+ MilkDrop presets** from 6 butterchurn packs, organized by source pack with virtualized browsing
 - **Pack filtering** — enable/disable built-in packs to control which presets appear and which autopilot draws from
 - **Quarantine system** — suspected broken or vibe-killing presets hidden by default, with per-preset unquarantine
 - **Multiple audio sources** — system/tab audio, local files, or microphone input

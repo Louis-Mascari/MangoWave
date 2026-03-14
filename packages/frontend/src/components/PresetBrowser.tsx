@@ -619,7 +619,9 @@ export function PresetBrowser({
         </button>
       </div>
 
-      {filter === 'all' && !deferredSearch && renderGroupedAll()}
+      <div style={{ display: filter === 'all' && !deferredSearch ? undefined : 'none' }}>
+        {renderGroupedAll()}
+      </div>
       {filter === 'quarantined' && renderQuarantined()}
       {filter === 'history' && renderHistory()}
       {(filter === 'favorites' || filter === 'blocked' || (deferredSearch && filter === 'all')) &&

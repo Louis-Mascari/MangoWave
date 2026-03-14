@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
+import { useToastStore } from '../store/useToastStore.ts';
 import { exchangeCode, refreshToken } from '../services/spotifyApi.ts';
 import { exchangeCodePkce, getSpotifyProfile, refreshTokenPkce } from '../services/spotifyPkce.ts';
 
@@ -64,8 +65,14 @@ export function useSpotifyAuth() {
             window.close();
           }
         })
-        .catch((err) => {
-          console.error('BYOC Spotify auth failed:', err);
+        .catch(() => {
+          useToastStore
+            .getState()
+            .show(
+              'Spotify connection failed. Please try again — if the issue persists, ' +
+                "check that your account has been added to the app's authorized users.",
+              { type: 'error' },
+            );
         });
     } else {
       // Owner backend flow
@@ -77,8 +84,14 @@ export function useSpotifyAuth() {
             window.close();
           }
         })
-        .catch((err) => {
-          console.error('Spotify auth failed:', err);
+        .catch(() => {
+          useToastStore
+            .getState()
+            .show(
+              'Spotify connection failed. Please try again — if the issue persists, ' +
+                "check that your account has been added to the app's authorized users.",
+              { type: 'error' },
+            );
         });
     }
   }, [setAuth, setByocAuth, getAuthMode, byocClientId]);
@@ -100,6 +113,12 @@ export function useSpotifyAuth() {
         })
         .catch(() => {
           logout();
+          useToastStore
+            .getState()
+            .show(
+              'Your Spotify session has expired. Please reconnect to continue using Spotify features.',
+              { type: 'warning' },
+            );
         });
     } else if (sessionId) {
       // Owner backend refresh
@@ -109,6 +128,12 @@ export function useSpotifyAuth() {
         })
         .catch(() => {
           logout();
+          useToastStore
+            .getState()
+            .show(
+              'Your Spotify session has expired. Please reconnect to continue using Spotify features.',
+              { type: 'warning' },
+            );
         });
     }
   }, [

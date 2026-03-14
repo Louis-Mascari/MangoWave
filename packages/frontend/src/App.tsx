@@ -33,6 +33,8 @@ import {
   toggleShuffle as apiToggleShuffle,
   setRepeatMode,
   RateLimitedError,
+  PremiumRequiredError,
+  TokenExpiredError,
 } from './services/spotifyApi.ts';
 import type { PlaybackAdapter } from './components/PlaybackControls.tsx';
 import { PlaybackPanel } from './components/PlaybackPanel.tsx';
@@ -121,6 +123,8 @@ function MainApp() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLaunchAnimation, setShowLaunchAnimation] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [webglContextLost, setWebglContextLost] = useState(false);
+  const silenceCheckRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const setOnboardingShown = useSettingsStore((s) => s.setOnboardingShown);
   const resetAutopilotRef = useRef<() => void>(() => {});
   const rateLimitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -300,6 +304,43 @@ function MainApp() {
     [transitionTime],
   );
 
+  const handleWebGLContextLost = useCallback(() => {
+    setWebglContextLost(true);
+  }, []);
+
+  // Silence detection for system audio — warns if no audio is flowing after capture starts
+  useEffect(() => {
+    if (silenceCheckRef.current) {
+      clearTimeout(silenceCheckRef.current);
+      silenceCheckRef.current = null;
+    }
+
+    if (!isActive || capture.captureSource !== 'system' || !audioEngine) return;
+
+    silenceCheckRef.current = setTimeout(() => {
+      silenceCheckRef.current = null;
+      const data = audioEngine.getFrequencyData();
+      if (data.length === 0) return;
+      const hasSignal = data.some((v) => v > 2);
+      if (!hasSignal) {
+        useToastStore
+          .getState()
+          .show(
+            'No audio detected — make sure audio is playing in the shared screen or tab, ' +
+              'and that you checked "Share audio" in the browser dialog.',
+            { type: 'warning', durationMs: 8000 },
+          );
+      }
+    }, 5000);
+
+    return () => {
+      if (silenceCheckRef.current) {
+        clearTimeout(silenceCheckRef.current);
+        silenceCheckRef.current = null;
+      }
+    };
+  }, [isActive, capture.captureSource, audioEngine]);
+
   const handleToggleFullscreen = useCallback(() => {
     if (document.fullscreenElement) {
       document.exitFullscreen();
@@ -388,6 +429,7 @@ function MainApp() {
   // --- Playback adapter (unified controls for local / spotify / mic / none) ---
   const spotifyNowPlaying = useSpotifyStore((s) => s.nowPlaying);
   const premiumError = useSpotifyStore((s) => s.premiumError);
+  const setPremiumError = useSpotifyStore((s) => s.setPremiumError);
   const isRateLimited = useSpotifyStore((s) => s.isRateLimited);
   const updateIsPlaying = useSpotifyStore((s) => s.updateIsPlaying);
   const requestPoll = useSpotifyStore((s) => s.requestPoll);
@@ -401,6 +443,36 @@ function MainApp() {
   const toggleShuffle = useMediaPlayerStore((s) => s.toggleShuffle);
   const cycleRepeatMode = useMediaPlayerStore((s) => s.cycleRepeatMode);
 
+  const handleSpotifyError = useCallback(
+    (err: unknown) => {
+      if (err instanceof RateLimitedError) {
+        setRateLimited(err.retryAfterSeconds * 1000);
+        rateLimitTimeoutRef.current = setTimeout(
+          () => clearRateLimited(),
+          err.retryAfterSeconds * 1000,
+        );
+      } else if (err instanceof PremiumRequiredError) {
+        setPremiumError(true);
+        useToastStore
+          .getState()
+          .show(
+            'Spotify Premium is required for playback controls. ' +
+              'You can still see now-playing info and use MangoWave with other audio sources.',
+            { type: 'warning' },
+          );
+      } else if (err instanceof TokenExpiredError) {
+        requestPoll(); // Triggers token refresh in useNowPlaying
+      } else {
+        useToastStore
+          .getState()
+          .show('Could not reach Spotify. Please check your connection and try again.', {
+            type: 'error',
+          });
+      }
+    },
+    [setRateLimited, clearRateLimited, setPremiumError, requestPoll],
+  );
+
   const handleSpotifyAction = useCallback(
     async (action: 'play' | 'pause' | 'next' | 'previous') => {
       const token = useSpotifyStore.getState().accessToken;
@@ -411,16 +483,10 @@ function MainApp() {
         await controlPlayback(token, action);
         requestPoll();
       } catch (err) {
-        if (err instanceof RateLimitedError) {
-          setRateLimited(err.retryAfterSeconds * 1000);
-          rateLimitTimeoutRef.current = setTimeout(
-            () => clearRateLimited(),
-            err.retryAfterSeconds * 1000,
-          );
-        }
+        handleSpotifyError(err);
       }
     },
-    [updateIsPlaying, requestPoll, setRateLimited, clearRateLimited],
+    [updateIsPlaying, requestPoll, handleSpotifyError],
   );
 
   const handleSpotifySeek = useCallback(
@@ -431,16 +497,10 @@ function MainApp() {
         await seekToPosition(token, positionMs);
         requestPoll();
       } catch (err) {
-        if (err instanceof RateLimitedError) {
-          setRateLimited(err.retryAfterSeconds * 1000);
-          rateLimitTimeoutRef.current = setTimeout(
-            () => clearRateLimited(),
-            err.retryAfterSeconds * 1000,
-          );
-        }
+        handleSpotifyError(err);
       }
     },
-    [requestPoll, setRateLimited, clearRateLimited],
+    [requestPoll, handleSpotifyError],
   );
 
   const handleSpotifyToggleShuffle = useCallback(async () => {
@@ -451,15 +511,9 @@ function MainApp() {
       await apiToggleShuffle(token, !current);
       requestPoll();
     } catch (err) {
-      if (err instanceof RateLimitedError) {
-        setRateLimited(err.retryAfterSeconds * 1000);
-        rateLimitTimeoutRef.current = setTimeout(
-          () => clearRateLimited(),
-          err.retryAfterSeconds * 1000,
-        );
-      }
+      handleSpotifyError(err);
     }
-  }, [requestPoll, setRateLimited, clearRateLimited]);
+  }, [requestPoll, handleSpotifyError]);
 
   const handleSpotifyCycleRepeat = useCallback(async () => {
     const token = useSpotifyStore.getState().accessToken;
@@ -470,15 +524,9 @@ function MainApp() {
       await setRepeatMode(token, next);
       requestPoll();
     } catch (err) {
-      if (err instanceof RateLimitedError) {
-        setRateLimited(err.retryAfterSeconds * 1000);
-        rateLimitTimeoutRef.current = setTimeout(
-          () => clearRateLimited(),
-          err.retryAfterSeconds * 1000,
-        );
-      }
+      handleSpotifyError(err);
     }
-  }, [requestPoll, setRateLimited, clearRateLimited]);
+  }, [requestPoll, handleSpotifyError]);
 
   const playbackAdapter: PlaybackAdapter = useMemo(() => {
     if (local.isActive) {
@@ -680,7 +728,26 @@ function MainApp() {
             onPresetChange={handlePresetChange}
             onPresetsLoaded={handlePresetsLoaded}
             onToggleFullscreen={handleToggleFullscreen}
+            onContextLost={handleWebGLContextLost}
           />
+          {webglContextLost && (
+            <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/90 font-sans text-white">
+              <h1 className="mb-2 text-2xl font-bold text-red-400">
+                Visualizer Lost Graphics Context
+              </h1>
+              <p className="mb-6 max-w-md text-center text-sm opacity-70">
+                Your device&apos;s graphics system was interrupted — this can happen when your
+                device is under heavy load, the GPU is shared with other applications, or the
+                display configuration changed. Reloading the page will restore the visualizer.
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="cursor-pointer rounded-lg border-none bg-orange-500 px-8 py-3 text-lg font-bold text-white hover:bg-orange-400"
+              >
+                Reload Page
+              </button>
+            </div>
+          )}
           {showOnboarding && (
             <OnboardingOverlay
               onComplete={() => {

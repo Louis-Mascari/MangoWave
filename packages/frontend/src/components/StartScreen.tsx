@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
+import { useToastStore } from '../store/useToastStore.ts';
 import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import logoSrc from '../assets/logo.png';
@@ -173,7 +174,12 @@ export function StartScreen({ onStart, onLocalFiles, onMicCapture, error }: Star
         )}
 
         {/* Error */}
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && (
+          <div className="max-w-lg rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-center">
+            <p className="text-xs font-semibold text-red-400">Something went wrong</p>
+            <p className="mt-1 text-xs text-red-300/70">{error}</p>
+          </div>
+        )}
       </div>
 
       {/* Modals */}
@@ -423,6 +429,13 @@ function SpotifySection({
                         }
                       } catch {
                         setIsConnecting(false);
+                        useToastStore
+                          .getState()
+                          .show(
+                            'Could not open the Spotify login window. ' +
+                              'Please check that pop-ups are allowed for this site and try again.',
+                            { type: 'error' },
+                          );
                       }
                     }}
                     disabled={isConnecting}

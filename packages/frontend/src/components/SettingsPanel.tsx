@@ -636,7 +636,7 @@ function DataTab() {
 
     const result = await parseImportFile(file);
     if (!result.ok) {
-      showToast(result.error, 6000);
+      showToast(result.error, { type: 'error', durationMs: 6000 });
       return;
     }
     setImportResult(result);
@@ -652,7 +652,10 @@ function DataTab() {
       ? [importResult.versionWarning, ...warnings]
       : warnings;
     if (allWarnings.length > 0) {
-      showToast('Settings imported — some settings could not be applied due to app changes', 6000);
+      showToast('Settings imported — some settings could not be applied due to app changes', {
+        type: 'warning',
+        durationMs: 6000,
+      });
     } else {
       showToast('Settings imported successfully');
     }

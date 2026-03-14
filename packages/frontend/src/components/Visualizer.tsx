@@ -14,6 +14,7 @@ interface VisualizerProps {
   onPresetChange: (name: string) => void;
   onPresetsLoaded: (presets: string[], packMap: Map<string, string>) => void;
   onToggleFullscreen: () => void;
+  onContextLost: () => void;
 }
 
 export function Visualizer({
@@ -22,6 +23,7 @@ export function Visualizer({
   onPresetChange,
   onPresetsLoaded,
   onToggleFullscreen,
+  onContextLost,
 }: VisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { performance, eq, audio } = useSettingsStore();
@@ -66,9 +68,17 @@ export function Visualizer({
     renderer.start();
     onPresetsLoaded(renderer.presetList, renderer.presetPackMap);
 
+    const handleContextLost = (e: Event) => {
+      e.preventDefault();
+      renderer.stop();
+      onContextLost();
+    };
+
+    canvas.addEventListener('webglcontextlost', handleContextLost);
     window.addEventListener('resize', updateSize);
 
     return () => {
+      canvas.removeEventListener('webglcontextlost', handleContextLost);
       window.removeEventListener('resize', updateSize);
       renderer.destroy();
       rendererRef.current = null;

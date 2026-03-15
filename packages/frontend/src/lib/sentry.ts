@@ -13,5 +13,3 @@ export function initSentry(): void {
     replaysOnErrorSampleRate: 0,
   });
 }
-
-export { Sentry };

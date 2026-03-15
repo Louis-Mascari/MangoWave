@@ -12,9 +12,7 @@ interface PresetHistoryState {
 
   push: (name: string) => void;
   goBack: () => string | null;
-  goForward: () => string | null;
   canGoBack: () => boolean;
-  canGoForward: () => boolean;
 
   // Shuffle round management
   markPlayed: (name: string) => void;
@@ -55,16 +53,7 @@ export const usePresetHistoryStore = create<PresetHistoryState>((set, get) => ({
     return state.history[newCursor];
   },
 
-  goForward: () => {
-    const state = get();
-    if (state.cursor >= state.history.length - 1) return null;
-    const newCursor = state.cursor + 1;
-    set({ cursor: newCursor, _isNavigating: true });
-    return state.history[newCursor];
-  },
-
   canGoBack: () => get().cursor > 0,
-  canGoForward: () => get().cursor < get().history.length - 1,
 
   markPlayed: (name) => {
     const state = get();

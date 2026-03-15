@@ -1,0 +1,15 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "ignoreBinaries": ["tsc", "prettier", "eslint"],
+  "exclude": ["types"],
+  "workspaces": {
+    "packages/frontend": {
+      "ignore": ["src/types/**/*.d.ts"]
+    },
+    "packages/backend": {},
+    "infrastructure": {
+      "entry": ["bin/mangowave.ts"],
+      "ignoreDependencies": ["ts-node"]
+    }
+  }
+}

@@ -27,6 +27,9 @@ jobs:
       - name: Prettier check
         run: npm run format:check
 
+      - name: Dead code check (Knip)
+        run: npx knip
+
       - name: ESLint (frontend)
         run: npm run lint --workspace=packages/frontend
 

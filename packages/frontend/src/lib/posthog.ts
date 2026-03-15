@@ -17,5 +17,3 @@ export function initPostHog(): void {
     disable_session_recording: false,
   });
 }
-
-export { posthog };

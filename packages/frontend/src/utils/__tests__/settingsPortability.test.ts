@@ -22,8 +22,7 @@ const mockState = {
   favoritePresets: ['Preset A'],
   blockedPresets: ['Preset B'],
   enabledPacks: ['Base', 'Extra'],
-  showQuarantined: false,
-  quarantineOverrides: [],
+  excludedOverrides: [],
 } as unknown as SettingsState;
 
 describe('buildExport', () => {

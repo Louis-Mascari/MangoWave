@@ -42,11 +42,11 @@ import { MediaPlaylist } from './components/MediaPlaylist.tsx';
 import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
 import { isMobileDevice } from './utils/isMobileDevice.ts';
 import quarantinedData from './data/quarantined-presets.json';
-import mobileSafeData from './data/mobile-safe-presets.json';
+import mobileBlockedData from './data/mobile-blocked-presets.json';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
 
 const quarantinedSet = new Set(quarantinedData.presets as string[]);
-const mobileSafeSet = new Set(mobileSafeData.presets as string[]);
+const mobileBlockedSet = new Set(mobileBlockedData.presets as string[]);
 
 /**
  * Minimal shell for OAuth popup callbacks.
@@ -123,8 +123,7 @@ function MainApp() {
   const setSongInfoDisplay = useSettingsStore((s) => s.setSongInfoDisplay);
   const toggleFavoritePreset = useSettingsStore((s) => s.toggleFavoritePreset);
   const toggleBlockPreset = useSettingsStore((s) => s.toggleBlockPreset);
-  const showQuarantined = useSettingsStore((s) => s.showQuarantined);
-  const quarantineOverrides = useSettingsStore((s) => s.quarantineOverrides);
+  const excludedOverrides = useSettingsStore((s) => s.excludedOverrides);
   const enabledPacks = useSettingsStore((s) => s.enabledPacks);
   const [currentPreset, setCurrentPreset] = useState('');
   const [presetList, setPresetList] = useState<string[]>([]);
@@ -141,8 +140,7 @@ function MainApp() {
 
   // Build effective quarantine set (quarantined minus user overrides)
   const effectiveQuarantineSet = useMemo(() => {
-    if (showQuarantined) return new Set<string>();
-    const overrideSet = new Set(quarantineOverrides);
+    const overrideSet = new Set(excludedOverrides);
     const result = new Set<string>();
     for (const name of quarantinedSet) {
       if (!overrideSet.has(name)) {
@@ -150,7 +148,7 @@ function MainApp() {
       }
     }
     return result;
-  }, [showQuarantined, quarantineOverrides]);
+  }, [excludedOverrides]);
 
   // Merged blocked set: user blocks + effective quarantine
   const mergedBlockedSet = useMemo(() => {
@@ -238,9 +236,10 @@ function MainApp() {
       pool = allPresets.filter((p) => !mergedBlockedSet.has(p));
     }
 
-    // On mobile, restrict to safe presets if the allowlist is populated
-    if (isMobileDevice && mobileSafeSet.size > 0) {
-      pool = pool.filter((p) => mobileSafeSet.has(p));
+    // On mobile, exclude presets known to cause freezing (unless user overrode)
+    if (isMobileDevice) {
+      const overrideSet = new Set(useSettingsStore.getState().excludedOverrides);
+      pool = pool.filter((p) => !mobileBlockedSet.has(p) || overrideSet.has(p));
     }
 
     if (pool.length === 0) return;
@@ -297,7 +296,15 @@ function MainApp() {
   }, [pickNextPreset]);
 
   const handlePreviousPreset = useCallback(() => {
-    const name = usePresetHistoryStore.getState().goBack();
+    const historyStore = usePresetHistoryStore.getState();
+    const overrideSet = new Set(useSettingsStore.getState().excludedOverrides);
+    let name = historyStore.goBack();
+    // Skip mobile-blocked presets (unless overridden) when navigating back
+    if (isMobileDevice) {
+      while (name && mobileBlockedSet.has(name) && !overrideSet.has(name)) {
+        name = historyStore.goBack();
+      }
+    }
     if (name) {
       rendererRef.current?.loadPreset(name, transitionTime);
       resetAutopilotRef.current();

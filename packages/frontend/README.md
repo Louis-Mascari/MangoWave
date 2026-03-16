@@ -42,7 +42,7 @@ src/
 │                  #     OnboardingOverlay (first-time tips), etc.
 ├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (butterchurn),
 │                  # isWebGL2Supported
-├── data/          # quarantined-presets.json, mobile-safe-presets.json
+├── data/          # quarantined-presets.json, mobile-blocked-presets.json
 ├── constants/     # shortcuts.ts (keyboard/mouse shortcut definitions)
 ├── hooks/         # useAudioCapture, useLocalPlayback, useAutopilot, useKeyboardShortcuts,
 │                  # useIdleTimer, useHideCursor, useFullscreen, useSpotifyAuth, useNowPlaying,
@@ -60,27 +60,25 @@ src/
 
 Zustand with `localStorage` persistence. Key sections:
 
-| Section               | Fields                                                                         | Defaults                                                                    |
-| --------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
-| `performance`         | `fpsCap`, `resolutionScale`, `meshWidth`, `meshHeight`, `textureRatio`, `fxaa` | Desktop: 60, 1.0, 48, 36, 1.0, false / Mobile: 30, 0.75, 32, 24, 0.5, false |
-| `audio`               | `smoothingConstant`, `fftSize`                                                 | 0.3, 1024                                                                   |
-| `autopilot`           | `enabled`, `interval`, `mode`, `favoriteWeight`                                | true, 15s, `'all'`, 2                                                       |
-| `eq`                  | `preAmpGain`, `bandGains[10]`                                                  | 1.5, all 0dB                                                                |
-| `blockedPresets`      | string[]                                                                       | []                                                                          |
-| `favoritePresets`     | string[]                                                                       | []                                                                          |
-| `presetNameDisplay`   | `'off' \| 'always' \| number`                                                  | 5                                                                           |
-| `songInfoDisplay`     | `'off' \| number` (on/off toggle, hardcoded 5s when on)                        | 5                                                                           |
-| `transitionTime`      | number (seconds)                                                               | 2.0                                                                         |
-| `volume`              | number (0.0–1.0)                                                               | 0.5                                                                         |
-| `enabledPacks`        | string[]                                                                       | all packs                                                                   |
-| `showQuarantined`     | boolean                                                                        | false                                                                       |
-| `quarantineOverrides` | string[]                                                                       | []                                                                          |
-| `mobileNoticeShown`   | boolean                                                                        | false                                                                       |
-| `onboardingShown`     | boolean                                                                        | false                                                                       |
+| Section             | Fields                                                                         | Defaults                    |
+| ------------------- | ------------------------------------------------------------------------------ | --------------------------- |
+| `performance`       | `fpsCap`, `resolutionScale`, `meshWidth`, `meshHeight`, `textureRatio`, `fxaa` | 60, 1.0, 48, 36, 1.0, false |
+| `audio`             | `smoothingConstant`, `fftSize`                                                 | 0.3, 1024                   |
+| `autopilot`         | `enabled`, `interval`, `mode`, `favoriteWeight`                                | true, 15s, `'all'`, 2       |
+| `eq`                | `preAmpGain`, `bandGains[10]`                                                  | 1.5, all 0dB                |
+| `blockedPresets`    | string[]                                                                       | []                          |
+| `favoritePresets`   | string[]                                                                       | []                          |
+| `presetNameDisplay` | `'off' \| 'always' \| number`                                                  | 5                           |
+| `songInfoDisplay`   | `'off' \| number` (on/off toggle, hardcoded 5s when on)                        | 5                           |
+| `transitionTime`    | number (seconds)                                                               | 2.0                         |
+| `volume`            | number (0.0–1.0)                                                               | 0.5                         |
+| `enabledPacks`      | string[]                                                                       | all packs                   |
+| `excludedOverrides` | string[]                                                                       | []                          |
+| `onboardingShown`   | boolean                                                                        | false                       |
 
 Blocked and favorited presets are mutually exclusive.
 
-On mobile, a notice appears in the StartScreen modals (Local Files, Microphone) offering to reduce rendering settings that can overload mobile GPUs. Users choose Optimize (applies mobile defaults) or Skip (keeps desktop values), with a "Remember my choice" checkbox to persist the decision via `mobileNoticeShown`.
+On mobile, 27 GPU-heavy presets (identified via Pixel 10 Pro testing) are filtered from the pool and shown in the Excluded tab alongside quarantined presets. Users can permanently restore any excluded preset via the Excluded tab — overrides persist in `excludedOverrides`.
 
 `useMediaPlayerStore` manages local file playback state (queue, current track, shuffle history, repeat mode). Not persisted — `File` objects can't survive page reload.
 

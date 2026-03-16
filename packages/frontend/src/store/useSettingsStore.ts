@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { EQ_BANDS } from '../engine/AudioEngine.ts';
-import { isMobileDevice } from '../utils/isMobileDevice.ts';
 
 export interface PerformanceSettings {
   fpsCap: number; // 0 = uncapped, 15–300
@@ -71,12 +70,10 @@ export interface SettingsState {
   setEnabledPacks: (packs: string[]) => void;
   togglePack: (pack: string) => void;
 
-  // Quarantine
-  showQuarantined: boolean;
-  setShowQuarantined: (show: boolean) => void;
-  quarantineOverrides: string[];
-  addQuarantineOverride: (name: string) => void;
-  removeQuarantineOverride: (name: string) => void;
+  // Exclusions (quarantined + mobile-blocked preset overrides)
+  excludedOverrides: string[];
+  addExcludedOverride: (name: string) => void;
+  removeExcludedOverride: (name: string) => void;
 
   // Display
   presetNameDisplay: 'off' | 'always' | number; // 'off', 'always', or seconds
@@ -87,12 +84,6 @@ export interface SettingsState {
   // Transitions
   transitionTime: number; // seconds for preset blend
   setTransitionTime: (seconds: number) => void;
-
-  // Mobile
-  mobileNoticeShown: boolean;
-  setMobileNoticeShown: (shown: boolean) => void;
-  resetToDesktopPerformance: () => void;
-  resetToMobilePerformance: () => void;
 
   // Onboarding
   onboardingShown: boolean;
@@ -117,15 +108,6 @@ const DESKTOP_PERFORMANCE: PerformanceSettings = {
   fxaa: false,
 };
 
-export const MOBILE_PERFORMANCE: PerformanceSettings = {
-  fpsCap: 30,
-  resolutionScale: 0.75,
-  meshWidth: 32,
-  meshHeight: 24,
-  textureRatio: 0.5,
-  fxaa: false,
-};
-
 // Only these keys can be set via importSettings — prevents overwriting store actions
 const IMPORTABLE_KEYS: (keyof SettingsState)[] = [
   'performance',
@@ -135,9 +117,7 @@ const IMPORTABLE_KEYS: (keyof SettingsState)[] = [
   'blockedPresets',
   'favoritePresets',
   'enabledPacks',
-  'showQuarantined',
-  'quarantineOverrides',
-  'mobileNoticeShown',
+  'excludedOverrides',
   'presetNameDisplay',
   'songInfoDisplay',
   'transitionTime',
@@ -148,7 +128,7 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       // Performance
-      performance: isMobileDevice ? { ...MOBILE_PERFORMANCE } : { ...DESKTOP_PERFORMANCE },
+      performance: { ...DESKTOP_PERFORMANCE },
       setFpsCap: (fps) =>
         set((state) => ({
           performance: {
@@ -276,26 +256,18 @@ export const useSettingsStore = create<SettingsState>()(
             : [...state.enabledPacks, pack],
         })),
 
-      // Quarantine
-      showQuarantined: false,
-      setShowQuarantined: (show) => set({ showQuarantined: show }),
-      quarantineOverrides: [],
-      addQuarantineOverride: (name) =>
+      // Exclusions (quarantined + mobile-blocked preset overrides)
+      excludedOverrides: [],
+      addExcludedOverride: (name) =>
         set((state) => ({
-          quarantineOverrides: state.quarantineOverrides.includes(name)
-            ? state.quarantineOverrides
-            : [...state.quarantineOverrides, name],
+          excludedOverrides: state.excludedOverrides.includes(name)
+            ? state.excludedOverrides
+            : [...state.excludedOverrides, name],
         })),
-      removeQuarantineOverride: (name) =>
+      removeExcludedOverride: (name) =>
         set((state) => ({
-          quarantineOverrides: state.quarantineOverrides.filter((p) => p !== name),
+          excludedOverrides: state.excludedOverrides.filter((p) => p !== name),
         })),
-
-      // Mobile
-      mobileNoticeShown: false,
-      setMobileNoticeShown: (shown) => set({ mobileNoticeShown: shown }),
-      resetToDesktopPerformance: () => set({ performance: { ...DESKTOP_PERFORMANCE } }),
-      resetToMobilePerformance: () => set({ performance: { ...MOBILE_PERFORMANCE } }),
 
       // Onboarding
       onboardingShown: false,
@@ -371,15 +343,33 @@ export const useSettingsStore = create<SettingsState>()(
             state.songInfoDisplay = 5;
           }
         }
-        // v3 → v4: Apply mobile performance defaults for existing mobile users
-        if ((version ?? 0) < 4) {
-          if (isMobileDevice) {
-            state.performance = { ...MOBILE_PERFORMANCE };
+        // v3 → v4: (was: mobile performance defaults — now undone by v5)
+        // v4 → v5: Remove mobile performance popup; reset mobile users to desktop defaults
+        if ((version ?? 0) < 5) {
+          delete state.mobileNoticeShown;
+          const perf = state.performance as Record<string, unknown> | undefined;
+          if (
+            perf &&
+            perf.fpsCap === 30 &&
+            perf.resolutionScale === 0.75 &&
+            perf.meshWidth === 32 &&
+            perf.meshHeight === 24 &&
+            perf.textureRatio === 0.5
+          ) {
+            state.performance = { ...DESKTOP_PERFORMANCE };
           }
+        }
+        // v5 → v6: Rename quarantineOverrides → excludedOverrides, remove showQuarantined
+        if ((version ?? 0) < 6) {
+          if (Array.isArray(state.quarantineOverrides)) {
+            state.excludedOverrides = state.quarantineOverrides;
+            delete state.quarantineOverrides;
+          }
+          delete state.showQuarantined;
         }
         return state as unknown as SettingsState;
       },
-      version: 4,
+      version: 6,
     },
   ),
 );

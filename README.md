@@ -20,7 +20,7 @@
 
 - **400+ MilkDrop presets** from 6 butterchurn packs, organized by source pack with virtualized browsing
 - **Pack filtering** — enable/disable built-in packs to control which presets appear and which autopilot draws from
-- **Quarantine system** — suspected broken or vibe-killing presets hidden by default, with per-preset unquarantine
+- **Excluded presets** — quarantined presets (broken or inappropriate content) and mobile-blocked presets (27 GPU-heavy presets identified via device testing) collected in a unified Excluded tab with reason badges and per-preset overrides
 - **Multiple audio sources** — system/tab audio, local files, or microphone input
 - **Local file playback** with queue, shuffle, repeat, seek, volume controls, and ID3 metadata display (title, artist, album, album art)
 - **10-band EQ** that shapes which frequencies drive the visuals
@@ -28,7 +28,7 @@
 - **Autopilot** with shuffle-style rounds (no repeats), all or favorites-only mode, proportional favorite weighting (1–10x)
 - **Preset history** with previous/next navigation and browseable history tab
 - **Shortcuts** — keyboard and mouse shortcuts for preset navigation, fullscreen, favorites, and more
-- **Mobile-optimized UI** with radial FAB menu, full-screen modal panels, and optional rendering optimizations for mobile GPUs
+- **Mobile-optimized UI** with radial FAB menu, full-screen modal panels, and automatic filtering of 27 GPU-heavy presets on mobile devices
 - **Optional Spotify integration** — Now Playing metadata for all authorized users; seek, shuffle, and repeat controls for Premium users. Cloud-synced settings. Owner-mode only due to Spotify's dev mode policy (1 Client ID per developer, max 5 authorized users, Premium required to register the app). Self-hosters can set up their own Spotify developer app via the included PKCE code
 - **Visual quality controls** — mesh resolution, texture quality, FXAA anti-aliasing, plus FPS cap, resolution scaling, FFT size, smoothing
 - **Settings export/import** — transfer settings between browsers or devices via JSON file

@@ -49,8 +49,8 @@ export const EXPORT_CATEGORIES: ExportCategory[] = [
   },
   {
     key: 'packs',
-    label: 'Packs & Quarantine',
-    fields: ['enabledPacks', 'showQuarantined', 'quarantineOverrides', 'mobileNoticeShown'],
+    label: 'Packs & Exclusions',
+    fields: ['enabledPacks', 'excludedOverrides'],
   },
 ];
 
@@ -121,6 +121,12 @@ export function parseImportFile(file: File): Promise<ParseResult> {
           captureImportFailure('Not a MangoWave settings file');
           resolve({ ok: false, error: 'Not a MangoWave settings file' });
           return;
+        }
+
+        // Map renamed fields from older exports
+        if ('quarantineOverrides' in parsed && !('excludedOverrides' in parsed)) {
+          parsed.excludedOverrides = parsed.quarantineOverrides;
+          delete parsed.quarantineOverrides;
         }
 
         const detected: string[] = [];
@@ -224,7 +230,7 @@ const SANITIZERS: Record<string, (val: unknown) => unknown> = {
   favoritePresets: (v) => sanitizeStringArray(v, 10_000),
   blockedPresets: (v) => sanitizeStringArray(v, 10_000),
   enabledPacks: (v) => sanitizeStringArray(v, 100),
-  quarantineOverrides: (v) => sanitizeStringArray(v, 10_000),
+  excludedOverrides: (v) => sanitizeStringArray(v, 10_000),
   presetNameDisplay: (v) => {
     if (v === 'off' || v === 'always') return v;
     if (typeof v === 'number' && isFinite(v)) return Math.min(10, Math.max(1, Math.round(v)));
@@ -239,8 +245,6 @@ const SANITIZERS: Record<string, (val: unknown) => unknown> = {
   },
   transitionTime: (v) => clamp(v, 0, 10, 2.0),
   volume: (v) => clamp(v, 0, 1, 0.5),
-  showQuarantined: (v) => (typeof v === 'boolean' ? v : false),
-  mobileNoticeShown: (v) => (typeof v === 'boolean' ? v : false),
 };
 
 export interface ImportResult {

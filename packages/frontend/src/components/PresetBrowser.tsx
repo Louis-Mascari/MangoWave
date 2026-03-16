@@ -5,10 +5,10 @@ import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { usePresetHistoryStore } from '../store/usePresetHistoryStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import quarantinedData from '../data/quarantined-presets.json';
-import mobileSafeData from '../data/mobile-safe-presets.json';
+import mobileBlockedData from '../data/mobile-blocked-presets.json';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 
-type FilterTab = 'all' | 'favorites' | 'blocked' | 'quarantined' | 'history';
+type FilterTab = 'all' | 'favorites' | 'blocked' | 'excluded' | 'history';
 
 interface PresetBrowserProps {
   presetList: string[];
@@ -19,11 +19,13 @@ interface PresetBrowserProps {
 }
 
 const quarantinedSet = new Set(quarantinedData.presets as string[]);
-const mobileSafeSet = new Set(mobileSafeData.presets as string[]);
+const mobileBlockedSet = new Set(mobileBlockedData.presets as string[]);
 
-function isMobileUnsafe(name: string): boolean {
-  return isMobileDevice && mobileSafeSet.size > 0 && !mobileSafeSet.has(name);
-}
+const QUARANTINE_REASONS: Record<string, { label: string; color: string }> = {
+  'Geiss - Spiral Artifact': { label: 'Broken', color: 'text-yellow-400' },
+  'martin - attack of the beast': { label: 'Content', color: 'text-red-400' },
+};
+const MOBILE_BLOCKED_REASON = { label: 'Mobile perf', color: 'text-blue-400' };
 
 function getAllBuiltinPacks(packMap: Map<string, string>): string[] {
   const packs = new Set<string>();
@@ -38,48 +40,26 @@ function PresetRow({
   isCurrent,
   isFavorite,
   isBlocked,
-  isQuarantined,
-  mobileUnsafe,
   onSelect,
   onToggleFavorite,
   onToggleBlock,
-  onUnquarantine,
 }: {
   name: string;
   isCurrent: boolean;
   isFavorite: boolean;
   isBlocked: boolean;
-  isQuarantined: boolean;
-  mobileUnsafe: boolean;
   onSelect: () => void;
   onToggleFavorite: () => void;
   onToggleBlock: () => void;
-  onUnquarantine: () => void;
 }) {
   return (
     <div
       onClick={onSelect}
       className={`flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs ${
-        isCurrent
-          ? 'bg-orange-500/30 text-white'
-          : mobileUnsafe
-            ? 'text-white/30 hover:bg-white/10'
-            : 'text-white/70 hover:bg-white/10'
+        isCurrent ? 'bg-orange-500/30 text-white' : 'text-white/70 hover:bg-white/10'
       }`}
     >
-      <span className="min-w-0 flex-1 truncate text-left">
-        {isQuarantined && (
-          <span className="mr-1 text-yellow-500/60" title="Quarantined">
-            !
-          </span>
-        )}
-        {mobileUnsafe && (
-          <span className="mr-1 text-orange-400/60" title="May freeze on mobile">
-            ⚠
-          </span>
-        )}
-        {name}
-      </span>
+      <span className="min-w-0 flex-1 truncate text-left">{name}</span>
       <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
         <button
           onClick={onToggleFavorite}
@@ -92,21 +72,6 @@ function PresetRow({
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
           </svg>
         </button>
-        {isQuarantined && (
-          <button
-            onClick={onUnquarantine}
-            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent text-yellow-500/60 hover:bg-white/10 hover:text-yellow-400"
-            title="Remove from quarantine"
-          >
-            <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
-        )}
         <button
           onClick={onToggleBlock}
           className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
@@ -198,9 +163,9 @@ export function PresetBrowser({
   const enabledPacks = useSettingsStore((s) => s.enabledPacks);
   const setEnabledPacks = useSettingsStore((s) => s.setEnabledPacks);
   const togglePack = useSettingsStore((s) => s.togglePack);
-  const showQuarantined = useSettingsStore((s) => s.showQuarantined);
-  const quarantineOverrides = useSettingsStore((s) => s.quarantineOverrides);
-  const addQuarantineOverride = useSettingsStore((s) => s.addQuarantineOverride);
+  const excludedOverrides = useSettingsStore((s) => s.excludedOverrides);
+  const addExcludedOverride = useSettingsStore((s) => s.addExcludedOverride);
+  const removeExcludedOverride = useSettingsStore((s) => s.removeExcludedOverride);
   const blockPreset = useSettingsStore((s) => s.blockPreset);
   const unblockPreset = useSettingsStore((s) => s.unblockPreset);
   const toggleFavoritePreset = useSettingsStore((s) => s.toggleFavoritePreset);
@@ -211,11 +176,10 @@ export function PresetBrowser({
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
   const [collapsedPacks, setCollapsedPacks] = useState<Set<string>>(new Set());
-  const [confirmPreset, setConfirmPreset] = useState<string | null>(null);
 
   const blockedSet = useMemo(() => new Set(blockedPresets), [blockedPresets]);
   const favoriteSet = useMemo(() => new Set(favoritePresets), [favoritePresets]);
-  const overrideSet = useMemo(() => new Set(quarantineOverrides), [quarantineOverrides]);
+  const overrideSet = useMemo(() => new Set(excludedOverrides), [excludedOverrides]);
 
   const allPacks = useMemo(() => getAllBuiltinPacks(presetPackMap), [presetPackMap]);
 
@@ -235,8 +199,8 @@ export function PresetBrowser({
 
   const enabledPackSet = useMemo(() => new Set(enabledPacks), [enabledPacks]);
 
-  // Determine effective quarantine (hidden unless overridden by user)
-  const isQuarantined = useCallback(
+  // Determine if preset is effectively excluded (quarantined and not overridden)
+  const isExcluded = useCallback(
     (name: string) => {
       if (!quarantinedSet.has(name)) return false;
       if (overrideSet.has(name)) return false;
@@ -253,6 +217,15 @@ export function PresetBrowser({
     [presetPackMap],
   );
 
+  // On mobile, filter mobile-blocked presets out of main tabs (unless user overrode)
+  const mainPresetList = useMemo(
+    () =>
+      isMobileDevice
+        ? presetList.filter((p) => !mobileBlockedSet.has(p) || overrideSet.has(p))
+        : presetList,
+    [presetList, overrideSet],
+  );
+
   // Build grouped data for "all" tab
   const { groupCounts, groupNames, flatPresets } = useMemo(() => {
     if (filter !== 'all' || deferredSearch) {
@@ -267,10 +240,10 @@ export function PresetBrowser({
     for (const pack of packOrder) {
       if (!enabledPackSet.has(pack)) continue;
       if (collapsedPacks.has(pack)) {
-        const packPresets = presetList.filter((name) => {
+        const packPresets = mainPresetList.filter((name) => {
           if (getPresetPack(name) !== pack) return false;
           if (blockedSet.has(name)) return false;
-          if (!showQuarantined && isQuarantined(name)) return false;
+          if (isExcluded(name)) return false;
           return true;
         });
         names.push(`${pack}|||${packPresets.length}`);
@@ -278,10 +251,10 @@ export function PresetBrowser({
         continue;
       }
 
-      const packPresets = presetList.filter((name) => {
+      const packPresets = mainPresetList.filter((name) => {
         if (getPresetPack(name) !== pack) return false;
         if (blockedSet.has(name)) return false;
-        if (!showQuarantined && isQuarantined(name)) return false;
+        if (isExcluded(name)) return false;
         return true;
       });
 
@@ -296,44 +269,56 @@ export function PresetBrowser({
   }, [
     filter,
     deferredSearch,
-    presetList,
+    mainPresetList,
     allPacks,
     enabledPackSet,
     collapsedPacks,
     blockedSet,
-    showQuarantined,
-    isQuarantined,
+    isExcluded,
     getPresetPack,
   ]);
 
-  // Flat filtered list for search, favorites, blocked, quarantined tabs
+  // Flat filtered list for search, favorites, blocked tabs
   const filteredPresets = useMemo(() => {
     if (filter === 'all' && !deferredSearch) return [];
-    if (filter === 'history') return [];
+    if (filter === 'history' || filter === 'excluded') return [];
 
     const lowerSearch = deferredSearch.toLowerCase();
-    return presetList.filter((name) => {
+    return mainPresetList.filter((name) => {
       if (deferredSearch && !name.toLowerCase().includes(lowerSearch)) return false;
       if (filter === 'favorites') return favoriteSet.has(name);
       if (filter === 'blocked') return blockedSet.has(name);
-      if (filter === 'quarantined') {
-        return quarantinedSet.has(name) && !overrideSet.has(name);
-      }
       // 'all' with search
       if (blockedSet.has(name)) return false;
-      if (!showQuarantined && isQuarantined(name)) return false;
+      if (isExcluded(name)) return false;
       return true;
     });
-  }, [
-    presetList,
-    deferredSearch,
-    filter,
-    blockedSet,
-    favoriteSet,
-    overrideSet,
-    showQuarantined,
-    isQuarantined,
-  ]);
+  }, [mainPresetList, deferredSearch, filter, blockedSet, favoriteSet, isExcluded]);
+
+  // Excluded tab: quarantined presets (not overridden) + mobile-blocked presets (on mobile, not overridden)
+  const excludedPresets = useMemo(() => {
+    if (filter !== 'excluded') return [];
+    const lowerSearch = deferredSearch.toLowerCase();
+    const result: { name: string; reason: { label: string; color: string } }[] = [];
+    // Quarantined presets (not overridden by user)
+    for (const name of quarantinedSet) {
+      if (overrideSet.has(name)) continue;
+      if (deferredSearch && !name.toLowerCase().includes(lowerSearch)) continue;
+      result.push({
+        name,
+        reason: QUARANTINE_REASONS[name] ?? { label: 'Quarantined', color: 'text-yellow-400' },
+      });
+    }
+    // Mobile-blocked presets (only on mobile, not overridden)
+    if (isMobileDevice) {
+      for (const name of mobileBlockedSet) {
+        if (overrideSet.has(name)) continue;
+        if (deferredSearch && !name.toLowerCase().includes(lowerSearch)) continue;
+        result.push({ name, reason: MOBILE_BLOCKED_REASON });
+      }
+    }
+    return result;
+  }, [filter, deferredSearch, overrideSet]);
 
   // History list (reversed, filtered by search)
   const historyList = useMemo(() => {
@@ -353,12 +338,12 @@ export function PresetBrowser({
     [favoriteSet, toggleFavoritePreset],
   );
 
-  const handleUnquarantine = useCallback(
+  const handleRestore = useCallback(
     (name: string) => {
-      addQuarantineOverride(name);
-      useToastStore.getState().show('Removed from quarantine');
+      addExcludedOverride(name);
+      useToastStore.getState().show('Preset restored to pool');
     },
-    [addQuarantineOverride],
+    [addExcludedOverride],
   );
 
   const handleToggleBlock = useCallback(
@@ -367,13 +352,25 @@ export function PresetBrowser({
       if (isBlocked) {
         unblockPreset(name);
         useToastStore.getState().show('Preset unblocked');
+      } else if (overrideSet.has(name)) {
+        removeExcludedOverride(name);
+        useToastStore.getState().show('Preset returned to excluded');
+        if (name === currentPreset) onNextPreset();
       } else {
         blockPreset(name);
         useToastStore.getState().show('Preset blocked');
         if (name === currentPreset) onNextPreset();
       }
     },
-    [blockedSet, blockPreset, unblockPreset, currentPreset, onNextPreset],
+    [
+      blockedSet,
+      blockPreset,
+      unblockPreset,
+      overrideSet,
+      removeExcludedOverride,
+      currentPreset,
+      onNextPreset,
+    ],
   );
 
   const toggleCollapsePack = useCallback((pack: string) => {
@@ -390,25 +387,10 @@ export function PresetBrowser({
 
   const handleSelectPreset = useCallback(
     (name: string) => {
-      if (isMobileUnsafe(name)) {
-        setConfirmPreset(name);
-      } else {
-        onSelectPreset(name);
-      }
+      onSelectPreset(name);
     },
     [onSelectPreset],
   );
-
-  const handleConfirmLoad = useCallback(() => {
-    if (confirmPreset) {
-      onSelectPreset(confirmPreset);
-      setConfirmPreset(null);
-    }
-  }, [confirmPreset, onSelectPreset]);
-
-  const handleCancelLoad = useCallback(() => {
-    setConfirmPreset(null);
-  }, []);
 
   const handleSelectAll = useCallback(() => {
     setEnabledPacks(allPacks);
@@ -486,12 +468,9 @@ export function PresetBrowser({
                 isCurrent={name === currentPreset}
                 isFavorite={favoriteSet.has(name)}
                 isBlocked={blockedSet.has(name)}
-                isQuarantined={quarantinedSet.has(name)}
-                mobileUnsafe={isMobileUnsafe(name)}
                 onSelect={() => handleSelectPreset(name)}
                 onToggleFavorite={() => handleToggleFavorite(name)}
                 onToggleBlock={() => handleToggleBlock(name)}
-                onUnquarantine={() => handleUnquarantine(name)}
               />
             );
           }}
@@ -512,12 +491,9 @@ export function PresetBrowser({
           isCurrent={name === currentPreset}
           isFavorite={favoriteSet.has(name)}
           isBlocked={blockedSet.has(name)}
-          isQuarantined={quarantinedSet.has(name)}
-          mobileUnsafe={isMobileUnsafe(name)}
           onSelect={() => handleSelectPreset(name)}
           onToggleFavorite={() => handleToggleFavorite(name)}
           onToggleBlock={() => handleToggleBlock(name)}
-          onUnquarantine={() => handleUnquarantine(name)}
         />
       ))}
       {filteredPresets.length === 0 && (
@@ -546,27 +522,29 @@ export function PresetBrowser({
     </div>
   );
 
-  // Render quarantined tab
-  const renderQuarantined = () => (
+  // Render excluded tab (quarantined + mobile-blocked)
+  const renderExcluded = () => (
     <div className="flex flex-col gap-0.5 overflow-y-auto max-md:min-h-0 max-md:flex-1 md:max-h-[280px]">
       <p className="mb-1 text-[10px] leading-snug text-white/40">
-        Presets suspected broken or not conducive to good vibes. Click to preview, then unquarantine
-        any you want to keep.
+        These presets are excluded from the pool. Tap any to load at your own risk.
       </p>
-      {filteredPresets.map((name) => (
+      {excludedPresets.map(({ name, reason }) => (
         <div
           key={name}
           onClick={() => handleSelectPreset(name)}
           className="flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs text-white/70 hover:bg-white/10"
         >
-          <span className="min-w-0 flex-1 truncate text-left">{name}</span>
+          <span className="min-w-0 flex-1 truncate text-left">
+            <span className={`mr-1.5 text-[10px] font-medium ${reason.color}`}>{reason.label}</span>
+            {name}
+          </span>
           <button
             onClick={(e) => {
               e.stopPropagation();
-              handleUnquarantine(name);
+              handleRestore(name);
             }}
-            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent text-yellow-500/60 hover:bg-white/10 hover:text-yellow-400"
-            title="Remove from quarantine"
+            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent text-green-500/60 hover:bg-white/10 hover:text-green-400"
+            title="Restore to pool"
           >
             <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
               <path
@@ -578,8 +556,8 @@ export function PresetBrowser({
           </button>
         </div>
       ))}
-      {filteredPresets.length === 0 && (
-        <p className="py-2 text-center text-xs text-white/40">No quarantined presets</p>
+      {excludedPresets.length === 0 && (
+        <p className="py-2 text-center text-xs text-white/40">No excluded presets</p>
       )}
     </div>
   );
@@ -589,7 +567,7 @@ export function PresetBrowser({
       <div className="flex flex-col gap-1.5">
         <h3 className="text-sm font-semibold text-white">Presets</h3>
         <div className="flex flex-wrap gap-1">
-          {(['all', 'favorites', 'blocked', 'quarantined', 'history'] as const).map((f) => (
+          {(['all', 'favorites', 'blocked', 'excluded', 'history'] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -630,33 +608,10 @@ export function PresetBrowser({
       >
         {renderGroupedAll()}
       </div>
-      {filter === 'quarantined' && renderQuarantined()}
+      {filter === 'excluded' && renderExcluded()}
       {filter === 'history' && renderHistory()}
       {(filter === 'favorites' || filter === 'blocked' || (deferredSearch && filter === 'all')) &&
         renderFlatList()}
-
-      {/* Mobile-unsafe preset confirmation */}
-      {confirmPreset && (
-        <div className="absolute inset-x-0 bottom-0 z-10 rounded-b-lg bg-black/90 px-4 py-3 backdrop-blur-sm">
-          <p className="mb-2 text-xs text-orange-300">
-            May freeze on mobile. Load &ldquo;{confirmPreset}&rdquo; anyway?
-          </p>
-          <div className="flex gap-2">
-            <button
-              onClick={handleConfirmLoad}
-              className="cursor-pointer rounded border-none bg-orange-500 px-3 py-1 text-xs font-medium text-white hover:bg-orange-600"
-            >
-              Load
-            </button>
-            <button
-              onClick={handleCancelLoad}
-              className="cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

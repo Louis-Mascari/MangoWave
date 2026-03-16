@@ -22,8 +22,7 @@ describe('useSettingsStore', () => {
       result.current.setAutopilotFavoriteWeight(2);
       result.current.setPresetNameDisplay(5);
       result.current.setSongInfoDisplay(5);
-      result.current.setShowQuarantined(false);
-      result.current.setMobileNoticeShown(false);
+      result.current.excludedOverrides.forEach((p) => result.current.removeExcludedOverride(p));
       // Clear presets
       result.current.blockedPresets.forEach((p) => result.current.unblockPreset(p));
       result.current.favoritePresets.forEach((p) => result.current.toggleFavoritePreset(p));
@@ -248,24 +247,27 @@ describe('useSettingsStore', () => {
     });
   });
 
-  describe('quarantine', () => {
-    it('defaults to hidden', () => {
+  describe('excluded overrides', () => {
+    it('starts empty', () => {
       const { result } = renderHook(() => useSettingsStore());
-      expect(result.current.showQuarantined).toBe(false);
+      expect(result.current.excludedOverrides).toEqual([]);
     });
 
-    it('toggles show quarantined', () => {
+    it('adds and removes overrides', () => {
       const { result } = renderHook(() => useSettingsStore());
-      act(() => result.current.setShowQuarantined(true));
-      expect(result.current.showQuarantined).toBe(true);
+      act(() => result.current.addExcludedOverride('Bad Preset'));
+      expect(result.current.excludedOverrides).toContain('Bad Preset');
+      act(() => result.current.removeExcludedOverride('Bad Preset'));
+      expect(result.current.excludedOverrides).not.toContain('Bad Preset');
     });
 
-    it('manages quarantine overrides', () => {
+    it('does not duplicate overrides', () => {
       const { result } = renderHook(() => useSettingsStore());
-      act(() => result.current.addQuarantineOverride('Bad Preset'));
-      expect(result.current.quarantineOverrides).toContain('Bad Preset');
-      act(() => result.current.removeQuarantineOverride('Bad Preset'));
-      expect(result.current.quarantineOverrides).not.toContain('Bad Preset');
+      act(() => {
+        result.current.addExcludedOverride('Bad Preset');
+        result.current.addExcludedOverride('Bad Preset');
+      });
+      expect(result.current.excludedOverrides.filter((p) => p === 'Bad Preset')).toHaveLength(1);
     });
   });
 
@@ -364,53 +366,6 @@ describe('useSettingsStore', () => {
       expect(result.current.enabledPacks).toEqual(['Extra']);
       act(() => result.current.togglePack('Base'));
       expect(result.current.enabledPacks).toContain('Base');
-    });
-  });
-
-  describe('mobileNoticeShown', () => {
-    it('defaults to false', () => {
-      const { result } = renderHook(() => useSettingsStore());
-      expect(result.current.mobileNoticeShown).toBe(false);
-    });
-
-    it('sets mobileNoticeShown', () => {
-      const { result } = renderHook(() => useSettingsStore());
-      act(() => result.current.setMobileNoticeShown(true));
-      expect(result.current.mobileNoticeShown).toBe(true);
-    });
-  });
-
-  describe('resetToDesktopPerformance', () => {
-    it('resets all performance fields to desktop values', () => {
-      const { result } = renderHook(() => useSettingsStore());
-      // Set to non-desktop values first
-      act(() => {
-        result.current.setFpsCap(30);
-        result.current.setResolutionScale(0.75);
-        result.current.setMeshSize(32, 24);
-        result.current.setTextureRatio(0.5);
-      });
-      act(() => result.current.resetToDesktopPerformance());
-      expect(result.current.performance).toEqual({
-        fpsCap: 60,
-        resolutionScale: 1.0,
-        meshWidth: 48,
-        meshHeight: 36,
-        textureRatio: 1.0,
-        fxaa: false,
-      });
-    });
-  });
-
-  describe('mobile defaults', () => {
-    it('uses desktop defaults when isMobileDevice is false', () => {
-      // Default test env has isMobileDevice = false
-      const { result } = renderHook(() => useSettingsStore());
-      expect(result.current.performance.fpsCap).toBe(60);
-      expect(result.current.performance.resolutionScale).toBe(1.0);
-      expect(result.current.performance.meshWidth).toBe(48);
-      expect(result.current.performance.meshHeight).toBe(36);
-      expect(result.current.performance.textureRatio).toBe(1.0);
     });
   });
 

@@ -3,10 +3,8 @@ import { VisualizerRenderer } from '../engine/VisualizerRenderer.ts';
 import type { AudioEngine } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import quarantinedData from '../data/quarantined-presets.json';
-import mobileSafeData from '../data/mobile-safe-presets.json';
+import mobileBlockedData from '../data/mobile-blocked-presets.json';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
-
-const mobileSafeSet = new Set(mobileSafeData.presets as string[]);
 
 interface VisualizerProps {
   audioEngine: AudioEngine;
@@ -49,12 +47,19 @@ export function Visualizer({
 
     updateSize();
 
-    // Build excluded set for initial preset pick: blocked + effective quarantine
-    const { blockedPresets, quarantineOverrides } = useSettingsStore.getState();
-    const overrideSet = new Set(quarantineOverrides);
+    // Build excluded set for initial preset pick: blocked + effective quarantine + mobile-blocked
+    const { blockedPresets, excludedOverrides } = useSettingsStore.getState();
+    const overrideSet = new Set(excludedOverrides);
     const excludedPresets = new Set<string>(blockedPresets);
     for (const name of quarantinedData.presets as string[]) {
       if (!overrideSet.has(name)) excludedPresets.add(name);
+    }
+
+    // On mobile, add blocked presets to the excluded set (unless user overrode)
+    if (isMobileDevice) {
+      for (const name of mobileBlockedData.presets as string[]) {
+        if (!overrideSet.has(name)) excludedPresets.add(name);
+      }
     }
 
     renderer.init(canvas, ctx, analyser, onPresetChange, {
@@ -63,7 +68,6 @@ export function Visualizer({
       textureRatio: performance.textureRatio,
       fxaa: performance.fxaa,
       excludedPresets,
-      mobileSafePresets: isMobileDevice && mobileSafeSet.size > 0 ? mobileSafeSet : undefined,
     });
     renderer.start();
     onPresetsLoaded(renderer.presetList, renderer.presetPackMap);

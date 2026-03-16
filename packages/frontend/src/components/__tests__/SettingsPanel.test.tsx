@@ -100,6 +100,6 @@ describe('SettingsPanel', () => {
     expect(screen.getByText('Display & Volume')).toBeInTheDocument();
     expect(screen.getByText('Favorites')).toBeInTheDocument();
     expect(screen.getByText('Blocked Presets')).toBeInTheDocument();
-    expect(screen.getByText('Packs & Quarantine')).toBeInTheDocument();
+    expect(screen.getByText('Packs & Exclusions')).toBeInTheDocument();
   });
 });

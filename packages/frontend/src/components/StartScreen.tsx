@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
@@ -30,11 +29,6 @@ export function StartScreen({
   const logout = useSpotifyStore((s) => s.logout);
   const getAuthMode = useSpotifyStore((s) => s.getAuthMode);
   const authMode = getAuthMode();
-
-  const mobileNoticeShown = useSettingsStore((s) => s.mobileNoticeShown);
-  const setMobileNoticeShown = useSettingsStore((s) => s.setMobileNoticeShown);
-  const resetToDesktopPerformance = useSettingsStore((s) => s.resetToDesktopPerformance);
-  const resetToMobilePerformance = useSettingsStore((s) => s.resetToMobilePerformance);
 
   const [activeModal, setActiveModalRaw] = useState<ModalView>('none');
   const [fileError, setFileError] = useState<string | null>(null);
@@ -292,27 +286,12 @@ export function StartScreen({
               <p className="mt-1 whitespace-pre-line text-xs text-red-300/70">{fileError}</p>
             </div>
           )}
-          {isMobileDevice && !mobileNoticeShown ? (
-            <MobilePerformanceNotice
-              onOptimize={(remember) => {
-                resetToMobilePerformance();
-                if (remember) setMobileNoticeShown(true);
-                handleFileSelect();
-              }}
-              onSkip={(remember) => {
-                resetToDesktopPerformance();
-                if (remember) setMobileNoticeShown(true);
-                handleFileSelect();
-              }}
-            />
-          ) : (
-            <button
-              onClick={handleFileSelect}
-              className="start-btn mt-5 w-full cursor-pointer rounded-xl border-none px-10 py-3 text-lg font-semibold text-white"
-            >
-              Choose Files
-            </button>
-          )}
+          <button
+            onClick={handleFileSelect}
+            className="start-btn mt-5 w-full cursor-pointer rounded-xl border-none px-10 py-3 text-lg font-semibold text-white"
+          >
+            Choose Files
+          </button>
         </Modal>
       )}
 
@@ -334,27 +313,12 @@ export function StartScreen({
               <p className="mt-1 whitespace-pre-line text-xs text-red-300/70">{error}</p>
             </div>
           )}
-          {isMobileDevice && !mobileNoticeShown ? (
-            <MobilePerformanceNotice
-              onOptimize={(remember) => {
-                resetToMobilePerformance();
-                if (remember) setMobileNoticeShown(true);
-                onMicCapture();
-              }}
-              onSkip={(remember) => {
-                resetToDesktopPerformance();
-                if (remember) setMobileNoticeShown(true);
-                onMicCapture();
-              }}
-            />
-          ) : (
-            <button
-              onClick={onMicCapture}
-              className="start-btn mt-5 w-full cursor-pointer rounded-xl border-none px-10 py-3 text-lg font-semibold text-white"
-            >
-              Start Microphone
-            </button>
-          )}
+          <button
+            onClick={onMicCapture}
+            className="start-btn mt-5 w-full cursor-pointer rounded-xl border-none px-10 py-3 text-lg font-semibold text-white"
+          >
+            Start Microphone
+          </button>
         </Modal>
       )}
 
@@ -507,50 +471,6 @@ function SpotifySection({
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function MobilePerformanceNotice({
-  onOptimize,
-  onSkip,
-}: {
-  onOptimize: (remember: boolean) => void;
-  onSkip: (remember: boolean) => void;
-}) {
-  const [remember, setRemember] = useState(false);
-
-  return (
-    <div className="mt-5 flex flex-col gap-3">
-      <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-4 py-3">
-        <p className="text-xs font-semibold text-yellow-400">Mobile Device Detected</p>
-        <p className="mt-1 text-xs text-yellow-300/70">
-          We&apos;ve automatically reduced rendering quality to prevent freezing on mobile hardware.
-          Some presets may still be demanding — for the best experience, use a desktop or laptop.
-          You can adjust these settings anytime in Settings &gt; Rendering.
-        </p>
-      </div>
-      <button
-        onClick={() => onOptimize(remember)}
-        className="start-btn w-full cursor-pointer rounded-xl border-none px-10 py-3 text-lg font-semibold text-white"
-      >
-        Optimize
-      </button>
-      <button
-        onClick={() => onSkip(remember)}
-        className="w-full cursor-pointer rounded-xl border border-white/10 bg-transparent px-10 py-2 text-sm text-white/50 transition-colors hover:text-white/70"
-      >
-        Skip
-      </button>
-      <label className="flex items-center justify-center gap-2 text-xs text-white/40">
-        <input
-          type="checkbox"
-          checked={remember}
-          onChange={(e) => setRemember(e.target.checked)}
-          className="accent-orange-500"
-        />
-        Remember my choice
-      </label>
     </div>
   );
 }

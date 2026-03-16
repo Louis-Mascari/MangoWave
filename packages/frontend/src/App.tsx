@@ -41,6 +41,7 @@ import { PlaybackPanel } from './components/PlaybackPanel.tsx';
 import { MediaPlaylist } from './components/MediaPlaylist.tsx';
 import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
 import { isMobileDevice } from './utils/isMobileDevice.ts';
+import { pickPreset } from './utils/pickPreset.ts';
 import quarantinedData from './data/quarantined-presets.json';
 import mobileBlockedData from './data/mobile-blocked-presets.json';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
@@ -242,43 +243,19 @@ function MainApp() {
       pool = pool.filter((p) => !mobileBlockedSet.has(p) || overrideSet.has(p));
     }
 
-    if (pool.length === 0) return;
-
     const historyStore = usePresetHistoryStore.getState();
+    const result = pickPreset(
+      pool,
+      historyStore.playedSet,
+      favoritePresets,
+      autopilot.mode,
+      autopilot.favoriteWeight,
+    );
+    if (!result) return;
 
-    // Shuffle: exclude already-played presets this round
-    let available = pool.filter((p) => !historyStore.playedSet.has(p));
-    if (available.length === 0) {
-      historyStore.resetRound();
-      available = pool;
-    }
-
-    // Weighted selection: in 'all' mode, each favorite gets `weight`x the chance of a non-favorite.
-    // e.g. 10 favorites, 540 others, weight=2 → favorites get 2x probability each.
-    let pick: string;
-    if (autopilot.mode !== 'favorites') {
-      const favSet = new Set(favoritePresets);
-      const weight = autopilot.favoriteWeight;
-      const favCount = available.filter((p) => favSet.has(p)).length;
-      const nonFavCount = available.length - favCount;
-      const totalWeight = favCount * weight + nonFavCount;
-      const favGroupProb = (favCount * weight) / totalWeight;
-
-      if (favCount > 0 && Math.random() < favGroupProb) {
-        const favAvailable = available.filter((p) => favSet.has(p));
-        pick = favAvailable[Math.floor(Math.random() * favAvailable.length)];
-      } else {
-        const nonFav = available.filter((p) => !favSet.has(p));
-        pick =
-          nonFav.length > 0
-            ? nonFav[Math.floor(Math.random() * nonFav.length)]
-            : available[Math.floor(Math.random() * available.length)];
-      }
-    } else {
-      pick = available[Math.floor(Math.random() * available.length)];
-    }
-    historyStore.markPlayed(pick);
-    renderer.loadPreset(pick, transitionTime);
+    if (result.roundReset) historyStore.resetRound();
+    historyStore.markPlayed(result.pick);
+    renderer.loadPreset(result.pick, transitionTime);
   }, [
     mergedBlockedSet,
     enabledPacks,
@@ -306,6 +283,7 @@ function MainApp() {
       }
     }
     if (name) {
+      historyStore.markPlayed(name);
       rendererRef.current?.loadPreset(name, transitionTime);
       resetAutopilotRef.current();
     }
@@ -315,6 +293,7 @@ function MainApp() {
 
   const handleSelectPreset = useCallback(
     (name: string) => {
+      usePresetHistoryStore.getState().markPlayed(name);
       rendererRef.current?.loadPreset(name, transitionTime);
       resetAutopilotRef.current();
     },

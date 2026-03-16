@@ -258,15 +258,7 @@ export function StartScreen({
           <OSTip />
 
           {/* Collapsible sensitivity tips */}
-          <details className="mt-3 text-xs text-[#888]">
-            <summary className="cursor-pointer select-none text-[#999] hover:text-[#bbb]">
-              Sensitivity &amp; reactivity tips
-            </summary>
-            <p className="mt-2">
-              Some presets are more ambient and less reactive than others — check the Settings panel
-              to adjust sensitivity and other parameters that feed the visualization engine.
-            </p>
-          </details>
+          <CollapsibleTip />
 
           {/* Spotify connect inside Share Audio modal */}
           <SpotifySection
@@ -587,6 +579,46 @@ function OSTip() {
   return (
     <div className="mt-3 rounded-lg border border-blue-500/20 bg-blue-500/5 px-3 py-2">
       <p className="text-xs text-blue-300/70">{tip}</p>
+    </div>
+  );
+}
+
+function CollapsibleTip() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mt-3 text-xs text-[#888]">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex cursor-pointer items-center gap-1 border-none bg-transparent text-xs text-[#999] hover:text-[#bbb]"
+      >
+        <svg
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          className="h-3.5 w-3.5 transition-transform duration-200"
+          style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)' }}
+        >
+          <path
+            fillRule="evenodd"
+            d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+            clipRule="evenodd"
+          />
+        </svg>
+        Sensitivity &amp; reactivity tips
+      </button>
+      <div
+        className="grid overflow-hidden transition-[grid-template-rows,opacity] duration-200 ease-in-out"
+        style={{
+          gridTemplateRows: open ? '1fr' : '0fr',
+          opacity: open ? 1 : 0,
+        }}
+      >
+        <div className="min-h-0">
+          <p className="pt-2">
+            Some presets are more ambient and less reactive than others — check the Settings panel
+            to adjust sensitivity and other parameters that feed the visualization engine.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

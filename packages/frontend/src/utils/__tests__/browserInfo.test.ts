@@ -1,20 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Use vi.hoisted so mutable state is available inside vi.mock factories
-const { mockIsMobileRef, mockResult } = vi.hoisted(() => ({
-  mockIsMobileRef: { value: false },
+const { mockResult } = vi.hoisted(() => ({
   mockResult: {
     browser: { name: 'Chrome' as string | undefined },
     os: { name: 'Windows' as string | undefined },
     engine: { name: 'Blink' as string | undefined },
   },
-}));
-
-vi.mock('../isMobileDevice.ts', () => ({
-  get isMobileDevice() {
-    return mockIsMobileRef.value;
-  },
-  detectMobile: () => mockIsMobileRef.value,
 }));
 
 vi.mock('ua-parser-js', () => ({
@@ -29,18 +21,16 @@ import { detectBrowserInfo } from '../browserInfo';
 
 describe('browserInfo', () => {
   beforeEach(() => {
-    mockIsMobileRef.value = false;
     mockResult.browser.name = 'Chrome';
     mockResult.os.name = 'Windows';
     mockResult.engine.name = 'Blink';
   });
 
-  it('detects Chrome on Windows as Chromium with audio capture', () => {
+  it('detects Chrome on Windows as Chromium', () => {
     const info = detectBrowserInfo();
     expect(info.browser).toBe('Chrome');
     expect(info.os).toBe('Windows');
     expect(info.isChromium).toBe(true);
-    expect(info.supportsAudioCapture).toBe(true);
   });
 
   it('detects Edge on macOS (normalized from "Mac OS")', () => {
@@ -64,7 +54,6 @@ describe('browserInfo', () => {
     const info = detectBrowserInfo();
     expect(info.browser).toBe('Firefox');
     expect(info.isChromium).toBe(false);
-    expect(info.supportsAudioCapture).toBe(false);
   });
 
   it('detects Safari as non-Chromium', () => {
@@ -75,14 +64,6 @@ describe('browserInfo', () => {
     expect(info.browser).toBe('Safari');
     expect(info.os).toBe('macOS');
     expect(info.isChromium).toBe(false);
-    expect(info.supportsAudioCapture).toBe(false);
-  });
-
-  it('returns supportsAudioCapture false for Chromium on mobile', () => {
-    mockIsMobileRef.value = true;
-    const info = detectBrowserInfo();
-    expect(info.isChromium).toBe(true);
-    expect(info.supportsAudioCapture).toBe(false);
   });
 
   it('handles unknown browser/OS gracefully', () => {

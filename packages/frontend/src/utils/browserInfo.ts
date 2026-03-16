@@ -1,11 +1,9 @@
 import { UAParser } from 'ua-parser-js';
-import { isMobileDevice } from './isMobileDevice.ts';
 
 export interface BrowserInfo {
   browser: string;
   os: string;
   isChromium: boolean;
-  supportsAudioCapture: boolean;
 }
 
 /** Compute browser info from current UA. Exported for testing. */
@@ -26,7 +24,6 @@ export function detectBrowserInfo(): BrowserInfo {
     browser: rawBrowser,
     os: osNormalized,
     isChromium,
-    supportsAudioCapture: isChromium && !isMobileDevice,
   };
 }
 

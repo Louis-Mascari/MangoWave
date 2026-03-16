@@ -65,7 +65,7 @@ export class AudioEngine {
     // Analyser for FFT data
     this.analyser = ctx.createAnalyser();
     this.analyser.fftSize = 1024;
-    this.analyser.smoothingTimeConstant = 0.5;
+    this.analyser.smoothingTimeConstant = 0.3;
 
     // Visual branch: source → preAmp → EQ chain → analyser
     source.connect(this.preAmpGain);

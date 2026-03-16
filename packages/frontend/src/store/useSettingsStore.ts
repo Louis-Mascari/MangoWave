@@ -28,7 +28,7 @@ export interface AutopilotSettings {
   enabled: boolean;
   interval: number; // seconds
   mode: AutopilotMode;
-  favoriteWeight: number; // 1–5, weight for favorites in shuffle
+  favoriteWeight: number; // 1–10, weight for favorites in shuffle
 }
 
 export interface SettingsState {

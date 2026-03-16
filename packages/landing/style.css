@@ -199,6 +199,11 @@ h1 {
   height: 18px;
 }
 
+.treat-link svg {
+  width: 24px !important;
+  height: 24px !important;
+}
+
 .treat-link {
   color: #ff8c32 !important;
 }

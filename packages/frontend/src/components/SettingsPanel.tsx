@@ -212,6 +212,7 @@ function RenderingTab() {
   const audio = useSettingsStore((s) => s.audio);
   const setSmoothingConstant = useSettingsStore((s) => s.setSmoothingConstant);
   const setFftSize = useSettingsStore((s) => s.setFftSize);
+  const resetRendering = useSettingsStore((s) => s.resetRendering);
 
   const [fpsEditing, setFpsEditing] = useState<string | null>(null);
   const fpsDisplayValue =
@@ -229,7 +230,15 @@ function RenderingTab() {
 
   return (
     <>
-      <h3 className="text-sm font-semibold text-white">Rendering</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-white">Rendering</h3>
+        <button
+          onClick={resetRendering}
+          className="cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-xs text-white/70 hover:bg-white/20"
+        >
+          Reset
+        </button>
+      </div>
 
       <div className="flex flex-col gap-1">
         <label className="flex items-center text-xs text-white/60">
@@ -429,13 +438,27 @@ function PresetsTab() {
   const setAutopilotInterval = useSettingsStore((s) => s.setAutopilotInterval);
   const setAutopilotMode = useSettingsStore((s) => s.setAutopilotMode);
   const setAutopilotFavoriteWeight = useSettingsStore((s) => s.setAutopilotFavoriteWeight);
+  const resetPresets = useSettingsStore((s) => s.resetPresets);
+  const blockedPresets = useSettingsStore((s) => s.blockedPresets);
+  const favoritePresets = useSettingsStore((s) => s.favoritePresets);
+  const clearBlocked = useSettingsStore((s) => s.clearBlocked);
+  const clearFavorites = useSettingsStore((s) => s.clearFavorites);
+  const showToast = useToastStore((s) => s.show);
 
   return (
     <>
-      <h3 className="flex items-center text-sm font-semibold text-white">
-        Presets
-        <Tooltip text="Presets vary in how reactive they are to sound. If visuals feel too subtle or too intense, adjust Pre-Amp gain in the Equalizer tab" />
-      </h3>
+      <div className="flex items-center justify-between">
+        <h3 className="flex items-center text-sm font-semibold text-white">
+          Presets
+          <Tooltip text="Presets vary in how reactive they are to sound. If visuals feel too subtle or too intense, adjust Pre-Amp gain in the Equalizer tab" />
+        </h3>
+        <button
+          onClick={resetPresets}
+          className="cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-xs text-white/70 hover:bg-white/20"
+        >
+          Reset
+        </button>
+      </div>
 
       <div className="flex flex-col gap-1">
         <label className="flex items-center text-xs text-white/60">
@@ -583,6 +606,35 @@ function PresetsTab() {
             style={rangeFillStyle(autopilot.favoriteWeight, 1, 10)}
           />
         </div>
+      </div>
+
+      <div className="mt-1 flex flex-wrap gap-2 border-t border-white/10 pt-3">
+        <button
+          onClick={() => {
+            if (blockedPresets.length === 0) return;
+            if (window.confirm(`Clear all ${blockedPresets.length} blocked presets?`)) {
+              clearBlocked();
+              showToast('Blocked presets cleared');
+            }
+          }}
+          disabled={blockedPresets.length === 0}
+          className="cursor-pointer rounded border-none bg-red-500/10 px-3 py-1 text-xs text-red-400 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Clear blocked ({blockedPresets.length})
+        </button>
+        <button
+          onClick={() => {
+            if (favoritePresets.length === 0) return;
+            if (window.confirm(`Clear all ${favoritePresets.length} favorite presets?`)) {
+              clearFavorites();
+              showToast('Favorite presets cleared');
+            }
+          }}
+          disabled={favoritePresets.length === 0}
+          className="cursor-pointer rounded border-none bg-red-500/10 px-3 py-1 text-xs text-red-400 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Clear favorites ({favoritePresets.length})
+        </button>
       </div>
     </>
   );

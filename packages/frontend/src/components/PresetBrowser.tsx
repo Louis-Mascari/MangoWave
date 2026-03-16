@@ -1,14 +1,14 @@
-import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
-import { GroupedVirtuoso } from 'react-virtuoso';
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef } from 'react';
+import { GroupedVirtuoso, type GroupedVirtuosoHandle } from 'react-virtuoso';
 
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { usePresetHistoryStore } from '../store/usePresetHistoryStore.ts';
+import { usePresetBrowserStore } from '../store/usePresetBrowserStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import quarantinedData from '../data/quarantined-presets.json';
 import mobileBlockedData from '../data/mobile-blocked-presets.json';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
-
-type FilterTab = 'all' | 'favorites' | 'blocked' | 'excluded' | 'history';
+import { PACK_ORDER } from '../engine/VisualizerRenderer.ts';
 
 interface PresetBrowserProps {
   presetList: string[];
@@ -26,14 +26,6 @@ const QUARANTINE_REASONS: Record<string, { label: string; color: string }> = {
   'martin - attack of the beast': { label: 'Content', color: 'text-red-400' },
 };
 const MOBILE_BLOCKED_REASON = { label: 'Mobile perf', color: 'text-blue-400' };
-
-function getAllBuiltinPacks(packMap: Map<string, string>): string[] {
-  const packs = new Set<string>();
-  for (const pack of packMap.values()) {
-    packs.add(pack);
-  }
-  return Array.from(packs);
-}
 
 function PresetRow({
   name,
@@ -172,16 +164,19 @@ export function PresetBrowser({
 
   const presetHistory = usePresetHistoryStore((s) => s.history);
 
-  const [filter, setFilter] = useState<FilterTab>('all');
-  const [search, setSearch] = useState('');
+  const filter = usePresetBrowserStore((s) => s.filter);
+  const setFilter = usePresetBrowserStore((s) => s.setFilter);
+  const search = usePresetBrowserStore((s) => s.search);
+  const setSearch = usePresetBrowserStore((s) => s.setSearch);
   const deferredSearch = useDeferredValue(search);
-  const [collapsedPacks, setCollapsedPacks] = useState<Set<string>>(new Set());
+  const collapsedPacks = usePresetBrowserStore((s) => s.collapsedPacks);
+  const toggleCollapsePack = usePresetBrowserStore((s) => s.toggleCollapsePack);
 
   const blockedSet = useMemo(() => new Set(blockedPresets), [blockedPresets]);
   const favoriteSet = useMemo(() => new Set(favoritePresets), [favoritePresets]);
   const overrideSet = useMemo(() => new Set(excludedOverrides), [excludedOverrides]);
 
-  const allPacks = useMemo(() => getAllBuiltinPacks(presetPackMap), [presetPackMap]);
+  const allPacks = PACK_ORDER;
 
   // Initialize enabledPacks on first load (only if never set before).
   const didInitPacks = useRef(false);
@@ -373,18 +368,6 @@ export function PresetBrowser({
     ],
   );
 
-  const toggleCollapsePack = useCallback((pack: string) => {
-    setCollapsedPacks((prev) => {
-      const next = new Set(prev);
-      if (next.has(pack)) {
-        next.delete(pack);
-      } else {
-        next.add(pack);
-      }
-      return next;
-    });
-  }, []);
-
   const handleSelectPreset = useCallback(
     (name: string) => {
       onSelectPreset(name);
@@ -399,6 +382,17 @@ export function PresetBrowser({
   const handleDeselectAll = useCallback(() => {
     setEnabledPacks([]);
   }, [setEnabledPacks]);
+
+  // Scroll persistence for grouped virtuoso list
+  const virtuosoRef = useRef<GroupedVirtuosoHandle>(null);
+  const scrollTopRef = useRef(0);
+  const initialScrollTop = useRef(usePresetBrowserStore.getState().scrollTop);
+
+  useEffect(() => {
+    return () => {
+      usePresetBrowserStore.getState().setScrollTop(scrollTopRef.current);
+    };
+  }, []);
 
   // Render the grouped "all" tab
   const renderGroupedAll = () => (
@@ -441,7 +435,12 @@ export function PresetBrowser({
 
       {groupNames.length > 0 ? (
         <GroupedVirtuoso
+          ref={virtuosoRef}
           style={{ height: isMobileDevice ? 'calc(100vh - 320px)' : '280px' }}
+          initialScrollTop={initialScrollTop.current}
+          onScroll={(e) => {
+            scrollTopRef.current = (e.target as HTMLElement).scrollTop;
+          }}
           groupCounts={groupCounts}
           groupContent={(index) => {
             const raw = groupNames[index];
@@ -565,7 +564,7 @@ export function PresetBrowser({
   return (
     <div className="relative flex flex-col gap-2 rounded-lg bg-black/60 p-4 backdrop-blur-sm max-md:min-h-0 max-md:flex-1 md:max-h-96 landscape:max-h-[70vh]">
       <div className="flex flex-col gap-1.5">
-        <h3 className="text-sm font-semibold text-white">Presets</h3>
+        {!isMobileDevice && <h3 className="text-sm font-semibold text-white">Presets</h3>}
         <div className="flex flex-wrap gap-1">
           {(['all', 'favorites', 'blocked', 'excluded', 'history'] as const).map((f) => (
             <button

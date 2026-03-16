@@ -93,6 +93,12 @@ export interface SettingsState {
   volume: number; // 0.0 to 1.0
   setVolume: (volume: number) => void;
 
+  // Reset actions
+  resetRendering: () => void;
+  resetPresets: () => void;
+  clearBlocked: () => void;
+  clearFavorites: () => void;
+
   // Import
   importSettings: (partial: Partial<SettingsState>) => void;
 }
@@ -106,6 +112,18 @@ const DESKTOP_PERFORMANCE: PerformanceSettings = {
   meshHeight: 36,
   textureRatio: 1.0,
   fxaa: false,
+};
+
+const DEFAULT_AUDIO: AudioSettings = {
+  smoothingConstant: 0.3,
+  fftSize: 1024,
+};
+
+const DEFAULT_AUTOPILOT: AutopilotSettings = {
+  enabled: true,
+  interval: 15,
+  mode: 'all',
+  favoriteWeight: 2,
 };
 
 // Only these keys can be set via importSettings — prevents overwriting store actions
@@ -154,10 +172,7 @@ export const useSettingsStore = create<SettingsState>()(
         })),
 
       // Audio
-      audio: {
-        smoothingConstant: 0.3,
-        fftSize: 1024,
-      },
+      audio: { ...DEFAULT_AUDIO },
       setSmoothingConstant: (value) =>
         set((state) => ({
           audio: { ...state.audio, smoothingConstant: value },
@@ -168,12 +183,7 @@ export const useSettingsStore = create<SettingsState>()(
         })),
 
       // Autopilot
-      autopilot: {
-        enabled: true,
-        interval: 15,
-        mode: 'all',
-        favoriteWeight: 2,
-      },
+      autopilot: { ...DEFAULT_AUTOPILOT },
       setAutopilotEnabled: (enabled) =>
         set((state) => ({
           autopilot: { ...state.autopilot, enabled },
@@ -286,6 +296,22 @@ export const useSettingsStore = create<SettingsState>()(
       // Volume
       volume: 0.5,
       setVolume: (volume) => set({ volume }),
+
+      // Reset actions
+      resetRendering: () =>
+        set(() => ({
+          performance: { ...DESKTOP_PERFORMANCE },
+          audio: { ...DEFAULT_AUDIO },
+        })),
+      resetPresets: () =>
+        set(() => ({
+          transitionTime: 2.0,
+          presetNameDisplay: 5,
+          songInfoDisplay: 5,
+          autopilot: { ...DEFAULT_AUTOPILOT },
+        })),
+      clearBlocked: () => set({ blockedPresets: [] }),
+      clearFavorites: () => set({ favoritePresets: [] }),
 
       // Import — whitelist data keys only (never overwrite store actions/functions)
       importSettings: (partial) =>

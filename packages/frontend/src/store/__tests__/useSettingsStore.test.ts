@@ -369,6 +369,85 @@ describe('useSettingsStore', () => {
     });
   });
 
+  describe('resetRendering', () => {
+    it('resets performance and audio to defaults', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => {
+        result.current.setFpsCap(144);
+        result.current.setResolutionScale(0.5);
+        result.current.setMeshSize(96, 72);
+        result.current.setTextureRatio(1.5);
+        result.current.setFxaa(true);
+        result.current.setSmoothingConstant(0.8);
+        result.current.setFftSize(4096);
+      });
+      act(() => result.current.resetRendering());
+      expect(result.current.performance).toEqual({
+        fpsCap: 60,
+        resolutionScale: 1.0,
+        meshWidth: 48,
+        meshHeight: 36,
+        textureRatio: 1.0,
+        fxaa: false,
+      });
+      expect(result.current.audio).toEqual({
+        smoothingConstant: 0.3,
+        fftSize: 1024,
+      });
+    });
+  });
+
+  describe('resetPresets', () => {
+    it('resets transition, display, and autopilot to defaults', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => {
+        result.current.setTransitionTime(8.0);
+        result.current.setPresetNameDisplay('always');
+        result.current.setSongInfoDisplay('off');
+        result.current.setAutopilotEnabled(false);
+        result.current.setAutopilotInterval(60);
+        result.current.setAutopilotMode('favorites');
+        result.current.setAutopilotFavoriteWeight(10);
+      });
+      act(() => result.current.resetPresets());
+      expect(result.current.transitionTime).toBe(2.0);
+      expect(result.current.presetNameDisplay).toBe(5);
+      expect(result.current.songInfoDisplay).toBe(5);
+      expect(result.current.autopilot).toEqual({
+        enabled: true,
+        interval: 15,
+        mode: 'all',
+        favoriteWeight: 2,
+      });
+    });
+  });
+
+  describe('clearBlocked', () => {
+    it('clears all blocked presets', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => {
+        result.current.blockPreset('A');
+        result.current.blockPreset('B');
+      });
+      expect(result.current.blockedPresets).toHaveLength(2);
+      act(() => result.current.clearBlocked());
+      expect(result.current.blockedPresets).toEqual([]);
+    });
+  });
+
+  describe('clearFavorites', () => {
+    it('clears all favorite presets', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => {
+        result.current.toggleFavoritePreset('A');
+        result.current.toggleFavoritePreset('B');
+      });
+      expect(result.current.favoritePresets).toHaveLength(2);
+      act(() => result.current.clearFavorites());
+      expect(result.current.favoritePresets).toEqual([]);
+    });
+  });
+
   describe('importSettings', () => {
     it('merges partial state into store', () => {
       const { result } = renderHook(() => useSettingsStore());

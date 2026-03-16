@@ -50,7 +50,7 @@ src/
 ├── lib/           # PostHog & Sentry init (no-op when env vars absent)
 ├── services/      # Spotify Web API client (owner-mode OAuth + PKCE utilities for self-hosters)
 ├── store/         # Zustand stores: useSettingsStore, useSpotifyStore, useMediaPlayerStore,
-│                  #     usePresetHistoryStore, useToastStore
+│                  #     usePresetHistoryStore, usePresetBrowserStore, useToastStore
 ├── utils/         # Shared utilities (isMobileDevice, settingsPortability, audioFileValidation)
 ├── types/         # butterchurn.d.ts, music-metadata.d.ts (type declarations for untyped packages)
 └── test/          # Vitest global setup
@@ -83,6 +83,8 @@ On mobile, 27 GPU-heavy presets (identified via Pixel 10 Pro testing) are filter
 `useMediaPlayerStore` manages local file playback state (queue, current track, shuffle history, repeat mode). Not persisted — `File` objects can't survive page reload.
 
 `usePresetHistoryStore` tracks preset navigation history (max 100 entries, cursor-based) for previous/next preset navigation. Also tracks `playedSet` for shuffle-style autopilot rounds. Not persisted.
+
+`usePresetBrowserStore` holds preset browser panel UI state (active filter tab, search term, collapsed packs, scroll position). Session-scoped (not persisted) — survives panel open/close but resets on page refresh.
 
 `useToastStore` drives single-message action toasts with typed variants (`info`, `error`, `warning`). API: `show(message, { type?, durationMs? })` — info auto-clears at 3.5s, error/warning at 6s. `durationMs` stored in state and drives both the JS cleanup timer and the CSS `toast-fade` animation duration (set dynamically via inline style). `ActionToast` renders styled variants: info (neutral), error (red border/bg), warning (amber border/bg).
 
@@ -132,7 +134,7 @@ Floating panel (`components/PlaybackPanel.tsx`) rendered by App.tsx when source 
 - **WebGL 2 required.** `isWebGL2Supported()` checks on mount and shows a fallback if unavailable.
 - **butterchurn is untyped** — type declarations live in `src/types/butterchurn.d.ts`.
 - **`vite.config.ts`** imports `defineConfig` from `vitest/config` (not `vite`) to support the `test` property.
-- **400+ presets** loaded from 6 butterchurn packs, organized by source pack with virtualized browsing (`react-virtuoso`).
+- **400+ presets** loaded from 5 butterchurn packs, organized by source pack with virtualized browsing (`react-virtuoso`).
 - **`secure-json-parse`** used for prototype pollution protection on settings import.
 - **Settings import sanitization** — all imported values clamped to UI-enforced ranges. Whitelisted data keys only (store functions can't be overwritten).
 - **Audio capture errors** — `humanizeAudioError` in `useAudioCapture` maps DOMException names to user-friendly messages per source (system vs mic). Missing audio tracks on screen share (user forgot "Share audio") block launch with platform-specific guidance. `startCapture`/`startMicCapture` return `boolean` success so callers gate on result.

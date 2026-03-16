@@ -13,8 +13,8 @@ vi.mock('butterchurn', () => ({
   },
 }));
 
-// Mock butterchurn-presets
-vi.mock('butterchurn-presets', () => ({
+// Mock butterchurn-presets (Minimal pack provides test presets; others empty)
+vi.mock('butterchurn-presets/lib/butterchurnPresetsMinimal.min', () => ({
   default: {
     getPresets: vi.fn(() => ({
       'Preset A': { code: 'a' },
@@ -23,7 +23,9 @@ vi.mock('butterchurn-presets', () => ({
     })),
   },
 }));
-
+vi.mock('butterchurn-presets/lib/butterchurnPresetsNonMinimal.min', () => ({
+  default: { getPresets: () => ({}) },
+}));
 vi.mock('butterchurn-presets/lib/butterchurnPresetsExtra.min', () => ({
   default: { getPresets: () => ({}) },
 }));
@@ -31,12 +33,6 @@ vi.mock('butterchurn-presets/lib/butterchurnPresetsExtra2.min', () => ({
   default: { getPresets: () => ({}) },
 }));
 vi.mock('butterchurn-presets/lib/butterchurnPresetsMD1.min', () => ({
-  default: { getPresets: () => ({}) },
-}));
-vi.mock('butterchurn-presets/lib/butterchurnPresetsNonMinimal.min', () => ({
-  default: { getPresets: () => ({}) },
-}));
-vi.mock('butterchurn-presets/lib/butterchurnPresetsMinimal.min', () => ({
   default: { getPresets: () => ({}) },
 }));
 
@@ -76,9 +72,9 @@ describe('VisualizerRenderer', () => {
       renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
 
       const packMap = renderer.presetPackMap;
-      expect(packMap.get('Preset A')).toBe('Base');
-      expect(packMap.get('Preset B')).toBe('Base');
-      expect(packMap.get('Preset C')).toBe('Base');
+      expect(packMap.get('Preset A')).toBe('Minimal');
+      expect(packMap.get('Preset B')).toBe('Minimal');
+      expect(packMap.get('Preset C')).toBe('Minimal');
     });
 
     it('excludes mobile-blocked presets via excludedPresets set', () => {

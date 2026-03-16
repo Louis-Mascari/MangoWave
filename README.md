@@ -18,7 +18,7 @@
 
 ## Features
 
-- **400+ MilkDrop presets** from 6 butterchurn packs, organized by source pack with virtualized browsing
+- **400+ MilkDrop presets** from 5 butterchurn packs, organized by source pack with virtualized browsing
 - **Pack filtering** — enable/disable built-in packs to control which presets appear and which autopilot draws from
 - **Excluded presets** — quarantined presets (broken or inappropriate content) and mobile-blocked presets (27 GPU-heavy presets identified via device testing) collected in a unified Excluded tab with reason badges and per-preset overrides
 - **Multiple audio sources** — system/tab audio, local files, or microphone input

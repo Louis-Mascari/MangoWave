@@ -1,5 +1,4 @@
 import butterchurn from 'butterchurn';
-import butterchurnPresets from 'butterchurn-presets';
 import butterchurnPresetsExtra from 'butterchurn-presets/lib/butterchurnPresetsExtra.min';
 import butterchurnPresetsExtra2 from 'butterchurn-presets/lib/butterchurnPresetsExtra2.min';
 import butterchurnPresetsMD1 from 'butterchurn-presets/lib/butterchurnPresetsMD1.min';
@@ -7,13 +6,15 @@ import butterchurnPresetsNonMinimal from 'butterchurn-presets/lib/butterchurnPre
 import butterchurnPresetsMinimal from 'butterchurn-presets/lib/butterchurnPresetsMinimal.min';
 
 const PACK_SOURCES = [
-  { label: 'Base', getPresets: () => butterchurnPresets.getPresets() },
+  { label: 'Minimal', getPresets: () => butterchurnPresetsMinimal.getPresets() },
+  { label: 'Non-Minimal', getPresets: () => butterchurnPresetsNonMinimal.getPresets() },
   { label: 'Extra', getPresets: () => butterchurnPresetsExtra.getPresets() },
   { label: 'Extra 2', getPresets: () => butterchurnPresetsExtra2.getPresets() },
   { label: 'MD1', getPresets: () => butterchurnPresetsMD1.getPresets() },
-  { label: 'Non-Minimal', getPresets: () => butterchurnPresetsNonMinimal.getPresets() },
-  { label: 'Minimal', getPresets: () => butterchurnPresetsMinimal.getPresets() },
 ] as const;
+
+/** Authoritative pack display order — derived from PACK_SOURCES load sequence. */
+export const PACK_ORDER = PACK_SOURCES.map((p) => p.label);
 
 export class VisualizerRenderer {
   private visualizer: ReturnType<typeof butterchurn.createVisualizer> | null = null;

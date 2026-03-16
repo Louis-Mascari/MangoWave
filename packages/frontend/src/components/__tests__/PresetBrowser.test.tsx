@@ -1,16 +1,27 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PresetBrowser } from '../PresetBrowser.tsx';
+import { usePresetBrowserStore } from '../../store/usePresetBrowserStore.ts';
 
 const PRESETS = ['Alpha Wave', 'Beta Pulse', 'Gamma Storm'];
 const PACK_MAP = new Map([
-  ['Alpha Wave', 'Base'],
-  ['Beta Pulse', 'Base'],
+  ['Alpha Wave', 'Minimal'],
+  ['Beta Pulse', 'Minimal'],
   ['Gamma Storm', 'Extra'],
 ]);
 
 describe('PresetBrowser', () => {
+  beforeEach(() => {
+    // Reset persistent browser store between tests
+    const store = usePresetBrowserStore.getState();
+    store.setFilter('all');
+    store.setSearch('');
+    store.setScrollTop(0);
+    for (const pack of store.collapsedPacks) {
+      store.toggleCollapsePack(pack);
+    }
+  });
   it('renders filter tabs', () => {
     render(
       <PresetBrowser
@@ -108,8 +119,8 @@ describe('PresetBrowser', () => {
       />,
     );
 
-    // Pack filter buttons should be visible
-    expect(screen.getByText('Base')).toBeInTheDocument();
+    // Pack filter buttons come from PACK_ORDER (all 5 packs shown)
+    expect(screen.getByText('Minimal')).toBeInTheDocument();
     expect(screen.getByText('Extra')).toBeInTheDocument();
   });
 

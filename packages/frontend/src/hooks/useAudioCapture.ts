@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { AudioEngine } from '../engine/AudioEngine.ts';
+import { browserInfo } from '../utils/browserInfo.ts';
 
 export type CaptureSource = 'system' | 'mic' | null;
 
@@ -52,6 +53,43 @@ function humanizeAudioError(err: unknown, source: 'system' | 'mic'): string {
   }
 }
 
+/**
+ * Builds a browser/OS-aware message when screen share has no audio tracks.
+ * Shows only the relevant OS tip instead of listing all platforms.
+ */
+function buildNoAudioMessage(): string {
+  const lines = [
+    'No audio was included in the screen share. Please try again and make sure to check "Share audio" (or "Share system audio") in the browser dialog.',
+  ];
+
+  if (!browserInfo.isChromium) {
+    lines.push(
+      `${browserInfo.browser} does not support audio capture via screen sharing. Please try Chrome, Edge, or Opera.`,
+    );
+  }
+
+  const { os } = browserInfo;
+  if (os === 'Windows' || os === 'ChromeOS') {
+    lines.push('All sharing modes (screen, window, and tab) support audio on ' + os + '.');
+  } else if (os === 'macOS') {
+    lines.push(
+      'On macOS 14.2+, screen and window sharing support audio in Chrome. Older macOS versions are limited to tab sharing.',
+    );
+  } else if (os === 'Linux') {
+    lines.push('On Linux, only tab sharing supports audio.');
+  } else {
+    // Unknown OS — show the full multi-platform summary
+    lines.push(
+      'On Windows and ChromeOS, all sharing modes support audio. ' +
+        'On macOS 14.2+, screen and window sharing support audio in Chrome — ' +
+        'older macOS versions are limited to tab sharing. ' +
+        'On Linux, only tab sharing supports audio.',
+    );
+  }
+
+  return lines.join('\n\n');
+}
+
 export function useAudioCapture(): UseAudioCaptureReturn {
   const engineRef = useRef<AudioEngine | null>(null);
   const [audioEngine, setAudioEngine] = useState<AudioEngine | null>(null);
@@ -84,16 +122,7 @@ export function useAudioCapture(): UseAudioCaptureReturn {
       if (stream.getAudioTracks().length === 0) {
         stream.getTracks().forEach((track) => track.stop());
         engine.destroy();
-        setError(
-          'No audio was included in the screen share. Please try again and make sure ' +
-            'to check "Share audio" (or "Share system audio") in the browser dialog.\n\n' +
-            'Audio sharing requires Chrome, Edge, or Opera on desktop. ' +
-            'Firefox, Safari, and mobile browsers do not support audio capture.\n\n' +
-            'On Windows and ChromeOS, all sharing modes support audio. ' +
-            'On macOS 14.2+, screen and window sharing support audio in Chrome — ' +
-            'older macOS versions are limited to tab sharing. ' +
-            'On Linux, only tab sharing supports audio.',
-        );
+        setError(buildNoAudioMessage());
         setIsCapturing(false);
         return false;
       }

@@ -3,6 +3,7 @@ import { useSpotifyStore } from '../store/useSpotifyStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
+import { browserInfo } from '../utils/browserInfo.ts';
 import { validateAudioFiles, rejectionMessage } from '../utils/audioFileValidation.ts';
 import logoSrc from '../assets/logo.png';
 
@@ -211,37 +212,61 @@ export function StartScreen({
       {/* Modals */}
       {activeModal === 'share-audio' && (
         <Modal title="Share Audio" onClose={closeModal}>
-          <p className="text-xs text-[#888]">
-            Works in Chrome, Edge, and Opera.
-            <br />
-            Firefox and Safari don&apos;t support audio capture via screen sharing — use local files
-            or microphone instead.
-          </p>
-          <ol className="mt-3 flex flex-col gap-3 text-sm text-[#aaa]">
-            <li>
-              <span className="font-medium text-[#e0e0e0]">1. Click Start</span> and choose a
-              screen, window, or tab to share
-            </li>
-          </ol>
-          <p className="mt-2 text-xs text-[#888]">
-            Tip: On Windows and ChromeOS, sharing your entire screen or a window gives the cleanest
-            experience (no browser banner). On macOS 14.2+, screen and window sharing also support
-            audio. On older macOS or Linux, share a browser tab for audio. Go fullscreen (F) for
-            full immersion.
-          </p>
-          <ol className="mt-3 flex flex-col gap-3 text-sm text-[#aaa]">
-            <li>
-              <span className="font-medium text-[#ff8c32]">2. Check &quot;Share audio&quot;</span> —
+          {/* Browser compat banner — only for non-Chromium browsers */}
+          {!browserInfo.isChromium && (
+            <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3">
+              <p className="text-xs font-semibold text-amber-400">
+                {browserInfo.browser} doesn&apos;t support audio capture
+              </p>
+              <p className="mt-1 text-xs text-amber-300/70">
+                Audio capture via screen sharing requires a Chromium-based browser (Chrome, Edge, or
+                Opera). You can still use{' '}
+                <button
+                  onClick={() => setActiveModal('local-files')}
+                  className="cursor-pointer border-none bg-transparent text-xs text-amber-300 underline"
+                >
+                  Local Files
+                </button>{' '}
+                or{' '}
+                <button
+                  onClick={() => setActiveModal('microphone')}
+                  className="cursor-pointer border-none bg-transparent text-xs text-amber-300 underline"
+                >
+                  Microphone
+                </button>{' '}
+                as an audio source.
+              </p>
+            </div>
+          )}
+
+          {/* Unified step list */}
+          <ol className="flex list-none flex-col gap-3 text-sm text-[#aaa]">
+            <StepItem number={1}>
+              <span className="font-medium text-[#e0e0e0]">Click Start</span> and choose a screen,
+              window, or tab to share
+            </StepItem>
+            <StepItem number={2}>
+              <span className="font-medium text-[#ff8c32]">Check &quot;Share audio&quot;</span> —
               this is required for the visualizer to react to sound
-            </li>
-            <li>
-              <span className="font-medium text-[#e0e0e0]">3. Play music</span> and lose yourself
-            </li>
+            </StepItem>
+            <StepItem number={3}>
+              <span className="font-medium text-[#e0e0e0]">Play music</span> and lose yourself
+            </StepItem>
           </ol>
-          <p className="mt-2 text-xs text-[#888]">
-            Some presets are more ambient and less reactive than others — check the Settings panel
-            to adjust sensitivity and other parameters that feed the visualization engine.
-          </p>
+
+          {/* OS-specific tip */}
+          <OSTip />
+
+          {/* Collapsible sensitivity tips */}
+          <details className="mt-3 text-xs text-[#888]">
+            <summary className="cursor-pointer select-none text-[#999] hover:text-[#bbb]">
+              Sensitivity &amp; reactivity tips
+            </summary>
+            <p className="mt-2">
+              Some presets are more ambient and less reactive than others — check the Settings panel
+              to adjust sensitivity and other parameters that feed the visualization engine.
+            </p>
+          </details>
 
           {/* Spotify connect inside Share Audio modal */}
           <SpotifySection
@@ -269,12 +294,12 @@ export function StartScreen({
 
       {activeModal === 'local-files' && (
         <Modal title="Play Local Files" onClose={closeModal}>
-          <div className="flex flex-col gap-3 text-sm text-[#aaa]">
-            <p>
-              Select audio files from your device. They&apos;ll play through your speakers while the
-              visualizer reacts to the music.
-            </p>
-            <ul className="flex flex-col gap-1.5 text-xs text-[#888]">
+          <p className="text-sm text-[#aaa]">
+            Select audio files from your device. They&apos;ll play through your speakers while the
+            visualizer reacts to the music.
+          </p>
+          <div className="mt-3 rounded-lg border border-blue-500/20 bg-blue-500/5 px-3 py-2">
+            <ul className="flex flex-col gap-1.5 text-xs text-blue-300/70">
               <li>Supports MP3, WAV, FLAC, OGG, AAC, and more</li>
               <li>Build a queue and control playback with shuffle, repeat, and seek</li>
               <li>Add or remove tracks at any time from the Queue panel</li>
@@ -297,12 +322,12 @@ export function StartScreen({
 
       {activeModal === 'microphone' && (
         <Modal title="Use Microphone" onClose={closeModal}>
-          <div className="flex flex-col gap-3 text-sm text-[#aaa]">
-            <p>
-              Feed your microphone into the visualizer. Great for live instruments, ambient sound,
-              or parties.
-            </p>
-            <ul className="flex flex-col gap-1.5 text-xs text-[#888]">
+          <p className="text-sm text-[#aaa]">
+            Feed your microphone into the visualizer. Great for live instruments, ambient sound, or
+            parties.
+          </p>
+          <div className="mt-3 rounded-lg border border-blue-500/20 bg-blue-500/5 px-3 py-2">
+            <ul className="flex flex-col gap-1.5 text-xs text-blue-300/70">
               <li>Silent mode — no audio plays through your speakers</li>
               <li>Requires microphone permission from your browser</li>
             </ul>
@@ -526,6 +551,43 @@ function ModeCard({
       <span className="text-sm font-semibold text-white">{title}</span>
       <span className="text-xs text-[#999]">{description}</span>
     </button>
+  );
+}
+
+function StepItem({ number, children }: { number: number; children: React.ReactNode }) {
+  return (
+    <li className="flex gap-3">
+      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#ff8c32] to-[#e050e0] text-xs font-bold text-white">
+        {number}
+      </span>
+      <span className="pt-0.5">{children}</span>
+    </li>
+  );
+}
+
+function OSTip() {
+  const { os, isChromium } = browserInfo;
+  let tip: string;
+  if (os === 'Windows' || os === 'ChromeOS') {
+    tip =
+      'All sharing modes (screen, window, and tab) support audio on ' +
+      os +
+      '. Sharing your entire screen or a window gives the cleanest experience (no browser banner).';
+  } else if (os === 'macOS') {
+    tip = isChromium
+      ? 'On macOS 14.2+, screen and window sharing support audio. Older macOS versions are limited to tab sharing.'
+      : 'Screen sharing audio requires a Chromium browser (Chrome, Edge, Opera) on macOS 14.2+.';
+  } else if (os === 'Linux') {
+    tip = 'On Linux, only tab sharing supports audio.';
+  } else {
+    tip =
+      'On Windows and ChromeOS, all sharing modes support audio. On macOS 14.2+, screen and window sharing support audio in Chrome. On Linux, only tab sharing supports audio.';
+  }
+
+  return (
+    <div className="mt-3 rounded-lg border border-blue-500/20 bg-blue-500/5 px-3 py-2">
+      <p className="text-xs text-blue-300/70">{tip}</p>
+    </div>
   );
 }
 

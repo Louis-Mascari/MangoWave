@@ -228,10 +228,10 @@ const SANITIZERS: Record<string, (val: unknown) => unknown> = {
   audio: sanitizeAudio,
   eq: sanitizeEQ,
   autopilot: sanitizeAutopilot,
-  favoritePresets: (v) => sanitizeStringArray(v, 10_000),
-  blockedPresets: (v) => sanitizeStringArray(v, 10_000),
+  favoritePresets: (v) => sanitizeStringArray(v, 500),
+  blockedPresets: (v) => sanitizeStringArray(v, 500),
   enabledPacks: (v) => sanitizeStringArray(v, 100),
-  excludedOverrides: (v) => sanitizeStringArray(v, 10_000),
+  excludedOverrides: (v) => sanitizeStringArray(v, 500),
   presetNameDisplay: (v) => {
     if (v === 'off' || v === 'always') return v;
     if (typeof v === 'number' && isFinite(v)) return Math.min(10, Math.max(1, Math.round(v)));

@@ -60,13 +60,21 @@ A PKCE-based flow also exists in the frontend code (`spotifyPkce.ts`) for self-h
 
 ## Settings Sync
 
-Authenticated users can sync settings to the cloud via `settings-save` / `settings-load`. The synced settings include:
+Authenticated users can sync all visualizer settings to the cloud via `settings-save` / `settings-load`. The synced payload mirrors the frontend Zustand store:
 
-- Theme, transition time
-- EQ settings (pre-amp gain + 10 band gains)
-- Blocked presets, favorite presets
+- **performance** — fpsCap (0/15–300), resolutionScale (0.25–1.0), meshWidth/Height, textureRatio, fxaa
+- **eqSettings** — pre-amp gain (0–3 linear) + 10 band gains (±12 dB)
+- **audio** — smoothingConstant (0–1), fftSize (512/1024/2048/4096)
+- **autopilot** — enabled, interval (5–120s), mode (all/favorites), favoriteWeight (1–10)
+- **transitionTime** — preset blend duration (0–30s)
+- **blockedPresets / favoritePresets** — preset name lists (up to 500 items, 200 chars each)
+- **enabledPacks** — active butterchurn pack names (up to 100 items)
+- **excludedOverrides** — user-restored excluded presets (up to 500 items)
+- **presetNameDisplay** — "off", "always", or duration in seconds (1–10)
+- **songInfoDisplay** — "off" or duration in seconds (1–10)
+- **volume** — local file playback volume (0–1)
 
-Settings are keyed to the user's Spotify ID (resolved from their session). Spotify credentials are never stored in settings.
+Settings are keyed to the user's Spotify ID (resolved from their session). Spotify credentials are never included in settings sync.
 
 ## Security
 
@@ -74,5 +82,5 @@ Settings are keyed to the user's Spotify ID (resolved from their session). Spoti
 - **Session validation** on every request — all endpoints look up the `sessionId` in DynamoDB before proceeding
 - **Session TTL** — sessions expire after 90 days via DynamoDB TTL (auto-deleted). TTL is refreshed on each token rotation
 - **CORS** restricted to allowed origins at the API Gateway level (not open to `*`)
-- **Settings validation** — `settings-save` validates all fields server-side: type checks, `Number.isFinite()` guards, range clamping (gains ±12, transition 0–30), preset list limits (10K items, 200 chars each), and extra key stripping. 1 MB body size limit (413 response)
+- **Settings validation** — `settings-save` validates all fields server-side: type checks, `Number.isFinite()` guards, range clamping, enum validation (fftSize, autopilot mode), preset list limits (500 items, 200 chars each), and extra key stripping. 1 MB body size limit (413 response)
 - **Error opacity** — generic 500 errors don't expose implementation details; 400/404 errors are specific

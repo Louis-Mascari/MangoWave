@@ -86,15 +86,43 @@ export async function updateSessionToken(sessionId: string, refreshToken: string
   );
 }
 
+export interface PerformanceSettings {
+  fpsCap: number;
+  resolutionScale: number;
+  meshWidth: number;
+  meshHeight: number;
+  textureRatio: number;
+  fxaa: boolean;
+}
+
+export interface AudioSettings {
+  smoothingConstant: number;
+  fftSize: number;
+}
+
+export interface AutopilotSettings {
+  enabled: boolean;
+  interval: number;
+  mode: string;
+  favoriteWeight: number;
+}
+
 export interface UserSettings {
-  theme: string;
-  transitionTime: number;
+  performance: PerformanceSettings;
   eqSettings: {
     preAmpGain: number;
     bandGains: number[];
   };
+  audio: AudioSettings;
+  autopilot: AutopilotSettings;
+  transitionTime: number;
   blockedPresets: string[];
   favoritePresets: string[];
+  enabledPacks: string[];
+  excludedOverrides: string[];
+  presetNameDisplay: 'off' | 'always' | number;
+  songInfoDisplay: 'off' | number;
+  volume: number;
 }
 
 export async function storeUserSettings(
@@ -128,10 +156,17 @@ export async function getUserSettings(spotifyUserId: string): Promise<UserSettin
   if (!result.Item) return null;
 
   return {
-    theme: result.Item.theme as string,
-    transitionTime: result.Item.transitionTime as number,
+    performance: result.Item.performance as PerformanceSettings,
     eqSettings: result.Item.eqSettings as UserSettings['eqSettings'],
+    audio: result.Item.audio as AudioSettings,
+    autopilot: result.Item.autopilot as AutopilotSettings,
+    transitionTime: result.Item.transitionTime as number,
     blockedPresets: result.Item.blockedPresets as string[],
     favoritePresets: result.Item.favoritePresets as string[],
+    enabledPacks: result.Item.enabledPacks as string[],
+    excludedOverrides: result.Item.excludedOverrides as string[],
+    presetNameDisplay: result.Item.presetNameDisplay as 'off' | 'always' | number,
+    songInfoDisplay: result.Item.songInfoDisplay as 'off' | number,
+    volume: result.Item.volume as number,
   };
 }

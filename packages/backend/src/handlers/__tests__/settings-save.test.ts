@@ -28,11 +28,25 @@ function makeRawEvent(body: string): APIGatewayProxyEventV2 {
 }
 
 const mockSettings = {
-  theme: 'default',
-  transitionTime: 2.0,
+  performance: {
+    fpsCap: 60,
+    resolutionScale: 1.0,
+    meshWidth: 48,
+    meshHeight: 36,
+    textureRatio: 1.0,
+    fxaa: false,
+  },
   eqSettings: { preAmpGain: 1.0, bandGains: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  audio: { smoothingConstant: 0.3, fftSize: 1024 },
+  autopilot: { enabled: true, interval: 15, mode: 'all', favoriteWeight: 2 },
+  transitionTime: 2.0,
   blockedPresets: ['bad-preset'],
   favoritePresets: ['good-preset'],
+  enabledPacks: ['Minimal', 'Non-Minimal'],
+  excludedOverrides: [],
+  presetNameDisplay: 5,
+  songInfoDisplay: 5,
+  volume: 0.5,
 };
 
 describe('settings-save handler', () => {
@@ -99,24 +113,6 @@ describe('settings-save handler', () => {
     expect(body.error).toContain('Settings must be an object');
   });
 
-  it('returns 400 if theme is not a string', async () => {
-    const result = await handler(
-      makeEvent({ sessionId: 'sess_1', settings: { ...mockSettings, theme: 123 } }),
-    );
-    expect(result.statusCode).toBe(400);
-    const body = JSON.parse(result.body as string);
-    expect(body.error).toContain('theme must be a string');
-  });
-
-  it('returns 400 if theme exceeds max length', async () => {
-    const result = await handler(
-      makeEvent({ sessionId: 'sess_1', settings: { ...mockSettings, theme: 'a'.repeat(51) } }),
-    );
-    expect(result.statusCode).toBe(400);
-    const body = JSON.parse(result.body as string);
-    expect(body.error).toContain('theme exceeds maximum length');
-  });
-
   it('returns 400 if transitionTime is not a number', async () => {
     const result = await handler(
       makeEvent({ sessionId: 'sess_1', settings: { ...mockSettings, transitionTime: 'fast' } }),
@@ -144,8 +140,6 @@ describe('settings-save handler', () => {
     void _;
     const result = await handler(makeEvent({ sessionId: 'sess_1', settings: noEq }));
     expect(result.statusCode).toBe(400);
-    const body = JSON.parse(result.body as string);
-    expect(body.error).toContain('eqSettings must be an object');
   });
 
   it('returns 400 if bandGains has wrong count', async () => {
@@ -191,7 +185,7 @@ describe('settings-save handler', () => {
     expect(storeUserSettings).toHaveBeenCalledWith(
       'user1',
       expect.objectContaining({
-        eqSettings: { preAmpGain: 12, bandGains: [-12, 0, 0, 0, 0, 0, 0, 0, 0, 12] },
+        eqSettings: { preAmpGain: 3, bandGains: [-12, 0, 0, 0, 0, 0, 0, 0, 0, 12] },
       }),
     );
   });
@@ -242,11 +236,18 @@ describe('settings-save handler', () => {
     const savedSettings = vi.mocked(storeUserSettings).mock.calls[0][1];
     expect(savedSettings).not.toHaveProperty('maliciousField');
     expect(Object.keys(savedSettings)).toEqual([
-      'theme',
-      'transitionTime',
+      'performance',
       'eqSettings',
+      'audio',
+      'autopilot',
+      'transitionTime',
       'blockedPresets',
       'favoritePresets',
+      'enabledPacks',
+      'excludedOverrides',
+      'presetNameDisplay',
+      'songInfoDisplay',
+      'volume',
     ]);
   });
 

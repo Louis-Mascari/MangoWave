@@ -245,14 +245,36 @@ export async function setRepeatMode(
 }
 
 export interface CloudSettings {
-  theme: string;
-  transitionTime: number;
+  performance: {
+    fpsCap: number;
+    resolutionScale: number;
+    meshWidth: number;
+    meshHeight: number;
+    textureRatio: number;
+    fxaa: boolean;
+  };
   eqSettings: {
     preAmpGain: number;
     bandGains: number[];
   };
+  audio: {
+    smoothingConstant: number;
+    fftSize: number;
+  };
+  autopilot: {
+    enabled: boolean;
+    interval: number;
+    mode: 'all' | 'favorites';
+    favoriteWeight: number;
+  };
+  transitionTime: number;
   blockedPresets: string[];
   favoritePresets: string[];
+  enabledPacks: string[];
+  excludedOverrides: string[];
+  presetNameDisplay: 'off' | 'always' | number;
+  songInfoDisplay: 'off' | number;
+  volume: number;
 }
 
 export async function saveSettings(sessionId: string, settings: CloudSettings): Promise<void> {

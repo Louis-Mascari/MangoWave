@@ -17,11 +17,25 @@ function makeEvent(body: Record<string, unknown>): APIGatewayProxyEventV2 {
 }
 
 const mockSettings = {
-  theme: 'default',
-  transitionTime: 2.0,
+  performance: {
+    fpsCap: 60,
+    resolutionScale: 1.0,
+    meshWidth: 48,
+    meshHeight: 36,
+    textureRatio: 1.0,
+    fxaa: false,
+  },
   eqSettings: { preAmpGain: 1.0, bandGains: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  audio: { smoothingConstant: 0.3, fftSize: 1024 },
+  autopilot: { enabled: true, interval: 15, mode: 'all', favoriteWeight: 2 },
+  transitionTime: 2.0,
   blockedPresets: [],
   favoritePresets: ['fav-preset'],
+  enabledPacks: ['Minimal', 'Non-Minimal'],
+  excludedOverrides: [],
+  presetNameDisplay: 5,
+  songInfoDisplay: 5,
+  volume: 0.5,
 };
 
 describe('settings-load handler', () => {

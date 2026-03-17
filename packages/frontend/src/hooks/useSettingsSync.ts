@@ -7,24 +7,52 @@ import type { CloudSettings } from '../services/spotifyApi.ts';
 const DEBOUNCE_MS = 2000;
 
 function getSettingsSnapshot(): CloudSettings {
-  const { transitionTime, eq, blockedPresets, favoritePresets } = useSettingsStore.getState();
-  return {
-    theme: 'default',
+  const {
+    performance,
+    eq,
+    audio,
+    autopilot,
     transitionTime,
+    blockedPresets,
+    favoritePresets,
+    enabledPacks,
+    excludedOverrides,
+    presetNameDisplay,
+    songInfoDisplay,
+    volume,
+  } = useSettingsStore.getState();
+  return {
+    performance: { ...performance },
     eqSettings: { preAmpGain: eq.preAmpGain, bandGains: [...eq.bandGains] },
+    audio: { ...audio },
+    autopilot: { ...autopilot },
+    transitionTime,
     blockedPresets: [...blockedPresets],
     favoritePresets: [...favoritePresets],
+    enabledPacks: [...enabledPacks],
+    excludedOverrides: [...excludedOverrides],
+    presetNameDisplay,
+    songInfoDisplay,
+    volume,
   };
 }
 
 function applyCloudSettings(cloud: CloudSettings): void {
   useSettingsStore.setState({
-    ...(cloud.transitionTime !== undefined && { transitionTime: cloud.transitionTime }),
+    ...(cloud.performance && { performance: { ...cloud.performance } }),
     ...(cloud.eqSettings && {
       eq: { preAmpGain: cloud.eqSettings.preAmpGain, bandGains: [...cloud.eqSettings.bandGains] },
     }),
+    ...(cloud.audio && { audio: { ...cloud.audio } }),
+    ...(cloud.autopilot && { autopilot: { ...cloud.autopilot } }),
+    ...(cloud.transitionTime !== undefined && { transitionTime: cloud.transitionTime }),
     ...(cloud.blockedPresets && { blockedPresets: [...cloud.blockedPresets] }),
     ...(cloud.favoritePresets && { favoritePresets: [...cloud.favoritePresets] }),
+    ...(cloud.enabledPacks && { enabledPacks: [...cloud.enabledPacks] }),
+    ...(cloud.excludedOverrides && { excludedOverrides: [...cloud.excludedOverrides] }),
+    ...(cloud.presetNameDisplay !== undefined && { presetNameDisplay: cloud.presetNameDisplay }),
+    ...(cloud.songInfoDisplay !== undefined && { songInfoDisplay: cloud.songInfoDisplay }),
+    ...(cloud.volume !== undefined && { volume: cloud.volume }),
   });
 }
 

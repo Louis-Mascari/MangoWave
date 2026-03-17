@@ -45,11 +45,25 @@ describe('useSettingsSync', () => {
 
   it('loads cloud settings on login and applies them', async () => {
     const cloudSettings = {
-      theme: 'default',
-      transitionTime: 5.0,
+      performance: {
+        fpsCap: 30,
+        resolutionScale: 0.5,
+        meshWidth: 32,
+        meshHeight: 24,
+        textureRatio: 0.5,
+        fxaa: true,
+      },
       eqSettings: { preAmpGain: 2.0, bandGains: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
+      audio: { smoothingConstant: 0.5, fftSize: 2048 },
+      autopilot: { enabled: false, interval: 30, mode: 'favorites' as const, favoriteWeight: 5 },
+      transitionTime: 5.0,
       blockedPresets: ['blocked1'],
       favoritePresets: ['fav1'],
+      enabledPacks: ['Minimal'],
+      excludedOverrides: ['restored1'],
+      presetNameDisplay: 'always' as const,
+      songInfoDisplay: 3,
+      volume: 0.8,
     };
 
     vi.mocked(loadSettings).mockResolvedValue(cloudSettings);
@@ -65,6 +79,11 @@ describe('useSettingsSync', () => {
     expect(useSettingsStore.getState().eq.preAmpGain).toBe(2.0);
     expect(useSettingsStore.getState().blockedPresets).toEqual(['blocked1']);
     expect(useSettingsStore.getState().favoritePresets).toEqual(['fav1']);
+    expect(useSettingsStore.getState().performance.fpsCap).toBe(30);
+    expect(useSettingsStore.getState().audio.fftSize).toBe(2048);
+    expect(useSettingsStore.getState().autopilot.mode).toBe('favorites');
+    expect(useSettingsStore.getState().enabledPacks).toEqual(['Minimal']);
+    expect(useSettingsStore.getState().volume).toBe(0.8);
   });
 
   it('uploads local settings when no cloud settings exist', async () => {

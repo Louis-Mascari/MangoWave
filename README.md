@@ -141,7 +141,7 @@ npm run build -w packages/frontend   # tsc + vite build
 All infrastructure is managed via AWS CDK. Pushes to `main` trigger CI (lint, typecheck, unit tests, E2E). When CI succeeds, the Deploy workflow runs automatically via `workflow_run`:
 
 1. CDK deploys all infrastructure (DynamoDB, Lambda, API Gateway, S3, CloudFront, CloudWatch)
-2. Vite builds the frontend
+2. Vite builds the frontend (source maps uploaded to Sentry during build, then deleted before deploy)
 3. Frontend synced to S3 (bucket name from CDK outputs) + CloudFront cache invalidated
 4. Landing page synced separately to S3
 

@@ -1,4 +1,5 @@
 import posthog from 'posthog-js';
+import * as Sentry from '@sentry/react';
 import sjson from 'secure-json-parse';
 import type { SettingsState } from '../store/useSettingsStore.ts';
 import i18n from '../i18n/index.ts';
@@ -159,6 +160,10 @@ function captureImportFailure(reason: string): void {
   if (posthog.__loaded) {
     posthog.capture('settings_import_failed', { reason });
   }
+  Sentry.captureMessage('settings_import_failed', {
+    level: 'warning',
+    extra: { reason },
+  });
 }
 
 function clamp(val: unknown, min: number, max: number, fallback: number): number {

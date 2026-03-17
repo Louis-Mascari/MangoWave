@@ -82,6 +82,9 @@ jobs:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_LOCKED_MODE: ${{ secrets.VITE_LOCKED_MODE }}
           VITE_UNLOCK_HASH: ${{ secrets.VITE_UNLOCK_HASH }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0

@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import * as Sentry from '@sentry/react';
 import { AudioEngine } from '../engine/AudioEngine.ts';
 import { browserInfo } from '../utils/browserInfo.ts';
 import i18n from '../i18n/index.ts';
@@ -128,6 +129,12 @@ export function useAudioCapture(): UseAudioCaptureReturn {
       setCaptureSource('system');
       return true;
     } catch (err) {
+      const isUserCancellation =
+        err instanceof DOMException &&
+        (err.name === 'NotAllowedError' || err.name === 'AbortError');
+      if (!isUserCancellation) {
+        Sentry.captureException(err, { tags: { audioSource: 'system' } });
+      }
       setError(humanizeAudioError(err, 'system'));
       setIsCapturing(false);
       return false;
@@ -151,6 +158,12 @@ export function useAudioCapture(): UseAudioCaptureReturn {
       setCaptureSource('mic');
       return true;
     } catch (err) {
+      const isUserCancellation =
+        err instanceof DOMException &&
+        (err.name === 'NotAllowedError' || err.name === 'AbortError');
+      if (!isUserCancellation) {
+        Sentry.captureException(err, { tags: { audioSource: 'mic' } });
+      }
       setError(humanizeAudioError(err, 'mic'));
       setIsCapturing(false);
       return false;

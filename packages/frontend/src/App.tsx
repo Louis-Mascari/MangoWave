@@ -790,11 +790,13 @@ function MainApp() {
           {showLaunchAnimation && (
             <LaunchAnimation onComplete={() => setShowLaunchAnimation(false)} />
           )}
-          {presetNameDisplay !== 'off' && (
-            <PresetNotification message={currentPreset} mode={presetNameDisplay} />
-          )}
+          <div className="pointer-events-none fixed top-4 left-4 z-[49] flex flex-col items-start gap-2">
+            {presetNameDisplay !== 'off' && (
+              <PresetNotification message={currentPreset} mode={presetNameDisplay} />
+            )}
+            <NowPlaying enabled={songInfoDisplay !== 'off'} track={nowPlayingTrack} />
+          </div>
           <RateLimitToast />
-          <NowPlaying enabled={songInfoDisplay !== 'off'} track={nowPlayingTrack} />
           <ControlBar
             onNextPreset={handleNextPreset}
             onPreviousPreset={handlePreviousPreset}

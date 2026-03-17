@@ -9,7 +9,7 @@ npm run dev        # Vite dev server at localhost:5173
 npm run build      # tsc -b && vite build
 npm run test       # Vitest (jsdom)
 npm run test:watch # Vitest in watch mode
-npm run lint       # ESLint
+npm run lint       # ESLint (includes jsx-a11y)
 ```
 
 ## Architecture

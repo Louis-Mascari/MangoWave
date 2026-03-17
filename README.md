@@ -131,6 +131,7 @@ npm run build -w packages/frontend   # tsc + vite build
 - **Audio:** Web Audio API (`getDisplayMedia`, `HTMLAudioElement`, `getUserMedia`), music-metadata (ID3 parsing)
 - **Backend:** AWS Lambda (Node.js/TypeScript), API Gateway, DynamoDB
 - **Infrastructure:** AWS CDK v2
+- **Code quality:** ESLint (with jsx-a11y), Prettier, Knip (unused code detection), Husky pre-commit hooks
 - **CI/CD:** GitHub Actions (OIDC deploy to AWS)
 - **Analytics:** PostHog (user analytics), Sentry (error tracking)
 

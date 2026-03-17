@@ -6,6 +6,7 @@ import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { browserInfo } from '../utils/browserInfo.ts';
 import { validateAudioFiles, rejectionMessage } from '../utils/audioFileValidation.ts';
+import { useFocusTrap } from '../hooks/useFocusTrap.ts';
 import { supportedLanguages, type SupportedLanguage } from '../i18n/index.ts';
 import logoSrc from '../assets/logo.png';
 
@@ -661,14 +662,22 @@ function Modal({
   children: React.ReactNode;
 }) {
   const { t: tc } = useTranslation('common');
+  const containerRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(containerRef, true);
   return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative mx-4 w-full max-w-md rounded-2xl border border-white/10 bg-[#111] p-6 shadow-2xl">
+      <div
+        ref={containerRef}
+        role="dialog"
+        aria-label={title}
+        className="relative mx-4 w-full max-w-md rounded-2xl border border-white/10 bg-[#111] p-6 shadow-2xl"
+      >
         <button
           onClick={onClose}
           className="absolute right-4 top-4 cursor-pointer border-none bg-transparent text-lg text-white/40 hover:text-white/80"

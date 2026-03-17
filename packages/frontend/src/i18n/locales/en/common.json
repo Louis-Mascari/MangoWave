@@ -31,5 +31,6 @@
   "low": "Low",
   "default": "Default",
   "high": "High",
-  "ultra": "Ultra"
+  "ultra": "Ultra",
+  "controls": "Controls"
 }

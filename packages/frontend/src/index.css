@@ -239,3 +239,32 @@ body {
   background: #ff8c32;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
+
+/* Focus-visible indicators for keyboard navigation */
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid #ff8c32;
+  outline-offset: 2px;
+}
+
+input[type='range']:focus-visible {
+  outline: 2px solid #ff8c32;
+  outline-offset: 4px;
+}
+
+.seek-bar:focus-visible::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+}
+
+.range-fill:focus-visible::-webkit-slider-thumb,
+.range-fill-vertical:focus-visible::-webkit-slider-thumb {
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+}
+

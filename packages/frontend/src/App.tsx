@@ -752,7 +752,7 @@ function MainApp() {
   }
 
   return (
-    <div className="h-screen w-screen bg-black">
+    <main className="h-screen w-screen bg-black">
       {isActive && audioEngine ? (
         <>
           <Visualizer
@@ -843,11 +843,13 @@ function MainApp() {
             <div className="fixed inset-0 z-[60] flex items-stretch justify-center bg-black/50 backdrop-blur-sm">
               <div className="relative mx-2 my-2 flex max-h-full w-full flex-col overflow-hidden rounded-lg bg-gray-900/95">
                 <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-                  <h3 className="text-sm font-semibold text-white">Queue</h3>
+                  <h3 className="text-sm font-semibold text-white">
+                    {i18n.t('queue', { ns: 'common' })}
+                  </h3>
                   <button
                     onClick={() => setActivePanel('none')}
                     className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-none bg-white/10 text-sm text-white/70 hover:bg-white/20"
-                    aria-label="Close"
+                    aria-label={i18n.t('close', { ns: 'common' })}
                   >
                     ✕
                   </button>
@@ -870,7 +872,7 @@ function MainApp() {
           onClearError={capture.clearError}
         />
       )}
-    </div>
+    </main>
   );
 }
 

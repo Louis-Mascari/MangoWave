@@ -1,5 +1,7 @@
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SHORTCUTS } from '../constants/shortcuts.ts';
+import { useFocusTrap } from '../hooks/useFocusTrap.ts';
 
 interface ShortcutOverlayProps {
   visible: boolean;
@@ -9,15 +11,22 @@ interface ShortcutOverlayProps {
 export function ShortcutOverlay({ visible, onClose }: ShortcutOverlayProps) {
   const { t: tc } = useTranslation('common');
   const { t: ts } = useTranslation('settings');
+  const containerRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(containerRef, visible);
 
   if (!visible) return null;
 
   return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm"
       onClick={onClose}
     >
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
       <div
+        ref={containerRef}
+        role="dialog"
+        aria-label={tc('shortcuts')}
         className="w-80 rounded-lg bg-gray-900/95 p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >

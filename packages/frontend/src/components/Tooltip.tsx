@@ -1,11 +1,31 @@
+import { useId, useRef, useState } from 'react';
+
 export function Tooltip({ text }: { text: string }) {
+  const id = useId();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [alignRight, setAlignRight] = useState(false);
+
+  const handlePosition = () => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    setAlignRight(rect.right + 96 > window.innerWidth);
+  };
+
   return (
-    <span className="group relative ml-1 inline-flex cursor-help" tabIndex={0}>
+    <button
+      ref={triggerRef}
+      type="button"
+      className="group relative ml-1 inline-flex cursor-help border-none bg-transparent p-0"
+      aria-describedby={id}
+      onMouseEnter={handlePosition}
+      onFocus={handlePosition}
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
         fill="currentColor"
         className="h-3.5 w-3.5 text-white/40"
+        aria-hidden="true"
       >
         <path
           fillRule="evenodd"
@@ -13,9 +33,15 @@ export function Tooltip({ text }: { text: string }) {
           clipRule="evenodd"
         />
       </svg>
-      <span className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1 hidden w-48 -translate-x-1/2 rounded bg-gray-900 px-2 py-1 text-center text-[10px] leading-tight text-white/80 shadow-lg group-hover:block group-focus:block">
+      <span
+        id={id}
+        role="tooltip"
+        className={`pointer-events-none absolute bottom-full z-50 mb-1 hidden w-48 rounded bg-gray-900 px-2 py-1 text-center text-[10px] leading-tight text-white/80 shadow-lg group-hover:block group-focus:block ${
+          alignRight ? 'right-0' : 'left-1/2 -translate-x-1/2'
+        }`}
+      >
         {text}
       </span>
-    </span>
+    </button>
   );
 }

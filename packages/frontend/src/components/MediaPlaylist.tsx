@@ -80,12 +80,21 @@ export function MediaPlaylist({ onAddFiles, onClear, onClose }: MediaPlaylistPro
         {tracks.map((track, index) => (
           <div
             key={track.id}
+            role="button"
+            tabIndex={0}
             className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-xs transition-colors ${
               index === currentTrackIndex
                 ? 'bg-orange-500/20 text-white'
                 : 'text-white/70 hover:bg-white/10'
             }`}
             onClick={() => setCurrentTrack(index)}
+            onKeyDown={(e) => {
+              if (e.currentTarget !== e.target) return;
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setCurrentTrack(index);
+              }
+            }}
           >
             <span className="min-w-0 flex-1 truncate">{track.name}</span>
             <span className="shrink-0 text-white/40">{formatDuration(track.duration)}</span>

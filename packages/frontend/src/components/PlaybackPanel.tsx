@@ -92,6 +92,7 @@ function SeekBar({
         className="seek-bar h-1 min-w-0 flex-1 cursor-pointer appearance-none rounded-full"
         style={{ '--fill': `${(currentTime / duration) * 100}%` } as React.CSSProperties}
         aria-label={t('playback.seek')}
+        aria-valuetext={formatTime(currentTime)}
       />
       <span className="text-[10px] tabular-nums text-white/50">{formatTime(duration)}</span>
     </div>
@@ -255,6 +256,7 @@ export function PlaybackPanel({
         className="seek-bar h-1 w-16 cursor-pointer appearance-none rounded-full"
         style={{ '--fill': `${(volume ?? 0) * 100}%` } as React.CSSProperties}
         aria-label={t('playback.volume')}
+        aria-valuetext={`${Math.round((volume ?? 0) * 100)}%`}
       />
     </div>
   ) : null;

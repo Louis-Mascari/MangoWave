@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SettingsPanel } from './SettingsPanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
+import { useFocusTrap } from '../hooks/useFocusTrap.ts';
 import type { PanelView } from './ControlBar.tsx';
 import logoUrl from '../assets/logo.png';
 
@@ -171,6 +172,9 @@ export function MobileControlBar({
   // Radial items clockwise from 12 o'clock:
   // Top half (preset): Previous(10), Block(11), Presets(12), Next(1), Favorite(2)
   // Bottom half (app): Settings(3), Exit(4), Fullscreen(6), Autopilot(8)
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, modalPanel !== 'none');
+
   const radialItems = [
     {
       label: tc('presets'),
@@ -271,7 +275,10 @@ export function MobileControlBar({
   return (
     <div className="md:hidden">
       {/* Backdrop overlay when menu is open */}
-      {menuOpen && <div className="fixed inset-0 z-[54] bg-black/30" onClick={closeMenu} />}
+      {menuOpen && (
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+        <div className="fixed inset-0 z-[54] bg-black/30" onClick={closeMenu} />
+      )}
 
       {/* FAB hub — slides from bottom-right to center when open */}
       <div
@@ -345,7 +352,18 @@ export function MobileControlBar({
       {/* Modal panels */}
       {modalPanel !== 'none' && (
         <div className="fixed inset-0 z-[60] flex items-stretch justify-center bg-black/50 backdrop-blur-sm">
-          <div className="relative mx-2 my-2 flex max-h-full w-full flex-col overflow-hidden rounded-lg bg-gray-900/95 landscape:my-1">
+          <div
+            ref={modalRef}
+            role="dialog"
+            aria-label={
+              activePanel === 'settings'
+                ? tc('settings')
+                : activePanel === 'presets'
+                  ? tc('presets')
+                  : tc('queue')
+            }
+            className="relative mx-2 my-2 flex max-h-full w-full flex-col overflow-hidden rounded-lg bg-gray-900/95 landscape:my-1"
+          >
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 landscape:py-1.5">
               <h3 className="text-sm font-semibold text-white">
                 {activePanel === 'settings' && tc('settings')}

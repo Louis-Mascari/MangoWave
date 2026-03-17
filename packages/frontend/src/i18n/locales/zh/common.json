@@ -31,5 +31,6 @@
   "low": "低",
   "default": "默认",
   "high": "高",
-  "ultra": "超高"
+  "ultra": "超高",
+  "controls": "控件"
 }

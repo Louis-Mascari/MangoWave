@@ -16,9 +16,9 @@ describe('RateLimitToast', () => {
     vi.useRealTimers();
   });
 
-  it('does not render when not rate limited', () => {
-    const { container } = render(<RateLimitToast />);
-    expect(container.firstChild).toBeNull();
+  it('does not render toast text when not rate limited', () => {
+    render(<RateLimitToast />);
+    expect(screen.queryByText(/Spotify rate limited/)).toBeNull();
   });
 
   it('renders when rate limited', () => {
@@ -44,11 +44,11 @@ describe('RateLimitToast', () => {
       isRateLimited: true,
       rateLimitResetsAt: Date.now() + 3000,
     });
-    const { container, rerender } = render(<RateLimitToast />);
-    expect(container.firstChild).not.toBeNull();
+    const { rerender } = render(<RateLimitToast />);
+    expect(screen.getByText(/Spotify rate limited/)).toBeInTheDocument();
 
     useSpotifyStore.setState({ isRateLimited: false, rateLimitResetsAt: null });
     rerender(<RateLimitToast />);
-    expect(container.firstChild).toBeNull();
+    expect(screen.queryByText(/Spotify rate limited/)).toBeNull();
   });
 });

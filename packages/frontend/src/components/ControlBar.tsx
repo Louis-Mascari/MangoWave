@@ -106,6 +106,7 @@ function DesktopControlBar({
     >
       {/* Click-outside backdrop to close panels */}
       {activePanel !== 'none' && (
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
         <div className="fixed inset-0 z-[-1]" onClick={() => onTogglePanel('none')} />
       )}
       {activePanel !== 'none' && (
@@ -138,7 +139,11 @@ function DesktopControlBar({
         </div>
       )}
 
-      <div className="flex items-center justify-between gap-2 bg-black/50 px-4 py-2 backdrop-blur-sm">
+      <div
+        role="toolbar"
+        aria-label={tc('controls')}
+        className="flex items-center justify-between gap-2 bg-black/50 px-4 py-2 backdrop-blur-sm"
+      >
         {/* LEFT: Preset Controls */}
         <div className="flex items-center gap-2">
           <BarButton onClick={() => onTogglePanel('presets')} active={activePanel === 'presets'}>
@@ -159,8 +164,9 @@ function DesktopControlBar({
               <button
                 onClick={onToggleBlock}
                 title={isBlocked ? t('controlBar.unblockPreset') : t('controlBar.blockPreset')}
+                aria-label={isBlocked ? t('controlBar.unblockPreset') : t('controlBar.blockPreset')}
                 className={`flex h-7 w-7 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
-                  isBlocked ? 'text-red-400' : 'text-white/30 hover:bg-white/10 hover:text-red-400'
+                  isBlocked ? 'text-red-400' : 'text-white/40 hover:bg-white/10 hover:text-red-400'
                 }`}
               >
                 <svg
@@ -182,10 +188,13 @@ function DesktopControlBar({
                 title={
                   isFavorite ? t('controlBar.removeFromFavorites') : t('controlBar.addToFavorites')
                 }
+                aria-label={
+                  isFavorite ? t('controlBar.removeFromFavorites') : t('controlBar.addToFavorites')
+                }
                 className={`flex h-7 w-7 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
                   isFavorite
                     ? 'text-yellow-400'
-                    : 'text-white/30 hover:bg-white/10 hover:text-yellow-400'
+                    : 'text-white/40 hover:bg-white/10 hover:text-yellow-400'
                 }`}
               >
                 <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">

@@ -188,6 +188,8 @@ function EqualizerTab() {
                 step="1"
                 value={eq.bandGains[i]}
                 onChange={(e) => setEQBandGain(i, parseFloat(e.target.value))}
+                aria-label={`${formatFreq(freq)} Hz`}
+                aria-valuetext={`${eq.bandGains[i]} dB`}
                 // @ts-expect-error - orient="vertical" is a non-standard Firefox attribute
                 orient="vertical"
                 className="range-fill-vertical h-24"
@@ -217,6 +219,8 @@ function EqualizerTab() {
               step="0.1"
               value={eq.preAmpGain}
               onChange={(e) => setPreAmpGain(parseFloat(e.target.value))}
+              aria-label={t('equalizer.preAmp')}
+              aria-valuetext={`${eq.preAmpGain.toFixed(1)}x`}
               className="range-fill flex-1"
               style={rangeFillStyle(eq.preAmpGain, 0, 3)}
             />
@@ -428,6 +432,8 @@ function RenderingTab() {
           step="0.05"
           value={audio.smoothingConstant}
           onChange={(e) => setSmoothingConstant(parseFloat(e.target.value))}
+          aria-label={t('rendering.audioSmoothing', { value: audio.smoothingConstant.toFixed(2) })}
+          aria-valuetext={audio.smoothingConstant.toFixed(2)}
           className="range-fill w-full"
           style={rangeFillStyle(audio.smoothingConstant, 0, 1)}
         />
@@ -505,6 +511,8 @@ function PresetsTab() {
           step="0.5"
           value={transitionTime}
           onChange={(e) => setTransitionTime(parseFloat(e.target.value))}
+          aria-label={t('presets.transitionTime', { value: transitionTime.toFixed(1) })}
+          aria-valuetext={`${transitionTime.toFixed(1)}s`}
           className="range-fill w-full"
           style={rangeFillStyle(transitionTime, 0, 10)}
         />
@@ -561,6 +569,8 @@ function PresetsTab() {
               step="1"
               value={presetNameDisplay}
               onChange={(e) => setPresetNameDisplay(parseInt(e.target.value))}
+              aria-label={t('presets.duration', { value: presetNameDisplay })}
+              aria-valuetext={`${presetNameDisplay}s`}
               className="range-fill w-full"
               style={rangeFillStyle(presetNameDisplay as number, 1, 10)}
             />
@@ -597,6 +607,8 @@ function PresetsTab() {
             step="5"
             value={autopilot.interval}
             onChange={(e) => setAutopilotInterval(parseInt(e.target.value))}
+            aria-label={t('presets.interval', { value: autopilot.interval })}
+            aria-valuetext={`${autopilot.interval}s`}
             className="range-fill w-full"
             style={rangeFillStyle(autopilot.interval, 5, 120)}
           />
@@ -639,6 +651,8 @@ function PresetsTab() {
             step="1"
             value={autopilot.favoriteWeight}
             onChange={(e) => setAutopilotFavoriteWeight(parseInt(e.target.value))}
+            aria-label={t('presets.favoriteFrequency', { value: autopilot.favoriteWeight })}
+            aria-valuetext={`${autopilot.favoriteWeight}x`}
             className="range-fill w-full"
             style={rangeFillStyle(autopilot.favoriteWeight, 1, 10)}
           />

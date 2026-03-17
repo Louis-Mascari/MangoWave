@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
+import { useFocusTrap } from '../hooks/useFocusTrap.ts';
 import logoUrl from '../assets/logo.png';
 
 interface OnboardingOverlayProps {
@@ -83,6 +84,8 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
   const [step, setStep] = useState(0);
   const [closing, setClosing] = useState(false);
   const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(containerRef, true);
 
   // Clean up fade-out timer on unmount
   useEffect(
@@ -102,6 +105,7 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
   }, [closing, onComplete]);
 
   return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       className="fixed inset-0 z-[90] flex items-center justify-center bg-black/93 transition-opacity"
       style={{
@@ -112,7 +116,12 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
         if (e.target === e.currentTarget) handleClose();
       }}
     >
-      <div className="mx-4 w-full max-w-sm rounded-xl bg-gray-900/95 p-6 shadow-2xl">
+      <div
+        ref={containerRef}
+        role="dialog"
+        aria-label={t('onboarding.title', { defaultValue: 'Getting Started' })}
+        className="mx-4 w-full max-w-sm rounded-xl bg-gray-900/95 p-6 shadow-2xl"
+      >
         {/* Progress dots */}
         <div className="mb-4 flex justify-center gap-1.5">
           {tips.map((_, i) => (

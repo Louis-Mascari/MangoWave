@@ -183,7 +183,7 @@ h1 {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  color: #666;
+  color: #999;
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: 500;
@@ -245,3 +245,11 @@ h1 {
     order: unset !important;
   }
 }
+
+/* Focus-visible indicators */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid #ff8c32;
+  outline-offset: 2px;
+}
+

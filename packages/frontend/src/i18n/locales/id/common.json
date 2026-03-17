@@ -31,5 +31,6 @@
   "low": "Rendah",
   "default": "Default",
   "high": "Tinggi",
-  "ultra": "Ultra"
+  "ultra": "Ultra",
+  "controls": "Kontrol"
 }

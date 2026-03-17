@@ -58,19 +58,32 @@ function PresetRow({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.currentTarget !== e.target) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
       className={`flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs ${
         isCurrent ? 'bg-orange-500/30 text-white' : 'text-white/70 hover:bg-white/10'
       }`}
     >
       <span className="min-w-0 flex-1 truncate text-left">{name}</span>
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
         <button
           onClick={onToggleFavorite}
           className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
-            isFavorite ? 'text-yellow-400' : 'text-white/30 hover:bg-white/10 hover:text-yellow-400'
+            isFavorite ? 'text-yellow-400' : 'text-white/40 hover:bg-white/10 hover:text-yellow-400'
           }`}
           title={
+            isFavorite ? t('presetBrowser.removeFromFavorites') : t('presetBrowser.addToFavorites')
+          }
+          aria-label={
             isFavorite ? t('presetBrowser.removeFromFavorites') : t('presetBrowser.addToFavorites')
           }
         >
@@ -81,9 +94,10 @@ function PresetRow({
         <button
           onClick={onToggleBlock}
           className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
-            isBlocked ? 'text-red-400' : 'text-white/30 hover:bg-white/10 hover:text-red-400'
+            isBlocked ? 'text-red-400' : 'text-white/40 hover:bg-white/10 hover:text-red-400'
           }`}
           title={isBlocked ? t('presetBrowser.unblockPreset') : t('presetBrowser.blockPreset')}
+          aria-label={isBlocked ? t('presetBrowser.unblockPreset') : t('presetBrowser.blockPreset')}
         >
           <svg
             viewBox="0 0 20 20"
@@ -120,17 +134,30 @@ function HistoryRow({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.currentTarget !== e.target) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
       className="flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs text-white/70 hover:bg-white/10"
     >
       <span className="min-w-0 flex-1 truncate text-left">{name}</span>
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
         <button
           onClick={onToggleFavorite}
           className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
-            isFavorite ? 'text-yellow-400' : 'text-white/30 hover:bg-white/10 hover:text-yellow-400'
+            isFavorite ? 'text-yellow-400' : 'text-white/40 hover:bg-white/10 hover:text-yellow-400'
           }`}
           title={
+            isFavorite ? t('presetBrowser.removeFromFavorites') : t('presetBrowser.addToFavorites')
+          }
+          aria-label={
             isFavorite ? t('presetBrowser.removeFromFavorites') : t('presetBrowser.addToFavorites')
           }
         >
@@ -141,9 +168,10 @@ function HistoryRow({
         <button
           onClick={onToggleBlock}
           className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
-            isBlocked ? 'text-red-400' : 'text-white/30 hover:bg-white/10 hover:text-red-400'
+            isBlocked ? 'text-red-400' : 'text-white/40 hover:bg-white/10 hover:text-red-400'
           }`}
           title={isBlocked ? t('presetBrowser.unblockPreset') : t('presetBrowser.blockPreset')}
+          aria-label={isBlocked ? t('presetBrowser.unblockPreset') : t('presetBrowser.blockPreset')}
         >
           <svg
             viewBox="0 0 20 20"
@@ -479,7 +507,16 @@ export function PresetBrowser({
             const isCollapsed = collapsedPacks.has(packName);
             return (
               <div
+                role="button"
+                tabIndex={0}
                 onClick={() => toggleCollapsePack(packName)}
+                onKeyDown={(e) => {
+                  if (e.currentTarget !== e.target) return;
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleCollapsePack(packName);
+                  }
+                }}
                 className="sticky top-0 z-[1] flex cursor-pointer items-center justify-between bg-black/80 px-2 py-1 backdrop-blur-sm"
               >
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-orange-400">
@@ -565,7 +602,16 @@ export function PresetBrowser({
       {excludedPresets.map(({ name, reason }) => (
         <div
           key={name}
+          role="button"
+          tabIndex={0}
           onClick={() => handleSelectPreset(name)}
+          onKeyDown={(e) => {
+            if (e.currentTarget !== e.target) return;
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleSelectPreset(name);
+            }
+          }}
           className="flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs text-white/70 hover:bg-white/10"
         >
           <span className="min-w-0 flex-1 truncate text-left">
@@ -581,6 +627,7 @@ export function PresetBrowser({
             }}
             className="flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent text-green-500/60 hover:bg-white/10 hover:text-green-400"
             title={t('presetBrowser.restoreToPool')}
+            aria-label={t('presetBrowser.restoreToPool')}
           >
             <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
               <path

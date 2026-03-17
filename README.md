@@ -16,6 +16,10 @@
   <a href="https://ko-fi.com/louismascari">Buy Mango a Treat 🐾</a>
 </p>
 
+<p align="center">
+  <video src="https://github.com/user-attachments/assets/45b90192-198e-48ce-96f1-daaf293c8ae6" autoplay loop muted playsinline width="100%"></video>
+</p>
+
 ## Features
 
 - **400+ MilkDrop presets** from 5 butterchurn packs, organized by source pack with virtualized browsing

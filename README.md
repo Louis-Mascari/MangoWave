@@ -133,17 +133,18 @@ npm run build -w packages/frontend   # tsc + vite build
 - **Backend:** AWS Lambda (Node.js/TypeScript), API Gateway, DynamoDB
 - **Infrastructure:** AWS CDK v2
 - **Code quality:** ESLint (with jsx-a11y), Prettier, Knip (unused code detection), Husky pre-commit hooks, Playwright E2E tests (5 browser configs)
-- **CI/CD:** GitHub Actions — lint + unit tests → E2E (Chromium + mobile Chrome full suite, Firefox + WebKit start-screen only; all 5 browsers locally) → OIDC deploy to AWS
+- **CI/CD:** GitHub Actions — two parallel workflows on push to `main`: CI (lint + unit tests → E2E) and Deploy (lint + unit tests → CDK → S3/CloudFront). E2E runs Chromium + mobile Chrome full suite, Firefox + WebKit start-screen only; all 5 browsers locally
 - **Analytics:** PostHog (user analytics), Sentry (error tracking)
 
 ## Deployment
 
-All infrastructure is managed via AWS CDK. Pushes to `main` auto-deploy via GitHub Actions:
+All infrastructure is managed via AWS CDK. Pushes to `main` auto-deploy via GitHub Actions. The deploy workflow runs its own lint + unit test gate before proceeding:
 
-1. CDK deploys all infrastructure (DynamoDB, Lambda, API Gateway, S3, CloudFront, CloudWatch)
-2. Vite builds the frontend
-3. Frontend synced to S3 (bucket name from CDK outputs) + CloudFront cache invalidated
-4. Landing page synced separately to S3
+1. Lint, typecheck, and unit tests must pass (defense in depth)
+2. CDK deploys all infrastructure (DynamoDB, Lambda, API Gateway, S3, CloudFront, CloudWatch)
+3. Vite builds the frontend
+4. Frontend synced to S3 (bucket name from CDK outputs) + CloudFront cache invalidated
+5. Landing page synced separately to S3
 
 Both the app (`play.mangowave.app`) and landing page (`mangowave.app`) are served from the same CloudFront distribution. A CloudFront Function routes requests by `Host` header to the appropriate S3 prefix.
 

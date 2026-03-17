@@ -21,6 +21,21 @@ test.describe('Visualizer', () => {
     await expect(app.locator('[data-testid="preset-name"]')).toBeVisible({ timeout: 10000 });
   });
 
+  test('microphone capture: start → ControlBar visible with preset name', async ({ app }) => {
+    await app.goto('/');
+
+    // Open Microphone modal and start
+    await app.getByRole('button', { name: /Use Microphone/ }).click();
+    await app.getByRole('button', { name: /Start Microphone/ }).click();
+
+    // Wait for the visualizer to be active — ControlBar (toolbar) should appear
+    const toolbar = app.locator('[role="toolbar"]');
+    await expect(toolbar).toBeVisible({ timeout: 15000 });
+
+    // Preset name should be showing somewhere
+    await expect(app.locator('[data-testid="preset-name"]')).toBeVisible({ timeout: 10000 });
+  });
+
   test('autopilot: toggling changes preset after interval', async ({ app }) => {
     // Pre-seed settings with autopilot enabled at a very short interval.
     // This addInitScript runs after the base fixture's (which clears localStorage),

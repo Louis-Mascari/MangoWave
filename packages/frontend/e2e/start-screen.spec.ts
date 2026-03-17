@@ -1,5 +1,6 @@
 import { test, expect } from './fixtures/base';
 import {
+  installAudioMocks,
   installAudioDeniedMock,
   installWebGL2UnsupportedMock,
   installWebGL2StubbedMock,
@@ -97,6 +98,68 @@ test.describe('StartScreen', () => {
     );
     await app.getByRole('button', { name: /Share Audio/ }).click();
     await expect(app.getByRole('button', { name: /Start Visualizer/ })).toBeDisabled();
+  });
+});
+
+test.describe('StartScreen — onboarding', () => {
+  test('onboarding overlay appears after first launch and can be dismissed', async ({
+    app,
+  }, testInfo) => {
+    test.skip(
+      needsWebGL2Stub(testInfo.project.name),
+      'Requires real WebGL 2 — butterchurn crash with stub races the onboarding overlay',
+    );
+    // Install audio mocks so we can start the visualizer
+    await app.addInitScript(installAudioMocks());
+    // Remove onboardingShown so the overlay displays
+    await app.addInitScript(() => {
+      const raw = localStorage.getItem('mangowave-settings');
+      if (raw) {
+        const settings = JSON.parse(raw);
+        delete settings.state.onboardingShown;
+        localStorage.setItem('mangowave-settings', JSON.stringify(settings));
+      }
+    });
+    await app.goto('/');
+
+    // Start via microphone (works on all browsers, no getDisplayMedia needed)
+    await app.getByRole('button', { name: /Use Microphone/ }).click();
+    await app.getByRole('button', { name: /Start Microphone/ }).click();
+
+    // Onboarding dialog should appear after launch
+    const dialog = app.locator('[role="dialog"]');
+    await expect(dialog).toBeVisible({ timeout: 10000 });
+
+    // Should have navigation buttons
+    await expect(dialog.getByRole('button', { name: /Skip/i })).toBeVisible();
+
+    // Dismiss via Skip
+    await dialog.getByRole('button', { name: /Skip/i }).click();
+
+    // Dialog should close (with fade animation, give it time)
+    await expect(dialog).not.toBeVisible({ timeout: 3000 });
+  });
+});
+
+test.describe('StartScreen — i18n', () => {
+  test('changing language translates the UI', async ({ app }, testInfo) => {
+    if (needsWebGL2Stub(testInfo.project.name)) {
+      await app.addInitScript(installWebGL2StubbedMock());
+    }
+    await app.goto('/');
+
+    // Verify English text is present
+    await expect(app.getByText('Choose your audio source')).toBeVisible();
+
+    // Change language to Spanish via the picker
+    await app.locator('select').selectOption('es');
+
+    // Verify Spanish translation appeared
+    await expect(app.getByText('Elige tu fuente de audio')).toBeVisible();
+
+    // Language should persist in localStorage
+    const lang = await app.evaluate(() => localStorage.getItem('mangowave-language'));
+    expect(lang).toBe('es');
   });
 });
 

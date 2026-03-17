@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { APIGatewayProxyEventV2 } from 'aws-lambda';
+import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 import { handler } from '../settings-save';
 
 vi.mock('../../lib/dynamo', () => ({
@@ -25,6 +25,14 @@ function makeRawEvent(body: string): APIGatewayProxyEventV2 {
     body,
     requestContext: { http: { method: 'POST' } },
   } as unknown as APIGatewayProxyEventV2;
+}
+
+async function invoke(body: Record<string, unknown>): Promise<APIGatewayProxyStructuredResultV2> {
+  return (await handler(makeEvent(body))) as APIGatewayProxyStructuredResultV2;
+}
+
+async function invokeRaw(body: string): Promise<APIGatewayProxyStructuredResultV2> {
+  return (await handler(makeRawEvent(body))) as APIGatewayProxyStructuredResultV2;
 }
 
 const mockSettings = {
@@ -55,18 +63,18 @@ describe('settings-save handler', () => {
   });
 
   it('returns 400 if sessionId is missing', async () => {
-    const result = await handler(makeEvent({ settings: mockSettings }));
+    const result = await invoke({ settings: mockSettings });
     expect(result.statusCode).toBe(400);
   });
 
   it('returns 400 if settings is missing', async () => {
-    const result = await handler(makeEvent({ sessionId: 'sess_1' }));
+    const result = await invoke({ sessionId: 'sess_1' });
     expect(result.statusCode).toBe(400);
   });
 
   it('returns 404 if session not found', async () => {
     vi.mocked(getSession).mockResolvedValue(null);
-    const result = await handler(makeEvent({ sessionId: 'sess_1', settings: mockSettings }));
+    const result = await invoke({ sessionId: 'sess_1', settings: mockSettings });
     expect(result.statusCode).toBe(404);
   });
 
@@ -77,7 +85,7 @@ describe('settings-save handler', () => {
     });
     vi.mocked(storeUserSettings).mockResolvedValue(undefined);
 
-    const result = await handler(makeEvent({ sessionId: 'sess_1', settings: mockSettings }));
+    const result = await invoke({ sessionId: 'sess_1', settings: mockSettings });
     expect(result.statusCode).toBe(200);
 
     const body = JSON.parse(result.body as string);
@@ -87,7 +95,7 @@ describe('settings-save handler', () => {
 
   it('returns 500 on dynamo failure', async () => {
     vi.mocked(getSession).mockRejectedValue(new Error('DynamoDB error'));
-    const result = await handler(makeEvent({ sessionId: 'sess_1', settings: mockSettings }));
+    const result = await invoke({ sessionId: 'sess_1', settings: mockSettings });
     expect(result.statusCode).toBe(500);
   });
 
@@ -95,28 +103,29 @@ describe('settings-save handler', () => {
 
   it('returns 413 for oversized request body', async () => {
     const bigBody = 'x'.repeat(1024 * 1024 + 1);
-    const result = await handler(makeRawEvent(bigBody));
+    const result = await invokeRaw(bigBody);
     expect(result.statusCode).toBe(413);
   });
 
   it('returns 400 if settings is not an object', async () => {
-    const result = await handler(makeEvent({ sessionId: 'sess_1', settings: 'not-an-object' }));
+    const result = await invoke({ sessionId: 'sess_1', settings: 'not-an-object' });
     expect(result.statusCode).toBe(400);
     const body = JSON.parse(result.body as string);
     expect(body.error).toContain('Settings must be an object');
   });
 
   it('returns 400 if settings is an array', async () => {
-    const result = await handler(makeEvent({ sessionId: 'sess_1', settings: [1, 2, 3] }));
+    const result = await invoke({ sessionId: 'sess_1', settings: [1, 2, 3] });
     expect(result.statusCode).toBe(400);
     const body = JSON.parse(result.body as string);
     expect(body.error).toContain('Settings must be an object');
   });
 
   it('returns 400 if transitionTime is not a number', async () => {
-    const result = await handler(
-      makeEvent({ sessionId: 'sess_1', settings: { ...mockSettings, transitionTime: 'fast' } }),
-    );
+    const result = await invoke({
+      sessionId: 'sess_1',
+      settings: { ...mockSettings, transitionTime: 'fast' },
+    });
     expect(result.statusCode).toBe(400);
     const body = JSON.parse(result.body as string);
     expect(body.error).toContain('transitionTime must be a finite number');
@@ -138,32 +147,28 @@ describe('settings-save handler', () => {
   it('returns 400 if eqSettings is missing', async () => {
     const { eqSettings: _, ...noEq } = mockSettings;
     void _;
-    const result = await handler(makeEvent({ sessionId: 'sess_1', settings: noEq }));
+    const result = await invoke({ sessionId: 'sess_1', settings: noEq });
     expect(result.statusCode).toBe(400);
   });
 
   it('returns 400 if bandGains has wrong count', async () => {
-    const result = await handler(
-      makeEvent({
-        sessionId: 'sess_1',
-        settings: { ...mockSettings, eqSettings: { preAmpGain: 0, bandGains: [0, 0, 0] } },
-      }),
-    );
+    const result = await invoke({
+      sessionId: 'sess_1',
+      settings: { ...mockSettings, eqSettings: { preAmpGain: 0, bandGains: [0, 0, 0] } },
+    });
     expect(result.statusCode).toBe(400);
     const body = JSON.parse(result.body as string);
     expect(body.error).toContain('exactly 10 items');
   });
 
   it('returns 400 if bandGains contains non-number', async () => {
-    const result = await handler(
-      makeEvent({
-        sessionId: 'sess_1',
-        settings: {
-          ...mockSettings,
-          eqSettings: { preAmpGain: 0, bandGains: [0, 0, 'bad', 0, 0, 0, 0, 0, 0, 0] },
-        },
-      }),
-    );
+    const result = await invoke({
+      sessionId: 'sess_1',
+      settings: {
+        ...mockSettings,
+        eqSettings: { preAmpGain: 0, bandGains: [0, 0, 'bad', 0, 0, 0, 0, 0, 0, 0] },
+      },
+    });
     expect(result.statusCode).toBe(400);
     const body = JSON.parse(result.body as string);
     expect(body.error).toContain('bandGains[2] must be a finite number');
@@ -191,33 +196,30 @@ describe('settings-save handler', () => {
   });
 
   it('returns 400 if blockedPresets is not an array', async () => {
-    const result = await handler(
-      makeEvent({ sessionId: 'sess_1', settings: { ...mockSettings, blockedPresets: 'wrong' } }),
-    );
+    const result = await invoke({
+      sessionId: 'sess_1',
+      settings: { ...mockSettings, blockedPresets: 'wrong' },
+    });
     expect(result.statusCode).toBe(400);
     const body = JSON.parse(result.body as string);
     expect(body.error).toContain('blockedPresets must be an array');
   });
 
   it('returns 400 if a preset name is too long', async () => {
-    const result = await handler(
-      makeEvent({
-        sessionId: 'sess_1',
-        settings: { ...mockSettings, favoritePresets: ['a'.repeat(201)] },
-      }),
-    );
+    const result = await invoke({
+      sessionId: 'sess_1',
+      settings: { ...mockSettings, favoritePresets: ['a'.repeat(201)] },
+    });
     expect(result.statusCode).toBe(400);
     const body = JSON.parse(result.body as string);
     expect(body.error).toContain('exceeds maximum length');
   });
 
   it('returns 400 if preset list item is not a string', async () => {
-    const result = await handler(
-      makeEvent({
-        sessionId: 'sess_1',
-        settings: { ...mockSettings, blockedPresets: [123] },
-      }),
-    );
+    const result = await invoke({
+      sessionId: 'sess_1',
+      settings: { ...mockSettings, blockedPresets: [123] },
+    });
     expect(result.statusCode).toBe(400);
     const body = JSON.parse(result.body as string);
     expect(body.error).toContain('blockedPresets[0] must be a string');
@@ -252,28 +254,24 @@ describe('settings-save handler', () => {
   });
 
   it('returns 400 for NaN transitionTime', async () => {
-    const result = await handler(
-      makeEvent({
-        sessionId: 'sess_1',
-        settings: { ...mockSettings, transitionTime: NaN },
-      }),
-    );
+    const result = await invoke({
+      sessionId: 'sess_1',
+      settings: { ...mockSettings, transitionTime: NaN },
+    });
     expect(result.statusCode).toBe(400);
   });
 
   it('returns 400 for Infinity preAmpGain', async () => {
-    const result = await handler(
-      makeEvent({
-        sessionId: 'sess_1',
-        settings: {
-          ...mockSettings,
-          eqSettings: {
-            preAmpGain: Infinity,
-            bandGains: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          },
+    const result = await invoke({
+      sessionId: 'sess_1',
+      settings: {
+        ...mockSettings,
+        eqSettings: {
+          preAmpGain: Infinity,
+          bandGains: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         },
-      }),
-    );
+      },
+    });
     expect(result.statusCode).toBe(400);
   });
 });

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { APIGatewayProxyEventV2 } from 'aws-lambda';
+import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 import { handler } from '../auth-callback';
 
 vi.mock('../../lib/spotify', () => ({
@@ -21,13 +21,17 @@ function makeEvent(body: Record<string, unknown>): APIGatewayProxyEventV2 {
   } as unknown as APIGatewayProxyEventV2;
 }
 
+async function invoke(body: Record<string, unknown>): Promise<APIGatewayProxyStructuredResultV2> {
+  return (await handler(makeEvent(body))) as APIGatewayProxyStructuredResultV2;
+}
+
 describe('auth-callback handler', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('returns 400 if code is missing', async () => {
-    const result = await handler(makeEvent({}));
+    const result = await invoke({});
     expect(result.statusCode).toBe(400);
   });
 
@@ -49,7 +53,7 @@ describe('auth-callback handler', () => {
 
     vi.mocked(storeSession).mockResolvedValue(undefined);
 
-    const result = await handler(makeEvent({ code: 'auth_code_123' }));
+    const result = await invoke({ code: 'auth_code_123' });
     expect(result.statusCode).toBe(200);
 
     const body = JSON.parse(result.body as string);
@@ -65,7 +69,7 @@ describe('auth-callback handler', () => {
   it('returns 500 on spotify API failure', async () => {
     vi.mocked(exchangeCodeForTokens).mockRejectedValue(new Error('bad code'));
 
-    const result = await handler(makeEvent({ code: 'bad' }));
+    const result = await invoke({ code: 'bad' });
     expect(result.statusCode).toBe(500);
   });
 });

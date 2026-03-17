@@ -66,7 +66,11 @@ test.describe('StartScreen', () => {
     await expect(app.locator('[role="dialog"]')).not.toBeVisible();
   });
 
-  test('local file loading transitions to visualizer', async ({ app }) => {
+  test('local file loading transitions to visualizer', async ({ app }, testInfo) => {
+    test.skip(
+      needsWebGL2Stub(testInfo.project.name),
+      'Requires real WebGL 2 for butterchurn init after file load',
+    );
     await app.getByRole('button', { name: /Play Local Files/ }).click();
 
     // Set files on the hidden input

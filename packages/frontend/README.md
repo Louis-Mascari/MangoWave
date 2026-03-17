@@ -1,6 +1,6 @@
 # @mangowave/frontend
 
-The MangoWave visualizer app — a React 19 + Vite 7 + TypeScript SPA that plays local files, captures system audio, or listens via microphone, rendering real-time MilkDrop-style visuals via butterchurn.
+The MangoWave visualizer app — a React 19 + Vite 8 + TypeScript SPA that plays local files, captures system audio, or listens via microphone, rendering real-time MilkDrop-style visuals via butterchurn.
 
 ## Development
 

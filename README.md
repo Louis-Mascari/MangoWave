@@ -66,7 +66,7 @@ NPM workspaces monorepo. Node >= 20 required.
 
 ```
 MangoWave/
-├── packages/frontend/     # React 19 + Vite 7 + TypeScript — the visualizer app
+├── packages/frontend/     # React 19 + Vite 8 + TypeScript — the visualizer app
 ├── packages/backend/      # Lambda handlers for Spotify OAuth & settings sync
 ├── packages/landing/      # Static landing page (HTML + CSS, no JS)
 ├── infrastructure/        # AWS CDK v2 — DynamoDB, Lambda, API Gateway, S3, CloudFront, CloudWatch
@@ -126,7 +126,7 @@ npm run build -w packages/frontend   # tsc + vite build
 
 ## Tech Stack
 
-- **Frontend:** React 19, Vite 7, TypeScript 5.9, Tailwind CSS 4, Zustand, react-i18next
+- **Frontend:** React 19, Vite 8, TypeScript 5.9, Tailwind CSS 4, Zustand, react-i18next
 - **Visual engine:** butterchurn (WebGL 2 MilkDrop port)
 - **Audio:** Web Audio API (`getDisplayMedia`, `HTMLAudioElement`, `getUserMedia`), music-metadata (ID3 parsing)
 - **Backend:** AWS Lambda (Node.js/TypeScript), API Gateway, DynamoDB

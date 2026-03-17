@@ -88,6 +88,8 @@ On mobile, 27 GPU-heavy presets (identified via Pixel 10 Pro testing) are filter
 
 `usePresetBrowserStore` holds preset browser panel UI state (active filter tab, search term, collapsed packs, scroll position). Session-scoped (not persisted) — survives panel open/close but resets on page refresh.
 
+**Language preference** is persisted separately by `i18next-browser-languagedetector` to `localStorage` key `mangowave-language` (not Zustand). This allows i18n to resolve synchronously at module load before React mounts.
+
 `useToastStore` drives single-message action toasts with typed variants (`info`, `error`, `warning`). API: `show(message, { type?, durationMs? })` — info auto-clears at 3.5s, error/warning at 6s. `durationMs` stored in state and drives both the JS cleanup timer and the CSS `toast-fade` animation duration (set dynamically via inline style). `ActionToast` renders styled variants: info (neutral), error (red border/bg), warning (amber border/bg).
 
 ## Environment Variables

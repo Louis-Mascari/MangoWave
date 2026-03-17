@@ -12,7 +12,7 @@
     "@types/node": "^24.10.1",
     "jest": "^30",
     "ts-jest": "^29",
-    "aws-cdk": "2.1109.0",
+    "aws-cdk": "2.1111.0",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.3"
   },

@@ -1,9 +1,19 @@
-import butterchurn from 'butterchurn';
-import butterchurnPresetsExtra from 'butterchurn-presets/lib/butterchurnPresetsExtra.min';
-import butterchurnPresetsExtra2 from 'butterchurn-presets/lib/butterchurnPresetsExtra2.min';
-import butterchurnPresetsMD1 from 'butterchurn-presets/lib/butterchurnPresetsMD1.min';
-import butterchurnPresetsNonMinimal from 'butterchurn-presets/lib/butterchurnPresetsNonMinimal.min';
-import butterchurnPresetsMinimal from 'butterchurn-presets/lib/butterchurnPresetsMinimal.min';
+import _butterchurn from 'butterchurn';
+import _butterchurnPresetsExtra from 'butterchurn-presets/lib/butterchurnPresetsExtra.min';
+import _butterchurnPresetsExtra2 from 'butterchurn-presets/lib/butterchurnPresetsExtra2.min';
+import _butterchurnPresetsMD1 from 'butterchurn-presets/lib/butterchurnPresetsMD1.min';
+import _butterchurnPresetsNonMinimal from 'butterchurn-presets/lib/butterchurnPresetsNonMinimal.min';
+import _butterchurnPresetsMinimal from 'butterchurn-presets/lib/butterchurnPresetsMinimal.min';
+
+// Vite 8 changed CJS interop — default export may be nested under .default
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const unwrap = <T>(mod: T): T => (mod as any).default ?? mod;
+const butterchurn = unwrap(_butterchurn);
+const butterchurnPresetsExtra = unwrap(_butterchurnPresetsExtra);
+const butterchurnPresetsExtra2 = unwrap(_butterchurnPresetsExtra2);
+const butterchurnPresetsMD1 = unwrap(_butterchurnPresetsMD1);
+const butterchurnPresetsNonMinimal = unwrap(_butterchurnPresetsNonMinimal);
+const butterchurnPresetsMinimal = unwrap(_butterchurnPresetsMinimal);
 
 const PACK_SOURCES = [
   { label: 'Minimal', getPresets: () => butterchurnPresetsMinimal.getPresets() },

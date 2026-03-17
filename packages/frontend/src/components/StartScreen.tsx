@@ -279,7 +279,11 @@ export function StartScreen({
 
           <button
             onClick={onStart}
-            className="start-btn mt-5 w-full cursor-pointer rounded-xl border-none px-10 py-3 text-lg font-semibold text-white"
+            disabled={!browserInfo.isChromium}
+            aria-disabled={!browserInfo.isChromium || undefined}
+            className={`start-btn mt-5 w-full rounded-xl border-none px-10 py-3 text-lg font-semibold text-white ${
+              browserInfo.isChromium ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+            }`}
           >
             {t('shareAudioModal.startVisualizer')}
           </button>

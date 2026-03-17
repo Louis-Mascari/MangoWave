@@ -14,28 +14,23 @@ export default defineConfig({
   },
 
   projects: [
-    // CI: Chromium-only. Firefox/WebKit fail on headless CI runners due to missing
-    // system-level WebGL 2 + audio backend support. All 5 projects work locally
-    // with real GPU drivers — run `npx playwright test` locally for cross-browser.
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
       testIgnore: /mobile\.spec/,
     },
-    ...(process.env.CI
-      ? []
-      : [
-          {
-            name: 'firefox',
-            use: { ...devices['Desktop Firefox'] },
-            testIgnore: /mobile\.spec/,
-          },
-          {
-            name: 'webkit',
-            use: { ...devices['Desktop Safari'] },
-            testIgnore: /mobile\.spec/,
-          },
-        ]),
+    // CI: Firefox/WebKit run start-screen tests only (no WebGL 2 on headless runners).
+    // Locally all 5 projects run the full suite with real GPU drivers.
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+      ...(process.env.CI ? { testMatch: /start-screen\.spec/ } : { testIgnore: /mobile\.spec/ }),
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+      ...(process.env.CI ? { testMatch: /start-screen\.spec/ } : { testIgnore: /mobile\.spec/ }),
+    },
     {
       name: 'mobile-chrome',
       use: { ...devices['Pixel 7'] },

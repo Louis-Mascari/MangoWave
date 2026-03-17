@@ -133,7 +133,7 @@ npm run build -w packages/frontend   # tsc + vite build
 - **Backend:** AWS Lambda (Node.js/TypeScript), API Gateway, DynamoDB
 - **Infrastructure:** AWS CDK v2
 - **Code quality:** ESLint (with jsx-a11y), Prettier, Knip (unused code detection), Husky pre-commit hooks, Playwright E2E tests (5 browser configs)
-- **CI/CD:** GitHub Actions — lint + unit tests → E2E (Chromium, Firefox, WebKit, mobile Chrome, mobile Safari) → OIDC deploy to AWS
+- **CI/CD:** GitHub Actions — lint + unit tests → E2E (Chromium + mobile Chrome full suite, Firefox + WebKit start-screen only; all 5 browsers locally) → OIDC deploy to AWS
 - **Analytics:** PostHog (user analytics), Sentry (error tracking)
 
 ## Deployment

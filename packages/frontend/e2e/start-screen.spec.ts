@@ -1,12 +1,22 @@
 import { test, expect } from './fixtures/base';
-import { installAudioDeniedMock, installWebGL2UnsupportedMock } from './fixtures/audio-mock';
+import {
+  installAudioDeniedMock,
+  installWebGL2UnsupportedMock,
+  installWebGL2StubbedMock,
+} from './fixtures/audio-mock';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const needsWebGL2Stub = (projectName: string) =>
+  projectName === 'firefox' || projectName === 'webkit';
+
 test.describe('StartScreen', () => {
-  test.beforeEach(async ({ app }) => {
+  test.beforeEach(async ({ app }, testInfo) => {
+    if (needsWebGL2Stub(testInfo.project.name)) {
+      await app.addInitScript(installWebGL2StubbedMock());
+    }
     await app.goto('/');
   });
 
@@ -73,6 +83,17 @@ test.describe('StartScreen', () => {
     // The language picker is a select or set of buttons in the footer
     await expect(app.locator('select, [role="listbox"]').first()).toBeVisible();
   });
+
+  test('Share Audio Start Visualizer button is disabled on non-Chromium', async ({
+    app,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name === 'chromium' || testInfo.project.name === 'mobile-chrome',
+      'Only relevant on non-Chromium browsers',
+    );
+    await app.getByRole('button', { name: /Share Audio/ }).click();
+    await expect(app.getByRole('button', { name: /Start Visualizer/ })).toBeDisabled();
+  });
 });
 
 test.describe('StartScreen — error states', () => {
@@ -87,7 +108,11 @@ test.describe('StartScreen — error states', () => {
     await expect(app.getByRole('heading', { name: /WebGL/i })).toBeVisible({ timeout: 10000 });
   });
 
-  test('audio capture denied shows error message', async ({ app }) => {
+  test('audio capture denied shows error message', async ({ app }, testInfo) => {
+    test.skip(
+      needsWebGL2Stub(testInfo.project.name),
+      'getDisplayMedia is Chromium-only — skip on Firefox/WebKit',
+    );
     await app.addInitScript(installAudioDeniedMock());
     await app.goto('/');
 

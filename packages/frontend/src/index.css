@@ -83,6 +83,10 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 8px 40px rgba(255, 140, 50, 0.45);
 }
+.start-btn:disabled {
+  transform: none;
+  box-shadow: 0 4px 28px rgba(255, 140, 50, 0.3);
+}
 
 .spotify-btn {
   transition:

@@ -6,9 +6,6 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    labels:
-      - dependencies
-      - github-actions
     groups:
       actions-minor-patch:
         update-types:
@@ -20,9 +17,6 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    labels:
-      - dependencies
-      - npm
     groups:
       npm-root-minor-patch:
         update-types:
@@ -34,10 +28,6 @@ updates:
     directory: /packages/frontend
     schedule:
       interval: weekly
-    labels:
-      - dependencies
-      - npm
-      - frontend
     groups:
       npm-frontend-minor-patch:
         update-types:
@@ -49,10 +39,6 @@ updates:
     directory: /packages/backend
     schedule:
       interval: weekly
-    labels:
-      - dependencies
-      - npm
-      - backend
     groups:
       npm-backend-minor-patch:
         update-types:
@@ -64,10 +50,6 @@ updates:
     directory: /infrastructure
     schedule:
       interval: weekly
-    labels:
-      - dependencies
-      - npm
-      - infrastructure
     groups:
       npm-infra-minor-patch:
         update-types:

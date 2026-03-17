@@ -42,35 +42,29 @@ test.describe('Mobile UI', () => {
     await expect(presetName).toBeVisible({ timeout: 10000 });
     const initial = await presetName.textContent();
 
-    // Open FAB and tap next
-    await app.getByLabel(/Open menu/i).click();
-    await app.waitForTimeout(500);
-
-    // Try pressing next multiple times to ensure preset changes
+    // Try pressing next via radial menu — retry because random preset might pick the same one
     await expect(async () => {
-      const nextButton = app.getByLabel(/Next/i).first();
-      await nextButton.click();
-      await app.waitForTimeout(500);
-
-      // Re-open menu if it closed
+      // Open FAB
       const openMenu = app.getByLabel(/Open menu/i);
       if (await openMenu.isVisible()) {
         await openMenu.click();
-        await app.waitForTimeout(500);
+        await app.waitForTimeout(300);
       }
+
+      await app.getByLabel('Next', { exact: true }).click();
+      await app.waitForTimeout(300);
 
       const current = await presetName.textContent();
       expect(current).not.toBe(initial);
-    }).toPass({ timeout: 15000 });
+    }).toPass({ timeout: 20000 });
   });
 
   test('radial menu: Presets item opens modal panel', async ({ app }) => {
     await app.getByLabel(/Open menu/i).click();
     await app.waitForTimeout(500);
 
-    // Click the Presets radial item
-    const presetsButton = app.getByLabel(/Preset/i).first();
-    await presetsButton.click();
+    // Click the Presets radial item — use exact match to avoid hitting other "preset" elements
+    await app.getByLabel('Presets', { exact: true }).click();
 
     // Should open a modal/dialog with preset browser content
     await expect(app.locator('[role="dialog"]').first()).toBeVisible({ timeout: 5000 });

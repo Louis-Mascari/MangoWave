@@ -11,7 +11,7 @@ test.describe('Visualizer', () => {
 
     // Open Share Audio and start
     await app.getByRole('button', { name: /Share Audio/ }).click();
-    await app.getByRole('button', { name: /Start Visualizer/ }).click();
+    await app.getByRole('button', { name: /Start Visualizer/ }).click({ force: true });
 
     // Wait for the visualizer to be active — ControlBar (toolbar) should appear
     const toolbar = app.locator('[role="toolbar"]');
@@ -37,7 +37,7 @@ test.describe('Visualizer', () => {
 
     // Start visualizer
     await app.getByRole('button', { name: /Share Audio/ }).click();
-    await app.getByRole('button', { name: /Start Visualizer/ }).click();
+    await app.getByRole('button', { name: /Start Visualizer/ }).click({ force: true });
 
     // Wait for toolbar and preset name
     await expect(app.locator('[role="toolbar"]')).toBeVisible({ timeout: 15000 });

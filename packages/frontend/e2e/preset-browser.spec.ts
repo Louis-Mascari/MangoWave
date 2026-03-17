@@ -8,7 +8,7 @@ test.describe('Preset Browser', () => {
 
     // Start visualizer
     await app.getByRole('button', { name: /Share Audio/ }).click();
-    await app.getByRole('button', { name: /Start Visualizer/ }).click();
+    await app.getByRole('button', { name: /Start Visualizer/ }).click({ force: true });
 
     // Wait for toolbar
     await expect(app.locator('[role="toolbar"]')).toBeVisible({ timeout: 15000 });

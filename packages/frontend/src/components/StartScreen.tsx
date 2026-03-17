@@ -92,7 +92,10 @@ export function StartScreen({
   }, [activeModal, closeModal]);
 
   return (
-    <div className="flex h-full flex-col items-center overflow-y-auto px-4 py-8 font-sans text-[#e0e0e0]">
+    <div
+      data-testid="start-screen"
+      className="flex h-full flex-col items-center overflow-y-auto px-4 py-8 font-sans text-[#e0e0e0]"
+    >
       <div className="flex flex-1 flex-col items-center justify-center gap-6">
         {/* Logo + Title */}
         <div className="flex flex-col items-center gap-3">

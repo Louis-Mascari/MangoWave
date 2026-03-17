@@ -9,6 +9,9 @@ npm run dev        # Vite dev server at localhost:5173
 npm run build      # tsc -b && vite build
 npm run test       # Vitest (jsdom)
 npm run test:watch # Vitest in watch mode
+npm run e2e        # Playwright E2E tests
+npm run e2e:ui     # Playwright with interactive UI
+npm run e2e:headed # Playwright in headed mode
 npm run lint       # ESLint (includes jsx-a11y)
 ```
 
@@ -56,6 +59,10 @@ src/
 ├── utils/         # Shared utilities (isMobileDevice, browserInfo, settingsPortability, audioFileValidation)
 ├── types/         # butterchurn.d.ts, music-metadata.d.ts (type declarations for untyped packages)
 └── test/          # Vitest global setup
+
+e2e/                 # Playwright E2E tests (separate from Vitest, own tsconfig)
+├── fixtures/        # Custom test fixture (state isolation), audio API mocks, test assets
+└── *.spec.ts        # Test files: start-screen, visualizer, preset-browser, settings, keyboard, mobile
 ```
 
 ### State Management

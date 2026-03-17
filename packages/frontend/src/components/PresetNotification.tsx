@@ -36,6 +36,7 @@ export function PresetNotification({ message, mode }: PresetNotificationProps) {
 
   return (
     <div
+      data-testid="preset-name"
       className={`font-mono text-sm text-white transition-all duration-500 drop-shadow-[0_0_4px_black] ${visible || isAlways ? 'max-h-8 opacity-80' : 'max-h-0 opacity-0 overflow-hidden'}`}
     >
       {message}

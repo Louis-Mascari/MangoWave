@@ -4,7 +4,10 @@
   "exclude": ["types"],
   "workspaces": {
     "packages/frontend": {
-      "ignore": ["src/types/**/*.d.ts"]
+      "entry": ["e2e/**/*.spec.ts"],
+      "project": ["src/**/*.{ts,tsx}", "e2e/**/*.ts"],
+      "ignore": ["src/types/**/*.d.ts"],
+      "ignoreDependencies": ["tailwindcss"]
     },
     "packages/backend": {},
     "infrastructure": {

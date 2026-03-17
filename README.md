@@ -94,9 +94,10 @@ npm run dev -w packages/frontend     # Vite dev server (localhost:5173)
 
 # Testing
 npm run test -w packages/frontend    # Vitest (jsdom)
+npm run e2e -w packages/frontend     # Playwright (requires browser binaries)
 npm run test -w packages/backend     # Vitest
 npm run test -w infrastructure       # Jest (CDK assertions)
-npm test                             # All workspaces
+npm test                             # All workspaces (unit only)
 
 # Linting & formatting
 npm run lint -w packages/frontend    # ESLint
@@ -131,8 +132,8 @@ npm run build -w packages/frontend   # tsc + vite build
 - **Audio:** Web Audio API (`getDisplayMedia`, `HTMLAudioElement`, `getUserMedia`), music-metadata (ID3 parsing)
 - **Backend:** AWS Lambda (Node.js/TypeScript), API Gateway, DynamoDB
 - **Infrastructure:** AWS CDK v2
-- **Code quality:** ESLint (with jsx-a11y), Prettier, Knip (unused code detection), Husky pre-commit hooks
-- **CI/CD:** GitHub Actions (OIDC deploy to AWS)
+- **Code quality:** ESLint (with jsx-a11y), Prettier, Knip (unused code detection), Husky pre-commit hooks, Playwright E2E tests (5 browser configs)
+- **CI/CD:** GitHub Actions — lint + unit tests → E2E (Chromium, Firefox, WebKit, mobile Chrome, mobile Safari) → OIDC deploy to AWS
 - **Analytics:** PostHog (user analytics), Sentry (error tracking)
 
 ## Deployment

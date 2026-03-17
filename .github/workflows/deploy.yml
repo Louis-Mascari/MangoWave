@@ -16,7 +16,53 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Security audit
+        run: npm audit --audit-level=high
+
+      - name: Prettier check
+        run: npm run format:check
+
+      - name: Dead code check (Knip)
+        run: npx knip
+
+      - name: ESLint (frontend)
+        run: npm run lint --workspace=packages/frontend
+
+      - name: Typecheck (frontend)
+        run: npx tsc -b --noEmit
+        working-directory: packages/frontend
+
+      - name: Typecheck (backend)
+        run: npx tsc --noEmit
+        working-directory: packages/backend
+
+      - name: Typecheck (infrastructure)
+        run: npx tsc --noEmit
+        working-directory: infrastructure
+
+      - name: Test (frontend)
+        run: npm run test --workspace=packages/frontend
+
+      - name: Test (backend)
+        run: npm run test --workspace=packages/backend
+
+      - name: Test (infrastructure)
+        run: npm run test --workspace=infrastructure
+
   deploy-backend:
+    needs: lint-and-test
     runs-on: ubuntu-latest
     outputs:
       s3-bucket: ${{ steps.cdk-outputs.outputs.bucket }}

@@ -70,7 +70,8 @@ MangoWave/
 ├── packages/backend/      # Lambda handlers for Spotify OAuth & settings sync
 ├── packages/landing/      # Static landing page (HTML + CSS, no JS)
 ├── infrastructure/        # AWS CDK v2 — DynamoDB, Lambda, API Gateway, S3, CloudFront, CloudWatch
-└── .github/workflows/     # CI (PR checks) + Deploy (OIDC -> CDK -> S3 -> CloudFront)
+├── .github/workflows/     # CI (PR checks) + Deploy (OIDC -> CDK -> S3 -> CloudFront)
+└── SELF-HOSTING.md        # Guide for deploying your own instance
 ```
 
 See each package's README for details.
@@ -146,6 +147,12 @@ All infrastructure is managed via AWS CDK. Pushes to `main` trigger CI (lint, ty
 4. Landing page synced separately to S3
 
 Both the app (`play.mangowave.app`) and landing page (`mangowave.app`) are served from the same CloudFront distribution. A CloudFront Function routes requests by `Host` header to the appropriate S3 prefix.
+
+## Self-Hosting
+
+The core visualizer is 100% client-side — you can deploy just the frontend to any static host with no backend or environment variables required. For Spotify integration and cloud settings sync, you'll need to set up the AWS infrastructure and a Spotify developer app.
+
+See **[SELF-HOSTING.md](SELF-HOSTING.md)** for full instructions.
 
 ## Requirements
 

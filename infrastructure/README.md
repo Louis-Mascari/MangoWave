@@ -47,6 +47,22 @@ infrastructure/
 └── tsconfig.json
 ```
 
+## Prerequisites (before CDK deploy)
+
+These resources must exist before running `cdk deploy`:
+
+- **ACM certificate** — TLS cert for CloudFront (e.g. `*.yourdomain.com`), must be in **us-east-1**
+- **Route 53 hosted zone** — DNS for your domain (or configure DNS manually if not using Route 53)
+- **WAF WebACL** — CloudFront security protection (optional but recommended), must be in **us-east-1**
+- **SSM Parameter Store entries** — 3 SecureString parameters for Spotify credentials:
+  ```
+  /mangowave/spotify/client-id
+  /mangowave/spotify/client-secret
+  /mangowave/spotify/redirect-uri
+  ```
+  Lambda env vars contain the parameter _names_, not the actual secrets — values are fetched at runtime via `GetParameter` with decryption.
+- **GitHub OIDC provider + IAM role** — only if using CI/CD (GitHub Actions assumes this role for AWS access)
+
 ## Deployment
 
 Automated via GitHub Actions (`.github/workflows/deploy.yml`) using OIDC to assume an IAM role (pre-created outside this stack). Manual deploy:
@@ -71,3 +87,6 @@ npx cdk deploy -c alertEmail=you@example.com -c acmCertArn=<arn> -c webAclArn=<a
 | `VITE_SPOTIFY_REDIRECT_URI` | Spotify OAuth redirect URI (frontend build)            |
 | `VITE_LOCKED_MODE`          | Set to `true` to restrict Spotify to magic-link users  |
 | `VITE_UNLOCK_HASH`          | SHA-256 hash of the magic-link unlock passphrase       |
+| `SENTRY_AUTH_TOKEN`         | Sentry auth token for source map upload during build   |
+| `SENTRY_ORG`                | Sentry organization slug (source map upload)           |
+| `SENTRY_PROJECT`            | Sentry project slug (source map upload)                |

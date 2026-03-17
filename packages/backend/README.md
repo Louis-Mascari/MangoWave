@@ -44,7 +44,7 @@ All endpoints require a valid `sessionId` (except `auth-callback`, which creates
 
 ## OAuth Flow (Owner Mode)
 
-The hosted site uses **owner-mode OAuth** — the backend proxies the Spotify OAuth flow using server-side client credentials stored in SSM Parameter Store. This is the only auth mode exposed in the hosted UI.
+The hosted site uses **owner-mode OAuth** — the backend proxies the Spotify OAuth flow using server-side client credentials stored in SSM Parameter Store. This is the only auth mode exposed in the hosted UI. Settings sync (below) is gated behind Spotify auth as a security measure — it prevents anonymous writes, but the synced data covers all visualizer settings, not just Spotify-related ones.
 
 Spotify's dev mode policy (as of March 2026) limits each developer app to 1 Client ID, the app owner plus 5 authorized users, and requires a Premium account to register the app. Authorized users must be added to the developer app's User Management tab in the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard). Authorized users don't need Premium themselves.
 

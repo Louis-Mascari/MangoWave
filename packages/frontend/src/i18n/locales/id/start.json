@@ -1,0 +1,109 @@
+{
+  "subtitle": "Visualizer audio-reaktif untuk browser kamu",
+  "chooseAudioSource": "Pilih sumber audio",
+  "photosensitivityWarning": "Peringatan Fotosensitivitas",
+  "photosensitivityDescription": "Visualizer ini menampilkan cahaya dan pola yang berkedip cepat.\nJika kamu memiliki epilepsi atau sensitif terhadap cahaya berkedip, harap berhati-hati.",
+  "shareAudio": "Bagikan Audio",
+  "shareAudioDescription": "Tangkap audio sistem atau tab melalui berbagi layar",
+  "playLocalFiles": "Putar File Lokal",
+  "localFilesDescription": "Putar file audio dari perangkatmu",
+  "useMicrophone": "Gunakan Mikrofon",
+  "micDescription": "Visualisasikan suara sekitar. Mode senyap",
+  "mobileCallout": "Gunakan laptop atau desktop untuk menangkap audio dari layar, jendela, atau tab browser mana pun menggunakan berbagi layar.",
+  "somethingWentWrong": "Terjadi kesalahan",
+
+  "shareAudioModal": {
+    "browserNoSupport": "{{browser}} tidak mendukung tangkapan audio",
+    "browserCompatMessage": "Tangkapan audio melalui berbagi layar memerlukan browser berbasis Chromium (Chrome, Edge, atau Opera). Kamu masih bisa menggunakan",
+    "localFiles": "File Lokal",
+    "microphone": "Mikrofon",
+    "asAudioSource": "sebagai sumber audio.",
+    "step1": "dan pilih layar, jendela, atau tab untuk dibagikan",
+    "step1Bold": "Klik Mulai",
+    "step2Bold": "Centang \"Bagikan audio\"",
+    "step2": "– ini diperlukan agar visualizer bereaksi terhadap suara",
+    "step3Bold": "Putar musik",
+    "step3": "dan nikmati",
+    "startVisualizer": "Mulai Visualizer"
+  },
+
+  "osTips": {
+    "windowsChromeOS": "Semua mode berbagi (layar, jendela, dan tab) mendukung audio di {{os}}. Berbagi seluruh layar atau jendela memberikan pengalaman terbaik (tanpa banner browser).",
+    "macOSChromium": "Di macOS 14.2+, berbagi layar dan jendela mendukung audio. Versi macOS yang lebih lama hanya mendukung berbagi tab.",
+    "macOSNonChromium": "Audio berbagi layar memerlukan browser Chromium (Chrome, Edge, Opera) di macOS 14.2+.",
+    "linux": "Di Linux, hanya berbagi tab yang mendukung audio.",
+    "unknown": "Di Windows dan ChromeOS, semua mode berbagi mendukung audio. Di macOS 14.2+, berbagi layar dan jendela mendukung audio di Chrome. Di Linux, hanya berbagi tab yang mendukung audio."
+  },
+
+  "sensitivityTips": {
+    "title": "Tips sensitivitas & reaktivitas",
+    "description": "Beberapa preset lebih ambient dan kurang reaktif dibanding yang lain. Buka panel Pengaturan untuk menyesuaikan sensitivitas dan parameter lain yang menggerakkan mesin visualisasi."
+  },
+
+  "localFilesModal": {
+    "step1Bold": "Pilih file kamu",
+    "step1": "– pilih satu atau lebih file audio dari perangkatmu",
+    "step2Bold": "Putar musik",
+    "step2": "dan nikmati",
+    "infoBox": "Mendukung MP3, WAV, FLAC, OGG, AAC, dan lainnya. Gunakan kontrol pemutaran untuk mengacak, mengulang, mencari, dan mengelola antreanmu.",
+    "unsupportedFile": "File tidak didukung",
+    "chooseFiles": "Pilih File"
+  },
+
+  "micModal": {
+    "step1Bold": "Klik Mulai Mikrofon",
+    "step1": "dan berikan izin saat diminta",
+    "step2Bold": "Biarkan suara menggerakkan visual",
+    "step2": "– musik live, suara sekitar, atau apa pun yang ditangkap mikrofon",
+    "infoBox": "Mode senyap: audio ditangkap tapi tidak diputar melalui speaker.",
+    "startMicrophone": "Mulai Mikrofon"
+  },
+
+  "spotify": {
+    "connectedAs": "Terhubung sebagai {{name}}",
+    "connected": "Spotify terhubung",
+    "connectedInfo": "Metadata lagu yang diputar & pengaturan MangoWave tersinkronisasi ke cloud aktif. Kontrol pemutaran memerlukan Premium. Bagikan layar, jendela, atau tab yang memutar Spotify untuk audio.",
+    "connectOptional": "Hubungkan Spotify (opsional)",
+    "connectDescription": "Hubungkan Spotify untuk metadata lagu yang diputar dan pengaturan MangoWave tersinkronisasi ke cloud. Spotify Premium juga mengaktifkan kontrol pemutaran. Kamu tetap perlu berbagi layar, jendela, atau tab yang memutar Spotify agar visualizer bereaksi terhadap audio.",
+    "connecting": "Menghubungkan...",
+    "connectSpotify": "Hubungkan Spotify",
+    "devInfo": "Jika kamu bukan pemilik aplikasi, pastikan mereka telah menambahkan nama dan email yang terkait dengan akun Spotify kamu ke tab User Management di aplikasi developer mereka."
+  },
+
+  "onboarding": {
+    "desktop": {
+      "skipPresetsTitle": "Lewati Preset",
+      "skipPresetsDesc": "Tekan Space atau N untuk melompat ke preset berikutnya. Setiap preset bereaksi berbeda terhadap musikmu.",
+      "curateTitle": "Kurasi Pengalamanmu",
+      "curateDesc": "Buka panel Preset untuk menjelajah, memfavoritkan, atau memblokir preset. Bangun koleksi favoritmu dan biarkan autopilot memutar semuanya.",
+      "tuneTitle": "Sesuaikan Visual",
+      "tuneDesc": "Buka Pengaturan untuk menyesuaikan equalizer, smoothing, dan kualitas rendering, yang membentuk bagaimana visual bereaksi terhadap musikmu.",
+      "shortcutsTitle": "Pintasan Keyboard",
+      "shortcutsDesc": "Tekan H untuk melihat semua pintasan keyboard, atau temukan di menu Pengaturan."
+    },
+    "mobile": {
+      "menuTitle": "Menu",
+      "menuDesc": "Ketuk logo di sudut untuk membuka menu radial. Menu ini memberi akses cepat ke semua fitur: preset, pengaturan, layar penuh, dan lainnya.",
+      "navigateTitle": "Navigasi Preset",
+      "navigateDesc": "Gunakan Berikutnya (▶) dan Sebelumnya (◀) untuk berpindah antar preset. Setiap preset bereaksi terhadap musikmu dengan caranya sendiri.",
+      "curateTitle": "Kurasi Pengalamanmu",
+      "curateDesc": "Favoritkan (★) preset yang kamu suka, blokir (⊘) yang tidak. Buka Preset (P) untuk menjelajah dan memfilter koleksimu.",
+      "autopilotTitle": "Autopilot & Pengaturan",
+      "autopilotDesc": "Aktifkan Autopilot (A) untuk beralih preset secara otomatis. Buka Pengaturan (⚙) untuk menyesuaikan equalizer dan rendering."
+    }
+  },
+
+  "landing": {
+    "title": "MangoWave | Audio Visualizer",
+    "metaDescription": "Visualizer audio-reaktif gratis dengan 400+ visual. Tanpa daftar akun, tanpa install, tanpa iklan. Setiap ketukan, setiap dentuman. Langsung mulai.",
+    "tagline": "Musikmu, divisualisasikan.",
+    "taglineSub": "Setiap ketukan, setiap dentuman. Langsung mulai.",
+    "feature400": "400+ Visual",
+    "featureAnySource": "Sumber Audio Apa Saja",
+    "featureDesktopMobile": "Desktop & Mobile",
+    "featureNoSignup": "Tanpa Daftar Akun",
+    "featureNoInstall": "Tanpa Install",
+    "featureNoAds": "Tanpa Iklan",
+    "launch": "Mulai"
+  }
+}

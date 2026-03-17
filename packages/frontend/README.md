@@ -44,6 +44,8 @@ src/
 │                  # isWebGL2Supported
 ├── data/          # quarantined-presets.json, mobile-blocked-presets.json
 ├── constants/     # shortcuts.ts (keyboard/mouse shortcut definitions)
+├── i18n/          # i18next config + 9 locale dirs (en, es, zh, hi, ja, ko, ru, id, pt-BR)
+│                  # 4 namespaces per locale: common, start, settings, messages
 ├── hooks/         # useAudioCapture, useLocalPlayback, useAutopilot, useKeyboardShortcuts,
 │                  # useIdleTimer, useHideCursor, useFullscreen, useSpotifyAuth, useNowPlaying,
 │                  # useUnlockCheck, useSettingsSync, useSpotifyProgress (smooth seek via rAF)
@@ -138,6 +140,7 @@ Floating panel (`components/PlaybackPanel.tsx`) rendered by App.tsx when source 
 - **`secure-json-parse`** used for prototype pollution protection on settings import.
 - **Settings import sanitization** — all imported values clamped to UI-enforced ranges. Whitelisted data keys only (store functions can't be overwritten).
 - **Audio capture errors** — `humanizeAudioError` in `useAudioCapture` maps DOMException names to user-friendly messages per source (system vs mic). Missing audio tracks on screen share (user forgot "Share audio") block launch with browser/OS-aware guidance via `buildNoAudioMessage` (uses `browserInfo` to show only the relevant platform's constraints and names the user's browser if non-Chromium). `startCapture`/`startMicCapture` return `boolean` success so callers gate on result.
-- **Silence detection** — App.tsx polls FFT data every 1.5s after system capture starts; warns via toast at ~6s if no signal. Auto-dismisses if audio starts flowing.
+- **Silence detection** — App.tsx polls time-domain waveform data every 1.5s after system or mic capture starts; warns via toast at ~6s if no signal. Auto-dismisses if audio starts flowing.
 - **File validation** — `audioFileValidation.ts` validates files by MIME type (`audio/*`) with extension fallback. StartScreen shows rejection errors in the modal; MediaPlaylist queue shows error toast. Defence-in-depth behind the `accept="audio/*"` attribute.
 - **WebGL context loss** — `Visualizer` listens for `webglcontextlost` on the canvas; App.tsx shows a z-200 reload overlay with user-facing explanation.
+- **i18n** — `react-i18next` with 9 languages, 4 namespaces (common, start, settings, messages). All translations statically bundled (no lazy loading). Browser language auto-detected via `i18next-browser-languagedetector`, persisted to localStorage (`mangowave-language`). Synchronous init (`initImmediate: false`) prevents re-render flicker. Components use `useTranslation` hook; non-React code (error handlers, utils) uses `i18n.getFixedT()`. App.tsx uses the `i18n` singleton directly (not `useTranslation`) to avoid unstable hook references that restart effects. Language picker on StartScreen footer.

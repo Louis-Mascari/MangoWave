@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { EQ_BANDS } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
@@ -40,16 +41,16 @@ const RESOLUTION_OPTIONS = [
 ];
 
 const MESH_OPTIONS = [
-  { label: 'Low', width: 32, height: 24 },
-  { label: 'Default', width: 48, height: 36 },
-  { label: 'High', width: 64, height: 48 },
-  { label: 'Ultra', width: 96, height: 72 },
+  { labelKey: 'low', width: 32, height: 24 },
+  { labelKey: 'default', width: 48, height: 36 },
+  { labelKey: 'high', width: 64, height: 48 },
+  { labelKey: 'ultra', width: 96, height: 72 },
 ];
 
 const TEXTURE_OPTIONS = [
-  { label: 'Low', value: 0.5 },
-  { label: 'Default', value: 1.0 },
-  { label: 'High', value: 1.5 },
+  { labelKey: 'low', value: 0.5 },
+  { labelKey: 'default', value: 1.0 },
+  { labelKey: 'high', value: 1.5 },
 ];
 
 const FFT_OPTIONS = [512, 1024, 2048, 4096];
@@ -59,6 +60,8 @@ function formatFreq(freq: number): string {
 }
 
 export function SettingsPanel() {
+  const { t } = useTranslation('settings');
+  const { t: tc } = useTranslation('common');
   const [activeTab, setActiveTab] = useState<Tab>('equalizer');
   const getAuthMode = useSpotifyStore((s) => s.getAuthMode);
   const accessToken = useSpotifyStore((s) => s.accessToken);
@@ -70,23 +73,23 @@ export function SettingsPanel() {
     <div className="flex flex-col gap-3 rounded-lg bg-black/60 p-4 backdrop-blur-sm">
       <div className="flex flex-wrap gap-2 border-b border-white/10 pb-2">
         <TabButton active={activeTab === 'equalizer'} onClick={() => setActiveTab('equalizer')}>
-          Equalizer
+          {t('tabs.equalizer')}
         </TabButton>
         <TabButton active={activeTab === 'rendering'} onClick={() => setActiveTab('rendering')}>
-          Rendering
+          {t('tabs.rendering')}
         </TabButton>
         <TabButton active={activeTab === 'presets'} onClick={() => setActiveTab('presets')}>
-          Presets
+          {t('tabs.presets')}
         </TabButton>
         <TabButton active={activeTab === 'shortcuts'} onClick={() => setActiveTab('shortcuts')}>
-          Shortcuts
+          {t('tabs.shortcuts')}
         </TabButton>
         <TabButton active={activeTab === 'data'} onClick={() => setActiveTab('data')}>
-          Data
+          {t('tabs.data')}
         </TabButton>
         {showSpotifyTab && (
           <TabButton active={activeTab === 'spotify'} onClick={() => setActiveTab('spotify')}>
-            Spotify
+            {t('tabs.spotify')}
           </TabButton>
         )}
       </div>
@@ -117,7 +120,7 @@ export function SettingsPanel() {
           >
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
-          Send Feedback
+          {tc('sendFeedback')}
         </a>
       </div>
     </div>
@@ -146,6 +149,8 @@ function TabButton({
 }
 
 function EqualizerTab() {
+  const { t } = useTranslation('settings');
+  const { t: tc } = useTranslation('common');
   const eq = useSettingsStore((s) => s.eq);
   const setPreAmpGain = useSettingsStore((s) => s.setPreAmpGain);
   const setEQBandGain = useSettingsStore((s) => s.setEQBandGain);
@@ -155,22 +160,22 @@ function EqualizerTab() {
     <>
       <div className="flex items-center justify-between">
         <h3 className="flex items-center text-sm font-semibold text-white">
-          Equalizer
-          <Tooltip text="Shapes which frequencies drive the visuals — does not change audio output. Boost bass for more intense movement, cut highs to calm treble reactions" />
+          {t('equalizer.title')}
+          <Tooltip text={t('equalizer.tooltip')} />
         </h3>
         <button
           onClick={resetEQ}
           className="cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-xs text-white/70 hover:bg-white/20"
         >
-          Reset
+          {tc('reset')}
         </button>
       </div>
 
       <div className="flex w-full items-start">
         <div className="flex h-24 flex-col justify-between pr-1.5 text-[10px] text-white/30">
-          <span>+12</span>
-          <span>0 dB</span>
-          <span>-12</span>
+          <span>{t('equalizer.scaleHigh')}</span>
+          <span>{t('equalizer.scaleMid')}</span>
+          <span>{t('equalizer.scaleLow')}</span>
         </div>
         <div className="relative flex flex-1 justify-between">
           <div className="pointer-events-none absolute left-0 right-0 top-12 border-t border-dashed border-white/15" />
@@ -201,8 +206,8 @@ function EqualizerTab() {
       <div className="mt-1 border-t border-white/10 pt-3">
         <div className="flex flex-col gap-1">
           <label className="flex items-center text-xs text-white/60">
-            Pre-Amp
-            <Tooltip text="Scales the overall signal — higher makes visuals more reactive, lower calms them. Purely visual, does not affect audio output" />
+            {t('equalizer.preAmp')}
+            <Tooltip text={t('equalizer.preAmpTooltip')} />
           </label>
           <div className="flex items-center gap-2">
             <input
@@ -226,6 +231,8 @@ function EqualizerTab() {
 }
 
 function RenderingTab() {
+  const { t } = useTranslation('settings');
+  const { t: tc } = useTranslation('common');
   const performance = useSettingsStore((s) => s.performance);
   const setFpsCap = useSettingsStore((s) => s.setFpsCap);
   const setResolutionScale = useSettingsStore((s) => s.setResolutionScale);
@@ -254,19 +261,19 @@ function RenderingTab() {
   return (
     <>
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-white">Rendering</h3>
+        <h3 className="text-sm font-semibold text-white">{t('rendering.title')}</h3>
         <button
           onClick={resetRendering}
           className="cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-xs text-white/70 hover:bg-white/20"
         >
-          Reset
+          {tc('reset')}
         </button>
       </div>
 
       <div className="flex flex-col gap-1">
         <label className="flex items-center text-xs text-white/60">
-          Frame Rate
-          <Tooltip text="Lower frame rates reduce GPU usage" />
+          {t('rendering.frameRate')}
+          <Tooltip text={t('rendering.frameRateTooltip')} />
         </label>
         <input
           type="number"
@@ -274,7 +281,7 @@ function RenderingTab() {
           max={300}
           step={1}
           value={fpsDisplayValue}
-          placeholder="15–300"
+          placeholder={t('rendering.frameRatePlaceholder')}
           onFocus={(e) => setFpsEditing(e.target.value)}
           onChange={(e) => setFpsEditing(e.target.value)}
           onBlur={(e) => commitFpsInput(e.target.value)}
@@ -305,15 +312,15 @@ function RenderingTab() {
                 : 'bg-white/10 text-white/70 hover:bg-white/20'
             }`}
           >
-            Uncapped
+            {t('rendering.uncapped')}
           </button>
         </div>
       </div>
 
       <div className="flex flex-col gap-1">
         <label className="flex items-center text-xs text-white/60">
-          Resolution
-          <Tooltip text="Lower resolution reduces GPU load but looks less sharp" />
+          {t('rendering.resolution')}
+          <Tooltip text={t('rendering.resolutionTooltip')} />
         </label>
         <div className="flex gap-2">
           {RESOLUTION_OPTIONS.map((opt) => (
@@ -334,13 +341,13 @@ function RenderingTab() {
 
       <div className="flex flex-col gap-1">
         <label className="flex items-center text-xs text-white/60">
-          Mesh Resolution
-          <Tooltip text="Controls the vertex grid for warp distortions. Higher = finer detail at more GPU cost" />
+          {t('rendering.meshResolution')}
+          <Tooltip text={t('rendering.meshResolutionTooltip')} />
         </label>
         <div className="flex gap-2">
           {MESH_OPTIONS.map((opt) => (
             <button
-              key={opt.label}
+              key={opt.labelKey}
               onClick={() => setMeshSize(opt.width, opt.height)}
               className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
                 performance.meshWidth === opt.width && performance.meshHeight === opt.height
@@ -348,7 +355,7 @@ function RenderingTab() {
                   : 'bg-white/10 text-white/70 hover:bg-white/20'
               }`}
             >
-              {opt.label}
+              {tc(opt.labelKey)}
             </button>
           ))}
         </div>
@@ -356,8 +363,8 @@ function RenderingTab() {
 
       <div className="flex flex-col gap-1">
         <label className="flex items-center text-xs text-white/60">
-          Texture Quality
-          <Tooltip text="Internal render resolution multiplier. Lower = faster, higher = supersampled quality" />
+          {t('rendering.textureQuality')}
+          <Tooltip text={t('rendering.textureQualityTooltip')} />
         </label>
         <div className="flex gap-2">
           {TEXTURE_OPTIONS.map((opt) => (
@@ -370,7 +377,7 @@ function RenderingTab() {
                   : 'bg-white/10 text-white/70 hover:bg-white/20'
               }`}
             >
-              {opt.label}
+              {tc(opt.labelKey)}
             </button>
           ))}
         </div>
@@ -378,8 +385,8 @@ function RenderingTab() {
 
       <div className="flex flex-col gap-1">
         <label className="flex items-center text-xs text-white/60">
-          Anti-Aliasing
-          <Tooltip text="Smooth jagged edges with FXAA. Small performance cost (~2-3%)" />
+          {t('rendering.antiAliasing')}
+          <Tooltip text={t('rendering.antiAliasingTooltip')} />
         </label>
         <div className="flex gap-2">
           <button
@@ -390,7 +397,7 @@ function RenderingTab() {
                 : 'bg-white/10 text-white/70 hover:bg-white/20'
             }`}
           >
-            On
+            {tc('on')}
           </button>
           <button
             onClick={() => setFxaa(false)}
@@ -400,19 +407,19 @@ function RenderingTab() {
                 : 'bg-white/10 text-white/70 hover:bg-white/20'
             }`}
           >
-            Off
+            {tc('off')}
           </button>
         </div>
       </div>
 
       <div className="mt-1 border-t border-white/10 pt-3">
-        <label className="text-xs font-semibold text-white/80">Analysis</label>
+        <label className="text-xs font-semibold text-white/80">{t('rendering.analysis')}</label>
       </div>
 
       <div className="flex flex-col gap-1">
         <label className="flex items-center text-xs text-white/60">
-          Audio Smoothing: {audio.smoothingConstant.toFixed(2)}
-          <Tooltip text="Lower = snappier reaction to beats, higher = smoother movement. Effect is subtle — presets apply their own internal smoothing" />
+          {t('rendering.audioSmoothing', { value: audio.smoothingConstant.toFixed(2) })}
+          <Tooltip text={t('rendering.audioSmoothingTooltip')} />
         </label>
         <input
           type="range"
@@ -428,8 +435,8 @@ function RenderingTab() {
 
       <div className="flex flex-col gap-1">
         <label className="flex items-center text-xs text-white/60">
-          FFT Size
-          <Tooltip text="Higher = more frequency detail but more latency. Effect is subtle — the engine maps to fixed internal frequency bands" />
+          {t('rendering.fftSize')}
+          <Tooltip text={t('rendering.fftSizeTooltip')} />
         </label>
         <div className="flex gap-2">
           {FFT_OPTIONS.map((size) => (
@@ -452,6 +459,9 @@ function RenderingTab() {
 }
 
 function PresetsTab() {
+  const { t } = useTranslation('settings');
+  const { t: tc } = useTranslation('common');
+  const { t: tm } = useTranslation('messages');
   const transitionTime = useSettingsStore((s) => s.transitionTime);
   const setTransitionTime = useSettingsStore((s) => s.setTransitionTime);
   const presetNameDisplay = useSettingsStore((s) => s.presetNameDisplay);
@@ -472,21 +482,21 @@ function PresetsTab() {
     <>
       <div className="flex items-center justify-between">
         <h3 className="flex items-center text-sm font-semibold text-white">
-          Presets
-          <Tooltip text="Presets vary in how reactive they are to sound. If visuals feel too subtle or too intense, adjust Pre-Amp gain in the Equalizer tab" />
+          {t('presets.title')}
+          <Tooltip text={t('presets.tooltip')} />
         </h3>
         <button
           onClick={resetPresets}
           className="cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-xs text-white/70 hover:bg-white/20"
         >
-          Reset
+          {tc('reset')}
         </button>
       </div>
 
       <div className="flex flex-col gap-1">
         <label className="flex items-center text-xs text-white/60">
-          Transition Time: {transitionTime.toFixed(1)}s
-          <Tooltip text="How long presets blend into each other when switching" />
+          {t('presets.transitionTime', { value: transitionTime.toFixed(1) })}
+          <Tooltip text={t('presets.transitionTimeTooltip')} />
         </label>
         <input
           type="range"
@@ -502,8 +512,8 @@ function PresetsTab() {
 
       <div className="flex flex-col gap-1">
         <label className="flex items-center text-xs text-white/60">
-          Preset Name Display
-          <Tooltip text="How long the preset name shows when switching presets" />
+          {t('presets.presetNameDisplay')}
+          <Tooltip text={t('presets.presetNameDisplayTooltip')} />
         </label>
         <div className="flex gap-2">
           <button
@@ -514,7 +524,7 @@ function PresetsTab() {
                 : 'bg-white/10 text-white/70 hover:bg-white/20'
             }`}
           >
-            Off
+            {tc('off')}
           </button>
           <button
             onClick={() => setPresetNameDisplay('always')}
@@ -524,7 +534,7 @@ function PresetsTab() {
                 : 'bg-white/10 text-white/70 hover:bg-white/20'
             }`}
           >
-            Always
+            {t('presets.always')}
           </button>
           <button
             onClick={() =>
@@ -536,12 +546,14 @@ function PresetsTab() {
                 : 'bg-white/10 text-white/70 hover:bg-white/20'
             }`}
           >
-            Timed
+            {t('presets.timed')}
           </button>
         </div>
         {typeof presetNameDisplay === 'number' && (
           <div className="mt-1">
-            <label className="text-xs text-white/60">Duration: {presetNameDisplay}s</label>
+            <label className="text-xs text-white/60">
+              {t('presets.duration', { value: presetNameDisplay })}
+            </label>
             <input
               type="range"
               min="1"
@@ -559,8 +571,8 @@ function PresetsTab() {
       <div className="mt-1 border-t border-white/10 pt-3">
         <div className="flex items-center justify-between">
           <label className="flex items-center text-xs font-semibold text-white/80">
-            Autopilot
-            <Tooltip text="Automatically cycles through presets at the set interval. Uses shuffle-style rounds — every preset plays once before any repeats" />
+            {tc('autopilot')}
+            <Tooltip text={t('presets.autopilotTooltip')} />
           </label>
           <button
             onClick={() => setAutopilotEnabled(!autopilot.enabled)}
@@ -570,12 +582,14 @@ function PresetsTab() {
                 : 'bg-white/10 text-white/70 hover:bg-white/20'
             }`}
           >
-            {autopilot.enabled ? 'On' : 'Off'}
+            {autopilot.enabled ? tc('on') : tc('off')}
           </button>
         </div>
 
         <div className="mt-2 flex flex-col gap-1">
-          <label className="text-xs text-white/60">Interval: {autopilot.interval}s</label>
+          <label className="text-xs text-white/60">
+            {t('presets.interval', { value: autopilot.interval })}
+          </label>
           <input
             type="range"
             min="5"
@@ -590,13 +604,13 @@ function PresetsTab() {
 
         <div className="mt-2 flex flex-col gap-1">
           <label className="flex items-center text-xs text-white/60">
-            Mode
-            <Tooltip text="All = presets from selected packs, Favorites = only favorited presets (ignores pack selection)" />
+            {t('presets.mode')}
+            <Tooltip text={t('presets.modeTooltip')} />
           </label>
           <div className="flex gap-2">
             {[
-              { mode: 'all' as const, label: 'All' },
-              { mode: 'favorites' as const, label: 'Favorites' },
+              { mode: 'all' as const, label: t('presets.all') },
+              { mode: 'favorites' as const, label: t('presets.favorites') },
             ].map(({ mode, label }) => (
               <button
                 key={mode}
@@ -615,8 +629,8 @@ function PresetsTab() {
 
         <div className="mt-2 flex flex-col gap-1">
           <label className="flex items-center text-xs text-white/60">
-            Favorite frequency: {autopilot.favoriteWeight}x
-            <Tooltip text="How much more likely favorites are to be picked next. Every preset still plays once per round before any repeats — this just makes favorites come up sooner" />
+            {t('presets.favoriteFrequency', { value: autopilot.favoriteWeight })}
+            <Tooltip text={t('presets.favoriteFrequencyTooltip')} />
           </label>
           <input
             type="range"
@@ -635,28 +649,32 @@ function PresetsTab() {
         <button
           onClick={() => {
             if (blockedPresets.length === 0) return;
-            if (window.confirm(`Clear all ${blockedPresets.length} blocked presets?`)) {
+            if (
+              window.confirm(t('presets.clearBlockedConfirm', { count: blockedPresets.length }))
+            ) {
               clearBlocked();
-              showToast('Blocked presets cleared');
+              showToast(tm('toasts.blockedPresetsCleared'));
             }
           }}
           disabled={blockedPresets.length === 0}
           className="cursor-pointer rounded border-none bg-red-500/10 px-3 py-1 text-xs text-red-400 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Clear blocked ({blockedPresets.length})
+          {t('presets.clearBlocked', { count: blockedPresets.length })}
         </button>
         <button
           onClick={() => {
             if (favoritePresets.length === 0) return;
-            if (window.confirm(`Clear all ${favoritePresets.length} favorite presets?`)) {
+            if (
+              window.confirm(t('presets.clearFavoritesConfirm', { count: favoritePresets.length }))
+            ) {
               clearFavorites();
-              showToast('Favorite presets cleared');
+              showToast(tm('toasts.favoritePresetsCleared'));
             }
           }}
           disabled={favoritePresets.length === 0}
           className="cursor-pointer rounded border-none bg-red-500/10 px-3 py-1 text-xs text-red-400 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Clear favorites ({favoritePresets.length})
+          {t('presets.clearFavorites', { count: favoritePresets.length })}
         </button>
       </div>
     </>
@@ -664,6 +682,9 @@ function PresetsTab() {
 }
 
 function DataTab() {
+  const { t } = useTranslation('settings');
+  const { t: tc } = useTranslation('common');
+  const { t: tm } = useTranslation('messages');
   const accessToken = useSpotifyStore((s) => s.accessToken);
   const sessionId = useSpotifyStore((s) => s.sessionId);
   const isSpotifyConnected = !!(accessToken || sessionId);
@@ -715,12 +736,12 @@ function DataTab() {
       ? [importResult.versionWarning, ...warnings]
       : warnings;
     if (allWarnings.length > 0) {
-      showToast('Settings imported — some settings could not be applied due to app changes', {
+      showToast(tm('settingsImport.importedWithWarnings'), {
         type: 'warning',
         durationMs: 6000,
       });
     } else {
-      showToast('Settings imported successfully');
+      showToast(tm('settingsImport.importedSuccess'));
     }
   };
 
@@ -735,15 +756,13 @@ function DataTab() {
 
   return (
     <>
-      <h3 className="text-sm font-semibold text-white">Data</h3>
+      <h3 className="text-sm font-semibold text-white">{t('data.title')}</h3>
       <p className="text-xs text-white/50">
-        Your settings are stored locally in this browser on this device.
-        {isSpotifyConnected && ' If connected via Spotify, they also sync to the cloud.'} Use export
-        and import to transfer settings between browsers or devices, or to back them up.
+        {isSpotifyConnected ? t('data.descriptionWithSync') : t('data.description')}
       </p>
 
       <div className="mt-1 flex flex-col gap-2">
-        <label className="text-xs font-semibold text-white/80">Export</label>
+        <label className="text-xs font-semibold text-white/80">{t('data.export')}</label>
         <div className="grid grid-cols-2 gap-1.5">
           {EXPORT_CATEGORIES.map((cat) => (
             <label key={cat.key} className="flex items-center gap-1.5 text-xs text-white/70">
@@ -753,7 +772,7 @@ function DataTab() {
                 onChange={() => toggleExportCategory(cat.key)}
                 className="accent-orange-500"
               />
-              {cat.label}
+              {t(cat.labelKey)}
             </label>
           ))}
         </div>
@@ -762,13 +781,13 @@ function DataTab() {
             onClick={() => setExportSelected(new Set(EXPORT_CATEGORIES.map((c) => c.key)))}
             className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
           >
-            Select all
+            {tc('selectAll')}
           </button>
           <button
             onClick={() => setExportSelected(new Set())}
             className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
           >
-            Deselect all
+            {tc('deselectAll')}
           </button>
         </div>
         <button
@@ -776,12 +795,12 @@ function DataTab() {
           disabled={exportSelected.size === 0}
           className="w-fit cursor-pointer rounded border-none bg-orange-500/20 px-3 py-1 text-xs text-orange-400 hover:bg-orange-500/30 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Export Settings
+          {t('data.exportSettings')}
         </button>
       </div>
 
       <div className="mt-1 flex flex-col gap-2 border-t border-white/10 pt-3">
-        <label className="text-xs font-semibold text-white/80">Import</label>
+        <label className="text-xs font-semibold text-white/80">{t('data.import')}</label>
         <input
           ref={fileInputRef}
           type="file"
@@ -792,10 +811,7 @@ function DataTab() {
 
         {importResult ? (
           <div className="flex flex-col gap-2">
-            <p className="text-xs text-white/60">
-              Select categories to import. Only selected categories will be overwritten — everything
-              else stays as-is.
-            </p>
+            <p className="text-xs text-white/60">{t('data.importDescription')}</p>
             <div className="grid grid-cols-2 gap-1.5">
               {EXPORT_CATEGORIES.filter((cat) => importResult.categories.includes(cat.key)).map(
                 (cat) => (
@@ -806,7 +822,7 @@ function DataTab() {
                       onChange={() => toggleImportCategory(cat.key)}
                       className="accent-orange-500"
                     />
-                    {cat.label}
+                    {t(cat.labelKey)}
                   </label>
                 ),
               )}
@@ -817,26 +833,24 @@ function DataTab() {
                 disabled={importSelected.size === 0}
                 className="cursor-pointer rounded border-none bg-orange-500/20 px-3 py-1 text-xs text-orange-400 hover:bg-orange-500/30 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Apply
+                {tc('apply')}
               </button>
               <button
                 onClick={() => setImportResult(null)}
                 className="cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
               >
-                Cancel
+                {tc('cancel')}
               </button>
             </div>
           </div>
         ) : (
           <>
-            <p className="text-xs text-white/50">
-              Load a settings file to choose which categories to apply.
-            </p>
+            <p className="text-xs text-white/50">{t('data.loadFileDescription')}</p>
             <button
               onClick={() => fileInputRef.current?.click()}
               className="w-fit cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
             >
-              Import Settings
+              {t('data.importSettings')}
             </button>
           </>
         )}
@@ -846,6 +860,8 @@ function DataTab() {
 }
 
 function SpotifyTab() {
+  const { t } = useTranslation('settings');
+  const { t: tc } = useTranslation('common');
   const user = useSpotifyStore((s) => s.user);
   const accessToken = useSpotifyStore((s) => s.accessToken);
   const sessionId = useSpotifyStore((s) => s.sessionId);
@@ -880,58 +896,46 @@ function SpotifyTab() {
   if (authMode !== 'owner' && !isConnected) {
     return (
       <>
-        <h3 className="text-sm font-semibold text-white">Spotify</h3>
-        <p className="text-xs text-white/40">
-          Spotify integration is not available. If you are self-hosting MangoWave, see the README
-          for setup instructions.
-        </p>
+        <h3 className="text-sm font-semibold text-white">{t('spotifyTab.title')}</h3>
+        <p className="text-xs text-white/40">{t('spotifyTab.unavailable')}</p>
       </>
     );
   }
 
   return (
     <>
-      <h3 className="text-sm font-semibold text-white">Spotify</h3>
+      <h3 className="text-sm font-semibold text-white">{t('spotifyTab.title')}</h3>
 
       {isConnected ? (
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 text-sm">
             <span className="text-green-400">&#10003;</span>
             <span className="text-white/80">
-              {user?.displayName ? `Connected as ${user.displayName}` : 'Connected'}
+              {user?.displayName
+                ? t('spotifyTab.connectedAs', { name: user.displayName })
+                : t('spotifyTab.connected')}
             </span>
           </div>
-          <p className="text-xs text-white/40">
-            Now-playing metadata &amp; cloud-synced MangoWave settings active. Playback controls
-            require Premium. Share a screen, window, or tab playing Spotify so the visualizer can
-            hear audio.
-          </p>
+          <p className="text-xs text-white/40">{t('spotifyTab.connectedInfo')}</p>
           <button
             onClick={logout}
             className="w-fit cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
           >
-            Disconnect
+            {tc('disconnect')}
           </button>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          <p className="text-xs text-white/50">
-            Connect Spotify for now-playing metadata and cloud-synced MangoWave settings. Spotify
-            Premium also enables playback controls. You&apos;ll still need to share a screen,
-            window, or tab playing Spotify for the visualizer to react to audio.
-          </p>
+          <p className="text-xs text-white/50">{t('spotifyTab.connectDescription')}</p>
           <div className="flex flex-col gap-1">
             <button
               onClick={handleOwnerConnect}
               disabled={isConnecting}
               className="w-fit cursor-pointer rounded border-none bg-[#1DB954]/20 px-3 py-1 text-xs text-[#1DB954] hover:bg-[#1DB954]/30 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {isConnecting ? 'Connecting...' : 'Connect Spotify'}
+              {isConnecting ? t('spotifyTab.connecting') : t('spotifyTab.connectSpotify')}
             </button>
-            <p className="text-[10px] text-white/30">
-              If you are not the app owner, ensure they&apos;ve added your name and email associated
-              with your Spotify account to their developer app&apos;s User Management tab.
-            </p>
+            <p className="text-[10px] text-white/30">{t('spotifyTab.devInfo')}</p>
           </div>
         </div>
       )}
@@ -940,16 +944,18 @@ function SpotifyTab() {
 }
 
 function ShortcutsTab() {
+  const { t } = useTranslation('settings');
+
   return (
     <>
-      <h3 className="text-sm font-semibold text-white">Shortcuts</h3>
+      <h3 className="text-sm font-semibold text-white">{t('tabs.shortcuts')}</h3>
       <div className="flex flex-col gap-2">
         {SHORTCUTS.map((s) => (
           <div key={s.key} className="flex items-center justify-between">
             <kbd className="rounded bg-white/10 px-2 py-0.5 font-mono text-xs text-white/80">
               {s.key}
             </kbd>
-            <span className="text-xs text-white/60">{s.action}</span>
+            <span className="text-xs text-white/60">{t(`shortcutActions.${s.actionKey}`)}</span>
           </div>
         ))}
       </div>

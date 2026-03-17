@@ -1,55 +1,56 @@
 import posthog from 'posthog-js';
 import sjson from 'secure-json-parse';
 import type { SettingsState } from '../store/useSettingsStore.ts';
+import i18n from '../i18n/index.ts';
 
 const EXPORT_VERSION = 1;
 const MAX_IMPORT_SIZE = 1_000_000; // 1MB
 
 export interface ExportCategory {
   key: string;
-  label: string;
+  labelKey: string;
   fields: (keyof SettingsState)[];
 }
 
 export const EXPORT_CATEGORIES: ExportCategory[] = [
   {
     key: 'rendering',
-    label: 'Rendering',
+    labelKey: 'data.categoryRendering',
     fields: ['performance'],
   },
   {
     key: 'audioAnalysis',
-    label: 'Audio Smoothing & FFT',
+    labelKey: 'data.categoryAudioAnalysis',
     fields: ['audio'],
   },
   {
     key: 'eq',
-    label: 'EQ',
+    labelKey: 'data.categoryEq',
     fields: ['eq'],
   },
   {
     key: 'autopilot',
-    label: 'Autopilot',
+    labelKey: 'data.categoryAutopilot',
     fields: ['autopilot'],
   },
   {
     key: 'display',
-    label: 'Display & Volume',
+    labelKey: 'data.categoryDisplay',
     fields: ['presetNameDisplay', 'songInfoDisplay', 'transitionTime', 'volume'],
   },
   {
     key: 'favorites',
-    label: 'Favorites',
+    labelKey: 'data.categoryFavorites',
     fields: ['favoritePresets'],
   },
   {
     key: 'blocked',
-    label: 'Blocked Presets',
+    labelKey: 'data.categoryBlocked',
     fields: ['blockedPresets'],
   },
   {
     key: 'packs',
-    label: 'Packs & Exclusions',
+    labelKey: 'data.categoryPacks',
     fields: ['enabledPacks', 'excludedOverrides'],
   },
 ];
@@ -100,15 +101,17 @@ export type ParseResult =
 
 export function parseImportFile(file: File): Promise<ParseResult> {
   return new Promise((resolve) => {
+    const t = i18n.getFixedT(null, 'messages');
+
     if (!file.name.endsWith('.json') && file.type !== 'application/json') {
       captureImportFailure('File must be a .json file');
-      resolve({ ok: false, error: 'File must be a .json file' });
+      resolve({ ok: false, error: t('settingsImport.mustBeJson') });
       return;
     }
 
     if (file.size > MAX_IMPORT_SIZE) {
       captureImportFailure('File too large');
-      resolve({ ok: false, error: 'File too large' });
+      resolve({ ok: false, error: t('settingsImport.fileTooLarge') });
       return;
     }
 
@@ -119,7 +122,7 @@ export function parseImportFile(file: File): Promise<ParseResult> {
 
         if (!parsed._meta || parsed._meta.source !== 'mangowave') {
           captureImportFailure('Not a MangoWave settings file');
-          resolve({ ok: false, error: 'Not a MangoWave settings file' });
+          resolve({ ok: false, error: t('settingsImport.notMangoWaveFile') });
           return;
         }
 
@@ -136,19 +139,17 @@ export function parseImportFile(file: File): Promise<ParseResult> {
         }
 
         const versionWarning =
-          parsed._meta.version > EXPORT_VERSION
-            ? 'Settings file is from a newer app version — some settings may not apply'
-            : undefined;
+          parsed._meta.version > EXPORT_VERSION ? t('settingsImport.newerVersion') : undefined;
 
         resolve({ ok: true, data: parsed, categories: detected, versionWarning });
       } catch {
         captureImportFailure('Invalid settings file');
-        resolve({ ok: false, error: 'Invalid settings file' });
+        resolve({ ok: false, error: t('settingsImport.invalidFile') });
       }
     };
     reader.onerror = () => {
-      captureImportFailure('Invalid settings file');
-      resolve({ ok: false, error: 'Invalid settings file' });
+      captureImportFailure(t('settingsImport.invalidFile'));
+      resolve({ ok: false, error: t('settingsImport.invalidFile') });
     };
     reader.readAsText(file);
   });
@@ -268,7 +269,7 @@ export function buildImportPayload(
         if (sanitized !== undefined) {
           payload[field] = sanitized;
         } else {
-          warnings.push(`"${field}" could not be applied`);
+          warnings.push(i18n.t('settingsImport.fieldNotApplied', { field, ns: 'messages' }));
         }
       }
     }

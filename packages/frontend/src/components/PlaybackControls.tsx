@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { RepeatMode } from '../store/useMediaPlayerStore.ts';
 
 export interface PlaybackAdapter {
@@ -19,23 +20,24 @@ interface PlaybackControlsProps {
   adapter: PlaybackAdapter;
 }
 
-const repeatLabels: Record<RepeatMode, string> = {
-  off: 'Repeat: off',
-  all: 'Repeat all',
-  one: 'Repeat one',
+const repeatLabelKeys: Record<RepeatMode, string> = {
+  off: 'playback.repeatOff',
+  all: 'playback.repeatAll',
+  one: 'playback.repeatOne',
 };
 
-const defaultTooltips: Record<PlaybackAdapter['source'], string> = {
-  local: 'Add songs to your queue',
-  mic: 'Microphone input — no playback controls',
-  system: 'Sharing audio — no playback controls',
-  spotify: 'Playback controls unavailable',
-  none: 'Sharing audio — no playback controls',
+const defaultTooltipKeys: Record<PlaybackAdapter['source'], string> = {
+  local: 'playback.addSongsToQueue',
+  mic: 'playback.micNoControls',
+  system: 'playback.sharingNoControls',
+  spotify: 'playback.controlsUnavailable',
+  none: 'playback.sharingNoControls',
 };
 
 export function PlaybackControls({ adapter }: PlaybackControlsProps) {
+  const { t } = useTranslation('messages');
   const isDisabled = !adapter.canControl;
-  const disabledTooltip = adapter.tooltip ?? defaultTooltips[adapter.source];
+  const disabledTooltip = adapter.tooltip ?? t(defaultTooltipKeys[adapter.source]);
 
   return (
     <div className="flex items-center gap-1">
@@ -43,8 +45,8 @@ export function PlaybackControls({ adapter }: PlaybackControlsProps) {
         <ToggleButton
           onClick={adapter.onToggleShuffle}
           active={adapter.shuffle ?? false}
-          label={adapter.shuffle ? 'Disable shuffle' : 'Enable shuffle'}
-          title={adapter.shuffle ? 'Shuffle: on' : 'Shuffle: off'}
+          label={adapter.shuffle ? t('playback.disableShuffle') : t('playback.enableShuffle')}
+          title={adapter.shuffle ? t('playback.shuffleOn') : t('playback.shuffleOff')}
         >
           🔀
         </ToggleButton>
@@ -52,24 +54,30 @@ export function PlaybackControls({ adapter }: PlaybackControlsProps) {
       <PlaybackButton
         onClick={adapter.onPrevious}
         disabled={isDisabled}
-        label="Previous track"
-        title={isDisabled ? disabledTooltip : 'Previous track (J)'}
+        label={t('playback.previousTrack')}
+        title={isDisabled ? disabledTooltip : t('playback.previousTrackShortcut')}
       >
         ⏮
       </PlaybackButton>
       <PlaybackButton
         onClick={adapter.isPlaying ? adapter.onPause : adapter.onPlay}
         disabled={isDisabled}
-        label={adapter.isPlaying ? 'Pause' : 'Play'}
-        title={isDisabled ? disabledTooltip : adapter.isPlaying ? 'Pause (K)' : 'Play (K)'}
+        label={adapter.isPlaying ? t('playback.pause') : t('playback.play')}
+        title={
+          isDisabled
+            ? disabledTooltip
+            : adapter.isPlaying
+              ? t('playback.pauseShortcut')
+              : t('playback.playShortcut')
+        }
       >
         {adapter.isPlaying ? '⏸' : '▶'}
       </PlaybackButton>
       <PlaybackButton
         onClick={adapter.onNext}
         disabled={isDisabled}
-        label="Next track"
-        title={isDisabled ? disabledTooltip : 'Next track (L)'}
+        label={t('playback.nextTrack')}
+        title={isDisabled ? disabledTooltip : t('playback.nextTrackShortcut')}
       >
         ⏭
       </PlaybackButton>
@@ -77,8 +85,8 @@ export function PlaybackControls({ adapter }: PlaybackControlsProps) {
         <ToggleButton
           onClick={adapter.onCycleRepeat}
           active={adapter.repeatMode !== 'off'}
-          label={repeatLabels[adapter.repeatMode ?? 'off']}
-          title={repeatLabels[adapter.repeatMode ?? 'off']}
+          label={t(repeatLabelKeys[adapter.repeatMode ?? 'off'])}
+          title={t(repeatLabelKeys[adapter.repeatMode ?? 'off'])}
         >
           {adapter.repeatMode === 'one' ? '🔂' : '🔁'}
         </ToggleButton>

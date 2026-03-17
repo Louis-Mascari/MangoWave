@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { SHORTCUTS } from '../constants/shortcuts.ts';
 
 interface ShortcutOverlayProps {
@@ -6,6 +7,9 @@ interface ShortcutOverlayProps {
 }
 
 export function ShortcutOverlay({ visible, onClose }: ShortcutOverlayProps) {
+  const { t: tc } = useTranslation('common');
+  const { t: ts } = useTranslation('settings');
+
   if (!visible) return null;
 
   return (
@@ -17,14 +21,14 @@ export function ShortcutOverlay({ visible, onClose }: ShortcutOverlayProps) {
         className="w-80 rounded-lg bg-gray-900/95 p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="mb-4 text-center text-sm font-semibold text-white">Shortcuts</h2>
+        <h2 className="mb-4 text-center text-sm font-semibold text-white">{tc('shortcuts')}</h2>
         <div className="flex flex-col gap-2">
           {SHORTCUTS.map((s) => (
             <div key={s.key} className="flex items-center justify-between">
-              <kbd className="rounded bg-white/10 px-2 py-0.5 text-xs font-mono text-white/80">
+              <kbd className="rounded bg-white/10 px-2 py-0.5 font-mono text-xs text-white/80">
                 {s.key}
               </kbd>
-              <span className="text-xs text-white/60">{s.action}</span>
+              <span className="text-xs text-white/60">{ts(`shortcutActions.${s.actionKey}`)}</span>
             </div>
           ))}
         </div>
@@ -32,7 +36,7 @@ export function ShortcutOverlay({ visible, onClose }: ShortcutOverlayProps) {
           onClick={onClose}
           className="mt-4 w-full cursor-pointer rounded border-none bg-white/10 py-1.5 text-xs text-white/70 hover:bg-white/20"
         >
-          Close
+          {tc('close')}
         </button>
       </div>
     </div>

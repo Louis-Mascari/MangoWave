@@ -1,0 +1,157 @@
+{
+  "errors": {
+    "notAllowedSystem": "Berbagi layar dibatalkan atau ditolak. Silakan coba lagi dan pilih layar, jendela, atau tab untuk dibagikan.",
+    "notAllowedMic": "Akses mikrofon ditolak. Silakan izinkan akses mikrofon di pengaturan browser dan coba lagi.",
+    "notFoundSystem": "Tidak ada layar atau jendela yang tersedia untuk dibagikan. Pastikan layar terhubung dan coba lagi.",
+    "notFoundMic": "Mikrofon tidak ditemukan. Silakan hubungkan mikrofon dan coba lagi.",
+    "notSupportedSystem": "Browser kamu tidak mendukung tangkapan audio melalui berbagi layar. Silakan coba Chrome, Edge, atau Opera.",
+    "notSupportedMic": "Browser kamu tidak mendukung akses mikrofon. Silakan coba browser modern seperti Chrome, Firefox, atau Edge.",
+    "notReadableSystem": "Tidak dapat mengakses layar. Aplikasi lain mungkin mencegah tangkapan layar.",
+    "notReadableMic": "Mikrofon tidak dapat diakses. Mungkin sedang digunakan oleh aplikasi lain. Coba tutup aplikasi tersebut dan coba lagi.",
+    "abortError": "Permintaan dibatalkan. Silakan coba lagi saat kamu siap.",
+    "genericError": "Terjadi kesalahan: {{message}}. Silakan coba lagi.",
+    "unexpectedError": "Terjadi kesalahan yang tidak terduga. Silakan coba lagi.",
+    "noAudioBase": "Audio tidak disertakan dalam berbagi layar. Silakan coba lagi dan pastikan mencentang \"Bagikan audio\" (atau \"Bagikan audio sistem\") di dialog browser.",
+    "noAudioNonChromium": "{{browser}} tidak mendukung tangkapan audio melalui berbagi layar. Silakan coba Chrome, Edge, atau Opera.",
+    "noAudioWindowsChromeOS": "Semua mode berbagi (layar, jendela, dan tab) mendukung audio di {{os}}.",
+    "noAudioMacOS": "Di macOS 14.2+, berbagi layar dan jendela mendukung audio di Chrome. Versi macOS yang lebih lama hanya mendukung berbagi tab.",
+    "noAudioLinux": "Di Linux, hanya berbagi tab yang mendukung audio.",
+    "noAudioUnknown": "Di Windows dan ChromeOS, semua mode berbagi mendukung audio. Di macOS 14.2+, berbagi layar dan jendela mendukung audio di Chrome. Di Linux, hanya berbagi tab yang mendukung audio.",
+    "webgl2NotSupported": "WebGL 2 Tidak Didukung",
+    "webgl2NotSupportedDesc": "MangoWave memerlukan WebGL 2 untuk merender visualisasi. Silakan coba browser modern seperti Chrome, Firefox, atau Edge.",
+    "webglContextLost": "Visualizer Kehilangan Konteks Grafis",
+    "webglContextLostDesc": "Sistem grafis perangkatmu terputus. Ini bisa terjadi saat perangkat dalam beban berat, GPU digunakan bersama aplikasi lain, atau konfigurasi layar berubah. Memuat ulang halaman akan memulihkan visualizer.",
+    "renderingError": "Terjadi kesalahan rendering, kemungkinan masalah WebGL atau Web Audio."
+  },
+
+  "fileValidation": {
+    "singleRejected": "\"{{filename}}\" bukan file audio yang didukung. Silakan gunakan format MP3, WAV, FLAC, OGG, AAC, atau format audio umum lainnya.",
+    "multipleRejected": "{{count}} file bukan format audio yang didukung dan dilewati: {{names}}. Silakan gunakan format MP3, WAV, FLAC, OGG, AAC, atau format audio umum lainnya."
+  },
+
+  "settingsImport": {
+    "mustBeJson": "File harus berformat .json",
+    "fileTooLarge": "File terlalu besar",
+    "notMangoWaveFile": "Bukan file pengaturan MangoWave",
+    "newerVersion": "File pengaturan dari versi aplikasi yang lebih baru. Beberapa pengaturan mungkin tidak diterapkan",
+    "invalidFile": "File pengaturan tidak valid",
+    "fieldNotApplied": "\"{{field}}\" tidak dapat diterapkan",
+    "importedWithWarnings": "Pengaturan diimpor. Beberapa pengaturan tidak dapat diterapkan karena perubahan aplikasi",
+    "importedSuccess": "Pengaturan berhasil diimpor"
+  },
+
+  "spotify": {
+    "connectingToSpotify": "Menghubungkan ke Spotify...",
+    "connectionFailed": "Koneksi Spotify gagal. Silakan coba lagi. Jika masalah berlanjut, pastikan akunmu telah ditambahkan ke daftar pengguna resmi aplikasi.",
+    "premiumRequired": "Spotify Premium diperlukan untuk kontrol pemutaran. Kamu masih bisa melihat info lagu yang diputar dan menggunakan MangoWave dengan sumber audio lain.",
+    "networkError": "Tidak dapat terhubung ke Spotify. Periksa koneksimu dan coba lagi.",
+    "popupBlocked": "Tidak dapat membuka jendela login Spotify. Pastikan pop-up diizinkan untuk situs ini dan coba lagi.",
+    "rateLimited": "Spotify dibatasi. Mencoba lagi dalam {{seconds}}d"
+  },
+
+  "toasts": {
+    "autopilotOn": "Autopilot aktif",
+    "autopilotOff": "Autopilot nonaktif",
+    "addedToFavorites": "Ditambahkan ke favorit",
+    "removedFromFavorites": "Dihapus dari favorit",
+    "presetBlocked": "Preset diblokir",
+    "presetUnblocked": "Preset di-unblokir",
+    "presetRestoredToPool": "Preset dikembalikan ke pool",
+    "presetReturnedToExcluded": "Preset dikembalikan ke pengecualian",
+    "blockedPresetsCleared": "Preset yang diblokir dihapus",
+    "favoritePresetsCleared": "Preset favorit dihapus",
+    "silenceDetected": "Tidak ada audio terdeteksi. Pastikan audio sedang diputar di layar, jendela, atau tab yang dibagikan, dan kamu telah mencentang \"Bagikan audio\" di dialog browser.",
+    "silenceDetectedMic": "Tidak ada audio terdeteksi dari mikrofon. Pastikan mikrofon tidak di-mute dan menangkap suara."
+  },
+
+  "playback": {
+    "addSongsToQueue": "Tambahkan lagu ke antrean",
+    "micNoControls": "Input mikrofon — tanpa kontrol pemutaran",
+    "sharingNoControls": "Berbagi audio — tanpa kontrol pemutaran",
+    "controlsUnavailable": "Kontrol pemutaran tidak tersedia",
+    "previousTrack": "Lagu sebelumnya",
+    "nextTrack": "Lagu berikutnya",
+    "play": "Putar",
+    "pause": "Jeda",
+    "previousTrackShortcut": "Lagu sebelumnya (J)",
+    "nextTrackShortcut": "Lagu berikutnya (L)",
+    "pauseShortcut": "Jeda (K)",
+    "playShortcut": "Putar (K)",
+    "enableShuffle": "Aktifkan acak",
+    "disableShuffle": "Nonaktifkan acak",
+    "shuffleOn": "Acak: aktif",
+    "shuffleOff": "Acak: nonaktif",
+    "repeatOff": "Ulang: nonaktif",
+    "repeatAll": "Ulang semua",
+    "repeatOne": "Ulang satu",
+    "seek": "Geser",
+    "seekSpotifyNote": "Pembaruan posisi putar mungkin perlu waktu untuk sinkron dengan Spotify",
+    "mute": "Bisukan",
+    "unmute": "Bunyikan",
+    "volume": "Volume",
+    "nowPlayingOn": "Sedang Diputar: aktif (tampil 5d per lagu)",
+    "nowPlayingOff": "Sedang Diputar: nonaktif (tampil 5d per lagu)",
+    "queueShortcut": "Antrean (Q)",
+    "playingOn": "Diputar di {{device}}"
+  },
+
+  "queue": {
+    "title": "Antrean",
+    "addFiles": "Tambah File",
+    "closeQueue": "Tutup antrean",
+    "moveUp": "Pindahkan {{name}} ke atas",
+    "moveDown": "Pindahkan {{name}} ke bawah",
+    "remove": "Hapus {{name}}",
+    "noTracksLoaded": "Tidak ada lagu dimuat"
+  },
+
+  "controlBar": {
+    "previousPreset": "Preset sebelumnya (P)",
+    "nextPreset": "Preset berikutnya (N)",
+    "blockPreset": "Blokir preset (B)",
+    "unblockPreset": "Buka blokir preset (B)",
+    "addToFavorites": "Tambah ke favorit (S)",
+    "removeFromFavorites": "Hapus dari favorit (S)",
+    "toggleAutopilot": "Alihkan autopilot (A)",
+    "toggleFullscreen": "Alihkan layar penuh (F)",
+    "exitFS": "Keluar"
+  },
+
+  "mobile": {
+    "next": "Berikutnya",
+    "favorite": "Favorit",
+    "unfavorite": "Hapus Favorit",
+    "block": "Blokir",
+    "unblock": "Buka Blokir",
+    "openMenu": "Buka menu",
+    "closeMenu": "Tutup menu",
+    "menu": "Menu"
+  },
+
+  "presetBrowser": {
+    "tabs": {
+      "all": "semua",
+      "favorites": "favorit",
+      "blocked": "diblokir",
+      "excluded": "dikecualikan",
+      "history": "riwayat"
+    },
+    "noPacksSelected": "Tidak ada paket dipilih. Autopilot dijeda",
+    "packsActive": "{{active}}/{{total}} paket aktif",
+    "searchPlaceholder": "Cari preset...",
+    "clearSearch": "Hapus pencarian",
+    "noPresetsVisible": "Tidak ada preset terlihat",
+    "noPresetsFound": "Tidak ada preset ditemukan",
+    "noHistoryYet": "Belum ada riwayat",
+    "noExcludedPresets": "Tidak ada preset yang dikecualikan",
+    "excludedDescription": "Preset ini dikecualikan dari pool. Ketuk salah satu untuk memuat dengan risiko sendiri.",
+    "addToFavorites": "Tambah ke favorit",
+    "removeFromFavorites": "Hapus dari favorit",
+    "blockPreset": "Blokir preset",
+    "unblockPreset": "Buka blokir preset",
+    "restoreToPool": "Kembalikan ke pool",
+    "quarantineBroken": "Rusak",
+    "quarantineContent": "Konten",
+    "quarantineMobilePerf": "Performa mobile"
+  }
+}

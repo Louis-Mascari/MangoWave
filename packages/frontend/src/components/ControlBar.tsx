@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useIdleTimer } from '../hooks/useIdleTimer.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { SettingsPanel } from './SettingsPanel.tsx';
@@ -90,6 +91,9 @@ function DesktopControlBar({
   onAddLocalFiles,
   onClearPlaylist,
 }: ControlBarProps) {
+  const { t } = useTranslation('messages');
+  const { t: tc } = useTranslation('common');
+  const { t: ts } = useTranslation('settings');
   const { isIdle, pause, resume } = useIdleTimer(3000, 5000);
 
   return (
@@ -138,14 +142,14 @@ function DesktopControlBar({
         {/* LEFT: Preset Controls */}
         <div className="flex items-center gap-2">
           <BarButton onClick={() => onTogglePanel('presets')} active={activePanel === 'presets'}>
-            Presets
+            {tc('presets')}
           </BarButton>
 
           <IconButton
             onClick={() => onPreviousPreset?.()}
             disabled={!canGoBack}
-            aria-label="Previous preset"
-            title="Previous preset (P)"
+            aria-label={ts('shortcutActions.previousPreset')}
+            title={t('controlBar.previousPreset')}
           >
             ◀
           </IconButton>
@@ -154,7 +158,7 @@ function DesktopControlBar({
             <div className="flex items-center gap-1 rounded bg-white/5 px-2 py-0.5">
               <button
                 onClick={onToggleBlock}
-                title={isBlocked ? 'Unblock preset (B)' : 'Block preset (B)'}
+                title={isBlocked ? t('controlBar.unblockPreset') : t('controlBar.blockPreset')}
                 className={`flex h-7 w-7 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
                   isBlocked ? 'text-red-400' : 'text-white/30 hover:bg-white/10 hover:text-red-400'
                 }`}
@@ -175,7 +179,9 @@ function DesktopControlBar({
               </span>
               <button
                 onClick={onToggleFavorite}
-                title={isFavorite ? 'Remove from favorites (S)' : 'Add to favorites (S)'}
+                title={
+                  isFavorite ? t('controlBar.removeFromFavorites') : t('controlBar.addToFavorites')
+                }
                 className={`flex h-7 w-7 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
                   isFavorite
                     ? 'text-yellow-400'
@@ -189,34 +195,38 @@ function DesktopControlBar({
             </div>
           )}
 
-          <IconButton onClick={onNextPreset} aria-label="Next preset" title="Next preset (N)">
+          <IconButton
+            onClick={onNextPreset}
+            aria-label={ts('shortcutActions.nextPreset')}
+            title={t('controlBar.nextPreset')}
+          >
             ▶
           </IconButton>
 
           <BarButton
             onClick={onToggleAutopilot}
             active={autopilotEnabled}
-            title="Toggle autopilot (A)"
+            title={t('controlBar.toggleAutopilot')}
             hotkey="A"
           >
-            Autopilot
+            {tc('autopilot')}
           </BarButton>
         </div>
 
         {/* RIGHT: App Controls */}
         <div className="flex items-center gap-2">
           <BarButton onClick={() => onTogglePanel('settings')} active={activePanel === 'settings'}>
-            Settings
+            {tc('settings')}
           </BarButton>
           <BarButton
             onClick={onToggleFullscreen}
             active={isFullscreen}
-            title="Toggle fullscreen (F)"
+            title={t('controlBar.toggleFullscreen')}
             hotkey="F"
           >
-            Fullscreen
+            {tc('fullscreen')}
           </BarButton>
-          <BarButton onClick={onStop}>Exit</BarButton>
+          <BarButton onClick={onStop}>{tc('exit')}</BarButton>
         </div>
       </div>
     </div>

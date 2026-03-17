@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
+import './i18n/index.ts';
 import { initPostHog } from './lib/posthog.ts';
 import { initSentry } from './lib/sentry.ts';
 import { ErrorBoundary } from './components/ErrorBoundary.tsx';

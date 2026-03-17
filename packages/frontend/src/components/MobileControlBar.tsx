@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SettingsPanel } from './SettingsPanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
 import type { PanelView } from './ControlBar.tsx';
@@ -58,6 +59,8 @@ export function MobileControlBar({
   isIdle,
   forceIdle,
 }: MobileControlBarProps) {
+  const { t } = useTranslation('messages');
+  const { t: tc } = useTranslation('common');
   const [menuOpen, setMenuOpen] = useState(false);
   const [modalPanel, setModalPanel] = useState<PanelView>('none');
 
@@ -170,12 +173,12 @@ export function MobileControlBar({
   // Bottom half (app): Settings(3), Exit(4), Fullscreen(6), Autopilot(8)
   const radialItems = [
     {
-      label: 'Presets',
+      label: tc('presets'),
       icon: 'P',
       action: () => menuToModal('presets'),
     },
     {
-      label: 'Next',
+      label: t('mobile.next'),
       icon: '▶',
       action: () => {
         onNextPreset();
@@ -185,7 +188,7 @@ export function MobileControlBar({
       },
     },
     {
-      label: isFavorite ? 'Unfavorite' : 'Favorite',
+      label: isFavorite ? t('mobile.unfavorite') : t('mobile.favorite'),
       icon: '★',
       action: () => {
         onToggleFavorite();
@@ -197,12 +200,12 @@ export function MobileControlBar({
       activeColor: 'yellow' as const,
     },
     {
-      label: 'Settings',
+      label: tc('settings'),
       icon: '⚙',
       action: () => menuToModal('settings'),
     },
     {
-      label: 'Exit',
+      label: tc('exit'),
       icon: '✕',
       action: () => {
         onStop();
@@ -210,7 +213,7 @@ export function MobileControlBar({
       },
     },
     {
-      label: isFullscreen ? 'Exit FS' : 'Fullscreen',
+      label: isFullscreen ? t('controlBar.exitFS') : tc('fullscreen'),
       icon: '⛶',
       action: () => {
         onToggleFullscreen();
@@ -221,7 +224,7 @@ export function MobileControlBar({
       active: isFullscreen,
     },
     {
-      label: 'Autopilot',
+      label: tc('autopilot'),
       icon: 'A',
       action: () => {
         onToggleAutopilot();
@@ -232,7 +235,7 @@ export function MobileControlBar({
       active: autopilotEnabled,
     },
     {
-      label: isBlocked ? 'Unblock' : 'Block',
+      label: isBlocked ? t('mobile.unblock') : t('mobile.block'),
       icon: '⊘',
       action: () => {
         onToggleBlock();
@@ -244,7 +247,7 @@ export function MobileControlBar({
       activeColor: 'red' as const,
     },
     {
-      label: 'Previous',
+      label: tc('previous'),
       icon: '◀',
       action: () => {
         onPreviousPreset?.();
@@ -326,7 +329,7 @@ export function MobileControlBar({
         {/* FAB button */}
         <button
           onClick={menuOpen ? closeMenu : openMenu}
-          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-label={menuOpen ? t('mobile.closeMenu') : t('mobile.openMenu')}
           className={`relative flex h-14 w-14 items-center justify-center rounded-full border-none bg-black/60 shadow-lg backdrop-blur-sm transition-all duration-400 ${
             menuOpen
               ? 'rotate-45 opacity-100'
@@ -335,7 +338,7 @@ export function MobileControlBar({
                 : 'opacity-100'
           } cursor-pointer`}
         >
-          <img src={logoUrl} alt="Menu" className="h-[52px] w-[52px] object-contain" />
+          <img src={logoUrl} alt={t('mobile.menu')} className="h-[52px] w-[52px] object-contain" />
         </button>
       </div>
 
@@ -345,14 +348,14 @@ export function MobileControlBar({
           <div className="relative mx-2 my-2 flex max-h-full w-full flex-col overflow-hidden rounded-lg bg-gray-900/95 landscape:my-1">
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 landscape:py-1.5">
               <h3 className="text-sm font-semibold text-white">
-                {activePanel === 'settings' && 'Settings'}
-                {activePanel === 'presets' && 'Presets'}
-                {activePanel === 'playlist' && 'Queue'}
+                {activePanel === 'settings' && tc('settings')}
+                {activePanel === 'presets' && tc('presets')}
+                {activePanel === 'playlist' && tc('queue')}
               </h3>
               <button
                 onClick={closeModal}
                 className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-none bg-white/10 text-sm text-white/70 hover:bg-white/20"
-                aria-label="Close"
+                aria-label={tc('close')}
               >
                 ✕
               </button>

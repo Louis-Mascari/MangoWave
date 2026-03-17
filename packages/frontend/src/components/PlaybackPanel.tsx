@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
 import { useSpotifyProgress } from '../hooks/useSpotifyProgress.ts';
 import { useMediaPlayerStore } from '../store/useMediaPlayerStore.ts';
@@ -40,6 +41,8 @@ function SeekBar({
   source: 'local' | 'spotify';
   onSeek: (time: number) => void;
 }) {
+  const { t } = useTranslation('messages');
+
   // Spotify progress (smooth interpolation)
   const spotifyNowPlaying = useSpotifyStore((s) => s.nowPlaying);
   const [spotifyProgressMs, setOptimisticProgress] = useSpotifyProgress(
@@ -61,7 +64,7 @@ function SeekBar({
 
   if (duration <= 0) return null;
 
-  const seekTooltip = isSpotify ? 'Seek updates may take a moment to sync with Spotify' : undefined;
+  const seekTooltip = isSpotify ? t('playback.seekSpotifyNote') : undefined;
 
   return (
     <div className="flex items-center gap-1.5" title={seekTooltip}>
@@ -88,7 +91,7 @@ function SeekBar({
         }}
         className="seek-bar h-1 min-w-0 flex-1 cursor-pointer appearance-none rounded-full"
         style={{ '--fill': `${(currentTime / duration) * 100}%` } as React.CSSProperties}
-        aria-label="Seek"
+        aria-label={t('playback.seek')}
       />
       <span className="text-[10px] tabular-nums text-white/50">{formatTime(duration)}</span>
     </div>
@@ -111,6 +114,8 @@ export function PlaybackPanel({
   isQueueOpen,
   hidden,
 }: PlaybackPanelProps) {
+  const { t } = useTranslation('messages');
+
   const spotifyDeviceName = useSpotifyStore((s) => s.nowPlaying?.deviceName);
 
   if (adapter.source !== 'local' && adapter.source !== 'spotify') return null;
@@ -129,8 +134,8 @@ export function PlaybackPanel({
     <TransportButton
       onClick={adapter.onPrevious}
       disabled={isDisabled}
-      label="Previous track"
-      title={isDisabled ? (adapter.tooltip ?? '') : 'Previous track (J)'}
+      label={t('playback.previousTrack')}
+      title={isDisabled ? (adapter.tooltip ?? '') : t('playback.previousTrackShortcut')}
     >
       ⏮
     </TransportButton>
@@ -140,8 +145,14 @@ export function PlaybackPanel({
     <TransportButton
       onClick={adapter.isPlaying ? adapter.onPause : adapter.onPlay}
       disabled={isDisabled}
-      label={adapter.isPlaying ? 'Pause' : 'Play'}
-      title={isDisabled ? (adapter.tooltip ?? '') : adapter.isPlaying ? 'Pause (K)' : 'Play (K)'}
+      label={adapter.isPlaying ? t('playback.pause') : t('playback.play')}
+      title={
+        isDisabled
+          ? (adapter.tooltip ?? '')
+          : adapter.isPlaying
+            ? t('playback.pauseShortcut')
+            : t('playback.playShortcut')
+      }
       primary
     >
       {adapter.isPlaying ? '⏸' : '▶'}
@@ -152,8 +163,8 @@ export function PlaybackPanel({
     <TransportButton
       onClick={adapter.onNext}
       disabled={isDisabled}
-      label="Next track"
-      title={isDisabled ? (adapter.tooltip ?? '') : 'Next track (L)'}
+      label={t('playback.nextTrack')}
+      title={isDisabled ? (adapter.tooltip ?? '') : t('playback.nextTrackShortcut')}
     >
       ⏭
     </TransportButton>
@@ -163,7 +174,7 @@ export function PlaybackPanel({
     <TransportToggle
       onClick={adapter.onToggleShuffle!}
       active={adapter.shuffle ?? false}
-      label={adapter.shuffle ? 'Shuffle: on' : 'Shuffle: off'}
+      label={adapter.shuffle ? t('playback.shuffleOn') : t('playback.shuffleOff')}
     >
       🔀
     </TransportToggle>
@@ -175,10 +186,10 @@ export function PlaybackPanel({
       active={adapter.repeatMode !== 'off'}
       label={
         adapter.repeatMode === 'one'
-          ? 'Repeat: one'
+          ? t('playback.repeatOne')
           : adapter.repeatMode === 'all'
-            ? 'Repeat: all'
-            : 'Repeat: off'
+            ? t('playback.repeatAll')
+            : t('playback.repeatOff')
       }
     >
       {adapter.repeatMode === 'one' ? '🔂' : '🔁'}
@@ -189,11 +200,7 @@ export function PlaybackPanel({
     <TransportToggle
       onClick={onToggleNowPlaying}
       active={nowPlayingEnabled}
-      label={
-        nowPlayingEnabled
-          ? 'Now Playing: on (shows 5s per track)'
-          : 'Now Playing: off (shows 5s per track)'
-      }
+      label={nowPlayingEnabled ? t('playback.nowPlayingOn') : t('playback.nowPlayingOff')}
     >
       <svg
         viewBox="0 0 20 20"
@@ -209,7 +216,11 @@ export function PlaybackPanel({
   );
 
   const queueBtn = showQueue ? (
-    <TransportToggle onClick={onToggleQueue} active={isQueueOpen ?? false} label="Queue (Q)">
+    <TransportToggle
+      onClick={onToggleQueue}
+      active={isQueueOpen ?? false}
+      label={t('playback.queueShortcut')}
+    >
       <svg
         viewBox="0 0 20 20"
         fill="none"
@@ -229,8 +240,8 @@ export function PlaybackPanel({
       <button
         onClick={onToggleMute}
         className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 hover:text-white/70"
-        title={isMuted ? 'Unmute' : 'Mute'}
-        aria-label={isMuted ? 'Unmute' : 'Mute'}
+        title={isMuted ? t('playback.unmute') : t('playback.mute')}
+        aria-label={isMuted ? t('playback.unmute') : t('playback.mute')}
       >
         {isMuted ? '🔇' : '🔊'}
       </button>
@@ -243,7 +254,7 @@ export function PlaybackPanel({
         onChange={(e) => onVolumeChange!(Number(e.target.value))}
         className="seek-bar h-1 w-16 cursor-pointer appearance-none rounded-full"
         style={{ '--fill': `${(volume ?? 0) * 100}%` } as React.CSSProperties}
-        aria-label="Volume"
+        aria-label={t('playback.volume')}
       />
     </div>
   ) : null;
@@ -251,7 +262,7 @@ export function PlaybackPanel({
   const deviceLabel = showDevice ? (
     <span
       className="ml-1 max-w-[120px] truncate text-[10px] text-white/30"
-      title={`Playing on ${spotifyDeviceName}`}
+      title={t('playback.playingOn', { device: spotifyDeviceName })}
     >
       {spotifyDeviceName}
     </span>

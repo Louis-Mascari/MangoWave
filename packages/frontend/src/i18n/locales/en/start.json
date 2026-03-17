@@ -1,0 +1,109 @@
+{
+  "subtitle": "Audio-reactive visualizer for your browser",
+  "chooseAudioSource": "Choose your audio source",
+  "photosensitivityWarning": "Photosensitivity Warning",
+  "photosensitivityDescription": "This visualizer displays rapid flashing lights and patterns.\nIf you have epilepsy or are sensitive to flashing lights, viewer discretion is advised.",
+  "shareAudio": "Share Audio",
+  "shareAudioDescription": "Capture system or tab audio via screen sharing",
+  "playLocalFiles": "Play Local Files",
+  "localFilesDescription": "Play audio files from your device",
+  "useMicrophone": "Use Microphone",
+  "micDescription": "Visualize ambient sound. Silent mode",
+  "mobileCallout": "Use a laptop or desktop to also capture audio from any screen, window, or browser tab using screen sharing.",
+  "somethingWentWrong": "Something went wrong",
+
+  "shareAudioModal": {
+    "browserNoSupport": "{{browser}} doesn't support audio capture",
+    "browserCompatMessage": "Audio capture via screen sharing requires a Chromium-based browser (Chrome, Edge, or Opera). You can still use",
+    "localFiles": "Local Files",
+    "microphone": "Microphone",
+    "asAudioSource": "as an audio source.",
+    "step1": "and choose a screen, window, or tab to share",
+    "step1Bold": "Click Start",
+    "step2Bold": "Check \"Share audio\"",
+    "step2": "– this is required for the visualizer to react to sound",
+    "step3Bold": "Play music",
+    "step3": "and lose yourself",
+    "startVisualizer": "Start Visualizer"
+  },
+
+  "osTips": {
+    "windowsChromeOS": "All sharing modes (screen, window, and tab) support audio on {{os}}. Sharing your entire screen or a window gives the cleanest experience (no browser banner).",
+    "macOSChromium": "On macOS 14.2+, screen and window sharing support audio. Older macOS versions are limited to tab sharing.",
+    "macOSNonChromium": "Screen sharing audio requires a Chromium browser (Chrome, Edge, Opera) on macOS 14.2+.",
+    "linux": "On Linux, only tab sharing supports audio.",
+    "unknown": "On Windows and ChromeOS, all sharing modes support audio. On macOS 14.2+, screen and window sharing support audio in Chrome. On Linux, only tab sharing supports audio."
+  },
+
+  "sensitivityTips": {
+    "title": "Sensitivity & reactivity tips",
+    "description": "Some presets are more ambient and less reactive than others. Check the Settings panel to adjust sensitivity and other parameters that feed the visualization engine."
+  },
+
+  "localFilesModal": {
+    "step1Bold": "Choose your files",
+    "step1": "– select one or more audio files from your device",
+    "step2Bold": "Play music",
+    "step2": "and lose yourself",
+    "infoBox": "Supports MP3, WAV, FLAC, OGG, AAC, and more. Use the playback controls to shuffle, repeat, seek, and manage your queue.",
+    "unsupportedFile": "Unsupported file",
+    "chooseFiles": "Choose Files"
+  },
+
+  "micModal": {
+    "step1Bold": "Click Start Microphone",
+    "step1": "and grant permission when prompted",
+    "step2Bold": "Let the sound drive the visuals",
+    "step2": "– live music, ambient noise, or anything your mic picks up",
+    "infoBox": "Silent mode: audio is captured but not played through your speakers.",
+    "startMicrophone": "Start Microphone"
+  },
+
+  "spotify": {
+    "connectedAs": "Connected as {{name}}",
+    "connected": "Spotify connected",
+    "connectedInfo": "Now-playing metadata & cloud-synced MangoWave settings active. Playback controls require Premium. Share a screen, window, or tab playing Spotify for audio.",
+    "connectOptional": "Connect Spotify (optional)",
+    "connectDescription": "Connect Spotify for now-playing metadata and cloud-synced MangoWave settings. Spotify Premium also enables playback controls. You'll still need to share a screen, window, or tab playing Spotify for the visualizer to react to audio.",
+    "connecting": "Connecting...",
+    "connectSpotify": "Connect Spotify",
+    "devInfo": "If you are not the app owner, ensure they've added your name and email associated with your Spotify account to their developer app's User Management tab."
+  },
+
+  "onboarding": {
+    "desktop": {
+      "skipPresetsTitle": "Skip Presets",
+      "skipPresetsDesc": "Press Space or N to skip to the next preset. Each one responds to your music differently.",
+      "curateTitle": "Curate Your Experience",
+      "curateDesc": "Open the Presets panel to browse, favorite, or block presets. Build a collection of your favorites and let autopilot cycle through them.",
+      "tuneTitle": "Tune the Visuals",
+      "tuneDesc": "Open Settings to adjust the equalizer, smoothing, and rendering quality, shaping how the visuals react to your music.",
+      "shortcutsTitle": "Keyboard Shortcuts",
+      "shortcutsDesc": "Press H to see all keyboard shortcuts, or find them in the Settings menu."
+    },
+    "mobile": {
+      "menuTitle": "The Menu",
+      "menuDesc": "Tap the logo in the corner to open the radial menu. It gives you quick access to everything: presets, settings, fullscreen, and more.",
+      "navigateTitle": "Navigate Presets",
+      "navigateDesc": "Use Next (▶) and Previous (◀) to skip between presets. Each one reacts to your music in its own way.",
+      "curateTitle": "Curate Your Experience",
+      "curateDesc": "Favorite (★) the presets you love, block (⊘) the ones you don't. Open Presets (P) to browse and filter your collection.",
+      "autopilotTitle": "Autopilot & Settings",
+      "autopilotDesc": "Toggle Autopilot (A) to cycle through presets automatically. Open Settings (⚙) to adjust the equalizer and rendering."
+    }
+  },
+
+  "landing": {
+    "title": "MangoWave | Audio Visualizer",
+    "metaDescription": "Free audio-reactive visualizer with 400+ visuals. No signup, no install, no ads. Every beat, every drop. Just hit launch.",
+    "tagline": "Your music, visualized.",
+    "taglineSub": "Every beat, every drop. Just hit launch.",
+    "feature400": "400+ Visuals",
+    "featureAnySource": "Any Audio Source",
+    "featureDesktopMobile": "Desktop & Mobile",
+    "featureNoSignup": "No Signup",
+    "featureNoInstall": "No Install",
+    "featureNoAds": "No Ads",
+    "launch": "Launch"
+  }
+}

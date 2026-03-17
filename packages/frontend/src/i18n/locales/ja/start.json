@@ -1,0 +1,109 @@
+{
+  "subtitle": "ブラウザで動く音声リアクティブビジュアライザー",
+  "chooseAudioSource": "音声ソースを選択してください",
+  "photosensitivityWarning": "光感受性に関する警告",
+  "photosensitivityDescription": "このビジュアライザーは高速で点滅する光やパターンを表示します。\nてんかんをお持ちの方、または点滅する光に敏感な方はご注意ください。",
+  "shareAudio": "音声を共有",
+  "shareAudioDescription": "画面共有でシステムまたはタブの音声をキャプチャします",
+  "playLocalFiles": "ローカルファイルを再生",
+  "localFilesDescription": "デバイスから音声ファイルを再生します",
+  "useMicrophone": "マイクを使用",
+  "micDescription": "環境音をビジュアライズします。サイレントモード",
+  "mobileCallout": "ノートPCまたはデスクトップを使用すると、画面共有で任意の画面、ウィンドウ、またはブラウザタブからの音声もキャプチャできます。",
+  "somethingWentWrong": "エラーが発生しました",
+
+  "shareAudioModal": {
+    "browserNoSupport": "{{browser}}は音声キャプチャをサポートしていません",
+    "browserCompatMessage": "画面共有による音声キャプチャには、Chromiumベースのブラウザ（Chrome、Edge、またはOpera）が必要です。代わりに",
+    "localFiles": "ローカルファイル",
+    "microphone": "マイク",
+    "asAudioSource": "を音声ソースとして使用できます。",
+    "step1": "で画面、ウィンドウ、またはタブを選択してください",
+    "step1Bold": "「開始」をクリック",
+    "step2Bold": "「音声を共有」にチェック",
+    "step2": "– ビジュアライザーが音声に反応するために必要です",
+    "step3Bold": "音楽を再生",
+    "step3": "してお楽しみください",
+    "startVisualizer": "ビジュアライザーを開始"
+  },
+
+  "osTips": {
+    "windowsChromeOS": "{{os}}では、すべての共有モード（画面、ウィンドウ、タブ）で音声がサポートされています。画面全体またはウィンドウを共有すると、ブラウザバナーなしでより快適に利用できます。",
+    "macOSChromium": "macOS 14.2以降では、画面とウィンドウの共有で音声がサポートされています。古いmacOSバージョンではタブ共有に限定されます。",
+    "macOSNonChromium": "macOSでの画面共有音声には、macOS 14.2以降でChromiumブラウザ（Chrome、Edge、Opera）が必要です。",
+    "linux": "Linuxでは、タブ共有のみが音声をサポートしています。",
+    "unknown": "WindowsとChromeOSでは、すべての共有モードで音声がサポートされています。macOS 14.2以降では、Chromeで画面とウィンドウの共有が音声をサポートしています。Linuxでは、タブ共有のみが音声をサポートしています。"
+  },
+
+  "sensitivityTips": {
+    "title": "感度とリアクティビティのヒント",
+    "description": "プリセットによって、アンビエント寄りのものやリアクティブなものがあります。設定パネルで感度やビジュアライゼーションエンジンに影響するパラメーターを調整できます。"
+  },
+
+  "localFilesModal": {
+    "step1Bold": "ファイルを選択",
+    "step1": "– デバイスから1つまたは複数の音声ファイルを選択してください",
+    "step2Bold": "音楽を再生",
+    "step2": "してお楽しみください",
+    "infoBox": "MP3、WAV、FLAC、OGG、AACなどに対応しています。再生コントロールでシャッフル、リピート、シーク、キュー管理ができます。",
+    "unsupportedFile": "サポートされていないファイル",
+    "chooseFiles": "ファイルを選択"
+  },
+
+  "micModal": {
+    "step1Bold": "「マイクを開始」をクリック",
+    "step1": "プロンプトが表示されたら許可してください",
+    "step2Bold": "音がビジュアルを駆動します",
+    "step2": "– ライブ音楽、環境音、マイクが拾うあらゆる音",
+    "infoBox": "サイレントモード：音声はキャプチャされますが、スピーカーからは再生されません。",
+    "startMicrophone": "マイクを開始"
+  },
+
+  "spotify": {
+    "connectedAs": "{{name}}として接続中",
+    "connected": "Spotify接続済み",
+    "connectedInfo": "再生中メタデータとクラウド同期されたMangoWave設定が有効です。再生コントロールにはPremiumが必要です。音声のためにSpotifyを再生している画面、ウィンドウ、またはタブを共有してください。",
+    "connectOptional": "Spotifyを接続（任意）",
+    "connectDescription": "Spotifyを接続すると、再生中メタデータとクラウド同期されたMangoWave設定が利用できます。Spotify Premiumでは再生コントロールも有効になります。ビジュアライザーが音声に反応するには、Spotifyを再生している画面、ウィンドウ、またはタブの共有が必要です。",
+    "connecting": "接続中...",
+    "connectSpotify": "Spotifyを接続",
+    "devInfo": "アプリオーナーでない場合は、Spotifyアカウントに関連付けられた名前とメールアドレスが、開発者アプリのユーザー管理タブに追加されていることを確認してください。"
+  },
+
+  "onboarding": {
+    "desktop": {
+      "skipPresetsTitle": "プリセットをスキップ",
+      "skipPresetsDesc": "Space または N を押すと次のプリセットに切り替わります。それぞれが音楽に対して異なる反応をします。",
+      "curateTitle": "自分好みにカスタマイズ",
+      "curateDesc": "プリセットパネルを開いて、プリセットの閲覧、お気に入り登録、ブロックができます。お気に入りのコレクションを作り、オートパイロットで順番に再生しましょう。",
+      "tuneTitle": "ビジュアルを調整",
+      "tuneDesc": "設定を開いてイコライザー、スムージング、レンダリング品質を調整し、ビジュアルが音楽にどう反応するかを変えましょう。",
+      "shortcutsTitle": "キーボードショートカット",
+      "shortcutsDesc": "H を押すとすべてのキーボードショートカットを確認できます。設定メニューからも見られます。"
+    },
+    "mobile": {
+      "menuTitle": "メニュー",
+      "menuDesc": "画面の角にあるロゴをタップすると、ラジアルメニューが開きます。プリセット、設定、フルスクリーンなど、すべてにすばやくアクセスできます。",
+      "navigateTitle": "プリセットを移動",
+      "navigateDesc": "次へ（▶）と前へ（◀）でプリセットを切り替えられます。それぞれが独自の方法で音楽に反応します。",
+      "curateTitle": "自分好みにカスタマイズ",
+      "curateDesc": "お気に入り（★）で好きなプリセットを登録し、ブロック（⊘）で不要なプリセットを除外できます。プリセット（P）を開いてコレクションの閲覧やフィルタリングができます。",
+      "autopilotTitle": "オートパイロットと設定",
+      "autopilotDesc": "オートパイロット（A）をオンにすると、プリセットが自動的に切り替わります。設定（⚙）でイコライザーやレンダリングを調整できます。"
+    }
+  },
+
+  "landing": {
+    "title": "MangoWave | オーディオビジュアライザー",
+    "metaDescription": "400以上のビジュアルを備えた無料の音声リアクティブビジュアライザー。登録不要、インストール不要、広告なし。すべてのビート、すべてのドロップ。ローンチボタンを押すだけ。",
+    "tagline": "あなたの音楽を、ビジュアライズ。",
+    "taglineSub": "すべてのビート、すべてのドロップ。ローンチボタンを押すだけ。",
+    "feature400": "400以上のビジュアル",
+    "featureAnySource": "あらゆる音声ソース",
+    "featureDesktopMobile": "デスクトップ＆モバイル",
+    "featureNoSignup": "登録不要",
+    "featureNoInstall": "インストール不要",
+    "featureNoAds": "広告なし",
+    "launch": "ローンチ"
+  }
+}

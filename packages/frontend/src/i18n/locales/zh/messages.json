@@ -1,0 +1,157 @@
+{
+  "errors": {
+    "notAllowedSystem": "屏幕共享已取消或被拒绝。请重试并选择要共享的屏幕、窗口或标签页。",
+    "notAllowedMic": "麦克风访问被拒绝。请在浏览器设置中允许麦克风访问，然后重试。",
+    "notFoundSystem": "没有可共享的屏幕或窗口。请确保已连接显示器，然后重试。",
+    "notFoundMic": "未找到麦克风。请连接麦克风后重试。",
+    "notSupportedSystem": "你的浏览器不支持通过屏幕共享进行音频捕获。请尝试使用 Chrome、Edge 或 Opera。",
+    "notSupportedMic": "你的浏览器不支持麦克风访问。请尝试使用 Chrome、Firefox 或 Edge 等现代浏览器。",
+    "notReadableSystem": "无法访问屏幕。可能有其他应用阻止了屏幕捕获。",
+    "notReadableMic": "无法访问你的麦克风。它可能正在被其他应用使用。请关闭该应用后重试。",
+    "abortError": "请求已取消。准备好后请重试。",
+    "genericError": "出了点问题：{{message}}。请重试。",
+    "unexpectedError": "发生了意外错误。请重试。",
+    "noAudioBase": "屏幕共享中未包含音频。请重试，并确保在浏览器对话框中勾选「共享音频」（或「共享系统音频」）。",
+    "noAudioNonChromium": "{{browser}} 不支持通过屏幕共享进行音频捕获。请尝试使用 Chrome、Edge 或 Opera。",
+    "noAudioWindowsChromeOS": "在 {{os}} 上，所有共享模式（屏幕、窗口和标签页）均支持音频。",
+    "noAudioMacOS": "在 macOS 14.2+ 上，Chrome 中的屏幕和窗口共享支持音频。较旧的 macOS 版本仅支持标签页共享。",
+    "noAudioLinux": "在 Linux 上，仅标签页共享支持音频。",
+    "noAudioUnknown": "在 Windows 和 ChromeOS 上，所有共享模式均支持音频。在 macOS 14.2+ 上，Chrome 中的屏幕和窗口共享支持音频。在 Linux 上，仅标签页共享支持音频。",
+    "webgl2NotSupported": "不支持 WebGL 2",
+    "webgl2NotSupportedDesc": "MangoWave 需要 WebGL 2 来渲染可视化效果。请尝试使用 Chrome、Firefox 或 Edge 等现代浏览器。",
+    "webglContextLost": "可视化工具失去图形上下文",
+    "webglContextLostDesc": "你的设备图形系统被中断。这可能发生在设备负载较重、GPU 被其他应用占用或显示配置更改时。重新加载页面即可恢复可视化工具。",
+    "renderingError": "发生了渲染错误，可能是 WebGL 或 Web Audio 问题。"
+  },
+
+  "fileValidation": {
+    "singleRejected": "「{{filename}}」不是受支持的音频文件。请使用 MP3、WAV、FLAC、OGG、AAC 或其他常见音频格式。",
+    "multipleRejected": "{{count}} 个文件不是受支持的音频格式，已被跳过：{{names}}。请使用 MP3、WAV、FLAC、OGG、AAC 或其他常见音频格式。"
+  },
+
+  "settingsImport": {
+    "mustBeJson": "文件必须是 .json 文件",
+    "fileTooLarge": "文件太大",
+    "notMangoWaveFile": "不是 MangoWave 设置文件",
+    "newerVersion": "设置文件来自较新的应用版本。部分设置可能无法应用",
+    "invalidFile": "无效的设置文件",
+    "fieldNotApplied": "「{{field}}」无法应用",
+    "importedWithWarnings": "设置已导入。由于应用变更，部分设置无法应用",
+    "importedSuccess": "设置导入成功"
+  },
+
+  "spotify": {
+    "connectingToSpotify": "正在连接 Spotify...",
+    "connectionFailed": "Spotify 连接失败。请重试。如果问题持续存在，请检查你的账户是否已添加到应用的授权用户中。",
+    "premiumRequired": "播放控制需要 Spotify Premium。你仍可以查看正在播放的信息，并使用其他音频来源与 MangoWave 配合使用。",
+    "networkError": "无法连接到 Spotify。请检查你的网络连接后重试。",
+    "popupBlocked": "无法打开 Spotify 登录窗口。请检查是否允许此站点弹出窗口，然后重试。",
+    "rateLimited": "Spotify 请求频率受限。将在 {{seconds}}s 后重试"
+  },
+
+  "toasts": {
+    "autopilotOn": "自动播放已开启",
+    "autopilotOff": "自动播放已关闭",
+    "addedToFavorites": "已添加到收藏",
+    "removedFromFavorites": "已从收藏中移除",
+    "presetBlocked": "预设已屏蔽",
+    "presetUnblocked": "预设已取消屏蔽",
+    "presetRestoredToPool": "预设已恢复到池中",
+    "presetReturnedToExcluded": "预设已返回到排除列表",
+    "blockedPresetsCleared": "已屏蔽的预设已清除",
+    "favoritePresetsCleared": "收藏的预设已清除",
+    "silenceDetected": "未检测到音频。请确保共享的屏幕、窗口或标签页中正在播放音频，并且在浏览器对话框中勾选了「共享音频」。",
+    "silenceDetectedMic": "未检测到麦克风音频。请确保麦克风未静音并且正在拾取声音。"
+  },
+
+  "playback": {
+    "addSongsToQueue": "将歌曲添加到队列",
+    "micNoControls": "麦克风输入：无播放控制",
+    "sharingNoControls": "音频共享中：无播放控制",
+    "controlsUnavailable": "播放控制不可用",
+    "previousTrack": "上一首",
+    "nextTrack": "下一首",
+    "play": "播放",
+    "pause": "暂停",
+    "previousTrackShortcut": "上一首 (J)",
+    "nextTrackShortcut": "下一首 (L)",
+    "pauseShortcut": "暂停 (K)",
+    "playShortcut": "播放 (K)",
+    "enableShuffle": "开启随机播放",
+    "disableShuffle": "关闭随机播放",
+    "shuffleOn": "随机播放：开",
+    "shuffleOff": "随机播放：关",
+    "repeatOff": "重复播放：关",
+    "repeatAll": "全部重复",
+    "repeatOne": "单曲重复",
+    "seek": "快进",
+    "seekSpotifyNote": "快进更新可能需要片刻时间与 Spotify 同步",
+    "mute": "静音",
+    "unmute": "取消静音",
+    "volume": "音量",
+    "nowPlayingOn": "正在播放：开（每首显示 5 秒）",
+    "nowPlayingOff": "正在播放：关（每首显示 5 秒）",
+    "queueShortcut": "队列 (Q)",
+    "playingOn": "正在 {{device}} 上播放"
+  },
+
+  "queue": {
+    "title": "队列",
+    "addFiles": "添加文件",
+    "closeQueue": "关闭队列",
+    "moveUp": "上移 {{name}}",
+    "moveDown": "下移 {{name}}",
+    "remove": "移除 {{name}}",
+    "noTracksLoaded": "未加载任何曲目"
+  },
+
+  "controlBar": {
+    "previousPreset": "上一个预设 (P)",
+    "nextPreset": "下一个预设 (N)",
+    "blockPreset": "屏蔽预设 (B)",
+    "unblockPreset": "取消屏蔽预设 (B)",
+    "addToFavorites": "添加到收藏 (S)",
+    "removeFromFavorites": "从收藏中移除 (S)",
+    "toggleAutopilot": "切换自动播放 (A)",
+    "toggleFullscreen": "切换全屏 (F)",
+    "exitFS": "退出全屏"
+  },
+
+  "mobile": {
+    "next": "下一个",
+    "favorite": "收藏",
+    "unfavorite": "取消收藏",
+    "block": "屏蔽",
+    "unblock": "取消屏蔽",
+    "openMenu": "打开菜单",
+    "closeMenu": "关闭菜单",
+    "menu": "菜单"
+  },
+
+  "presetBrowser": {
+    "tabs": {
+      "all": "全部",
+      "favorites": "收藏",
+      "blocked": "已屏蔽",
+      "excluded": "已排除",
+      "history": "历史"
+    },
+    "noPacksSelected": "未选择预设包。自动播放已暂停",
+    "packsActive": "{{active}}/{{total}} 个预设包已启用",
+    "searchPlaceholder": "搜索预设...",
+    "clearSearch": "清除搜索",
+    "noPresetsVisible": "没有可见的预设",
+    "noPresetsFound": "未找到预设",
+    "noHistoryYet": "暂无历史记录",
+    "noExcludedPresets": "没有已排除的预设",
+    "excludedDescription": "这些预设已从池中排除。点击任一预设可自行加载，风险自负。",
+    "addToFavorites": "添加到收藏",
+    "removeFromFavorites": "从收藏中移除",
+    "blockPreset": "屏蔽预设",
+    "unblockPreset": "取消屏蔽预设",
+    "restoreToPool": "恢复到池中",
+    "quarantineBroken": "损坏",
+    "quarantineContent": "内容",
+    "quarantineMobilePerf": "移动端性能"
+  }
+}

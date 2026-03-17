@@ -1,0 +1,109 @@
+{
+  "subtitle": "浏览器中的音频响应可视化工具",
+  "chooseAudioSource": "选择你的音频来源",
+  "photosensitivityWarning": "光敏性警告",
+  "photosensitivityDescription": "此可视化工具会显示快速闪烁的灯光和图案。\n如果你有癫痫或对闪烁灯光敏感，请谨慎观看。",
+  "shareAudio": "共享音频",
+  "shareAudioDescription": "通过屏幕共享捕获系统或标签页音频",
+  "playLocalFiles": "播放本地文件",
+  "localFilesDescription": "播放设备上的音频文件",
+  "useMicrophone": "使用麦克风",
+  "micDescription": "可视化环境声音。静音模式",
+  "mobileCallout": "使用笔记本电脑或台式机，还可以通过屏幕共享捕获任何屏幕、窗口或浏览器标签页的音频。",
+  "somethingWentWrong": "出了点问题",
+
+  "shareAudioModal": {
+    "browserNoSupport": "{{browser}} 不支持音频捕获",
+    "browserCompatMessage": "通过屏幕共享进行音频捕获需要基于 Chromium 的浏览器（Chrome、Edge 或 Opera）。你仍然可以使用",
+    "localFiles": "本地文件",
+    "microphone": "麦克风",
+    "asAudioSource": "作为音频来源。",
+    "step1": "然后选择要共享的屏幕、窗口或标签页",
+    "step1Bold": "点击开始",
+    "step2Bold": "勾选「共享音频」",
+    "step2": "– 这是可视化工具响应声音的必要条件",
+    "step3Bold": "播放音乐",
+    "step3": "沉浸其中",
+    "startVisualizer": "启动可视化工具"
+  },
+
+  "osTips": {
+    "windowsChromeOS": "在 {{os}} 上，所有共享模式（屏幕、窗口和标签页）均支持音频。共享整个屏幕或窗口可获得最佳体验（无浏览器横幅）。",
+    "macOSChromium": "在 macOS 14.2+ 上，屏幕和窗口共享支持音频。较旧的 macOS 版本仅支持标签页共享。",
+    "macOSNonChromium": "在 macOS 14.2+ 上，屏幕共享音频需要 Chromium 浏览器（Chrome、Edge、Opera）。",
+    "linux": "在 Linux 上，仅标签页共享支持音频。",
+    "unknown": "在 Windows 和 ChromeOS 上，所有共享模式均支持音频。在 macOS 14.2+ 上，Chrome 中的屏幕和窗口共享支持音频。在 Linux 上，仅标签页共享支持音频。"
+  },
+
+  "sensitivityTips": {
+    "title": "灵敏度和响应度提示",
+    "description": "有些预设偏向环境氛围，对声音的响应较弱。你可以在设置面板中调整灵敏度和其他参数来优化可视化效果。"
+  },
+
+  "localFilesModal": {
+    "step1Bold": "选择你的文件",
+    "step1": "– 从设备中选择一个或多个音频文件",
+    "step2Bold": "播放音乐",
+    "step2": "沉浸其中",
+    "infoBox": "支持 MP3、WAV、FLAC、OGG、AAC 等格式。使用播放控件进行随机播放、重复、快进和管理队列。",
+    "unsupportedFile": "不支持的文件",
+    "chooseFiles": "选择文件"
+  },
+
+  "micModal": {
+    "step1Bold": "点击启动麦克风",
+    "step1": "并在提示时授予权限",
+    "step2Bold": "让声音驱动视觉效果",
+    "step2": "– 现场音乐、环境噪音或麦克风捕获的任何声音",
+    "infoBox": "静音模式：音频被捕获但不会通过扬声器播放。",
+    "startMicrophone": "启动麦克风"
+  },
+
+  "spotify": {
+    "connectedAs": "已连接为 {{name}}",
+    "connected": "Spotify 已连接",
+    "connectedInfo": "正在播放的元数据和云同步 MangoWave 设置已激活。播放控制需要 Premium。共享正在播放 Spotify 的屏幕、窗口或标签页以获取音频。",
+    "connectOptional": "连接 Spotify（可选）",
+    "connectDescription": "连接 Spotify 以获取正在播放的元数据和云同步 MangoWave 设置。Spotify Premium 还可启用播放控制。你仍需要共享正在播放 Spotify 的屏幕、窗口或标签页，可视化工具才能响应音频。",
+    "connecting": "正在连接...",
+    "connectSpotify": "连接 Spotify",
+    "devInfo": "如果你不是应用所有者，请确保他们已将你的 Spotify 账户关联的姓名和电子邮件添加到其开发者应用的用户管理标签页中。"
+  },
+
+  "onboarding": {
+    "desktop": {
+      "skipPresetsTitle": "跳过预设",
+      "skipPresetsDesc": "按 Space 或 N 跳到下一个预设。每个预设对你的音乐有不同的响应。",
+      "curateTitle": "定制你的体验",
+      "curateDesc": "打开预设面板来浏览、收藏或屏蔽预设。建立你的收藏列表，让自动播放循环播放它们。",
+      "tuneTitle": "调整视觉效果",
+      "tuneDesc": "打开设置来调整均衡器、平滑度和渲染质量，改变视觉效果对音乐的响应方式。",
+      "shortcutsTitle": "键盘快捷键",
+      "shortcutsDesc": "按 H 查看所有键盘快捷键，或在设置菜单中找到它们。"
+    },
+    "mobile": {
+      "menuTitle": "菜单",
+      "menuDesc": "点击角落的图标打开径向菜单。它可以快速访问所有功能：预设、设置、全屏等。",
+      "navigateTitle": "浏览预设",
+      "navigateDesc": "使用下一个 (▶) 和上一个 (◀) 在预设之间切换。每个预设以自己的方式响应你的音乐。",
+      "curateTitle": "定制你的体验",
+      "curateDesc": "收藏 (★) 你喜欢的预设，屏蔽 (⊘) 你不喜欢的。打开预设 (P) 来浏览和筛选你的收藏。",
+      "autopilotTitle": "自动播放和设置",
+      "autopilotDesc": "开启自动播放 (A) 自动循环预设。打开设置 (⚙) 调整均衡器和渲染效果。"
+    }
+  },
+
+  "landing": {
+    "title": "MangoWave | 音频可视化工具",
+    "metaDescription": "免费音频响应可视化工具，拥有 400+ 视觉效果。无需注册、无需安装、没有广告。每一个节拍，每一次律动。立即启动。",
+    "tagline": "你的音乐，可视化。",
+    "taglineSub": "每一个节拍，每一次律动。立即启动。",
+    "feature400": "400+ 视觉效果",
+    "featureAnySource": "任何音频来源",
+    "featureDesktopMobile": "桌面端和移动端",
+    "featureNoSignup": "无需注册",
+    "featureNoInstall": "无需安装",
+    "featureNoAds": "没有广告",
+    "launch": "启动"
+  }
+}

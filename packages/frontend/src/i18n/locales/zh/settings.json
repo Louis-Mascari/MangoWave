@@ -1,0 +1,117 @@
+{
+  "tabs": {
+    "equalizer": "均衡器",
+    "rendering": "渲染",
+    "presets": "预设",
+    "shortcuts": "快捷键",
+    "data": "数据",
+    "spotify": "Spotify"
+  },
+
+  "equalizer": {
+    "title": "均衡器",
+    "tooltip": "调整哪些频率驱动视觉效果。不会改变音频输出。增强低音以获得更强烈的动感，削减高音以减弱高频反应",
+    "scaleHigh": "+12",
+    "scaleMid": "0 dB",
+    "scaleLow": "-12",
+    "preAmp": "前置放大",
+    "preAmpTooltip": "缩放整体信号。数值越高视觉响应越强，越低则越平缓。纯视觉效果，不影响音频输出"
+  },
+
+  "rendering": {
+    "title": "渲染",
+    "frameRate": "帧率",
+    "frameRateTooltip": "较低的帧率可减少 GPU 使用",
+    "frameRatePlaceholder": "15–300",
+    "uncapped": "无上限",
+    "resolution": "分辨率",
+    "resolutionTooltip": "较低的分辨率可减少 GPU 负载，但清晰度会降低",
+    "meshResolution": "网格分辨率",
+    "meshResolutionTooltip": "控制变形扭曲的顶点网格。越高 = 细节越丰富，GPU 开销越大",
+    "textureQuality": "纹理质量",
+    "textureQualityTooltip": "内部渲染分辨率倍数。越低 = 越快，越高 = 超采样质量",
+    "antiAliasing": "抗锯齿",
+    "antiAliasingTooltip": "使用 FXAA 平滑锯齿边缘。性能开销较小（约 2-3%）",
+    "analysis": "分析",
+    "audioSmoothing": "音频平滑度：{{value}}",
+    "audioSmoothingTooltip": "越低 = 对节拍的反应越灵敏，越高 = 运动越平滑。效果较细微：预设会应用自身的内部平滑",
+    "fftSize": "FFT 大小",
+    "fftSizeTooltip": "越高 = 频率细节越丰富但延迟更大。效果较细微：引擎会映射到固定的内部频段"
+  },
+
+  "presets": {
+    "title": "预设",
+    "tooltip": "预设对声音的响应程度各不相同。如果视觉效果感觉太弱或太强，请在均衡器标签页中调整前置放大增益",
+    "transitionTime": "过渡时间：{{value}}s",
+    "transitionTimeTooltip": "切换预设时混合过渡的持续时间",
+    "presetNameDisplay": "预设名称显示",
+    "presetNameDisplayTooltip": "切换预设时名称显示的时长",
+    "always": "始终显示",
+    "timed": "定时",
+    "duration": "持续时间：{{value}}s",
+    "autopilotTooltip": "按设定间隔自动循环预设。使用随机轮播方式：每个预设播放一次后才会重复",
+    "interval": "间隔：{{value}}s",
+    "mode": "模式",
+    "modeTooltip": "全部 = 来自已选预设包的预设，收藏 = 仅收藏的预设（忽略预设包选择）",
+    "all": "全部",
+    "favorites": "收藏",
+    "favoriteFrequency": "收藏频率：{{value}}x",
+    "favoriteFrequencyTooltip": "收藏预设被优先选中的概率倍数。每个预设在一轮中仍只播放一次。这只是让收藏的预设更早出现",
+    "clearBlockedConfirm": "清除所有 {{count}} 个已屏蔽的预设？",
+    "clearBlocked": "清除已屏蔽 ({{count}})",
+    "clearFavoritesConfirm": "清除所有 {{count}} 个收藏的预设？",
+    "clearFavorites": "清除收藏 ({{count}})"
+  },
+
+  "data": {
+    "title": "数据",
+    "description": "你的设置存储在此设备的浏览器本地。使用导出和导入功能可在不同浏览器或设备之间传输设置，或进行备份。",
+    "descriptionWithSync": "你的设置存储在此设备的浏览器本地。如果通过 Spotify 连接，还会同步到云端。使用导出和导入功能可在不同浏览器或设备之间传输设置，或进行备份。",
+    "export": "导出",
+    "exportSettings": "导出设置",
+    "import": "导入",
+    "importDescription": "选择要导入的类别。仅所选类别会被覆盖，其余保持不变。",
+    "loadFileDescription": "加载设置文件以选择要应用的类别。",
+    "importSettings": "导入设置",
+    "categoryRendering": "渲染",
+    "categoryAudioAnalysis": "音频平滑与FFT",
+    "categoryEq": "均衡器",
+    "categoryAutopilot": "自动播放",
+    "categoryDisplay": "显示与音量",
+    "categoryFavorites": "收藏",
+    "categoryBlocked": "已屏蔽预设",
+    "categoryPacks": "预设包与排除项"
+  },
+
+  "spotifyTab": {
+    "title": "Spotify",
+    "unavailable": "Spotify 集成不可用。如果你正在自行托管 MangoWave，请参阅 README 了解设置说明。",
+    "connectedAs": "已连接为 {{name}}",
+    "connected": "已连接",
+    "connectedInfo": "正在播放的元数据和云同步 MangoWave 设置已激活。播放控制需要 Premium。共享正在播放 Spotify 的屏幕、窗口或标签页，让可视化工具获取音频。",
+    "connectDescription": "连接 Spotify 以获取正在播放的元数据和云同步 MangoWave 设置。Spotify Premium 还可启用播放控制。你仍需要共享正在播放 Spotify 的屏幕、窗口或标签页，可视化工具才能响应音频。",
+    "connecting": "正在连接...",
+    "connectSpotify": "连接 Spotify",
+    "devInfo": "如果你不是应用所有者，请确保他们已将你的 Spotify 账户关联的姓名和电子邮件添加到其开发者应用的用户管理标签页中。"
+  },
+
+  "shortcutActions": {
+    "nextPreset": "下一个预设",
+    "previousPreset": "上一个预设",
+    "toggleFullscreen": "切换全屏",
+    "toggleAutopilot": "切换自动播放",
+    "toggleFavorite": "切换收藏",
+    "toggleBlock": "切换屏蔽",
+    "toggleQueue": "切换队列（本地文件）",
+    "playPause": "播放 / 暂停",
+    "previousTrack": "上一首",
+    "nextTrack": "下一首",
+    "closePanel": "关闭面板 / 覆盖层",
+    "toggleShortcuts": "切换快捷键面板"
+  },
+
+  "language": {
+    "title": "语言",
+    "tooltip": "选择界面的显示语言"
+  }
+}

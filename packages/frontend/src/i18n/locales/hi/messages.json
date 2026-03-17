@@ -1,0 +1,157 @@
+{
+  "errors": {
+    "notAllowedSystem": "स्क्रीन शेयरिंग रद्द या अस्वीकार कर दी गई। कृपया फिर से कोशिश करो और शेयर करने के लिए एक स्क्रीन, विंडो या टैब चुनो।",
+    "notAllowedMic": "माइक्रोफ़ोन एक्सेस अस्वीकार कर दी गई। कृपया अपनी ब्राउज़र सेटिंग्स में माइक्रोफ़ोन एक्सेस की अनुमति दो और फिर से कोशिश करो।",
+    "notFoundSystem": "शेयर करने के लिए कोई स्क्रीन या विंडो उपलब्ध नहीं थी। कृपया सुनिश्चित करो कि डिस्प्ले कनेक्टेड है और फिर से कोशिश करो।",
+    "notFoundMic": "कोई माइक्रोफ़ोन नहीं मिला। कृपया माइक्रोफ़ोन कनेक्ट करो और फिर से कोशिश करो।",
+    "notSupportedSystem": "तुम्हारा ब्राउज़र स्क्रीन शेयरिंग के ज़रिए ऑडियो कैप्चर सपोर्ट नहीं करता। कृपया Chrome, Edge, या Opera आज़माओ।",
+    "notSupportedMic": "तुम्हारा ब्राउज़र माइक्रोफ़ोन एक्सेस सपोर्ट नहीं करता। कृपया Chrome, Firefox, या Edge जैसा मॉडर्न ब्राउज़र आज़माओ।",
+    "notReadableSystem": "स्क्रीन एक्सेस नहीं हो सकी। कोई अन्य एप्लिकेशन स्क्रीन कैप्चर रोक रहा हो सकता है।",
+    "notReadableMic": "तुम्हारा माइक्रोफ़ोन एक्सेस नहीं हो सका। हो सकता है कोई अन्य एप्लिकेशन इस्तेमाल कर रहा हो। उसे बंद करके फिर कोशिश करो।",
+    "abortError": "रिक्वेस्ट रद्द कर दी गई। कृपया तैयार होने पर फिर से कोशिश करो।",
+    "genericError": "कुछ गड़बड़ हो गई: {{message}}। कृपया फिर से कोशिश करो।",
+    "unexpectedError": "एक अप्रत्याशित त्रुटि हुई। कृपया फिर से कोशिश करो।",
+    "noAudioBase": "स्क्रीन शेयर में ऑडियो शामिल नहीं था। कृपया फिर से कोशिश करो और ब्राउज़र डायलॉग में \"Share audio\" (या \"Share system audio\") चेक करना न भूलो।",
+    "noAudioNonChromium": "{{browser}} स्क्रीन शेयरिंग के ज़रिए ऑडियो कैप्चर सपोर्ट नहीं करता। कृपया Chrome, Edge, या Opera आज़माओ।",
+    "noAudioWindowsChromeOS": "{{os}} पर सभी शेयरिंग मोड (स्क्रीन, विंडो और टैब) ऑडियो सपोर्ट करते हैं।",
+    "noAudioMacOS": "macOS 14.2+ पर, Chrome में स्क्रीन और विंडो शेयरिंग ऑडियो सपोर्ट करती है। पुराने macOS वर्शन सिर्फ़ टैब शेयरिंग तक सीमित हैं।",
+    "noAudioLinux": "Linux पर, सिर्फ़ टैब शेयरिंग ऑडियो सपोर्ट करती है।",
+    "noAudioUnknown": "Windows और ChromeOS पर, सभी शेयरिंग मोड ऑडियो सपोर्ट करते हैं। macOS 14.2+ पर, Chrome में स्क्रीन और विंडो शेयरिंग ऑडियो सपोर्ट करती है। Linux पर, सिर्फ़ टैब शेयरिंग ऑडियो सपोर्ट करती है।",
+    "webgl2NotSupported": "WebGL 2 सपोर्टेड नहीं है",
+    "webgl2NotSupportedDesc": "MangoWave को विज़ुअलाइज़ेशन रेंडर करने के लिए WebGL 2 चाहिए। कृपया Chrome, Firefox, या Edge जैसा मॉडर्न ब्राउज़र आज़माओ।",
+    "webglContextLost": "विज़ुअलाइज़र ने ग्राफ़िक्स कॉन्टेक्स्ट खो दिया",
+    "webglContextLostDesc": "तुम्हारे डिवाइस का ग्राफ़िक्स सिस्टम बाधित हो गया। यह तब हो सकता है जब डिवाइस पर भारी लोड हो, GPU अन्य एप्लिकेशन के साथ शेयर हो रहा हो, या डिस्प्ले कॉन्फ़िगरेशन बदल गया हो। पेज रीलोड करने से विज़ुअलाइज़र फिर से चालू हो जाएगा।",
+    "renderingError": "एक रेंडरिंग त्रुटि हुई, संभवतः WebGL या Web Audio समस्या।"
+  },
+
+  "fileValidation": {
+    "singleRejected": "\"{{filename}}\" एक समर्थित ऑडियो फ़ाइल नहीं है। कृपया MP3, WAV, FLAC, OGG, AAC या अन्य सामान्य ऑडियो फ़ॉर्मेट इस्तेमाल करो।",
+    "multipleRejected": "{{count}} फ़ाइलें समर्थित ऑडियो फ़ॉर्मेट नहीं थीं और छोड़ दी गईं: {{names}}। कृपया MP3, WAV, FLAC, OGG, AAC या अन्य सामान्य ऑडियो फ़ॉर्मेट इस्तेमाल करो।"
+  },
+
+  "settingsImport": {
+    "mustBeJson": "फ़ाइल .json होनी चाहिए",
+    "fileTooLarge": "फ़ाइल बहुत बड़ी है",
+    "notMangoWaveFile": "यह MangoWave सेटिंग्स फ़ाइल नहीं है",
+    "newerVersion": "सेटिंग्स फ़ाइल नए ऐप वर्शन से है। कुछ सेटिंग्स लागू नहीं हो सकतीं",
+    "invalidFile": "अमान्य सेटिंग्स फ़ाइल",
+    "fieldNotApplied": "\"{{field}}\" लागू नहीं हो सका",
+    "importedWithWarnings": "सेटिंग्स इम्पोर्ट हो गईं। ऐप बदलावों के कारण कुछ सेटिंग्स लागू नहीं हो सकीं",
+    "importedSuccess": "सेटिंग्स सफलतापूर्वक इम्पोर्ट हो गईं"
+  },
+
+  "spotify": {
+    "connectingToSpotify": "Spotify से कनेक्ट हो रहा है...",
+    "connectionFailed": "Spotify कनेक्शन विफल हो गया। कृपया फिर से कोशिश करो। अगर समस्या बनी रहे, तो जाँचो कि तुम्हारा अकाउंट ऐप के अधिकृत उपयोगकर्ताओं में जोड़ा गया है।",
+    "premiumRequired": "प्लेबैक कंट्रोल के लिए Spotify Premium ज़रूरी है। तुम अभी भी अभी चल रहा है जानकारी देख सकते हो और अन्य ऑडियो सोर्स के साथ MangoWave इस्तेमाल कर सकते हो।",
+    "networkError": "Spotify तक नहीं पहुँच सके। कृपया अपना कनेक्शन जाँचो और फिर से कोशिश करो।",
+    "popupBlocked": "Spotify लॉगिन विंडो नहीं खुल सकी। कृपया जाँचो कि इस साइट के लिए पॉप-अप अनुमत हैं और फिर से कोशिश करो।",
+    "rateLimited": "Spotify रेट लिमिटेड। {{seconds}}s में फिर कोशिश होगी"
+  },
+
+  "toasts": {
+    "autopilotOn": "ऑटोपायलट चालू",
+    "autopilotOff": "ऑटोपायलट बंद",
+    "addedToFavorites": "फ़ेवरिट में जोड़ा गया",
+    "removedFromFavorites": "फ़ेवरिट से हटाया गया",
+    "presetBlocked": "प्रीसेट ब्लॉक किया",
+    "presetUnblocked": "प्रीसेट अनब्लॉक किया",
+    "presetRestoredToPool": "प्रीसेट पूल में वापस लाया",
+    "presetReturnedToExcluded": "प्रीसेट एक्सक्लूडेड में वापस किया",
+    "blockedPresetsCleared": "ब्लॉक किए प्रीसेट साफ़ किए",
+    "favoritePresetsCleared": "फ़ेवरिट प्रीसेट साफ़ किए",
+    "silenceDetected": "कोई ऑडियो नहीं मिला। सुनिश्चित करो कि शेयर की गई स्क्रीन, विंडो या टैब में ऑडियो चल रहा है, और ब्राउज़र डायलॉग में \"Share audio\" चेक किया है।",
+    "silenceDetectedMic": "माइक्रोफ़ोन से कोई ऑडियो नहीं मिला। सुनिश्चित करो कि तुम्हारा mic म्यूट नहीं है और आवाज़ कैप्चर कर रहा है।"
+  },
+
+  "playback": {
+    "addSongsToQueue": "क़तार में गाने जोड़ो",
+    "micNoControls": "माइक्रोफ़ोन इनपुट: कोई प्लेबैक कंट्रोल नहीं",
+    "sharingNoControls": "ऑडियो शेयरिंग: कोई प्लेबैक कंट्रोल नहीं",
+    "controlsUnavailable": "प्लेबैक कंट्रोल उपलब्ध नहीं",
+    "previousTrack": "पिछला ट्रैक",
+    "nextTrack": "अगला ट्रैक",
+    "play": "चलाओ",
+    "pause": "रोको",
+    "previousTrackShortcut": "पिछला ट्रैक (J)",
+    "nextTrackShortcut": "अगला ट्रैक (L)",
+    "pauseShortcut": "रोको (K)",
+    "playShortcut": "चलाओ (K)",
+    "enableShuffle": "शफ़ल चालू करो",
+    "disableShuffle": "शफ़ल बंद करो",
+    "shuffleOn": "शफ़ल: चालू",
+    "shuffleOff": "शफ़ल: बंद",
+    "repeatOff": "रिपीट: बंद",
+    "repeatAll": "सभी रिपीट",
+    "repeatOne": "एक रिपीट",
+    "seek": "सीक",
+    "seekSpotifyNote": "सीक अपडेट Spotify से सिंक होने में थोड़ा समय ले सकते हैं",
+    "mute": "म्यूट",
+    "unmute": "अनम्यूट",
+    "volume": "वॉल्यूम",
+    "nowPlayingOn": "अभी चल रहा है: चालू (हर ट्रैक 5s दिखाता है)",
+    "nowPlayingOff": "अभी चल रहा है: बंद (हर ट्रैक 5s दिखाता है)",
+    "queueShortcut": "क़तार (Q)",
+    "playingOn": "{{device}} पर चल रहा है"
+  },
+
+  "queue": {
+    "title": "क़तार",
+    "addFiles": "फ़ाइलें जोड़ो",
+    "closeQueue": "क़तार बंद करो",
+    "moveUp": "{{name}} ऊपर ले जाओ",
+    "moveDown": "{{name}} नीचे ले जाओ",
+    "remove": "{{name}} हटाओ",
+    "noTracksLoaded": "कोई ट्रैक लोड नहीं"
+  },
+
+  "controlBar": {
+    "previousPreset": "पिछला प्रीसेट (P)",
+    "nextPreset": "अगला प्रीसेट (N)",
+    "blockPreset": "प्रीसेट ब्लॉक करो (B)",
+    "unblockPreset": "प्रीसेट अनब्लॉक करो (B)",
+    "addToFavorites": "फ़ेवरिट में जोड़ो (S)",
+    "removeFromFavorites": "फ़ेवरिट से हटाओ (S)",
+    "toggleAutopilot": "ऑटोपायलट टॉगल (A)",
+    "toggleFullscreen": "फ़ुलस्क्रीन टॉगल (F)",
+    "exitFS": "FS बाहर"
+  },
+
+  "mobile": {
+    "next": "अगला",
+    "favorite": "फ़ेवरिट",
+    "unfavorite": "अनफ़ेवरिट",
+    "block": "ब्लॉक",
+    "unblock": "अनब्लॉक",
+    "openMenu": "मेन्यू खोलो",
+    "closeMenu": "मेन्यू बंद करो",
+    "menu": "मेन्यू"
+  },
+
+  "presetBrowser": {
+    "tabs": {
+      "all": "सभी",
+      "favorites": "फ़ेवरिट",
+      "blocked": "ब्लॉक किए",
+      "excluded": "एक्सक्लूडेड",
+      "history": "इतिहास"
+    },
+    "noPacksSelected": "कोई पैक नहीं चुना। ऑटोपायलट रुका हुआ",
+    "packsActive": "{{active}}/{{total}} पैक सक्रिय",
+    "searchPlaceholder": "प्रीसेट खोजो...",
+    "clearSearch": "खोज साफ़ करो",
+    "noPresetsVisible": "कोई प्रीसेट दिख नहीं रहा",
+    "noPresetsFound": "कोई प्रीसेट नहीं मिला",
+    "noHistoryYet": "अभी तक कोई इतिहास नहीं",
+    "noExcludedPresets": "कोई एक्सक्लूडेड प्रीसेट नहीं",
+    "excludedDescription": "ये प्रीसेट पूल से एक्सक्लूड हैं। अपनी ज़िम्मेदारी पर लोड करने के लिए किसी पर टैप करो।",
+    "addToFavorites": "फ़ेवरिट में जोड़ो",
+    "removeFromFavorites": "फ़ेवरिट से हटाओ",
+    "blockPreset": "प्रीसेट ब्लॉक करो",
+    "unblockPreset": "प्रीसेट अनब्लॉक करो",
+    "restoreToPool": "पूल में वापस लाओ",
+    "quarantineBroken": "टूटा हुआ",
+    "quarantineContent": "कॉन्टेंट",
+    "quarantineMobilePerf": "मोबाइल परफ़ॉर्मेंस"
+  }
+}

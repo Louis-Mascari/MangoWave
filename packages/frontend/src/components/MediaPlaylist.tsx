@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMediaPlayerStore } from '../store/useMediaPlayerStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import { validateAudioFiles, rejectionMessage } from '../utils/audioFileValidation.ts';
@@ -17,6 +18,8 @@ interface MediaPlaylistProps {
 }
 
 export function MediaPlaylist({ onAddFiles, onClear, onClose }: MediaPlaylistProps) {
+  const { t } = useTranslation('messages');
+  const { t: tc } = useTranslation('common');
   const tracks = useMediaPlayerStore((s) => s.tracks);
   const currentTrackIndex = useMediaPlayerStore((s) => s.currentTrackIndex);
   const setCurrentTrack = useMediaPlayerStore((s) => s.setCurrentTrack);
@@ -46,26 +49,26 @@ export function MediaPlaylist({ onAddFiles, onClear, onClose }: MediaPlaylistPro
   return (
     <div className="flex max-h-80 flex-col gap-2 rounded-lg bg-black/60 p-4 backdrop-blur-sm">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-white">Queue</h3>
+        <h3 className="text-sm font-semibold text-white">{t('queue.title')}</h3>
         <div className="flex gap-2">
           <button
             onClick={handleAddClick}
             className="cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-xs text-white/70 hover:bg-white/20"
           >
-            Add Files
+            {t('queue.addFiles')}
           </button>
           <button
             onClick={onClear}
             className="cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-xs text-red-400/70 hover:bg-white/20"
           >
-            Clear
+            {tc('clear')}
           </button>
           {onClose && (
             <button
               onClick={onClose}
               className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-none bg-white/10 text-xs text-white/60 hover:bg-white/20 hover:text-white"
-              aria-label="Close queue"
-              title="Close queue"
+              aria-label={t('queue.closeQueue')}
+              title={t('queue.closeQueue')}
             >
               ✕
             </button>
@@ -95,7 +98,7 @@ export function MediaPlaylist({ onAddFiles, onClear, onClose }: MediaPlaylistPro
                   }}
                   disabled={index === 0}
                   className="flex h-7 w-7 cursor-pointer items-center justify-center rounded border-none bg-white/10 text-xs text-white/30 hover:bg-white/20 hover:text-white/70 disabled:cursor-default disabled:bg-transparent disabled:text-white/10"
-                  aria-label={`Move ${track.name} up`}
+                  aria-label={t('queue.moveUp', { name: track.name })}
                 >
                   ▲
                 </button>
@@ -106,7 +109,7 @@ export function MediaPlaylist({ onAddFiles, onClear, onClose }: MediaPlaylistPro
                   }}
                   disabled={index === tracks.length - 1}
                   className="flex h-7 w-7 cursor-pointer items-center justify-center rounded border-none bg-white/10 text-xs text-white/30 hover:bg-white/20 hover:text-white/70 disabled:cursor-default disabled:bg-transparent disabled:text-white/10"
-                  aria-label={`Move ${track.name} down`}
+                  aria-label={t('queue.moveDown', { name: track.name })}
                 >
                   ▼
                 </button>
@@ -118,14 +121,14 @@ export function MediaPlaylist({ onAddFiles, onClear, onClose }: MediaPlaylistPro
                 removeTrack(track.id);
               }}
               className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:text-red-400"
-              aria-label={`Remove ${track.name}`}
+              aria-label={t('queue.remove', { name: track.name })}
             >
               ×
             </button>
           </div>
         ))}
         {tracks.length === 0 && (
-          <p className="py-4 text-center text-xs text-white/30">No tracks loaded</p>
+          <p className="py-4 text-center text-xs text-white/30">{t('queue.noTracksLoaded')}</p>
         )}
       </div>
 

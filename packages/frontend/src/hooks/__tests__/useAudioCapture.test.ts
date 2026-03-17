@@ -74,7 +74,7 @@ describe('useAudioCapture', () => {
     });
 
     expect(result.current.isCapturing).toBe(false);
-    expect(result.current.error).toBe('Permission denied');
+    expect(result.current.error).toBe('Something went wrong: Permission denied. Please try again.');
   });
 
   it('stops capture and cleans up', async () => {

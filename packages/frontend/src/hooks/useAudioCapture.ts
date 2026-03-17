@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { AudioEngine } from '../engine/AudioEngine.ts';
 import { browserInfo } from '../utils/browserInfo.ts';
+import i18n from '../i18n/index.ts';
 
 export type CaptureSource = 'system' | 'mic' | null;
 
@@ -20,36 +21,32 @@ export interface UseAudioCaptureReturn {
  * so users know exactly what went wrong and how to fix it.
  */
 function humanizeAudioError(err: unknown, source: 'system' | 'mic'): string {
+  const t = i18n.getFixedT(null, 'messages');
+
   if (!(err instanceof DOMException)) {
-    return err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
+    return err instanceof Error
+      ? t('errors.genericError', { message: err.message })
+      : t('errors.unexpectedError');
   }
 
   switch (err.name) {
     case 'NotAllowedError':
-      return source === 'system'
-        ? 'Screen sharing was cancelled or denied. Please try again and select a screen, window, or tab to share.'
-        : 'Microphone access was denied. Please allow microphone access in your browser settings and try again.';
+      return source === 'system' ? t('errors.notAllowedSystem') : t('errors.notAllowedMic');
 
     case 'NotFoundError':
-      return source === 'system'
-        ? 'No screen or window was available to share. Please make sure a display is connected and try again.'
-        : 'No microphone was found. Please connect a microphone and try again.';
+      return source === 'system' ? t('errors.notFoundSystem') : t('errors.notFoundMic');
 
     case 'NotSupportedError':
-      return source === 'system'
-        ? 'Your browser does not support audio capture via screen sharing. Please try Chrome, Edge, or Opera.'
-        : 'Your browser does not support microphone access. Please try a modern browser such as Chrome, Firefox, or Edge.';
+      return source === 'system' ? t('errors.notSupportedSystem') : t('errors.notSupportedMic');
 
     case 'NotReadableError':
-      return source === 'system'
-        ? 'Could not access the screen. Another application may be preventing screen capture.'
-        : 'Your microphone could not be accessed. It may be in use by another application — try closing it and trying again.';
+      return source === 'system' ? t('errors.notReadableSystem') : t('errors.notReadableMic');
 
     case 'AbortError':
-      return 'The request was cancelled. Please try again when you are ready.';
+      return t('errors.abortError');
 
     default:
-      return `Something went wrong: ${err.message}. Please try again.`;
+      return t('errors.genericError', { message: err.message });
   }
 }
 
@@ -58,33 +55,22 @@ function humanizeAudioError(err: unknown, source: 'system' | 'mic'): string {
  * Shows only the relevant OS tip instead of listing all platforms.
  */
 function buildNoAudioMessage(): string {
-  const lines = [
-    'No audio was included in the screen share. Please try again and make sure to check "Share audio" (or "Share system audio") in the browser dialog.',
-  ];
+  const t = i18n.getFixedT(null, 'messages');
+  const lines = [t('errors.noAudioBase')];
 
   if (!browserInfo.isChromium) {
-    lines.push(
-      `${browserInfo.browser} does not support audio capture via screen sharing. Please try Chrome, Edge, or Opera.`,
-    );
+    lines.push(t('errors.noAudioNonChromium', { browser: browserInfo.browser }));
   }
 
   const { os } = browserInfo;
   if (os === 'Windows' || os === 'ChromeOS') {
-    lines.push('All sharing modes (screen, window, and tab) support audio on ' + os + '.');
+    lines.push(t('errors.noAudioWindowsChromeOS', { os }));
   } else if (os === 'macOS') {
-    lines.push(
-      'On macOS 14.2+, screen and window sharing support audio in Chrome. Older macOS versions are limited to tab sharing.',
-    );
+    lines.push(t('errors.noAudioMacOS'));
   } else if (os === 'Linux') {
-    lines.push('On Linux, only tab sharing supports audio.');
+    lines.push(t('errors.noAudioLinux'));
   } else {
-    // Unknown OS — show the full multi-platform summary
-    lines.push(
-      'On Windows and ChromeOS, all sharing modes support audio. ' +
-        'On macOS 14.2+, screen and window sharing support audio in Chrome — ' +
-        'older macOS versions are limited to tab sharing. ' +
-        'On Linux, only tab sharing supports audio.',
-    );
+    lines.push(t('errors.noAudioUnknown'));
   }
 
   return lines.join('\n\n');

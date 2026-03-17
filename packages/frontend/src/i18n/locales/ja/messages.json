@@ -1,0 +1,157 @@
+{
+  "errors": {
+    "notAllowedSystem": "画面共有がキャンセルまたは拒否されました。もう一度お試しいただき、共有する画面、ウィンドウ、またはタブを選択してください。",
+    "notAllowedMic": "マイクへのアクセスが拒否されました。ブラウザの設定でマイクアクセスを許可してから、もう一度お試しください。",
+    "notFoundSystem": "共有できる画面やウィンドウが見つかりませんでした。ディスプレイが接続されていることを確認して、もう一度お試しください。",
+    "notFoundMic": "マイクが見つかりませんでした。マイクを接続してから、もう一度お試しください。",
+    "notSupportedSystem": "お使いのブラウザは画面共有による音声キャプチャをサポートしていません。Chrome、Edge、またはOperaをお試しください。",
+    "notSupportedMic": "お使いのブラウザはマイクアクセスをサポートしていません。Chrome、Firefox、Edgeなどのモダンブラウザをお試しください。",
+    "notReadableSystem": "画面にアクセスできませんでした。別のアプリケーションが画面キャプチャを妨げている可能性があります。",
+    "notReadableMic": "マイクにアクセスできませんでした。別のアプリケーションで使用中の可能性があります。そのアプリを閉じてから、もう一度お試しください。",
+    "abortError": "リクエストがキャンセルされました。準備ができたら、もう一度お試しください。",
+    "genericError": "エラーが発生しました: {{message}}。もう一度お試しください。",
+    "unexpectedError": "予期しないエラーが発生しました。もう一度お試しください。",
+    "noAudioBase": "画面共有に音声が含まれていません。もう一度お試しいただき、ブラウザのダイアログで「音声を共有」（または「システム音声を共有」）にチェックが入っていることを確認してください。",
+    "noAudioNonChromium": "{{browser}}は画面共有による音声キャプチャをサポートしていません。Chrome、Edge、またはOperaをお試しください。",
+    "noAudioWindowsChromeOS": "{{os}}では、すべての共有モード（画面、ウィンドウ、タブ）で音声がサポートされています。",
+    "noAudioMacOS": "macOS 14.2以降では、Chromeで画面とウィンドウの共有が音声をサポートしています。古いmacOSバージョンではタブ共有に限定されます。",
+    "noAudioLinux": "Linuxでは、タブ共有のみが音声をサポートしています。",
+    "noAudioUnknown": "WindowsとChromeOSでは、すべての共有モードで音声がサポートされています。macOS 14.2以降では、Chromeで画面とウィンドウの共有が音声をサポートしています。Linuxでは、タブ共有のみが音声をサポートしています。",
+    "webgl2NotSupported": "WebGL 2がサポートされていません",
+    "webgl2NotSupportedDesc": "MangoWaveのビジュアライゼーションにはWebGL 2が必要です。Chrome、Firefox、Edgeなどのモダンブラウザをお試しください。",
+    "webglContextLost": "ビジュアライザーがグラフィックスコンテキストを失いました",
+    "webglContextLostDesc": "デバイスのグラフィックスシステムが中断されました。デバイスの負荷が高い場合、GPUが他のアプリケーションと共有されている場合、またはディスプレイ設定が変更された場合に発生することがあります。ページを再読み込みするとビジュアライザーが復元されます。",
+    "renderingError": "レンダリングエラーが発生しました。WebGLまたはWeb Audioの問題の可能性があります。"
+  },
+
+  "fileValidation": {
+    "singleRejected": "「{{filename}}」はサポートされている音声ファイルではありません。MP3、WAV、FLAC、OGG、AACなどの一般的な音声形式をご使用ください。",
+    "multipleRejected": "{{count}}件のファイルがサポートされていない音声形式のためスキップされました: {{names}}。MP3、WAV、FLAC、OGG、AACなどの一般的な音声形式をご使用ください。"
+  },
+
+  "settingsImport": {
+    "mustBeJson": "ファイルは.json形式である必要があります",
+    "fileTooLarge": "ファイルが大きすぎます",
+    "notMangoWaveFile": "MangoWaveの設定ファイルではありません",
+    "newerVersion": "設定ファイルはより新しいアプリバージョンのものです。一部の設定が適用されない場合があります",
+    "invalidFile": "無効な設定ファイルです",
+    "fieldNotApplied": "「{{field}}」を適用できませんでした",
+    "importedWithWarnings": "設定をインポートしました。アプリの変更により一部の設定を適用できませんでした",
+    "importedSuccess": "設定のインポートが完了しました"
+  },
+
+  "spotify": {
+    "connectingToSpotify": "Spotifyに接続中...",
+    "connectionFailed": "Spotifyへの接続に失敗しました。もう一度お試しください。問題が続く場合は、アカウントがアプリの承認済みユーザーに追加されていることを確認してください。",
+    "premiumRequired": "再生コントロールにはSpotify Premiumが必要です。再生中の情報は引き続き表示でき、他の音声ソースでMangoWaveを使用できます。",
+    "networkError": "Spotifyに接続できませんでした。接続状況を確認して、もう一度お試しください。",
+    "popupBlocked": "Spotifyのログインウィンドウを開けませんでした。このサイトのポップアップが許可されていることを確認して、もう一度お試しください。",
+    "rateLimited": "Spotifyのレート制限を受けました。{{seconds}}秒後に再試行します"
+  },
+
+  "toasts": {
+    "autopilotOn": "オートパイロット オン",
+    "autopilotOff": "オートパイロット オフ",
+    "addedToFavorites": "お気に入りに追加しました",
+    "removedFromFavorites": "お気に入りから削除しました",
+    "presetBlocked": "プリセットをブロックしました",
+    "presetUnblocked": "プリセットのブロックを解除しました",
+    "presetRestoredToPool": "プリセットをプールに復元しました",
+    "presetReturnedToExcluded": "プリセットを除外に戻しました",
+    "blockedPresetsCleared": "ブロック済みプリセットをクリアしました",
+    "favoritePresetsCleared": "お気に入りプリセットをクリアしました",
+    "silenceDetected": "音声が検出されません。共有している画面、ウィンドウ、またはタブで音声が再生されていること、およびブラウザのダイアログで「音声を共有」にチェックが入っていることを確認してください。",
+    "silenceDetectedMic": "マイクからの音声が検出されません。マイクがミュートになっていないこと、音を拾っていることを確認してください。"
+  },
+
+  "playback": {
+    "addSongsToQueue": "キューに曲を追加",
+    "micNoControls": "マイク入力：再生コントロールなし",
+    "sharingNoControls": "音声共有中：再生コントロールなし",
+    "controlsUnavailable": "再生コントロールは利用できません",
+    "previousTrack": "前のトラック",
+    "nextTrack": "次のトラック",
+    "play": "再生",
+    "pause": "一時停止",
+    "previousTrackShortcut": "前のトラック (J)",
+    "nextTrackShortcut": "次のトラック (L)",
+    "pauseShortcut": "一時停止 (K)",
+    "playShortcut": "再生 (K)",
+    "enableShuffle": "シャッフルを有効にする",
+    "disableShuffle": "シャッフルを無効にする",
+    "shuffleOn": "シャッフル: オン",
+    "shuffleOff": "シャッフル: オフ",
+    "repeatOff": "リピート: オフ",
+    "repeatAll": "全曲リピート",
+    "repeatOne": "1曲リピート",
+    "seek": "シーク",
+    "seekSpotifyNote": "シークの更新がSpotifyと同期するまで少し時間がかかる場合があります",
+    "mute": "ミュート",
+    "unmute": "ミュート解除",
+    "volume": "音量",
+    "nowPlayingOn": "再生中表示: オン（トラックごとに5秒表示）",
+    "nowPlayingOff": "再生中表示: オフ（トラックごとに5秒表示）",
+    "queueShortcut": "キュー (Q)",
+    "playingOn": "{{device}}で再生中"
+  },
+
+  "queue": {
+    "title": "キュー",
+    "addFiles": "ファイルを追加",
+    "closeQueue": "キューを閉じる",
+    "moveUp": "{{name}}を上に移動",
+    "moveDown": "{{name}}を下に移動",
+    "remove": "{{name}}を削除",
+    "noTracksLoaded": "トラックが読み込まれていません"
+  },
+
+  "controlBar": {
+    "previousPreset": "前のプリセット (P)",
+    "nextPreset": "次のプリセット (N)",
+    "blockPreset": "プリセットをブロック (B)",
+    "unblockPreset": "プリセットのブロックを解除 (B)",
+    "addToFavorites": "お気に入りに追加 (S)",
+    "removeFromFavorites": "お気に入りから削除 (S)",
+    "toggleAutopilot": "オートパイロット切り替え (A)",
+    "toggleFullscreen": "フルスクリーン切り替え (F)",
+    "exitFS": "FS終了"
+  },
+
+  "mobile": {
+    "next": "次へ",
+    "favorite": "お気に入り",
+    "unfavorite": "お気に入り解除",
+    "block": "ブロック",
+    "unblock": "ブロック解除",
+    "openMenu": "メニューを開く",
+    "closeMenu": "メニューを閉じる",
+    "menu": "メニュー"
+  },
+
+  "presetBrowser": {
+    "tabs": {
+      "all": "すべて",
+      "favorites": "お気に入り",
+      "blocked": "ブロック済み",
+      "excluded": "除外",
+      "history": "履歴"
+    },
+    "noPacksSelected": "パックが選択されていません。オートパイロットを一時停止しました",
+    "packsActive": "{{active}}/{{total}}パック有効",
+    "searchPlaceholder": "プリセットを検索...",
+    "clearSearch": "検索をクリア",
+    "noPresetsVisible": "表示可能なプリセットがありません",
+    "noPresetsFound": "プリセットが見つかりません",
+    "noHistoryYet": "履歴はまだありません",
+    "noExcludedPresets": "除外されたプリセットはありません",
+    "excludedDescription": "これらのプリセットはプールから除外されています。自己責任でタップして読み込めます。",
+    "addToFavorites": "お気に入りに追加",
+    "removeFromFavorites": "お気に入りから削除",
+    "blockPreset": "プリセットをブロック",
+    "unblockPreset": "プリセットのブロックを解除",
+    "restoreToPool": "プールに復元",
+    "quarantineBroken": "破損",
+    "quarantineContent": "コンテンツ",
+    "quarantineMobilePerf": "モバイルパフォーマンス"
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "tabs": {
+    "equalizer": "Equalizer",
+    "rendering": "Rendering",
+    "presets": "Presets",
+    "shortcuts": "Shortcuts",
+    "data": "Data",
+    "spotify": "Spotify"
+  },
+
+  "equalizer": {
+    "title": "Equalizer",
+    "tooltip": "Shapes which frequencies drive the visuals. Does not change audio output. Boost bass for more intense movement, cut highs to calm treble reactions",
+    "scaleHigh": "+12",
+    "scaleMid": "0 dB",
+    "scaleLow": "-12",
+    "preAmp": "Pre-Amp",
+    "preAmpTooltip": "Scales the overall signal. Higher makes visuals more reactive, lower calms them. Purely visual, does not affect audio output"
+  },
+
+  "rendering": {
+    "title": "Rendering",
+    "frameRate": "Frame Rate",
+    "frameRateTooltip": "Lower frame rates reduce GPU usage",
+    "frameRatePlaceholder": "15–300",
+    "uncapped": "Uncapped",
+    "resolution": "Resolution",
+    "resolutionTooltip": "Lower resolution reduces GPU load but looks less sharp",
+    "meshResolution": "Mesh Resolution",
+    "meshResolutionTooltip": "Controls the vertex grid for warp distortions. Higher = finer detail at more GPU cost",
+    "textureQuality": "Texture Quality",
+    "textureQualityTooltip": "Internal render resolution multiplier. Lower = faster, higher = supersampled quality",
+    "antiAliasing": "Anti-Aliasing",
+    "antiAliasingTooltip": "Smooth jagged edges with FXAA. Small performance cost (~2-3%)",
+    "analysis": "Analysis",
+    "audioSmoothing": "Audio Smoothing: {{value}}",
+    "audioSmoothingTooltip": "Lower = snappier reaction to beats, higher = smoother movement. Effect is subtle: presets apply their own internal smoothing",
+    "fftSize": "FFT Size",
+    "fftSizeTooltip": "Higher = more frequency detail but more latency. Effect is subtle: the engine maps to fixed internal frequency bands"
+  },
+
+  "presets": {
+    "title": "Presets",
+    "tooltip": "Presets vary in how reactive they are to sound. If visuals feel too subtle or too intense, adjust Pre-Amp gain in the Equalizer tab",
+    "transitionTime": "Transition Time: {{value}}s",
+    "transitionTimeTooltip": "How long presets blend into each other when switching",
+    "presetNameDisplay": "Preset Name Display",
+    "presetNameDisplayTooltip": "How long the preset name shows when switching presets",
+    "always": "Always",
+    "timed": "Timed",
+    "duration": "Duration: {{value}}s",
+    "autopilotTooltip": "Automatically cycles through presets at the set interval. Uses shuffle-style rounds: every preset plays once before any repeats",
+    "interval": "Interval: {{value}}s",
+    "mode": "Mode",
+    "modeTooltip": "All = presets from selected packs, Favorites = only favorited presets (ignores pack selection)",
+    "all": "All",
+    "favorites": "Favorites",
+    "favoriteFrequency": "Favorite frequency: {{value}}x",
+    "favoriteFrequencyTooltip": "How much more likely favorites are to be picked next. Every preset still plays once per round before any repeats. This just makes favorites come up sooner",
+    "clearBlockedConfirm": "Clear all {{count}} blocked presets?",
+    "clearBlocked": "Clear blocked ({{count}})",
+    "clearFavoritesConfirm": "Clear all {{count}} favorite presets?",
+    "clearFavorites": "Clear favorites ({{count}})"
+  },
+
+  "data": {
+    "title": "Data",
+    "description": "Your settings are stored locally in this browser on this device. Use export and import to transfer settings between browsers or devices, or to back them up.",
+    "descriptionWithSync": "Your settings are stored locally in this browser on this device. If connected via Spotify, they also sync to the cloud. Use export and import to transfer settings between browsers or devices, or to back them up.",
+    "export": "Export",
+    "exportSettings": "Export Settings",
+    "import": "Import",
+    "importDescription": "Select categories to import. Only selected categories will be overwritten. Everything else stays as-is.",
+    "loadFileDescription": "Load a settings file to choose which categories to apply.",
+    "importSettings": "Import Settings",
+    "categoryRendering": "Rendering",
+    "categoryAudioAnalysis": "Audio Smoothing & FFT",
+    "categoryEq": "EQ",
+    "categoryAutopilot": "Autopilot",
+    "categoryDisplay": "Display & Volume",
+    "categoryFavorites": "Favorites",
+    "categoryBlocked": "Blocked Presets",
+    "categoryPacks": "Packs & Exclusions"
+  },
+
+  "spotifyTab": {
+    "title": "Spotify",
+    "unavailable": "Spotify integration is not available. If you are self-hosting MangoWave, see the README for setup instructions.",
+    "connectedAs": "Connected as {{name}}",
+    "connected": "Connected",
+    "connectedInfo": "Now-playing metadata & cloud-synced MangoWave settings active. Playback controls require Premium. Share a screen, window, or tab playing Spotify so the visualizer can hear audio.",
+    "connectDescription": "Connect Spotify for now-playing metadata and cloud-synced MangoWave settings. Spotify Premium also enables playback controls. You'll still need to share a screen, window, or tab playing Spotify for the visualizer to react to audio.",
+    "connecting": "Connecting...",
+    "connectSpotify": "Connect Spotify",
+    "devInfo": "If you are not the app owner, ensure they've added your name and email associated with your Spotify account to their developer app's User Management tab."
+  },
+
+  "shortcutActions": {
+    "nextPreset": "Next preset",
+    "previousPreset": "Previous preset",
+    "toggleFullscreen": "Toggle fullscreen",
+    "toggleAutopilot": "Toggle autopilot",
+    "toggleFavorite": "Toggle favorite",
+    "toggleBlock": "Toggle block",
+    "toggleQueue": "Toggle queue (local files)",
+    "playPause": "Play / pause",
+    "previousTrack": "Previous track",
+    "nextTrack": "Next track",
+    "closePanel": "Close panel / overlay",
+    "toggleShortcuts": "Toggle shortcut overlay"
+  },
+
+  "language": {
+    "title": "Language",
+    "tooltip": "Choose the display language for the interface"
+  }
+}

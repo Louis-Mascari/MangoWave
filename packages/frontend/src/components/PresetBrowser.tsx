@@ -1,4 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { GroupedVirtuoso, type GroupedVirtuosoHandle } from 'react-virtuoso';
 
 import { useSettingsStore } from '../store/useSettingsStore.ts';
@@ -21,11 +22,20 @@ interface PresetBrowserProps {
 const quarantinedSet = new Set(quarantinedData.presets as string[]);
 const mobileBlockedSet = new Set(mobileBlockedData.presets as string[]);
 
-const QUARANTINE_REASONS: Record<string, { label: string; color: string }> = {
-  'Geiss - Spiral Artifact': { label: 'Broken', color: 'text-yellow-400' },
-  'martin - attack of the beast': { label: 'Content', color: 'text-red-400' },
+const QUARANTINE_REASONS: Record<string, { labelKey: string; color: string }> = {
+  'Geiss - Spiral Artifact': {
+    labelKey: 'presetBrowser.quarantineBroken',
+    color: 'text-yellow-400',
+  },
+  'martin - attack of the beast': {
+    labelKey: 'presetBrowser.quarantineContent',
+    color: 'text-red-400',
+  },
 };
-const MOBILE_BLOCKED_REASON = { label: 'Mobile perf', color: 'text-blue-400' };
+const MOBILE_BLOCKED_REASON = {
+  labelKey: 'presetBrowser.quarantineMobilePerf',
+  color: 'text-blue-400',
+};
 
 function PresetRow({
   name,
@@ -44,6 +54,8 @@ function PresetRow({
   onToggleFavorite: () => void;
   onToggleBlock: () => void;
 }) {
+  const { t } = useTranslation('messages');
+
   return (
     <div
       onClick={onSelect}
@@ -58,7 +70,9 @@ function PresetRow({
           className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
             isFavorite ? 'text-yellow-400' : 'text-white/30 hover:bg-white/10 hover:text-yellow-400'
           }`}
-          title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          title={
+            isFavorite ? t('presetBrowser.removeFromFavorites') : t('presetBrowser.addToFavorites')
+          }
         >
           <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -69,7 +83,7 @@ function PresetRow({
           className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
             isBlocked ? 'text-red-400' : 'text-white/30 hover:bg-white/10 hover:text-red-400'
           }`}
-          title={isBlocked ? 'Unblock preset' : 'Block preset'}
+          title={isBlocked ? t('presetBrowser.unblockPreset') : t('presetBrowser.blockPreset')}
         >
           <svg
             viewBox="0 0 20 20"
@@ -102,6 +116,8 @@ function HistoryRow({
   onToggleFavorite: () => void;
   onToggleBlock: () => void;
 }) {
+  const { t } = useTranslation('messages');
+
   return (
     <div
       onClick={onSelect}
@@ -114,7 +130,9 @@ function HistoryRow({
           className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
             isFavorite ? 'text-yellow-400' : 'text-white/30 hover:bg-white/10 hover:text-yellow-400'
           }`}
-          title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          title={
+            isFavorite ? t('presetBrowser.removeFromFavorites') : t('presetBrowser.addToFavorites')
+          }
         >
           <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -125,7 +143,7 @@ function HistoryRow({
           className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent ${
             isBlocked ? 'text-red-400' : 'text-white/30 hover:bg-white/10 hover:text-red-400'
           }`}
-          title={isBlocked ? 'Unblock preset' : 'Block preset'}
+          title={isBlocked ? t('presetBrowser.unblockPreset') : t('presetBrowser.blockPreset')}
         >
           <svg
             viewBox="0 0 20 20"
@@ -150,6 +168,8 @@ export function PresetBrowser({
   onSelectPreset,
   onNextPreset,
 }: PresetBrowserProps) {
+  const { t } = useTranslation('messages');
+  const { t: tc } = useTranslation('common');
   const blockedPresets = useSettingsStore((s) => s.blockedPresets);
   const favoritePresets = useSettingsStore((s) => s.favoritePresets);
   const enabledPacks = useSettingsStore((s) => s.enabledPacks);
@@ -294,14 +314,17 @@ export function PresetBrowser({
   const excludedPresets = useMemo(() => {
     if (filter !== 'excluded') return [];
     const lowerSearch = deferredSearch.toLowerCase();
-    const result: { name: string; reason: { label: string; color: string } }[] = [];
+    const result: { name: string; reason: { labelKey: string; color: string } }[] = [];
     // Quarantined presets (not overridden by user)
     for (const name of quarantinedSet) {
       if (overrideSet.has(name)) continue;
       if (deferredSearch && !name.toLowerCase().includes(lowerSearch)) continue;
       result.push({
         name,
-        reason: QUARANTINE_REASONS[name] ?? { label: 'Quarantined', color: 'text-yellow-400' },
+        reason: QUARANTINE_REASONS[name] ?? {
+          labelKey: 'presetBrowser.quarantineBroken',
+          color: 'text-yellow-400',
+        },
       });
     }
     // Mobile-blocked presets (only on mobile, not overridden)
@@ -328,17 +351,21 @@ export function PresetBrowser({
     (name: string) => {
       const wasFavorite = favoriteSet.has(name);
       toggleFavoritePreset(name);
-      useToastStore.getState().show(wasFavorite ? 'Removed from favorites' : 'Added to favorites');
+      useToastStore
+        .getState()
+        .show(
+          wasFavorite ? t('presetBrowser.removeFromFavorites') : t('presetBrowser.addToFavorites'),
+        );
     },
-    [favoriteSet, toggleFavoritePreset],
+    [favoriteSet, toggleFavoritePreset, t],
   );
 
   const handleRestore = useCallback(
     (name: string) => {
       addExcludedOverride(name);
-      useToastStore.getState().show('Preset restored to pool');
+      useToastStore.getState().show(t('presetBrowser.restoreToPool'));
     },
-    [addExcludedOverride],
+    [addExcludedOverride, t],
   );
 
   const handleToggleBlock = useCallback(
@@ -346,14 +373,14 @@ export function PresetBrowser({
       const isBlocked = blockedSet.has(name);
       if (isBlocked) {
         unblockPreset(name);
-        useToastStore.getState().show('Preset unblocked');
+        useToastStore.getState().show(t('presetBrowser.unblockPreset'));
       } else if (overrideSet.has(name)) {
         removeExcludedOverride(name);
-        useToastStore.getState().show('Preset returned to excluded');
+        useToastStore.getState().show(t('presetBrowser.restoreToPool'));
         if (name === currentPreset) onNextPreset();
       } else {
         blockPreset(name);
-        useToastStore.getState().show('Preset blocked');
+        useToastStore.getState().show(t('presetBrowser.blockPreset'));
         if (name === currentPreset) onNextPreset();
       }
     },
@@ -365,6 +392,7 @@ export function PresetBrowser({
       removeExcludedOverride,
       currentPreset,
       onNextPreset,
+      t,
     ],
   );
 
@@ -418,18 +446,21 @@ export function PresetBrowser({
           onClick={handleSelectAll}
           className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
         >
-          Select all
+          {tc('selectAll')}
         </button>
         <button
           onClick={handleDeselectAll}
           className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
         >
-          Deselect all
+          {tc('deselectAll')}
         </button>
         <span className="text-[9px] text-white/25">
           {enabledPacks.length === 0
-            ? 'No packs selected — autopilot paused'
-            : `${enabledPacks.length}/${allPacks.length} packs active`}
+            ? t('presetBrowser.noPacksSelected')
+            : t('presetBrowser.packsActive', {
+                active: enabledPacks.length,
+                total: allPacks.length,
+              })}
         </span>
       </div>
 
@@ -475,7 +506,9 @@ export function PresetBrowser({
           }}
         />
       ) : (
-        <p className="py-2 text-center text-xs text-white/40">No presets visible</p>
+        <p className="py-2 text-center text-xs text-white/40">
+          {t('presetBrowser.noPresetsVisible')}
+        </p>
       )}
     </>
   );
@@ -496,7 +529,9 @@ export function PresetBrowser({
         />
       ))}
       {filteredPresets.length === 0 && (
-        <p className="py-2 text-center text-xs text-white/40">No presets found</p>
+        <p className="py-2 text-center text-xs text-white/40">
+          {t('presetBrowser.noPresetsFound')}
+        </p>
       )}
     </div>
   );
@@ -516,7 +551,7 @@ export function PresetBrowser({
         />
       ))}
       {historyList.length === 0 && (
-        <p className="py-2 text-center text-xs text-white/40">No history yet</p>
+        <p className="py-2 text-center text-xs text-white/40">{t('presetBrowser.noHistoryYet')}</p>
       )}
     </div>
   );
@@ -525,7 +560,7 @@ export function PresetBrowser({
   const renderExcluded = () => (
     <div className="flex flex-col gap-0.5 overflow-y-auto max-md:min-h-0 max-md:flex-1 md:max-h-[280px]">
       <p className="mb-1 text-[10px] leading-snug text-white/40">
-        These presets are excluded from the pool. Tap any to load at your own risk.
+        {t('presetBrowser.excludedDescription')}
       </p>
       {excludedPresets.map(({ name, reason }) => (
         <div
@@ -534,7 +569,9 @@ export function PresetBrowser({
           className="flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs text-white/70 hover:bg-white/10"
         >
           <span className="min-w-0 flex-1 truncate text-left">
-            <span className={`mr-1.5 text-[10px] font-medium ${reason.color}`}>{reason.label}</span>
+            <span className={`mr-1.5 text-[10px] font-medium ${reason.color}`}>
+              {t(reason.labelKey)}
+            </span>
             {name}
           </span>
           <button
@@ -543,7 +580,7 @@ export function PresetBrowser({
               handleRestore(name);
             }}
             className="flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent text-green-500/60 hover:bg-white/10 hover:text-green-400"
-            title="Restore to pool"
+            title={t('presetBrowser.restoreToPool')}
           >
             <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
               <path
@@ -556,7 +593,9 @@ export function PresetBrowser({
         </div>
       ))}
       {excludedPresets.length === 0 && (
-        <p className="py-2 text-center text-xs text-white/40">No excluded presets</p>
+        <p className="py-2 text-center text-xs text-white/40">
+          {t('presetBrowser.noExcludedPresets')}
+        </p>
       )}
     </div>
   );
@@ -564,7 +603,7 @@ export function PresetBrowser({
   return (
     <div className="relative flex flex-col gap-2 rounded-lg bg-black/60 p-4 backdrop-blur-sm max-md:min-h-0 max-md:flex-1 md:max-h-96 landscape:max-h-[70vh]">
       <div className="flex flex-col gap-1.5">
-        {!isMobileDevice && <h3 className="text-sm font-semibold text-white">Presets</h3>}
+        {!isMobileDevice && <h3 className="text-sm font-semibold text-white">{tc('presets')}</h3>}
         <div className="flex flex-wrap gap-1">
           {(['all', 'favorites', 'blocked', 'excluded', 'history'] as const).map((f) => (
             <button
@@ -576,7 +615,7 @@ export function PresetBrowser({
                   : 'bg-white/10 text-white/60 hover:bg-white/20'
               }`}
             >
-              {f}
+              {t(`presetBrowser.tabs.${f}`)}
             </button>
           ))}
         </div>
@@ -585,7 +624,7 @@ export function PresetBrowser({
       <div className="relative">
         <input
           type="text"
-          placeholder="Search presets..."
+          placeholder={t('presetBrowser.searchPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full rounded border-none bg-white/10 px-2 py-1 pr-7 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
@@ -595,7 +634,7 @@ export function PresetBrowser({
           className={`absolute top-1/2 right-1.5 flex h-4 w-4 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-none bg-white/20 text-[10px] leading-none text-white/60 hover:bg-white/30 hover:text-white ${
             search ? 'visible' : 'invisible'
           }`}
-          aria-label="Clear search"
+          aria-label={t('presetBrowser.clearSearch')}
         >
           ✕
         </button>

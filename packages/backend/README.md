@@ -16,11 +16,13 @@ Handlers are deployed via CDK (see `infrastructure/`). No local server — test 
 ```
 src/
 ├── handlers/           # Lambda entry points (one per route)
+│   ├── __tests__/      # Handler tests (auth-callback, auth-refresh, settings-save, settings-load)
 │   ├── auth-callback.ts
 │   ├── auth-refresh.ts
 │   ├── settings-save.ts
 │   └── settings-load.ts
 ├── lib/
+│   ├── __tests__/      # Lib tests (validation)
 │   ├── spotify.ts      # Spotify API client (token exchange, refresh, profile)
 │   ├── dynamo.ts       # DynamoDB operations (sessions, settings)
 │   └── validation.ts   # Server-side settings validation (type, range, size checks)
@@ -74,9 +76,3 @@ Settings are keyed to the user's Spotify ID (resolved from their session). Spoti
 - **CORS** restricted to allowed origins at the API Gateway level (not open to `*`)
 - **Settings validation** — `settings-save` validates all fields server-side: type checks, `Number.isFinite()` guards, range clamping (gains ±12, transition 0–30), preset list limits (10K items, 200 chars each), and extra key stripping. 1 MB body size limit (413 response)
 - **Error opacity** — generic 500 errors don't expose implementation details; 400/404 errors are specific
-
-## Error Handling
-
-- `403` from Spotify → frontend parses the response body; only `PREMIUM_REQUIRED` reason hides playback controls (non-Premium users still see Now Playing metadata). Other 403 reasons (player command failures, stale tokens) show a generic error toast without disabling controls
-- `401` from Spotify → frontend refreshes token via `refreshAccessToken` and retries the failed command once
-- `429` from Spotify → rate limit toast on frontend, polling pause with auto-resume

@@ -1,0 +1,117 @@
+{
+  "tabs": {
+    "equalizer": "Equalizador",
+    "rendering": "Renderização",
+    "presets": "Presets",
+    "shortcuts": "Atalhos",
+    "data": "Dados",
+    "spotify": "Spotify"
+  },
+
+  "equalizer": {
+    "title": "Equalizador",
+    "tooltip": "Define quais frequências impulsionam os visuais. Não altera a saída de áudio. Aumente os graves para mais movimento intenso, reduza os agudos para acalmar as reações de frequências altas",
+    "scaleHigh": "+12",
+    "scaleMid": "0 dB",
+    "scaleLow": "-12",
+    "preAmp": "Pré-Amp",
+    "preAmpTooltip": "Escala o sinal geral. Mais alto torna os visuais mais reativos, mais baixo os acalma. Puramente visual, não afeta a saída de áudio"
+  },
+
+  "rendering": {
+    "title": "Renderização",
+    "frameRate": "Taxa de Quadros",
+    "frameRateTooltip": "Taxas de quadros mais baixas reduzem o uso de GPU",
+    "frameRatePlaceholder": "15–300",
+    "uncapped": "Sem limite",
+    "resolution": "Resolução",
+    "resolutionTooltip": "Resolução mais baixa reduz a carga de GPU, mas fica menos nítida",
+    "meshResolution": "Resolução de Malha",
+    "meshResolutionTooltip": "Controla a grade de vértices para distorções de warp. Mais alto = mais detalhes com mais custo de GPU",
+    "textureQuality": "Qualidade de Textura",
+    "textureQualityTooltip": "Multiplicador da resolução interna de renderização. Mais baixo = mais rápido, mais alto = qualidade com superamostragem",
+    "antiAliasing": "Anti-Aliasing",
+    "antiAliasingTooltip": "Suaviza bordas serrilhadas com FXAA. Pequeno custo de desempenho (~2-3%)",
+    "analysis": "Análise",
+    "audioSmoothing": "Suavização de Áudio: {{value}}",
+    "audioSmoothingTooltip": "Mais baixo = reação mais rápida às batidas, mais alto = movimento mais suave. O efeito é sutil: presets aplicam sua própria suavização interna",
+    "fftSize": "Tamanho FFT",
+    "fftSizeTooltip": "Mais alto = mais detalhes de frequência, porém mais latência. O efeito é sutil: o motor mapeia para bandas de frequência internas fixas"
+  },
+
+  "presets": {
+    "title": "Presets",
+    "tooltip": "Presets variam em quão reativos são ao som. Se os visuais parecem muito sutis ou muito intensos, ajuste o ganho do Pré-Amp na aba Equalizador",
+    "transitionTime": "Tempo de Transição: {{value}}s",
+    "transitionTimeTooltip": "Quanto tempo os presets se mesclam ao alternar",
+    "presetNameDisplay": "Exibição do Nome do Preset",
+    "presetNameDisplayTooltip": "Quanto tempo o nome do preset aparece ao trocar de preset",
+    "always": "Sempre",
+    "timed": "Temporizado",
+    "duration": "Duração: {{value}}s",
+    "autopilotTooltip": "Alterna automaticamente entre presets no intervalo definido. Usa rodadas estilo embaralhamento: cada preset toca uma vez antes de qualquer repetição",
+    "interval": "Intervalo: {{value}}s",
+    "mode": "Modo",
+    "modeTooltip": "Todos = presets dos pacotes selecionados, Favoritos = apenas presets favoritados (ignora seleção de pacotes)",
+    "all": "Todos",
+    "favorites": "Favoritos",
+    "favoriteFrequency": "Frequência de favoritos: {{value}}x",
+    "favoriteFrequencyTooltip": "Quanto mais provável é que os favoritos sejam escolhidos a seguir. Cada preset ainda toca uma vez por rodada antes de qualquer repetição. Isso apenas faz os favoritos aparecerem mais cedo",
+    "clearBlockedConfirm": "Limpar todos os {{count}} presets bloqueados?",
+    "clearBlocked": "Limpar bloqueados ({{count}})",
+    "clearFavoritesConfirm": "Limpar todos os {{count}} presets favoritos?",
+    "clearFavorites": "Limpar favoritos ({{count}})"
+  },
+
+  "data": {
+    "title": "Dados",
+    "description": "Suas configurações são armazenadas localmente neste navegador neste dispositivo. Use exportar e importar para transferir configurações entre navegadores ou dispositivos, ou para fazer backup.",
+    "descriptionWithSync": "Suas configurações são armazenadas localmente neste navegador neste dispositivo. Se conectado via Spotify, elas também sincronizam com a nuvem. Use exportar e importar para transferir configurações entre navegadores ou dispositivos, ou para fazer backup.",
+    "export": "Exportar",
+    "exportSettings": "Exportar Configurações",
+    "import": "Importar",
+    "importDescription": "Selecione as categorias para importar. Apenas as categorias selecionadas serão sobrescritas. Todo o resto permanece como está.",
+    "loadFileDescription": "Carregue um arquivo de configurações para escolher quais categorias aplicar.",
+    "importSettings": "Importar Configurações",
+    "categoryRendering": "Renderização",
+    "categoryAudioAnalysis": "Suavização de Áudio e FFT",
+    "categoryEq": "Equalizador",
+    "categoryAutopilot": "Piloto Automático",
+    "categoryDisplay": "Exibição e Volume",
+    "categoryFavorites": "Favoritos",
+    "categoryBlocked": "Presets Bloqueados",
+    "categoryPacks": "Pacotes e Exclusões"
+  },
+
+  "spotifyTab": {
+    "title": "Spotify",
+    "unavailable": "A integração com Spotify não está disponível. Se você está hospedando o MangoWave por conta própria, veja o README para instruções de configuração.",
+    "connectedAs": "Conectado como {{name}}",
+    "connected": "Conectado",
+    "connectedInfo": "Metadados da música atual e configurações do MangoWave sincronizadas na nuvem ativas. Controles de reprodução requerem Premium. Compartilhe uma tela, janela ou aba reproduzindo Spotify para o visualizador captar o áudio.",
+    "connectDescription": "Conecte o Spotify para metadados da música atual e configurações do MangoWave sincronizadas na nuvem. O Spotify Premium também habilita controles de reprodução. Você ainda precisará compartilhar uma tela, janela ou aba reproduzindo Spotify para o visualizador reagir ao áudio.",
+    "connecting": "Conectando...",
+    "connectSpotify": "Conectar Spotify",
+    "devInfo": "Se você não é o proprietário do aplicativo, certifique-se de que ele adicionou seu nome e e-mail associados à sua conta Spotify na aba Gerenciamento de Usuários do aplicativo de desenvolvedor."
+  },
+
+  "shortcutActions": {
+    "nextPreset": "Próximo preset",
+    "previousPreset": "Preset anterior",
+    "toggleFullscreen": "Alternar tela cheia",
+    "toggleAutopilot": "Alternar piloto automático",
+    "toggleFavorite": "Alternar favorito",
+    "toggleBlock": "Alternar bloqueio",
+    "toggleQueue": "Alternar fila (arquivos locais)",
+    "playPause": "Reproduzir / pausar",
+    "previousTrack": "Faixa anterior",
+    "nextTrack": "Próxima faixa",
+    "closePanel": "Fechar painel / sobreposição",
+    "toggleShortcuts": "Alternar sobreposição de atalhos"
+  },
+
+  "language": {
+    "title": "Idioma",
+    "tooltip": "Escolha o idioma de exibição da interface"
+  }
+}

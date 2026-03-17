@@ -1,0 +1,157 @@
+{
+  "errors": {
+    "notAllowedSystem": "Screen sharing was cancelled or denied. Please try again and select a screen, window, or tab to share.",
+    "notAllowedMic": "Microphone access was denied. Please allow microphone access in your browser settings and try again.",
+    "notFoundSystem": "No screen or window was available to share. Please make sure a display is connected and try again.",
+    "notFoundMic": "No microphone was found. Please connect a microphone and try again.",
+    "notSupportedSystem": "Your browser does not support audio capture via screen sharing. Please try Chrome, Edge, or Opera.",
+    "notSupportedMic": "Your browser does not support microphone access. Please try a modern browser such as Chrome, Firefox, or Edge.",
+    "notReadableSystem": "Could not access the screen. Another application may be preventing screen capture.",
+    "notReadableMic": "Your microphone could not be accessed. It may be in use by another application. Try closing it and trying again.",
+    "abortError": "The request was cancelled. Please try again when you are ready.",
+    "genericError": "Something went wrong: {{message}}. Please try again.",
+    "unexpectedError": "An unexpected error occurred. Please try again.",
+    "noAudioBase": "No audio was included in the screen share. Please try again and make sure to check \"Share audio\" (or \"Share system audio\") in the browser dialog.",
+    "noAudioNonChromium": "{{browser}} does not support audio capture via screen sharing. Please try Chrome, Edge, or Opera.",
+    "noAudioWindowsChromeOS": "All sharing modes (screen, window, and tab) support audio on {{os}}.",
+    "noAudioMacOS": "On macOS 14.2+, screen and window sharing support audio in Chrome. Older macOS versions are limited to tab sharing.",
+    "noAudioLinux": "On Linux, only tab sharing supports audio.",
+    "noAudioUnknown": "On Windows and ChromeOS, all sharing modes support audio. On macOS 14.2+, screen and window sharing support audio in Chrome. On Linux, only tab sharing supports audio.",
+    "webgl2NotSupported": "WebGL 2 Not Supported",
+    "webgl2NotSupportedDesc": "MangoWave requires WebGL 2 to render visualizations. Please try a modern browser such as Chrome, Firefox, or Edge.",
+    "webglContextLost": "Visualizer Lost Graphics Context",
+    "webglContextLostDesc": "Your device's graphics system was interrupted. This can happen when your device is under heavy load, the GPU is shared with other applications, or the display configuration changed. Reloading the page will restore the visualizer.",
+    "renderingError": "A rendering error occurred, possibly a WebGL or Web Audio issue."
+  },
+
+  "fileValidation": {
+    "singleRejected": "\"{{filename}}\" is not a supported audio file. Please use MP3, WAV, FLAC, OGG, AAC, or other common audio formats.",
+    "multipleRejected": "{{count}} files were not supported audio formats and were skipped: {{names}}. Please use MP3, WAV, FLAC, OGG, AAC, or other common audio formats."
+  },
+
+  "settingsImport": {
+    "mustBeJson": "File must be a .json file",
+    "fileTooLarge": "File too large",
+    "notMangoWaveFile": "Not a MangoWave settings file",
+    "newerVersion": "Settings file is from a newer app version. Some settings may not apply",
+    "invalidFile": "Invalid settings file",
+    "fieldNotApplied": "\"{{field}}\" could not be applied",
+    "importedWithWarnings": "Settings imported. Some settings could not be applied due to app changes",
+    "importedSuccess": "Settings imported successfully"
+  },
+
+  "spotify": {
+    "connectingToSpotify": "Connecting to Spotify...",
+    "connectionFailed": "Spotify connection failed. Please try again. If the issue persists, check that your account has been added to the app's authorized users.",
+    "premiumRequired": "Spotify Premium is required for playback controls. You can still see now-playing info and use MangoWave with other audio sources.",
+    "networkError": "Could not reach Spotify. Please check your connection and try again.",
+    "popupBlocked": "Could not open the Spotify login window. Please check that pop-ups are allowed for this site and try again.",
+    "rateLimited": "Spotify rate limited. Retrying in {{seconds}}s"
+  },
+
+  "toasts": {
+    "autopilotOn": "Autopilot on",
+    "autopilotOff": "Autopilot off",
+    "addedToFavorites": "Added to favorites",
+    "removedFromFavorites": "Removed from favorites",
+    "presetBlocked": "Preset blocked",
+    "presetUnblocked": "Preset unblocked",
+    "presetRestoredToPool": "Preset restored to pool",
+    "presetReturnedToExcluded": "Preset returned to excluded",
+    "blockedPresetsCleared": "Blocked presets cleared",
+    "favoritePresetsCleared": "Favorite presets cleared",
+    "silenceDetected": "No audio detected. Make sure audio is playing in the shared screen, window, or tab, and that you checked \"Share audio\" in the browser dialog.",
+    "silenceDetectedMic": "No audio detected from your microphone. Make sure your mic is not muted and is picking up sound."
+  },
+
+  "playback": {
+    "addSongsToQueue": "Add songs to your queue",
+    "micNoControls": "Microphone input — no playback controls",
+    "sharingNoControls": "Sharing audio — no playback controls",
+    "controlsUnavailable": "Playback controls unavailable",
+    "previousTrack": "Previous track",
+    "nextTrack": "Next track",
+    "play": "Play",
+    "pause": "Pause",
+    "previousTrackShortcut": "Previous track (J)",
+    "nextTrackShortcut": "Next track (L)",
+    "pauseShortcut": "Pause (K)",
+    "playShortcut": "Play (K)",
+    "enableShuffle": "Enable shuffle",
+    "disableShuffle": "Disable shuffle",
+    "shuffleOn": "Shuffle: on",
+    "shuffleOff": "Shuffle: off",
+    "repeatOff": "Repeat: off",
+    "repeatAll": "Repeat all",
+    "repeatOne": "Repeat one",
+    "seek": "Seek",
+    "seekSpotifyNote": "Seek updates may take a moment to sync with Spotify",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "volume": "Volume",
+    "nowPlayingOn": "Now Playing: on (shows 5s per track)",
+    "nowPlayingOff": "Now Playing: off (shows 5s per track)",
+    "queueShortcut": "Queue (Q)",
+    "playingOn": "Playing on {{device}}"
+  },
+
+  "queue": {
+    "title": "Queue",
+    "addFiles": "Add Files",
+    "closeQueue": "Close queue",
+    "moveUp": "Move {{name}} up",
+    "moveDown": "Move {{name}} down",
+    "remove": "Remove {{name}}",
+    "noTracksLoaded": "No tracks loaded"
+  },
+
+  "controlBar": {
+    "previousPreset": "Previous preset (P)",
+    "nextPreset": "Next preset (N)",
+    "blockPreset": "Block preset (B)",
+    "unblockPreset": "Unblock preset (B)",
+    "addToFavorites": "Add to favorites (S)",
+    "removeFromFavorites": "Remove from favorites (S)",
+    "toggleAutopilot": "Toggle autopilot (A)",
+    "toggleFullscreen": "Toggle fullscreen (F)",
+    "exitFS": "Exit FS"
+  },
+
+  "mobile": {
+    "next": "Next",
+    "favorite": "Favorite",
+    "unfavorite": "Unfavorite",
+    "block": "Block",
+    "unblock": "Unblock",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "menu": "Menu"
+  },
+
+  "presetBrowser": {
+    "tabs": {
+      "all": "all",
+      "favorites": "favorites",
+      "blocked": "blocked",
+      "excluded": "excluded",
+      "history": "history"
+    },
+    "noPacksSelected": "No packs selected. Autopilot paused",
+    "packsActive": "{{active}}/{{total}} packs active",
+    "searchPlaceholder": "Search presets...",
+    "clearSearch": "Clear search",
+    "noPresetsVisible": "No presets visible",
+    "noPresetsFound": "No presets found",
+    "noHistoryYet": "No history yet",
+    "noExcludedPresets": "No excluded presets",
+    "excludedDescription": "These presets are excluded from the pool. Tap any to load at your own risk.",
+    "addToFavorites": "Add to favorites",
+    "removeFromFavorites": "Remove from favorites",
+    "blockPreset": "Block preset",
+    "unblockPreset": "Unblock preset",
+    "restoreToPool": "Restore to pool",
+    "quarantineBroken": "Broken",
+    "quarantineContent": "Content",
+    "quarantineMobilePerf": "Mobile perf"
+  }
+}

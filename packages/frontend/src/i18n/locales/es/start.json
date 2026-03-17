@@ -1,0 +1,109 @@
+{
+  "subtitle": "Visualizador reactivo al audio para tu navegador",
+  "chooseAudioSource": "Elige tu fuente de audio",
+  "photosensitivityWarning": "Advertencia de fotosensibilidad",
+  "photosensitivityDescription": "Este visualizador muestra luces y patrones intermitentes rápidos.\nSi tienes epilepsia o eres sensible a las luces intermitentes, se recomienda discreción.",
+  "shareAudio": "Compartir audio",
+  "shareAudioDescription": "Captura audio del sistema o de una pestaña mediante pantalla compartida",
+  "playLocalFiles": "Reproducir archivos locales",
+  "localFilesDescription": "Reproduce archivos de audio desde tu dispositivo",
+  "useMicrophone": "Usar micrófono",
+  "micDescription": "Visualiza el sonido ambiente. Modo silencioso",
+  "mobileCallout": "Usa una laptop o computadora de escritorio para también capturar audio de cualquier pantalla, ventana o pestaña del navegador mediante pantalla compartida.",
+  "somethingWentWrong": "Algo salió mal",
+
+  "shareAudioModal": {
+    "browserNoSupport": "{{browser}} no soporta la captura de audio",
+    "browserCompatMessage": "La captura de audio mediante pantalla compartida requiere un navegador basado en Chromium (Chrome, Edge u Opera). Aún puedes usar",
+    "localFiles": "Archivos locales",
+    "microphone": "Micrófono",
+    "asAudioSource": "como fuente de audio.",
+    "step1": "y elige una pantalla, ventana o pestaña para compartir",
+    "step1Bold": "Haz clic en Iniciar",
+    "step2Bold": "Marca \"Compartir audio\"",
+    "step2": "– esto es necesario para que el visualizador reaccione al sonido",
+    "step3Bold": "Reproduce música",
+    "step3": "y déjate llevar",
+    "startVisualizer": "Iniciar visualizador"
+  },
+
+  "osTips": {
+    "windowsChromeOS": "Todos los modos de compartir (pantalla, ventana y pestaña) soportan audio en {{os}}. Compartir toda la pantalla o una ventana da la experiencia más limpia (sin barra del navegador).",
+    "macOSChromium": "En macOS 14.2+, compartir pantalla y ventana soportan audio. Las versiones anteriores de macOS están limitadas a compartir pestañas.",
+    "macOSNonChromium": "Compartir audio de pantalla requiere un navegador Chromium (Chrome, Edge, Opera) en macOS 14.2+.",
+    "linux": "En Linux, solo compartir pestañas soporta audio.",
+    "unknown": "En Windows y ChromeOS, todos los modos de compartir soportan audio. En macOS 14.2+, compartir pantalla y ventana soportan audio en Chrome. En Linux, solo compartir pestañas soporta audio."
+  },
+
+  "sensitivityTips": {
+    "title": "Consejos de sensibilidad y reactividad",
+    "description": "Algunos presets son más ambientales y menos reactivos que otros. Revisa el panel de Configuración para ajustar la sensibilidad y otros parámetros que alimentan el motor de visualización."
+  },
+
+  "localFilesModal": {
+    "step1Bold": "Elige tus archivos",
+    "step1": "– selecciona uno o más archivos de audio desde tu dispositivo",
+    "step2Bold": "Reproduce música",
+    "step2": "y déjate llevar",
+    "infoBox": "Soporta MP3, WAV, FLAC, OGG, AAC y más. Usa los controles de reproducción para mezclar, repetir, avanzar y administrar tu cola.",
+    "unsupportedFile": "Archivo no soportado",
+    "chooseFiles": "Elegir archivos"
+  },
+
+  "micModal": {
+    "step1Bold": "Haz clic en Iniciar micrófono",
+    "step1": "y otorga permiso cuando se solicite",
+    "step2Bold": "Deja que el sonido impulse las visuales",
+    "step2": "– música en vivo, ruido ambiente o cualquier cosa que capte tu micrófono",
+    "infoBox": "Modo silencioso: el audio se captura pero no se reproduce por tus altavoces.",
+    "startMicrophone": "Iniciar micrófono"
+  },
+
+  "spotify": {
+    "connectedAs": "Conectado como {{name}}",
+    "connected": "Spotify conectado",
+    "connectedInfo": "Metadatos de reproducción actual y configuración de MangoWave sincronizada en la nube activos. Los controles de reproducción requieren Premium. Comparte una pantalla, ventana o pestaña con Spotify para el audio.",
+    "connectOptional": "Conectar Spotify (opcional)",
+    "connectDescription": "Conecta Spotify para obtener metadatos de reproducción actual y configuración de MangoWave sincronizada en la nube. Spotify Premium también habilita controles de reproducción. Aún necesitarás compartir una pantalla, ventana o pestaña con Spotify para que el visualizador reaccione al audio.",
+    "connecting": "Conectando...",
+    "connectSpotify": "Conectar Spotify",
+    "devInfo": "Si no eres el propietario de la app, asegúrate de que hayan agregado tu nombre y correo electrónico asociado a tu cuenta de Spotify en la pestaña de Gestión de usuarios de su app de desarrollador."
+  },
+
+  "onboarding": {
+    "desktop": {
+      "skipPresetsTitle": "Saltar presets",
+      "skipPresetsDesc": "Presiona Space o N para saltar al siguiente preset. Cada uno responde a tu música de manera diferente.",
+      "curateTitle": "Personaliza tu experiencia",
+      "curateDesc": "Abre el panel de Presets para explorar, marcar como favoritos o bloquear presets. Arma una colección de tus favoritos y deja que el autopilot los recorra.",
+      "tuneTitle": "Ajusta las visuales",
+      "tuneDesc": "Abre Configuración para ajustar el ecualizador, el suavizado y la calidad de renderizado, moldeando cómo las visuales reaccionan a tu música.",
+      "shortcutsTitle": "Atajos de teclado",
+      "shortcutsDesc": "Presiona H para ver todos los atajos de teclado, o encuéntralos en el menú de Configuración."
+    },
+    "mobile": {
+      "menuTitle": "El menú",
+      "menuDesc": "Toca el logo en la esquina para abrir el menú radial. Te da acceso rápido a todo: presets, configuración, pantalla completa y más.",
+      "navigateTitle": "Navega entre presets",
+      "navigateDesc": "Usa Siguiente (▶) y Anterior (◀) para saltar entre presets. Cada uno reacciona a tu música a su manera.",
+      "curateTitle": "Personaliza tu experiencia",
+      "curateDesc": "Marca como favorito (★) los presets que te gusten, bloquea (⊘) los que no. Abre Presets (P) para explorar y filtrar tu colección.",
+      "autopilotTitle": "Autopilot y Configuración",
+      "autopilotDesc": "Activa Autopilot (A) para recorrer presets automáticamente. Abre Configuración (⚙) para ajustar el ecualizador y el renderizado."
+    }
+  },
+
+  "landing": {
+    "title": "MangoWave | Visualizador de audio",
+    "metaDescription": "Visualizador reactivo al audio gratuito con más de 400 visuales. Sin registro, sin instalación, sin anuncios. Cada beat, cada drop. Solo dale a iniciar.",
+    "tagline": "Tu música, visualizada.",
+    "taglineSub": "Cada beat, cada drop. Solo dale a iniciar.",
+    "feature400": "400+ visuales",
+    "featureAnySource": "Cualquier fuente de audio",
+    "featureDesktopMobile": "Escritorio y móvil",
+    "featureNoSignup": "Sin registro",
+    "featureNoInstall": "Sin instalación",
+    "featureNoAds": "Sin anuncios",
+    "launch": "Iniciar"
+  }
+}

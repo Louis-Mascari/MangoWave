@@ -1,0 +1,117 @@
+{
+  "tabs": {
+    "equalizer": "イコライザー",
+    "rendering": "レンダリング",
+    "presets": "プリセット",
+    "shortcuts": "ショートカット",
+    "data": "データ",
+    "spotify": "Spotify"
+  },
+
+  "equalizer": {
+    "title": "イコライザー",
+    "tooltip": "ビジュアルを駆動する周波数を調整します。音声出力は変わりません。低音をブーストするとより激しい動きに、高音をカットすると高音域の反応が穏やかになります",
+    "scaleHigh": "+12",
+    "scaleMid": "0 dB",
+    "scaleLow": "-12",
+    "preAmp": "プリアンプ",
+    "preAmpTooltip": "全体の信号をスケーリングします。高くするとビジュアルがより反応的に、低くすると穏やかになります。ビジュアルのみに影響し、音声出力は変わりません"
+  },
+
+  "rendering": {
+    "title": "レンダリング",
+    "frameRate": "フレームレート",
+    "frameRateTooltip": "フレームレートを下げるとGPU使用率が低下します",
+    "frameRatePlaceholder": "15–300",
+    "uncapped": "無制限",
+    "resolution": "解像度",
+    "resolutionTooltip": "解像度を下げるとGPU負荷が減りますが、鮮明さが低下します",
+    "meshResolution": "メッシュ解像度",
+    "meshResolutionTooltip": "ワープ歪みの頂点グリッドを制御します。高い値 = より細かいディテール、より多くのGPUコスト",
+    "textureQuality": "テクスチャ品質",
+    "textureQualityTooltip": "内部レンダリング解像度の倍率です。低い = 高速、高い = スーパーサンプリング品質",
+    "antiAliasing": "アンチエイリアシング",
+    "antiAliasingTooltip": "FXAAでジャギーを滑らかにします。わずかなパフォーマンスコスト（約2-3%）",
+    "analysis": "分析",
+    "audioSmoothing": "オーディオスムージング: {{value}}",
+    "audioSmoothingTooltip": "低い = ビートへの反応が速い、高い = 動きが滑らか。効果は微妙で、プリセットは独自の内部スムージングを適用します",
+    "fftSize": "FFTサイズ",
+    "fftSizeTooltip": "高い = より多くの周波数ディテール、ただしレイテンシーが増加。効果は微妙で、エンジンは固定の内部周波数帯域にマッピングします"
+  },
+
+  "presets": {
+    "title": "プリセット",
+    "tooltip": "プリセットによって音への反応度が異なります。ビジュアルが繊細すぎる、または激しすぎる場合は、イコライザータブのプリアンプゲインを調整してください",
+    "transitionTime": "トランジション時間: {{value}}秒",
+    "transitionTimeTooltip": "プリセット切り替え時のブレンドにかかる時間です",
+    "presetNameDisplay": "プリセット名の表示",
+    "presetNameDisplayTooltip": "プリセット切り替え時にプリセット名を表示する時間です",
+    "always": "常に表示",
+    "timed": "時間制限",
+    "duration": "表示時間: {{value}}秒",
+    "autopilotTooltip": "設定した間隔でプリセットを自動的に切り替えます。シャッフル方式のラウンドを使用し、すべてのプリセットが1回ずつ再生されてから繰り返されます",
+    "interval": "間隔: {{value}}秒",
+    "mode": "モード",
+    "modeTooltip": "すべて = 選択したパックのプリセット、お気に入り = お気に入りに登録したプリセットのみ（パック選択を無視）",
+    "all": "すべて",
+    "favorites": "お気に入り",
+    "favoriteFrequency": "お気に入り頻度: {{value}}倍",
+    "favoriteFrequencyTooltip": "お気に入りが次に選ばれやすくなる倍率です。すべてのプリセットは繰り返される前にラウンド内で1回ずつ再生されます。この設定はお気に入りを早めに表示するだけです",
+    "clearBlockedConfirm": "ブロック済みプリセット{{count}}件をすべてクリアしますか？",
+    "clearBlocked": "ブロックをクリア（{{count}}件）",
+    "clearFavoritesConfirm": "お気に入りプリセット{{count}}件をすべてクリアしますか？",
+    "clearFavorites": "お気に入りをクリア（{{count}}件）"
+  },
+
+  "data": {
+    "title": "データ",
+    "description": "設定はこのデバイスのこのブラウザにローカル保存されています。エクスポートとインポートを使用して、ブラウザやデバイス間で設定を転送したり、バックアップを作成したりできます。",
+    "descriptionWithSync": "設定はこのデバイスのこのブラウザにローカル保存されています。Spotify経由で接続している場合は、クラウドにも同期されます。エクスポートとインポートを使用して、ブラウザやデバイス間で設定を転送したり、バックアップを作成したりできます。",
+    "export": "エクスポート",
+    "exportSettings": "設定をエクスポート",
+    "import": "インポート",
+    "importDescription": "インポートするカテゴリを選択してください。選択したカテゴリのみが上書きされます。それ以外はそのまま残ります。",
+    "loadFileDescription": "設定ファイルを読み込んで、適用するカテゴリを選択してください。",
+    "importSettings": "設定をインポート",
+    "categoryRendering": "レンダリング",
+    "categoryAudioAnalysis": "オーディオスムージングとFFT",
+    "categoryEq": "イコライザー",
+    "categoryAutopilot": "オートパイロット",
+    "categoryDisplay": "表示と音量",
+    "categoryFavorites": "お気に入り",
+    "categoryBlocked": "ブロック済みプリセット",
+    "categoryPacks": "パックと除外設定"
+  },
+
+  "spotifyTab": {
+    "title": "Spotify",
+    "unavailable": "Spotify連携は利用できません。MangoWaveをセルフホスティングしている場合は、セットアップ手順についてREADMEを参照してください。",
+    "connectedAs": "{{name}}として接続中",
+    "connected": "接続済み",
+    "connectedInfo": "再生中メタデータとクラウド同期されたMangoWave設定が有効です。再生コントロールにはPremiumが必要です。ビジュアライザーが音声を認識できるように、Spotifyを再生している画面、ウィンドウ、またはタブを共有してください。",
+    "connectDescription": "Spotifyを接続すると、再生中メタデータとクラウド同期されたMangoWave設定が利用できます。Spotify Premiumでは再生コントロールも有効になります。ビジュアライザーが音声に反応するには、Spotifyを再生している画面、ウィンドウ、またはタブの共有が必要です。",
+    "connecting": "接続中...",
+    "connectSpotify": "Spotifyを接続",
+    "devInfo": "アプリオーナーでない場合は、Spotifyアカウントに関連付けられた名前とメールアドレスが、開発者アプリのユーザー管理タブに追加されていることを確認してください。"
+  },
+
+  "shortcutActions": {
+    "nextPreset": "次のプリセット",
+    "previousPreset": "前のプリセット",
+    "toggleFullscreen": "フルスクリーン切り替え",
+    "toggleAutopilot": "オートパイロット切り替え",
+    "toggleFavorite": "お気に入り切り替え",
+    "toggleBlock": "ブロック切り替え",
+    "toggleQueue": "キュー切り替え（ローカルファイル）",
+    "playPause": "再生 / 一時停止",
+    "previousTrack": "前のトラック",
+    "nextTrack": "次のトラック",
+    "closePanel": "パネル / オーバーレイを閉じる",
+    "toggleShortcuts": "ショートカットオーバーレイ切り替え"
+  },
+
+  "language": {
+    "title": "言語",
+    "tooltip": "インターフェースの表示言語を選択します"
+  }
+}

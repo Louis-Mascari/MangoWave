@@ -1,4 +1,5 @@
 import { useEffect, useRef, useSyncExternalStore } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
 
 function useCountdown(resetsAt: number | null): number {
@@ -21,6 +22,7 @@ function useCountdown(resetsAt: number | null): number {
 }
 
 export function RateLimitToast() {
+  const { t } = useTranslation('messages');
   const isRateLimited = useSpotifyStore((s) => s.isRateLimited);
   const rateLimitResetsAt = useSpotifyStore((s) => s.rateLimitResetsAt);
   const secondsLeft = useCountdown(rateLimitResetsAt);
@@ -29,7 +31,7 @@ export function RateLimitToast() {
 
   return (
     <div className="fixed right-4 top-4 z-50 rounded-lg bg-amber-500/90 px-4 py-2 text-sm font-medium text-black shadow-lg backdrop-blur-sm">
-      Spotify rate limited — retrying in {secondsLeft}s
+      {t('spotify.rateLimited', { seconds: secondsLeft })}
     </div>
   );
 }

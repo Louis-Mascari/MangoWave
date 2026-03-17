@@ -1,0 +1,157 @@
+{
+  "errors": {
+    "notAllowedSystem": "화면 공유가 취소되거나 거부되었습니다. 다시 시도하여 공유할 화면, 창 또는 탭을 선택해 주세요.",
+    "notAllowedMic": "마이크 접근이 거부되었습니다. 브라우저 설정에서 마이크 접근을 허용한 후 다시 시도해 주세요.",
+    "notFoundSystem": "공유할 수 있는 화면이나 창을 찾을 수 없습니다. 디스플레이가 연결되어 있는지 확인하고 다시 시도해 주세요.",
+    "notFoundMic": "마이크를 찾을 수 없습니다. 마이크를 연결하고 다시 시도해 주세요.",
+    "notSupportedSystem": "이 브라우저는 화면 공유를 통한 오디오 캡처를 지원하지 않습니다. Chrome, Edge 또는 Opera를 사용해 주세요.",
+    "notSupportedMic": "이 브라우저는 마이크 접근을 지원하지 않습니다. Chrome, Firefox 또는 Edge 등의 최신 브라우저를 사용해 주세요.",
+    "notReadableSystem": "화면에 접근할 수 없습니다. 다른 애플리케이션이 화면 캡처를 막고 있을 수 있습니다.",
+    "notReadableMic": "마이크에 접근할 수 없습니다. 다른 애플리케이션에서 사용 중일 수 있습니다. 해당 앱을 닫고 다시 시도해 주세요.",
+    "abortError": "요청이 취소되었습니다. 준비가 되면 다시 시도해 주세요.",
+    "genericError": "문제가 발생했습니다: {{message}}. 다시 시도해 주세요.",
+    "unexpectedError": "예기치 않은 오류가 발생했습니다. 다시 시도해 주세요.",
+    "noAudioBase": "화면 공유에 오디오가 포함되지 않았습니다. 다시 시도하고 브라우저 대화상자에서 \"오디오 공유\" (또는 \"시스템 오디오 공유\")를 반드시 체크해 주세요.",
+    "noAudioNonChromium": "{{browser}}은(는) 화면 공유를 통한 오디오 캡처를 지원하지 않습니다. Chrome, Edge 또는 Opera를 사용해 주세요.",
+    "noAudioWindowsChromeOS": "{{os}}에서는 모든 공유 모드(화면, 창, 탭)가 오디오를 지원합니다.",
+    "noAudioMacOS": "macOS 14.2 이상에서는 Chrome에서 화면 및 창 공유가 오디오를 지원합니다. 이전 macOS 버전은 탭 공유만 지원됩니다.",
+    "noAudioLinux": "Linux에서는 탭 공유만 오디오를 지원합니다.",
+    "noAudioUnknown": "Windows와 ChromeOS에서는 모든 공유 모드가 오디오를 지원합니다. macOS 14.2 이상에서는 Chrome에서 화면 및 창 공유가 오디오를 지원합니다. Linux에서는 탭 공유만 오디오를 지원합니다.",
+    "webgl2NotSupported": "WebGL 2 미지원",
+    "webgl2NotSupportedDesc": "MangoWave는 시각화 렌더링에 WebGL 2가 필요합니다. Chrome, Firefox 또는 Edge 등의 최신 브라우저를 사용해 주세요.",
+    "webglContextLost": "비주얼라이저 그래픽 컨텍스트 손실",
+    "webglContextLostDesc": "기기의 그래픽 시스템이 중단되었습니다. 기기에 부하가 많거나, GPU를 다른 애플리케이션과 공유하고 있거나, 디스플레이 설정이 변경되었을 때 발생할 수 있습니다. 페이지를 새로고침하면 비주얼라이저가 복원됩니다.",
+    "renderingError": "렌더링 오류가 발생했습니다. WebGL 또는 Web Audio 관련 문제일 수 있습니다."
+  },
+
+  "fileValidation": {
+    "singleRejected": "\"{{filename}}\"은(는) 지원되지 않는 오디오 파일입니다. MP3, WAV, FLAC, OGG, AAC 등의 일반적인 오디오 형식을 사용해 주세요.",
+    "multipleRejected": "{{count}}개의 파일이 지원되지 않는 오디오 형식으로 건너뛰었습니다: {{names}}. MP3, WAV, FLAC, OGG, AAC 등의 일반적인 오디오 형식을 사용해 주세요."
+  },
+
+  "settingsImport": {
+    "mustBeJson": "파일은 .json 형식이어야 합니다",
+    "fileTooLarge": "파일이 너무 큽니다",
+    "notMangoWaveFile": "MangoWave 설정 파일이 아닙니다",
+    "newerVersion": "설정 파일이 최신 앱 버전에서 생성되었습니다. 일부 설정이 적용되지 않을 수 있습니다",
+    "invalidFile": "잘못된 설정 파일입니다",
+    "fieldNotApplied": "\"{{field}}\"을(를) 적용할 수 없습니다",
+    "importedWithWarnings": "설정을 가져왔습니다. 앱 변경으로 인해 일부 설정을 적용할 수 없었습니다",
+    "importedSuccess": "설정을 성공적으로 가져왔습니다"
+  },
+
+  "spotify": {
+    "connectingToSpotify": "Spotify에 연결하는 중...",
+    "connectionFailed": "Spotify 연결에 실패했습니다. 다시 시도해 주세요. 문제가 계속되면 앱의 승인된 사용자에 계정이 추가되어 있는지 확인하세요.",
+    "premiumRequired": "재생 컨트롤을 사용하려면 Spotify Premium이 필요합니다. 현재 재생 정보는 계속 확인할 수 있으며 다른 오디오 소스로 MangoWave를 사용할 수 있습니다.",
+    "networkError": "Spotify에 연결할 수 없습니다. 네트워크 연결을 확인하고 다시 시도해 주세요.",
+    "popupBlocked": "Spotify 로그인 창을 열 수 없습니다. 이 사이트의 팝업이 허용되어 있는지 확인하고 다시 시도해 주세요.",
+    "rateLimited": "Spotify 요청 제한에 도달했습니다. {{seconds}}초 후 재시도합니다"
+  },
+
+  "toasts": {
+    "autopilotOn": "자동 전환 켜짐",
+    "autopilotOff": "자동 전환 꺼짐",
+    "addedToFavorites": "즐겨찾기에 추가됨",
+    "removedFromFavorites": "즐겨찾기에서 제거됨",
+    "presetBlocked": "프리셋 차단됨",
+    "presetUnblocked": "프리셋 차단 해제됨",
+    "presetRestoredToPool": "프리셋이 풀에 복원됨",
+    "presetReturnedToExcluded": "프리셋이 제외 목록으로 복귀됨",
+    "blockedPresetsCleared": "차단된 프리셋이 모두 해제됨",
+    "favoritePresetsCleared": "즐겨찾기가 모두 해제됨",
+    "silenceDetected": "오디오가 감지되지 않습니다. 공유한 화면, 창 또는 탭에서 오디오가 재생 중인지, 그리고 브라우저 대화상자에서 \"오디오 공유\"를 체크했는지 확인하세요.",
+    "silenceDetectedMic": "마이크에서 오디오가 감지되지 않습니다. 마이크가 음소거되지 않았는지, 소리를 잘 잡고 있는지 확인하세요."
+  },
+
+  "playback": {
+    "addSongsToQueue": "재생 목록에 곡 추가",
+    "micNoControls": "마이크 입력 — 재생 컨트롤 없음",
+    "sharingNoControls": "오디오 공유 중 — 재생 컨트롤 없음",
+    "controlsUnavailable": "재생 컨트롤을 사용할 수 없음",
+    "previousTrack": "이전 트랙",
+    "nextTrack": "다음 트랙",
+    "play": "재생",
+    "pause": "일시정지",
+    "previousTrackShortcut": "이전 트랙 (J)",
+    "nextTrackShortcut": "다음 트랙 (L)",
+    "pauseShortcut": "일시정지 (K)",
+    "playShortcut": "재생 (K)",
+    "enableShuffle": "셔플 켜기",
+    "disableShuffle": "셔플 끄기",
+    "shuffleOn": "셔플: 켜짐",
+    "shuffleOff": "셔플: 꺼짐",
+    "repeatOff": "반복: 꺼짐",
+    "repeatAll": "전체 반복",
+    "repeatOne": "한 곡 반복",
+    "seek": "탐색",
+    "seekSpotifyNote": "탐색 업데이트가 Spotify와 동기화되는 데 잠시 걸릴 수 있습니다",
+    "mute": "음소거",
+    "unmute": "음소거 해제",
+    "volume": "볼륨",
+    "nowPlayingOn": "현재 재생: 켜짐 (트랙당 5초 표시)",
+    "nowPlayingOff": "현재 재생: 꺼짐 (트랙당 5초 표시)",
+    "queueShortcut": "재생 목록 (Q)",
+    "playingOn": "{{device}}에서 재생 중"
+  },
+
+  "queue": {
+    "title": "재생 목록",
+    "addFiles": "파일 추가",
+    "closeQueue": "재생 목록 닫기",
+    "moveUp": "{{name}} 위로 이동",
+    "moveDown": "{{name}} 아래로 이동",
+    "remove": "{{name}} 제거",
+    "noTracksLoaded": "불러온 트랙이 없습니다"
+  },
+
+  "controlBar": {
+    "previousPreset": "이전 프리셋 (P)",
+    "nextPreset": "다음 프리셋 (N)",
+    "blockPreset": "프리셋 차단 (B)",
+    "unblockPreset": "프리셋 차단 해제 (B)",
+    "addToFavorites": "즐겨찾기에 추가 (S)",
+    "removeFromFavorites": "즐겨찾기에서 제거 (S)",
+    "toggleAutopilot": "자동 전환 켜기/끄기 (A)",
+    "toggleFullscreen": "전체 화면 전환 (F)",
+    "exitFS": "전체 화면 종료"
+  },
+
+  "mobile": {
+    "next": "다음",
+    "favorite": "즐겨찾기",
+    "unfavorite": "즐겨찾기 해제",
+    "block": "차단",
+    "unblock": "차단 해제",
+    "openMenu": "메뉴 열기",
+    "closeMenu": "메뉴 닫기",
+    "menu": "메뉴"
+  },
+
+  "presetBrowser": {
+    "tabs": {
+      "all": "전체",
+      "favorites": "즐겨찾기",
+      "blocked": "차단됨",
+      "excluded": "제외됨",
+      "history": "기록"
+    },
+    "noPacksSelected": "선택된 팩 없음. 자동 전환 일시정지됨",
+    "packsActive": "{{active}}/{{total}} 팩 활성",
+    "searchPlaceholder": "프리셋 검색...",
+    "clearSearch": "검색 지우기",
+    "noPresetsVisible": "표시할 프리셋 없음",
+    "noPresetsFound": "프리셋을 찾을 수 없음",
+    "noHistoryYet": "아직 기록이 없습니다",
+    "noExcludedPresets": "제외된 프리셋 없음",
+    "excludedDescription": "이 프리셋들은 풀에서 제외되었습니다. 탭하면 불러올 수 있지만, 문제가 있을 수 있습니다.",
+    "addToFavorites": "즐겨찾기에 추가",
+    "removeFromFavorites": "즐겨찾기에서 제거",
+    "blockPreset": "프리셋 차단",
+    "unblockPreset": "프리셋 차단 해제",
+    "restoreToPool": "풀에 복원",
+    "quarantineBroken": "오류",
+    "quarantineContent": "콘텐츠",
+    "quarantineMobilePerf": "모바일 성능"
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "tabs": {
+    "equalizer": "Equalizer",
+    "rendering": "Rendering",
+    "presets": "Preset",
+    "shortcuts": "Pintasan",
+    "data": "Data",
+    "spotify": "Spotify"
+  },
+
+  "equalizer": {
+    "title": "Equalizer",
+    "tooltip": "Mengatur frekuensi mana yang menggerakkan visual. Tidak mengubah output audio. Tingkatkan bass untuk gerakan lebih intens, kurangi high untuk meredam reaksi treble",
+    "scaleHigh": "+12",
+    "scaleMid": "0 dB",
+    "scaleLow": "-12",
+    "preAmp": "Pre-Amp",
+    "preAmpTooltip": "Mengatur skala sinyal keseluruhan. Lebih tinggi membuat visual lebih reaktif, lebih rendah meredamnya. Murni visual, tidak mempengaruhi output audio"
+  },
+
+  "rendering": {
+    "title": "Rendering",
+    "frameRate": "Frame Rate",
+    "frameRateTooltip": "Frame rate lebih rendah mengurangi penggunaan GPU",
+    "frameRatePlaceholder": "15–300",
+    "uncapped": "Tanpa batas",
+    "resolution": "Resolusi",
+    "resolutionTooltip": "Resolusi lebih rendah mengurangi beban GPU tapi tampilan kurang tajam",
+    "meshResolution": "Resolusi Mesh",
+    "meshResolutionTooltip": "Mengontrol grid vertex untuk distorsi warp. Lebih tinggi = detail lebih halus dengan biaya GPU lebih besar",
+    "textureQuality": "Kualitas Tekstur",
+    "textureQualityTooltip": "Pengali resolusi render internal. Lebih rendah = lebih cepat, lebih tinggi = kualitas supersampled",
+    "antiAliasing": "Anti-Aliasing",
+    "antiAliasingTooltip": "Menghaluskan tepian bergerigi dengan FXAA. Biaya performa kecil (~2-3%)",
+    "analysis": "Analisis",
+    "audioSmoothing": "Audio Smoothing: {{value}}",
+    "audioSmoothingTooltip": "Lebih rendah = reaksi lebih cepat terhadap ketukan, lebih tinggi = gerakan lebih halus. Efeknya halus: preset menerapkan smoothing internal sendiri",
+    "fftSize": "Ukuran FFT",
+    "fftSizeTooltip": "Lebih tinggi = detail frekuensi lebih banyak tapi latensi lebih besar. Efeknya halus: mesin memetakan ke band frekuensi internal tetap"
+  },
+
+  "presets": {
+    "title": "Preset",
+    "tooltip": "Preset bervariasi dalam tingkat reaktivitasnya terhadap suara. Jika visual terasa terlalu halus atau terlalu intens, sesuaikan gain Pre-Amp di tab Equalizer",
+    "transitionTime": "Waktu Transisi: {{value}}d",
+    "transitionTimeTooltip": "Berapa lama preset bercampur saat berpindah",
+    "presetNameDisplay": "Tampilan Nama Preset",
+    "presetNameDisplayTooltip": "Berapa lama nama preset ditampilkan saat berpindah preset",
+    "always": "Selalu",
+    "timed": "Berdurasi",
+    "duration": "Durasi: {{value}}d",
+    "autopilotTooltip": "Secara otomatis berganti preset pada interval yang ditentukan. Menggunakan sistem acak bergilir: setiap preset diputar sekali sebelum ada yang diulang",
+    "interval": "Interval: {{value}}d",
+    "mode": "Mode",
+    "modeTooltip": "Semua = preset dari paket terpilih, Favorit = hanya preset favorit (mengabaikan pilihan paket)",
+    "all": "Semua",
+    "favorites": "Favorit",
+    "favoriteFrequency": "Frekuensi favorit: {{value}}x",
+    "favoriteFrequencyTooltip": "Seberapa besar kemungkinan favorit dipilih berikutnya. Setiap preset tetap diputar sekali per giliran sebelum ada yang diulang. Ini hanya membuat favorit muncul lebih awal",
+    "clearBlockedConfirm": "Hapus semua {{count}} preset yang diblokir?",
+    "clearBlocked": "Hapus diblokir ({{count}})",
+    "clearFavoritesConfirm": "Hapus semua {{count}} preset favorit?",
+    "clearFavorites": "Hapus favorit ({{count}})"
+  },
+
+  "data": {
+    "title": "Data",
+    "description": "Pengaturanmu disimpan secara lokal di browser ini pada perangkat ini. Gunakan ekspor dan impor untuk memindahkan pengaturan antar browser atau perangkat, atau untuk mencadangkannya.",
+    "descriptionWithSync": "Pengaturanmu disimpan secara lokal di browser ini pada perangkat ini. Jika terhubung melalui Spotify, pengaturan juga disinkronkan ke cloud. Gunakan ekspor dan impor untuk memindahkan pengaturan antar browser atau perangkat, atau untuk mencadangkannya.",
+    "export": "Ekspor",
+    "exportSettings": "Ekspor Pengaturan",
+    "import": "Impor",
+    "importDescription": "Pilih kategori untuk diimpor. Hanya kategori yang dipilih yang akan ditimpa. Yang lainnya tetap seperti semula.",
+    "loadFileDescription": "Muat file pengaturan untuk memilih kategori mana yang diterapkan.",
+    "importSettings": "Impor Pengaturan",
+    "categoryRendering": "Rendering",
+    "categoryAudioAnalysis": "Audio Smoothing & FFT",
+    "categoryEq": "EQ",
+    "categoryAutopilot": "Autopilot",
+    "categoryDisplay": "Tampilan & Volume",
+    "categoryFavorites": "Favorit",
+    "categoryBlocked": "Preset Diblokir",
+    "categoryPacks": "Paket & Pengecualian"
+  },
+
+  "spotifyTab": {
+    "title": "Spotify",
+    "unavailable": "Integrasi Spotify tidak tersedia. Jika kamu melakukan self-hosting MangoWave, lihat README untuk petunjuk pengaturan.",
+    "connectedAs": "Terhubung sebagai {{name}}",
+    "connected": "Terhubung",
+    "connectedInfo": "Metadata lagu yang diputar & pengaturan MangoWave tersinkronisasi ke cloud aktif. Kontrol pemutaran memerlukan Premium. Bagikan layar, jendela, atau tab yang memutar Spotify agar visualizer bisa mendengar audio.",
+    "connectDescription": "Hubungkan Spotify untuk metadata lagu yang diputar dan pengaturan MangoWave tersinkronisasi ke cloud. Spotify Premium juga mengaktifkan kontrol pemutaran. Kamu tetap perlu berbagi layar, jendela, atau tab yang memutar Spotify agar visualizer bereaksi terhadap audio.",
+    "connecting": "Menghubungkan...",
+    "connectSpotify": "Hubungkan Spotify",
+    "devInfo": "Jika kamu bukan pemilik aplikasi, pastikan mereka telah menambahkan nama dan email yang terkait dengan akun Spotify kamu ke tab User Management di aplikasi developer mereka."
+  },
+
+  "shortcutActions": {
+    "nextPreset": "Preset berikutnya",
+    "previousPreset": "Preset sebelumnya",
+    "toggleFullscreen": "Alihkan layar penuh",
+    "toggleAutopilot": "Alihkan autopilot",
+    "toggleFavorite": "Alihkan favorit",
+    "toggleBlock": "Alihkan blokir",
+    "toggleQueue": "Alihkan antrean (file lokal)",
+    "playPause": "Putar / jeda",
+    "previousTrack": "Lagu sebelumnya",
+    "nextTrack": "Lagu berikutnya",
+    "closePanel": "Tutup panel / overlay",
+    "toggleShortcuts": "Alihkan overlay pintasan"
+  },
+
+  "language": {
+    "title": "Bahasa",
+    "tooltip": "Pilih bahasa tampilan untuk antarmuka"
+  }
+}

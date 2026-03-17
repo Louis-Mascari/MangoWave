@@ -1,0 +1,157 @@
+{
+  "errors": {
+    "notAllowedSystem": "O compartilhamento de tela foi cancelado ou negado. Por favor, tente novamente e selecione uma tela, janela ou aba para compartilhar.",
+    "notAllowedMic": "O acesso ao microfone foi negado. Por favor, permita o acesso ao microfone nas configurações do seu navegador e tente novamente.",
+    "notFoundSystem": "Nenhuma tela ou janela estava disponível para compartilhar. Por favor, verifique se um monitor está conectado e tente novamente.",
+    "notFoundMic": "Nenhum microfone foi encontrado. Por favor, conecte um microfone e tente novamente.",
+    "notSupportedSystem": "Seu navegador não suporta captura de áudio via compartilhamento de tela. Por favor, tente Chrome, Edge ou Opera.",
+    "notSupportedMic": "Seu navegador não suporta acesso ao microfone. Por favor, tente um navegador moderno como Chrome, Firefox ou Edge.",
+    "notReadableSystem": "Não foi possível acessar a tela. Outro aplicativo pode estar impedindo a captura de tela.",
+    "notReadableMic": "Não foi possível acessar seu microfone. Ele pode estar sendo usado por outro aplicativo. Tente fechá-lo e tente novamente.",
+    "abortError": "A solicitação foi cancelada. Por favor, tente novamente quando estiver pronto.",
+    "genericError": "Algo deu errado: {{message}}. Por favor, tente novamente.",
+    "unexpectedError": "Ocorreu um erro inesperado. Por favor, tente novamente.",
+    "noAudioBase": "Nenhum áudio foi incluído no compartilhamento de tela. Por favor, tente novamente e certifique-se de marcar \"Compartilhar áudio\" (ou \"Compartilhar áudio do sistema\") na caixa de diálogo do navegador.",
+    "noAudioNonChromium": "{{browser}} não suporta captura de áudio via compartilhamento de tela. Por favor, tente Chrome, Edge ou Opera.",
+    "noAudioWindowsChromeOS": "Todos os modos de compartilhamento (tela, janela e aba) suportam áudio no {{os}}.",
+    "noAudioMacOS": "No macOS 14.2+, compartilhamento de tela e janela suportam áudio no Chrome. Versões anteriores do macOS são limitadas ao compartilhamento de aba.",
+    "noAudioLinux": "No Linux, apenas o compartilhamento de aba suporta áudio.",
+    "noAudioUnknown": "No Windows e ChromeOS, todos os modos de compartilhamento suportam áudio. No macOS 14.2+, compartilhamento de tela e janela suportam áudio no Chrome. No Linux, apenas o compartilhamento de aba suporta áudio.",
+    "webgl2NotSupported": "WebGL 2 Não Suportado",
+    "webgl2NotSupportedDesc": "MangoWave requer WebGL 2 para renderizar visualizações. Por favor, tente um navegador moderno como Chrome, Firefox ou Edge.",
+    "webglContextLost": "O Visualizador Perdeu o Contexto Gráfico",
+    "webglContextLostDesc": "O sistema gráfico do seu dispositivo foi interrompido. Isso pode acontecer quando seu dispositivo está sob carga pesada, a GPU é compartilhada com outros aplicativos ou a configuração de exibição mudou. Recarregar a página restaurará o visualizador.",
+    "renderingError": "Ocorreu um erro de renderização, possivelmente um problema de WebGL ou Web Audio."
+  },
+
+  "fileValidation": {
+    "singleRejected": "\"{{filename}}\" não é um arquivo de áudio suportado. Por favor, use MP3, WAV, FLAC, OGG, AAC ou outros formatos de áudio comuns.",
+    "multipleRejected": "{{count}} arquivos não eram formatos de áudio suportados e foram ignorados: {{names}}. Por favor, use MP3, WAV, FLAC, OGG, AAC ou outros formatos de áudio comuns."
+  },
+
+  "settingsImport": {
+    "mustBeJson": "O arquivo deve ser um arquivo .json",
+    "fileTooLarge": "Arquivo muito grande",
+    "notMangoWaveFile": "Não é um arquivo de configurações do MangoWave",
+    "newerVersion": "O arquivo de configurações é de uma versão mais recente do aplicativo. Algumas configurações podem não ser aplicadas",
+    "invalidFile": "Arquivo de configurações inválido",
+    "fieldNotApplied": "\"{{field}}\" não pôde ser aplicado",
+    "importedWithWarnings": "Configurações importadas. Algumas configurações não puderam ser aplicadas devido a mudanças no aplicativo",
+    "importedSuccess": "Configurações importadas com sucesso"
+  },
+
+  "spotify": {
+    "connectingToSpotify": "Conectando ao Spotify...",
+    "connectionFailed": "A conexão com o Spotify falhou. Por favor, tente novamente. Se o problema persistir, verifique se sua conta foi adicionada aos usuários autorizados do aplicativo.",
+    "premiumRequired": "Spotify Premium é necessário para controles de reprodução. Você ainda pode ver informações da música atual e usar o MangoWave com outras fontes de áudio.",
+    "networkError": "Não foi possível conectar ao Spotify. Por favor, verifique sua conexão e tente novamente.",
+    "popupBlocked": "Não foi possível abrir a janela de login do Spotify. Por favor, verifique se pop-ups são permitidos para este site e tente novamente.",
+    "rateLimited": "Limite de requisições do Spotify atingido. Tentando novamente em {{seconds}}s"
+  },
+
+  "toasts": {
+    "autopilotOn": "Piloto automático ligado",
+    "autopilotOff": "Piloto automático desligado",
+    "addedToFavorites": "Adicionado aos favoritos",
+    "removedFromFavorites": "Removido dos favoritos",
+    "presetBlocked": "Preset bloqueado",
+    "presetUnblocked": "Preset desbloqueado",
+    "presetRestoredToPool": "Preset restaurado ao pool",
+    "presetReturnedToExcluded": "Preset retornado aos excluídos",
+    "blockedPresetsCleared": "Presets bloqueados limpos",
+    "favoritePresetsCleared": "Presets favoritos limpos",
+    "silenceDetected": "Nenhum áudio detectado. Certifique-se de que o áudio está tocando na tela, janela ou aba compartilhada, e que você marcou \"Compartilhar áudio\" na caixa de diálogo do navegador.",
+    "silenceDetectedMic": "Nenhum áudio detectado do microfone. Certifique-se de que seu mic não está mutado e está captando som."
+  },
+
+  "playback": {
+    "addSongsToQueue": "Adicione músicas à sua fila",
+    "micNoControls": "Entrada de microfone: sem controles de reprodução",
+    "sharingNoControls": "Compartilhando áudio: sem controles de reprodução",
+    "controlsUnavailable": "Controles de reprodução indisponíveis",
+    "previousTrack": "Faixa anterior",
+    "nextTrack": "Próxima faixa",
+    "play": "Reproduzir",
+    "pause": "Pausar",
+    "previousTrackShortcut": "Faixa anterior (J)",
+    "nextTrackShortcut": "Próxima faixa (L)",
+    "pauseShortcut": "Pausar (K)",
+    "playShortcut": "Reproduzir (K)",
+    "enableShuffle": "Ativar aleatório",
+    "disableShuffle": "Desativar aleatório",
+    "shuffleOn": "Aleatório: ligado",
+    "shuffleOff": "Aleatório: desligado",
+    "repeatOff": "Repetir: desligado",
+    "repeatAll": "Repetir tudo",
+    "repeatOne": "Repetir uma",
+    "seek": "Avançar",
+    "seekSpotifyNote": "Atualizações de posição podem levar um momento para sincronizar com o Spotify",
+    "mute": "Silenciar",
+    "unmute": "Ativar som",
+    "volume": "Volume",
+    "nowPlayingOn": "Tocando Agora: ligado (mostra 5s por faixa)",
+    "nowPlayingOff": "Tocando Agora: desligado (mostra 5s por faixa)",
+    "queueShortcut": "Fila (Q)",
+    "playingOn": "Reproduzindo em {{device}}"
+  },
+
+  "queue": {
+    "title": "Fila",
+    "addFiles": "Adicionar Arquivos",
+    "closeQueue": "Fechar fila",
+    "moveUp": "Mover {{name}} para cima",
+    "moveDown": "Mover {{name}} para baixo",
+    "remove": "Remover {{name}}",
+    "noTracksLoaded": "Nenhuma faixa carregada"
+  },
+
+  "controlBar": {
+    "previousPreset": "Preset anterior (P)",
+    "nextPreset": "Próximo preset (N)",
+    "blockPreset": "Bloquear preset (B)",
+    "unblockPreset": "Desbloquear preset (B)",
+    "addToFavorites": "Adicionar aos favoritos (S)",
+    "removeFromFavorites": "Remover dos favoritos (S)",
+    "toggleAutopilot": "Alternar piloto automático (A)",
+    "toggleFullscreen": "Alternar tela cheia (F)",
+    "exitFS": "Sair TC"
+  },
+
+  "mobile": {
+    "next": "Próximo",
+    "favorite": "Favoritar",
+    "unfavorite": "Desfavoritar",
+    "block": "Bloquear",
+    "unblock": "Desbloquear",
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu",
+    "menu": "Menu"
+  },
+
+  "presetBrowser": {
+    "tabs": {
+      "all": "todos",
+      "favorites": "favoritos",
+      "blocked": "bloqueados",
+      "excluded": "excluídos",
+      "history": "histórico"
+    },
+    "noPacksSelected": "Nenhum pacote selecionado. Piloto automático pausado",
+    "packsActive": "{{active}}/{{total}} pacotes ativos",
+    "searchPlaceholder": "Buscar presets...",
+    "clearSearch": "Limpar busca",
+    "noPresetsVisible": "Nenhum preset visível",
+    "noPresetsFound": "Nenhum preset encontrado",
+    "noHistoryYet": "Nenhum histórico ainda",
+    "noExcludedPresets": "Nenhum preset excluído",
+    "excludedDescription": "Estes presets estão excluídos do pool. Toque em qualquer um para carregar por sua conta e risco.",
+    "addToFavorites": "Adicionar aos favoritos",
+    "removeFromFavorites": "Remover dos favoritos",
+    "blockPreset": "Bloquear preset",
+    "unblockPreset": "Desbloquear preset",
+    "restoreToPool": "Restaurar ao pool",
+    "quarantineBroken": "Quebrado",
+    "quarantineContent": "Conteúdo",
+    "quarantineMobilePerf": "Desempenho mobile"
+  }
+}

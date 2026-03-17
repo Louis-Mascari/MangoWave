@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import logoUrl from '../assets/logo.png';
 
@@ -7,42 +8,38 @@ interface OnboardingOverlayProps {
 }
 
 interface Tip {
-  title: string;
-  description: string;
+  titleKey: string;
+  descKey: string;
   icon: React.ReactNode;
 }
 
 const DESKTOP_TIPS: Tip[] = [
   {
-    title: 'Skip Presets',
-    description:
-      'Press Space or N to skip to the next preset. Each one responds to your music differently.',
+    titleKey: 'onboarding.desktop.skipPresetsTitle',
+    descKey: 'onboarding.desktop.skipPresetsDesc',
     icon: '⏭',
   },
   {
-    title: 'Curate Your Experience',
-    description:
-      'Open the Presets panel to browse, favorite, or block presets. Build a collection of your favorites and let autopilot cycle through them.',
+    titleKey: 'onboarding.desktop.curateTitle',
+    descKey: 'onboarding.desktop.curateDesc',
     icon: '🎨',
   },
   {
-    title: 'Tune the Visuals',
-    description:
-      'Open Settings to adjust the equalizer, smoothing, and rendering quality — shaping how the visuals react to your music.',
+    titleKey: 'onboarding.desktop.tuneTitle',
+    descKey: 'onboarding.desktop.tuneDesc',
     icon: '⚙',
   },
   {
-    title: 'Keyboard Shortcuts',
-    description: 'Press H to see all keyboard shortcuts, or find them in the Settings menu.',
+    titleKey: 'onboarding.desktop.shortcutsTitle',
+    descKey: 'onboarding.desktop.shortcutsDesc',
     icon: '⌨',
   },
 ];
 
 const MOBILE_TIPS: Tip[] = [
   {
-    title: 'The Menu',
-    description:
-      'Tap the logo in the corner to open the radial menu. It gives you quick access to everything — presets, settings, fullscreen, and more.',
+    titleKey: 'onboarding.mobile.menuTitle',
+    descKey: 'onboarding.mobile.menuDesc',
     icon: (
       <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-black/60">
         <img src={logoUrl} alt="MangoWave logo" className="h-11 w-11 object-contain" />
@@ -50,9 +47,8 @@ const MOBILE_TIPS: Tip[] = [
     ),
   },
   {
-    title: 'Navigate Presets',
-    description:
-      'Use Next (▶) and Previous (◀) to skip between presets. Each one reacts to your music in its own way.',
+    titleKey: 'onboarding.mobile.navigateTitle',
+    descKey: 'onboarding.mobile.navigateDesc',
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -67,15 +63,13 @@ const MOBILE_TIPS: Tip[] = [
     ),
   },
   {
-    title: 'Curate Your Experience',
-    description:
-      "Favorite (★) the presets you love, block (⊘) the ones you don't. Open Presets (P) to browse and filter your collection.",
+    titleKey: 'onboarding.mobile.curateTitle',
+    descKey: 'onboarding.mobile.curateDesc',
     icon: '🎨',
   },
   {
-    title: 'Autopilot & Settings',
-    description:
-      'Toggle Autopilot (A) to cycle through presets automatically. Open Settings (⚙) to adjust the equalizer and rendering.',
+    titleKey: 'onboarding.mobile.autopilotTitle',
+    descKey: 'onboarding.mobile.autopilotDesc',
     icon: '⚙',
   },
 ];
@@ -83,6 +77,8 @@ const MOBILE_TIPS: Tip[] = [
 const FADE_OUT_MS = 800;
 
 export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
+  const { t } = useTranslation('start');
+  const { t: tc } = useTranslation('common');
   const tips = isMobileDevice ? MOBILE_TIPS : DESKTOP_TIPS;
   const [step, setStep] = useState(0);
   const [closing, setClosing] = useState(false);
@@ -132,8 +128,8 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
         {/* Tip content */}
         <div className="text-center">
           <div className="mb-3 text-3xl">{tip.icon}</div>
-          <h3 className="mb-2 text-base font-semibold text-white">{tip.title}</h3>
-          <p className="text-sm leading-relaxed text-white/60">{tip.description}</p>
+          <h3 className="mb-2 text-base font-semibold text-white">{t(tip.titleKey)}</h3>
+          <p className="text-sm leading-relaxed text-white/60">{t(tip.descKey)}</p>
         </div>
 
         {/* Navigation */}
@@ -142,7 +138,7 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
             onClick={handleClose}
             className="cursor-pointer border-none bg-transparent px-3 py-1.5 text-xs text-white/40 hover:text-white/60"
           >
-            Skip
+            {tc('skip')}
           </button>
           <div className="flex gap-2">
             {step > 0 && (
@@ -150,14 +146,14 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
                 onClick={() => setStep(step - 1)}
                 className="cursor-pointer rounded-lg border-none bg-white/10 px-4 py-1.5 text-xs text-white/70 hover:bg-white/20"
               >
-                Back
+                {tc('back')}
               </button>
             )}
             <button
               onClick={() => (isLast ? handleClose() : setStep(step + 1))}
               className="cursor-pointer rounded-lg border-none bg-orange-500 px-4 py-1.5 text-xs font-medium text-white hover:bg-orange-600"
             >
-              {isLast ? 'Got it' : 'Next'}
+              {isLast ? tc('gotIt') : tc('next')}
             </button>
           </div>
         </div>

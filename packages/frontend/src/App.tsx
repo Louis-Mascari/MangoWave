@@ -1,4 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+// i18n singleton used directly (not useTranslation) to avoid unstable hook references
+// that trigger useSyncExternalStore resubscription and restart effects in MainApp.
+import i18n from './i18n/index.ts';
 import { useIdleTimer } from './hooks/useIdleTimer.ts';
 import { useAudioCapture } from './hooks/useAudioCapture.ts';
 import { useLocalPlayback } from './hooks/useLocalPlayback.ts';
@@ -55,9 +59,10 @@ const mobileBlockedSet = new Set(mobileBlockedData.presets as string[]);
  */
 function OAuthPopup() {
   useSpotifyAuth();
+  const { t } = useTranslation('messages');
   return (
     <div className="flex h-screen items-center justify-center bg-black text-white">
-      Connecting to Spotify...
+      {t('spotify.connectingToSpotify')}
     </div>
   );
 }
@@ -91,11 +96,7 @@ function MainApp() {
       } else if (event.data?.type === 'spotify-auth-failed') {
         useToastStore
           .getState()
-          .show(
-            'Spotify connection failed. Please try again — if the issue persists, ' +
-              "check that your account has been added to the app's authorized users.",
-            { type: 'error' },
-          );
+          .show(i18n.t('spotify.connectionFailed', { ns: 'messages' }), { type: 'error' });
       }
     };
     window.addEventListener('message', handleMessage);
@@ -304,23 +305,26 @@ function MainApp() {
     setWebglContextLost(true);
   }, []);
 
-  // Silence detection for system audio — warns if no audio is flowing after capture starts
+  // Silence detection for system/mic audio — warns if no audio is flowing after capture starts
   useEffect(() => {
     if (silenceCheckRef.current) {
       clearInterval(silenceCheckRef.current);
       silenceCheckRef.current = null;
     }
 
-    if (!isActive || capture.captureSource !== 'system' || !audioEngine) return;
+    if (!isActive || !capture.captureSource || !audioEngine) return;
 
     let toastShown = false;
     let checksRemaining = 4;
 
-    // Start checking after launch animation (~2.5s), then every 1s
+    // Start checking after launch animation (~2.5s), then every 1s.
+    // Uses time-domain data (waveform) instead of frequency data because
+    // getByteFrequencyData returns zeros for MediaStreamSource in setInterval contexts.
     silenceCheckRef.current = setInterval(() => {
-      const data = audioEngine.getFrequencyData();
+      const data = audioEngine.getTimeDomainData();
       if (data.length === 0) return;
-      const hasSignal = data.some((v) => v > 2);
+      // Time-domain silence = all samples at exactly 128. Any deviation means audio is flowing.
+      const hasSignal = data.some((v) => v < 127 || v > 129);
 
       if (hasSignal) {
         // Audio detected — cancel warning and dismiss toast if it was shown
@@ -333,13 +337,12 @@ function MainApp() {
       checksRemaining--;
       if (checksRemaining <= 0 && !toastShown) {
         toastShown = true;
-        useToastStore
-          .getState()
-          .show(
-            'No audio detected — make sure audio is playing in the shared screen, window, ' +
-              'or tab, and that you checked "Share audio" in the browser dialog.',
-            { type: 'warning', durationMs: 8000 },
-          );
+        const toastKey =
+          capture.captureSource === 'mic' ? 'toasts.silenceDetectedMic' : 'toasts.silenceDetected';
+        useToastStore.getState().show(i18n.t(toastKey, { ns: 'messages' }), {
+          type: 'warning',
+          durationMs: 8000,
+        });
       }
 
       // Keep checking for a few seconds after showing toast so we can dismiss it
@@ -372,7 +375,13 @@ function MainApp() {
   const handleToggleAutopilot = useCallback(() => {
     const next = !autopilot.enabled;
     setAutopilotEnabled(next);
-    useToastStore.getState().show(next ? 'Autopilot on' : 'Autopilot off');
+    useToastStore
+      .getState()
+      .show(
+        next
+          ? i18n.t('toasts.autopilotOn', { ns: 'messages' })
+          : i18n.t('toasts.autopilotOff', { ns: 'messages' }),
+      );
   }, [autopilot.enabled, setAutopilotEnabled]);
 
   const handleTogglePanel = useCallback((panel: PanelView) => {
@@ -428,14 +437,26 @@ function MainApp() {
     if (!currentPreset) return;
     const wasFavorite = useSettingsStore.getState().favoritePresets.includes(currentPreset);
     toggleFavoritePreset(currentPreset);
-    useToastStore.getState().show(wasFavorite ? 'Removed from favorites' : 'Added to favorites');
+    useToastStore
+      .getState()
+      .show(
+        wasFavorite
+          ? i18n.t('toasts.removedFromFavorites', { ns: 'messages' })
+          : i18n.t('toasts.addedToFavorites', { ns: 'messages' }),
+      );
   }, [currentPreset, toggleFavoritePreset]);
 
   const handleToggleBlock = useCallback(() => {
     if (!currentPreset) return;
     const isCurrentlyBlocked = useSettingsStore.getState().blockedPresets.includes(currentPreset);
     toggleBlockPreset(currentPreset);
-    useToastStore.getState().show(isCurrentlyBlocked ? 'Preset unblocked' : 'Preset blocked');
+    useToastStore
+      .getState()
+      .show(
+        isCurrentlyBlocked
+          ? i18n.t('toasts.presetUnblocked', { ns: 'messages' })
+          : i18n.t('toasts.presetBlocked', { ns: 'messages' }),
+      );
     // If we just blocked the current preset, skip to next
     if (!isCurrentlyBlocked) {
       handleNextPreset();
@@ -473,19 +494,13 @@ function MainApp() {
         setPremiumError(true);
         useToastStore
           .getState()
-          .show(
-            'Spotify Premium is required for playback controls. ' +
-              'You can still see now-playing info and use MangoWave with other audio sources.',
-            { type: 'warning' },
-          );
+          .show(i18n.t('spotify.premiumRequired', { ns: 'messages' }), { type: 'warning' });
       } else if (err instanceof TokenExpiredError) {
         requestPoll(); // Triggers token refresh in useNowPlaying
       } else {
         useToastStore
           .getState()
-          .show('Could not reach Spotify. Please check your connection and try again.', {
-            type: 'error',
-          });
+          .show(i18n.t('spotify.networkError', { ns: 'messages' }), { type: 'error' });
       }
     },
     [setRateLimited, clearRateLimited, setPremiumError, requestPoll],
@@ -726,10 +741,11 @@ function MainApp() {
   if (!webgl2) {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-black font-sans text-white">
-        <h1 className="mb-2 text-3xl font-bold text-red-500">WebGL 2 Not Supported</h1>
+        <h1 className="mb-2 text-3xl font-bold text-red-500">
+          {i18n.t('errors.webgl2NotSupported', { ns: 'messages' })}
+        </h1>
         <p className="max-w-md text-center opacity-60">
-          MangoWave requires WebGL 2 to render visualizations. Please try a modern browser such as
-          Chrome, Firefox, or Edge.
+          {i18n.t('errors.webgl2NotSupportedDesc', { ns: 'messages' })}
         </p>
       </div>
     );
@@ -750,18 +766,16 @@ function MainApp() {
           {webglContextLost && (
             <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/90 font-sans text-white">
               <h1 className="mb-2 text-2xl font-bold text-red-400">
-                Visualizer Lost Graphics Context
+                {i18n.t('errors.webglContextLost', { ns: 'messages' })}
               </h1>
               <p className="mb-6 max-w-md text-center text-sm opacity-70">
-                Your device&apos;s graphics system was interrupted — this can happen when your
-                device is under heavy load, the GPU is shared with other applications, or the
-                display configuration changed. Reloading the page will restore the visualizer.
+                {i18n.t('errors.webglContextLostDesc', { ns: 'messages' })}
               </p>
               <button
                 onClick={() => window.location.reload()}
                 className="cursor-pointer rounded-lg border-none bg-orange-500 px-8 py-3 text-lg font-bold text-white hover:bg-orange-400"
               >
-                Reload Page
+                {i18n.t('reloadPage', { ns: 'common' })}
               </button>
             </div>
           )}

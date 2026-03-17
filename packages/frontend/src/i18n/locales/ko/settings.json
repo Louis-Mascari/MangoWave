@@ -1,0 +1,117 @@
+{
+  "tabs": {
+    "equalizer": "이퀄라이저",
+    "rendering": "렌더링",
+    "presets": "프리셋",
+    "shortcuts": "단축키",
+    "data": "데이터",
+    "spotify": "Spotify"
+  },
+
+  "equalizer": {
+    "title": "이퀄라이저",
+    "tooltip": "어떤 주파수가 비주얼을 움직이는지 조절합니다. 오디오 출력에는 영향을 주지 않습니다. 저음을 높이면 움직임이 강해지고, 고음을 낮추면 반응이 차분해집니다",
+    "scaleHigh": "+12",
+    "scaleMid": "0 dB",
+    "scaleLow": "-12",
+    "preAmp": "프리앰프",
+    "preAmpTooltip": "전체 신호를 스케일합니다. 높이면 비주얼이 더 강하게 반응하고, 낮추면 차분해집니다. 시각 전용이며 오디오 출력에는 영향을 주지 않습니다"
+  },
+
+  "rendering": {
+    "title": "렌더링",
+    "frameRate": "프레임 레이트",
+    "frameRateTooltip": "프레임 레이트를 낮추면 GPU 사용량이 줄어듭니다",
+    "frameRatePlaceholder": "15–300",
+    "uncapped": "무제한",
+    "resolution": "해상도",
+    "resolutionTooltip": "해상도를 낮추면 GPU 부하가 줄지만 선명도가 떨어집니다",
+    "meshResolution": "메시 해상도",
+    "meshResolutionTooltip": "왜곡 효과의 정점 그리드를 조절합니다. 높을수록 디테일이 세밀해지지만 GPU 비용이 증가합니다",
+    "textureQuality": "텍스처 품질",
+    "textureQualityTooltip": "내부 렌더 해상도 배율입니다. 낮으면 빠르고, 높으면 슈퍼샘플링 품질이 됩니다",
+    "antiAliasing": "안티앨리어싱",
+    "antiAliasingTooltip": "FXAA로 계단 현상을 완화합니다. 약간의 성능 비용(~2-3%)",
+    "analysis": "분석",
+    "audioSmoothing": "오디오 스무딩: {{value}}",
+    "audioSmoothingTooltip": "낮을수록 비트에 빠르게 반응하고, 높을수록 부드럽게 움직입니다. 프리셋 자체 스무딩이 적용되므로 효과는 미묘합니다",
+    "fftSize": "FFT 크기",
+    "fftSizeTooltip": "높을수록 주파수 디테일이 좋아지지만 지연이 늘어납니다. 엔진이 고정 주파수 대역에 매핑하므로 효과는 미묘합니다"
+  },
+
+  "presets": {
+    "title": "프리셋",
+    "tooltip": "프리셋마다 소리에 대한 반응성이 다릅니다. 비주얼이 너무 약하거나 강하면 이퀄라이저 탭의 프리앰프 게인을 조절하세요",
+    "transitionTime": "전환 시간: {{value}}초",
+    "transitionTimeTooltip": "프리셋 전환 시 블렌딩되는 시간",
+    "presetNameDisplay": "프리셋 이름 표시",
+    "presetNameDisplayTooltip": "프리셋 전환 시 이름이 표시되는 시간",
+    "always": "항상",
+    "timed": "타이머",
+    "duration": "표시 시간: {{value}}초",
+    "autopilotTooltip": "설정된 간격으로 프리셋을 자동 순환합니다. 셔플 방식으로 모든 프리셋이 한 번씩 재생된 후에 반복됩니다",
+    "interval": "간격: {{value}}초",
+    "mode": "모드",
+    "modeTooltip": "전체 = 선택된 팩의 프리셋, 즐겨찾기 = 즐겨찾기에 추가된 프리셋만 (팩 선택 무시)",
+    "all": "전체",
+    "favorites": "즐겨찾기",
+    "favoriteFrequency": "즐겨찾기 빈도: {{value}}배",
+    "favoriteFrequencyTooltip": "즐겨찾기가 다음에 선택될 확률을 높입니다. 모든 프리셋은 여전히 라운드당 한 번씩 재생됩니다. 즐겨찾기가 더 빨리 나올 뿐입니다",
+    "clearBlockedConfirm": "차단된 프리셋 {{count}}개를 모두 해제할까요?",
+    "clearBlocked": "차단 해제 ({{count}})",
+    "clearFavoritesConfirm": "즐겨찾기 {{count}}개를 모두 해제할까요?",
+    "clearFavorites": "즐겨찾기 해제 ({{count}})"
+  },
+
+  "data": {
+    "title": "데이터",
+    "description": "설정은 이 브라우저, 이 기기에 로컬로 저장됩니다. 내보내기와 가져오기를 사용하여 브라우저나 기기 간에 설정을 이동하거나 백업할 수 있습니다.",
+    "descriptionWithSync": "설정은 이 브라우저, 이 기기에 로컬로 저장됩니다. Spotify로 연결되어 있으면 클라우드에도 동기화됩니다. 내보내기와 가져오기를 사용하여 브라우저나 기기 간에 설정을 이동하거나 백업할 수 있습니다.",
+    "export": "내보내기",
+    "exportSettings": "설정 내보내기",
+    "import": "가져오기",
+    "importDescription": "가져올 카테고리를 선택하세요. 선택한 카테고리만 덮어쓰기됩니다. 나머지는 그대로 유지됩니다.",
+    "loadFileDescription": "설정 파일을 불러와서 적용할 카테고리를 선택하세요.",
+    "importSettings": "설정 가져오기",
+    "categoryRendering": "렌더링",
+    "categoryAudioAnalysis": "오디오 스무딩 & FFT",
+    "categoryEq": "EQ",
+    "categoryAutopilot": "자동 전환",
+    "categoryDisplay": "디스플레이 & 볼륨",
+    "categoryFavorites": "즐겨찾기",
+    "categoryBlocked": "차단된 프리셋",
+    "categoryPacks": "팩 & 제외 항목"
+  },
+
+  "spotifyTab": {
+    "title": "Spotify",
+    "unavailable": "Spotify 연동을 사용할 수 없습니다. MangoWave를 셀프 호스팅하는 경우 README에서 설정 방법을 확인하세요.",
+    "connectedAs": "{{name}}(으)로 연결됨",
+    "connected": "연결됨",
+    "connectedInfo": "현재 재생 메타데이터와 클라우드 동기화 MangoWave 설정이 활성화되었습니다. 재생 컨트롤은 Premium이 필요합니다. Spotify를 재생 중인 화면, 창, 탭을 공유하여 비주얼라이저가 오디오를 들을 수 있게 하세요.",
+    "connectDescription": "Spotify를 연결하면 현재 재생 메타데이터와 클라우드 동기화 MangoWave 설정을 사용할 수 있습니다. Spotify Premium은 재생 컨트롤도 지원합니다. 비주얼라이저가 오디오에 반응하려면 Spotify를 재생 중인 화면, 창, 탭을 공유해야 합니다.",
+    "connecting": "연결 중...",
+    "connectSpotify": "Spotify 연결",
+    "devInfo": "앱 소유자가 아닌 경우, 소유자에게 Spotify 계정에 연결된 이름과 이메일을 개발자 앱의 사용자 관리 탭에 추가해 달라고 요청하세요."
+  },
+
+  "shortcutActions": {
+    "nextPreset": "다음 프리셋",
+    "previousPreset": "이전 프리셋",
+    "toggleFullscreen": "전체 화면 전환",
+    "toggleAutopilot": "자동 전환 켜기/끄기",
+    "toggleFavorite": "즐겨찾기 전환",
+    "toggleBlock": "차단 전환",
+    "toggleQueue": "재생 목록 전환 (로컬 파일)",
+    "playPause": "재생 / 일시정지",
+    "previousTrack": "이전 트랙",
+    "nextTrack": "다음 트랙",
+    "closePanel": "패널 / 오버레이 닫기",
+    "toggleShortcuts": "단축키 오버레이 전환"
+  },
+
+  "language": {
+    "title": "언어",
+    "tooltip": "인터페이스의 표시 언어를 선택합니다"
+  }
+}

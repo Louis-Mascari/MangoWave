@@ -6,6 +6,8 @@
  * check enforces MIME type validation before files reach the audio pipeline.
  */
 
+import i18n from '../i18n/index.ts';
+
 const AUDIO_MIME_PREFIX = 'audio/';
 
 /** Common audio extensions for files that lack a MIME type (e.g. `.ogg` on some platforms). */
@@ -61,11 +63,13 @@ export function validateAudioFiles(files: File[]): ValidationResult {
 
 /** Builds a user-friendly rejection message listing the bad filenames. */
 export function rejectionMessage(rejected: string[]): string {
+  const t = i18n.getFixedT(null, 'messages');
+
   const count = rejected.length;
   const names =
     count <= 3 ? rejected.join(', ') : `${rejected.slice(0, 3).join(', ')} and ${count - 3} more`;
 
   return count === 1
-    ? `"${names}" is not a supported audio file. Please use MP3, WAV, FLAC, OGG, AAC, or other common audio formats.`
-    : `${count} files were not supported audio formats and were skipped: ${names}. Please use MP3, WAV, FLAC, OGG, AAC, or other common audio formats.`;
+    ? t('fileValidation.singleRejected', { filename: names })
+    : t('fileValidation.multipleRejected', { count, names });
 }

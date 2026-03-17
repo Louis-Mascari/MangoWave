@@ -33,6 +33,7 @@
 - **Visual quality controls** — mesh resolution, texture quality, FXAA anti-aliasing, plus FPS cap, resolution scaling, FFT size, smoothing
 - **Settings export/import** — transfer settings between browsers or devices via JSON file
 - **First-time onboarding** — guided tips overlay for new visitors (separate desktop and mobile variants)
+- **9-language i18n** — English, Spanish, Chinese, Hindi, Japanese, Korean, Russian, Indonesian, Brazilian Portuguese. Browser language auto-detected with manual override on the start screen. Non-English translations are AI-generated — if you spot an error, please [open an issue](https://github.com/Louis-Mascari/MangoWave/issues/new/choose)
 - **Zero setup** — no signup, no install, no ads — everything runs in the browser
 
 ## Architecture
@@ -125,7 +126,7 @@ npm run build -w packages/frontend   # tsc + vite build
 
 ## Tech Stack
 
-- **Frontend:** React 19, Vite 7, TypeScript 5.9, Tailwind CSS 4, Zustand
+- **Frontend:** React 19, Vite 7, TypeScript 5.9, Tailwind CSS 4, Zustand, react-i18next
 - **Visual engine:** butterchurn (WebGL 2 MilkDrop port)
 - **Audio:** Web Audio API (`getDisplayMedia`, `HTMLAudioElement`, `getUserMedia`), music-metadata (ID3 parsing)
 - **Backend:** AWS Lambda (Node.js/TypeScript), API Gateway, DynamoDB

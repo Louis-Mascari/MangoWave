@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { APIGatewayProxyEventV2 } from 'aws-lambda';
+import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 import { handler } from '../settings-load';
 
 vi.mock('../../lib/dynamo', () => ({
@@ -14,6 +14,10 @@ function makeEvent(body: Record<string, unknown>): APIGatewayProxyEventV2 {
     body: JSON.stringify(body),
     requestContext: { http: { method: 'POST' } },
   } as unknown as APIGatewayProxyEventV2;
+}
+
+async function invoke(body: Record<string, unknown>): Promise<APIGatewayProxyStructuredResultV2> {
+  return (await handler(makeEvent(body))) as APIGatewayProxyStructuredResultV2;
 }
 
 const mockSettings = {
@@ -44,13 +48,13 @@ describe('settings-load handler', () => {
   });
 
   it('returns 400 if sessionId is missing', async () => {
-    const result = await handler(makeEvent({}));
+    const result = await invoke({});
     expect(result.statusCode).toBe(400);
   });
 
   it('returns 404 if session not found', async () => {
     vi.mocked(getSession).mockResolvedValue(null);
-    const result = await handler(makeEvent({ sessionId: 'sess_1' }));
+    const result = await invoke({ sessionId: 'sess_1' });
     expect(result.statusCode).toBe(404);
   });
 
@@ -61,7 +65,7 @@ describe('settings-load handler', () => {
     });
     vi.mocked(getUserSettings).mockResolvedValue(mockSettings);
 
-    const result = await handler(makeEvent({ sessionId: 'sess_1' }));
+    const result = await invoke({ sessionId: 'sess_1' });
     expect(result.statusCode).toBe(200);
 
     const body = JSON.parse(result.body as string);
@@ -75,7 +79,7 @@ describe('settings-load handler', () => {
     });
     vi.mocked(getUserSettings).mockResolvedValue(null);
 
-    const result = await handler(makeEvent({ sessionId: 'sess_1' }));
+    const result = await invoke({ sessionId: 'sess_1' });
     expect(result.statusCode).toBe(200);
 
     const body = JSON.parse(result.body as string);
@@ -84,7 +88,7 @@ describe('settings-load handler', () => {
 
   it('returns 500 on dynamo failure', async () => {
     vi.mocked(getSession).mockRejectedValue(new Error('DynamoDB error'));
-    const result = await handler(makeEvent({ sessionId: 'sess_1' }));
+    const result = await invoke({ sessionId: 'sess_1' });
     expect(result.statusCode).toBe(500);
   });
 });

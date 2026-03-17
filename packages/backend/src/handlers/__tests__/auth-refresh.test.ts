@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { APIGatewayProxyEventV2 } from 'aws-lambda';
+import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 import { handler } from '../auth-refresh';
 
 vi.mock('../../lib/spotify', () => ({
@@ -21,20 +21,24 @@ function makeEvent(body: Record<string, unknown>): APIGatewayProxyEventV2 {
   } as unknown as APIGatewayProxyEventV2;
 }
 
+async function invoke(body: Record<string, unknown>): Promise<APIGatewayProxyStructuredResultV2> {
+  return (await handler(makeEvent(body))) as APIGatewayProxyStructuredResultV2;
+}
+
 describe('auth-refresh handler', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('returns 400 if sessionId is missing', async () => {
-    const result = await handler(makeEvent({}));
+    const result = await invoke({});
     expect(result.statusCode).toBe(400);
   });
 
   it('returns 404 if no stored session exists', async () => {
     vi.mocked(getSession).mockResolvedValue(null);
 
-    const result = await handler(makeEvent({ sessionId: 'sess_abc' }));
+    const result = await invoke({ sessionId: 'sess_abc' });
     expect(result.statusCode).toBe(404);
   });
 
@@ -52,7 +56,7 @@ describe('auth-refresh handler', () => {
     });
     vi.mocked(updateSessionToken).mockResolvedValue(undefined);
 
-    const result = await handler(makeEvent({ sessionId: 'sess_abc' }));
+    const result = await invoke({ sessionId: 'sess_abc' });
     expect(result.statusCode).toBe(200);
 
     const body = JSON.parse(result.body as string);
@@ -67,7 +71,7 @@ describe('auth-refresh handler', () => {
     });
     vi.mocked(refreshAccessToken).mockRejectedValue(new Error('expired'));
 
-    const result = await handler(makeEvent({ sessionId: 'sess_abc' }));
+    const result = await invoke({ sessionId: 'sess_abc' });
     expect(result.statusCode).toBe(500);
   });
 });

@@ -24,10 +24,12 @@ jobs:
       - run: npm ci
 
       - name: Security audit
-        # GHSA-8gc5-j5rx-235r: fast-xml-parser numeric entity expansion via @aws-sdk/xml-builder.
-        # Not exploitable here — fast-xml-parser only parses AWS service responses, not user input.
-        # AWS SDK hasn't published a fix yet; suppress until upstream resolves it.
-        run: npm audit --audit-level=high --ignore-advisories GHSA-8gc5-j5rx-235r
+        # Audit level set to critical (not high) to work around GHSA-8gc5-j5rx-235r:
+        # fast-xml-parser numeric entity expansion via @aws-sdk/xml-builder. Not exploitable
+        # here — fast-xml-parser only processes AWS service responses, never user input.
+        # AWS SDK hasn't published a fix yet. Restore --audit-level=high once Dependabot
+        # bumps @aws-sdk/* to a version that uses fast-xml-parser@5.5.6+.
+        run: npm audit --audit-level=critical
 
       - name: Prettier check
         run: npm run format:check

@@ -1,0 +1,75 @@
+version: 2
+
+updates:
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - github-actions
+    groups:
+      actions-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  # npm — root
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - npm
+    groups:
+      npm-root-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  # npm — frontend
+  - package-ecosystem: npm
+    directory: /packages/frontend
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - npm
+      - frontend
+    groups:
+      npm-frontend-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  # npm — backend
+  - package-ecosystem: npm
+    directory: /packages/backend
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - npm
+      - backend
+    groups:
+      npm-backend-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  # npm — infrastructure
+  - package-ecosystem: npm
+    directory: /infrastructure
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - npm
+      - infrastructure
+    groups:
+      npm-infra-minor-patch:
+        update-types:
+          - minor
+          - patch

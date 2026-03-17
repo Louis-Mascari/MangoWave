@@ -99,10 +99,18 @@ body {
 
 /* Action toast fade in/out — duration set dynamically via inline style */
 @keyframes toast-fade {
-  0% { opacity: 0; }
-  10% { opacity: 1; }
-  85% { opacity: 1; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 /* Seek bar / volume — thin track with orange fill */
@@ -245,7 +253,7 @@ button:focus-visible,
 a:focus-visible,
 [tabindex]:focus-visible,
 select:focus-visible,
-[role="button"]:focus-visible {
+[role='button']:focus-visible {
   outline: 2px solid #ff8c32;
   outline-offset: 2px;
 }
@@ -267,4 +275,3 @@ input[type='range']:focus-visible {
   height: 18px;
   margin-top: -6px;
 }
-

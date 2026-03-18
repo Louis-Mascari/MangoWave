@@ -1,6 +1,7 @@
 {
   "name": "MangoWave",
   "short_name": "MangoWave",
+  "description": "Browser-based audio-reactive visualizer inspired by Winamp and MilkDrop",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",

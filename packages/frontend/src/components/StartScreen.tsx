@@ -363,7 +363,7 @@ export function StartScreen({
       />
 
       {/* Footer */}
-      <div className="flex flex-col items-center gap-3 pb-4 pt-2">
+      <div className="flex flex-col items-center gap-3 pb-4 pt-6 sm:pt-2">
         <div className="flex items-center gap-8">
           <a
             href="https://github.com/Louis-Mascari/MangoWave"

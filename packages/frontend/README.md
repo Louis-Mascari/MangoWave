@@ -97,7 +97,7 @@ On mobile, 27 GPU-heavy presets (identified via Pixel 10 Pro testing) are filter
 
 **Language preference** is persisted separately by `i18next-browser-languagedetector` to `localStorage` key `mangowave-language` (not Zustand). This allows i18n to resolve synchronously at module load before React mounts.
 
-`useToastStore` drives single-message action toasts with typed variants (`info`, `error`, `warning`). API: `show(message, { type?, durationMs? })` — info auto-clears at 3.5s, error/warning at 6s. `durationMs` stored in state and drives both the JS cleanup timer and the CSS `toast-fade` animation duration (set dynamically via inline style). `ActionToast` renders styled variants: info (neutral), error (red border/bg), warning (amber border/bg).
+`useToastStore` drives single-message action toasts with typed variants (`info`, `error`, `warning`). API: `show(message, { type?, durationMs? })` — info auto-clears at 3.5s, error/warning at 6s. `durationMs` stored in state and drives both the JS cleanup timer and the CSS `toast-fade` animation duration (set dynamically via inline style).
 
 ## Environment Variables
 
@@ -133,12 +133,10 @@ Key details:
 
 ### PlaybackPanel
 
-Floating panel (`components/PlaybackPanel.tsx`) rendered by App.tsx when source is `local` or `spotify`. Contains seek bar, transport controls (prev/play/next), shuffle, repeat, Now Playing toggle, queue toggle (local only), and volume (local only, desktop only).
+Floating panel (`components/PlaybackPanel.tsx`) rendered by App.tsx when local playback is active or Spotify is connected (Premium only). Contains seek bar, transport controls (prev/play/next), shuffle, repeat, Now Playing toggle, queue toggle (local only), and volume (local only, desktop only).
 
-- **Responsive layout** — flex-wrap groups: `[prev play next]` + `[shuffle repeat nowplaying queue]` wrap as units, volume wraps last
 - **Idle auto-hide** — `useIdleTimer` with `pause`/`resume` (hover keeps visible on desktop) and `forceIdle` (instant hide after mobile radial actions). 5s mobile, 3s desktop
-- **Mobile** — `bottom-24 left-4 right-4`, hidden when FAB menu is open (`mobileMenuOpen` state in App.tsx)
-- **Desktop** — `bottom-16 left-1/2 -translate-x-1/2`, centered above ControlBar
+- **Mobile** — hidden when FAB menu is open (`mobileMenuOpen` state in App.tsx)
 
 ## Key Technical Notes
 
@@ -151,5 +149,5 @@ Floating panel (`components/PlaybackPanel.tsx`) rendered by App.tsx when source 
 - **Audio capture errors** — `humanizeAudioError` in `useAudioCapture` maps DOMException names to user-friendly messages per source (system vs mic). Missing audio tracks on screen share (user forgot "Share audio") block launch with browser/OS-aware guidance via `buildNoAudioMessage` (uses `browserInfo` to show only the relevant platform's constraints and names the user's browser if non-Chromium). `startCapture`/`startMicCapture` return `boolean` success so callers gate on result.
 - **Silence detection** — App.tsx polls time-domain waveform data every 1.5s after system or mic capture starts; warns via toast at ~6s if no signal. Auto-dismisses if audio starts flowing.
 - **File validation** — `audioFileValidation.ts` validates files by MIME type (`audio/*`) with extension fallback. StartScreen shows rejection errors in the modal; MediaPlaylist queue shows error toast. Defence-in-depth behind the `accept="audio/*"` attribute.
-- **WebGL context loss** — `Visualizer` listens for `webglcontextlost` on the canvas; App.tsx shows a z-200 reload overlay with user-facing explanation.
+- **WebGL context loss** — `Visualizer` listens for `webglcontextlost` on the canvas; App.tsx shows a reload overlay with user-facing explanation.
 - **i18n** — `react-i18next` with 9 languages, 4 namespaces (common, start, settings, messages). All translations statically bundled (no lazy loading). Browser language auto-detected via `i18next-browser-languagedetector`, persisted to localStorage (`mangowave-language`). Synchronous init (`initImmediate: false`) prevents re-render flicker. Components use `useTranslation` hook; non-React code (error handlers, utils) uses `i18n.getFixedT()`. App.tsx uses the `i18n` singleton directly (not `useTranslation`) to avoid unstable hook references that restart effects. Language picker on StartScreen footer.

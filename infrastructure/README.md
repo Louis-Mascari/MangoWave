@@ -8,24 +8,24 @@ AWS CDK v2 stack for MangoWave infrastructure (backend + frontend hosting).
 npm run build          # tsc
 npm run test           # Jest (CDK template assertion tests)
 npx cdk synth          # Synthesize CloudFormation template
-npx cdk deploy -c alertEmail=<email> -c acmCertArn=<arn> -c webAclArn=<arn>  # Deploy stack
+npx cdk deploy -c alertEmail=<email> -c acmCertArn=<arn> -c webAclArn=<arn>  # Deploy (alertEmail required)
 ```
 
 ## Resources
 
-| Resource           | Type             | Description                                                        |
-| ------------------ | ---------------- | ------------------------------------------------------------------ |
-| DynamoDB table     | NoSQL database   | Auth sessions (90-day TTL) and user settings (single-table design) |
-| 4 Lambda functions | Node.js handlers | auth-callback, auth-refresh, settings-save, settings-load          |
-| HTTP API           | API Gateway v2   | CORS + stage-level throttling (20 burst, 10 rps)                   |
-| CloudWatch alarms  | Per-Lambda + API | Error and 5xx monitoring                                           |
-| Access logging     | API Gateway      | Structured JSON logs                                               |
-| SNS topic          | Alerts           | All alarms notify via email                                        |
-| Budget             | AWS Budgets      | Alerts and automated cost protection                               |
-| SSM parameters     | Spotify secrets  | OAuth credentials (encrypted)                                      |
-| S3 bucket          | Frontend hosting | Static assets for app + landing page                               |
-| CloudFront         | CDN              | Distribution with host-based routing (app vs landing)              |
-| CloudFront Func    | Edge routing     | Routes `mangowave.app` requests to `/landing/` prefix              |
+| Resource           | Type             | Description                                                         |
+| ------------------ | ---------------- | ------------------------------------------------------------------- |
+| DynamoDB table     | NoSQL database   | Auth sessions (90-day TTL) and user settings (single-table, RETAIN) |
+| 4 Lambda functions | Node.js handlers | auth-callback, auth-refresh, settings-save, settings-load           |
+| HTTP API           | API Gateway v2   | CORS + stage-level throttling (20 burst, 10 rps)                    |
+| CloudWatch alarms  | Per-Lambda + API | Error and 5xx monitoring                                            |
+| Access logging     | API Gateway      | Structured JSON logs (30-day retention)                             |
+| SNS topic          | Alerts           | All alarms notify via email                                         |
+| Budget             | AWS Budgets      | Alerts and automated cost protection                                |
+| SSM parameters     | Spotify secrets  | OAuth credentials (encrypted)                                       |
+| S3 bucket          | Frontend hosting | Static assets for app + landing page                                |
+| CloudFront         | CDN              | Distribution with host-based routing, TLS 1.3 minimum               |
+| CloudFront Func    | Edge routing     | Routes `mangowave.app` / `www.mangowave.app` to `/landing/` prefix  |
 
 ### CORS
 
@@ -33,7 +33,9 @@ API Gateway CORS is configured in the stack with allowed origins defaulting to `
 
 ## Cost Protection
 
-API throttling, budget kill-switch, no reserved concurrency — see CDK stack for specifics.
+- **API throttling** — 20 burst / 10 rps at the API Gateway stage level
+- **Budget** — $1/month limit with SNS alerts at 50% and 100% of actual spend
+- **Kill-switch** — at 100% budget, AWS Budgets automatically attaches a deny policy to all Lambda roles (blocks `lambda:InvokeFunction` and `execute-api:Invoke`)
 
 ## Stack Layout
 

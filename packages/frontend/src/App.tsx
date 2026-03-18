@@ -14,12 +14,14 @@ import { useAutopilot } from './hooks/useAutopilot.ts';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.ts';
 import { useHideCursor } from './hooks/useHideCursor.ts';
 import { useFullscreen } from './hooks/useFullscreen.ts';
+import { useSpotifyPlayback } from './hooks/useSpotifyPlayback.ts';
+import { usePlaybackAdapter } from './hooks/usePlaybackAdapter.ts';
+import { usePresetNavigation } from './hooks/usePresetNavigation.ts';
 import { Visualizer } from './components/Visualizer.tsx';
 import { ControlBar } from './components/ControlBar.tsx';
 import type { PanelView } from './components/ControlBar.tsx';
 import { PresetNotification } from './components/PresetNotification.tsx';
 import { NowPlaying } from './components/NowPlaying.tsx';
-import type { NowPlayingTrackInfo } from './components/NowPlaying.tsx';
 import { StartScreen } from './components/StartScreen.tsx';
 import { ShortcutOverlay } from './components/ShortcutOverlay.tsx';
 import { LaunchAnimation } from './components/LaunchAnimation.tsx';
@@ -31,22 +33,10 @@ import { useSettingsStore } from './store/useSettingsStore.ts';
 import { useSpotifyStore } from './store/useSpotifyStore.ts';
 import { usePresetHistoryStore } from './store/usePresetHistoryStore.ts';
 import { useToastStore } from './store/useToastStore.ts';
-import {
-  controlPlayback,
-  seekToPosition,
-  toggleShuffle as apiToggleShuffle,
-  setRepeatMode,
-  RateLimitedError,
-  PremiumRequiredError,
-  TokenExpiredError,
-} from './services/spotifyApi.ts';
-import type { PlaybackAdapter } from './components/PlaybackControls.tsx';
 import { PlaybackPanel } from './components/PlaybackPanel.tsx';
 import { MediaPlaylist } from './components/MediaPlaylist.tsx';
 import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
 import { isMobileDevice } from './utils/isMobileDevice.ts';
-import { pickPreset } from './utils/pickPreset.ts';
-import { quarantinedSet, mobileBlockedSet } from './data/excludedPresets.ts';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
 
 /**
@@ -111,18 +101,11 @@ function MainApp() {
   // Only poll Spotify when the visualizer is running — no need on the start screen
   useNowPlaying(isSpotifyConnected && isActive);
   const rendererRef = useRef<VisualizerRenderer | null>(null);
-  const blockedPresets = useSettingsStore((s) => s.blockedPresets);
-  const favoritePresets = useSettingsStore((s) => s.favoritePresets);
-  const transitionTime = useSettingsStore((s) => s.transitionTime);
   const autopilot = useSettingsStore((s) => s.autopilot);
   const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
   const presetNameDisplay = useSettingsStore((s) => s.presetNameDisplay);
   const songInfoDisplay = useSettingsStore((s) => s.songInfoDisplay);
   const setSongInfoDisplay = useSettingsStore((s) => s.setSongInfoDisplay);
-  const toggleFavoritePreset = useSettingsStore((s) => s.toggleFavoritePreset);
-  const toggleBlockPreset = useSettingsStore((s) => s.toggleBlockPreset);
-  const excludedOverrides = useSettingsStore((s) => s.excludedOverrides);
-  const enabledPacks = useSettingsStore((s) => s.enabledPacks);
   const [currentPreset, setCurrentPreset] = useState('');
   const [presetList, setPresetList] = useState<string[]>([]);
   const [presetPackMap, setPresetPackMap] = useState<Map<string, string>>(new Map());
@@ -134,39 +117,6 @@ function MainApp() {
   const silenceCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const setOnboardingShown = useSettingsStore((s) => s.setOnboardingShown);
   const resetAutopilotRef = useRef<() => void>(() => {});
-  const rateLimitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Build effective quarantine set (quarantined minus user overrides)
-  const effectiveQuarantineSet = useMemo(() => {
-    const overrideSet = new Set(excludedOverrides);
-    const result = new Set<string>();
-    for (const name of quarantinedSet) {
-      if (!overrideSet.has(name)) {
-        result.add(name);
-      }
-    }
-    return result;
-  }, [excludedOverrides]);
-
-  // Merged blocked set: user blocks + effective quarantine
-  const mergedBlockedSet = useMemo(() => {
-    const set = new Set(blockedPresets);
-    for (const name of effectiveQuarantineSet) {
-      set.add(name);
-    }
-    return set;
-  }, [blockedPresets, effectiveQuarantineSet]);
-
-  // Check if a preset belongs to any enabled built-in pack
-  const enabledPackSet = useMemo(() => new Set(enabledPacks), [enabledPacks]);
-  const isInEnabledPack = useCallback(
-    (name: string) => {
-      if (enabledPackSet.size === 0) return false;
-      const sourcePack = presetPackMap.get(name);
-      return !!sourcePack && enabledPackSet.has(sourcePack);
-    },
-    [enabledPackSet, presetPackMap],
-  );
 
   const startLaunch = useCallback(() => {
     setShowLaunchAnimation(true);
@@ -218,87 +168,17 @@ function MainApp() {
     setPresetPackMap(packMap);
   }, []);
 
-  // Shared shuffle pick: used by both manual next and autopilot
-  const pickNextPreset = useCallback(() => {
-    const renderer = rendererRef.current;
-    if (!renderer) return;
-
-    const allPresets = renderer.presetList;
-
-    let pool: string[];
-    if (autopilot.mode === 'favorites' && favoritePresets.length > 0) {
-      // Favorites mode: pool is favorites only (not blocked), ignores pack filtering
-      pool = favoritePresets.filter((p) => !mergedBlockedSet.has(p));
-    } else if (enabledPacks.length > 0) {
-      pool = allPresets.filter((p) => !mergedBlockedSet.has(p) && isInEnabledPack(p));
-    } else if (presetPackMap.size > 0) {
-      pool = []; // Packs initialized but none enabled
-    } else {
-      pool = allPresets.filter((p) => !mergedBlockedSet.has(p));
-    }
-
-    // On mobile, exclude presets known to cause freezing (unless user overrode)
-    if (isMobileDevice) {
-      const overrideSet = new Set(useSettingsStore.getState().excludedOverrides);
-      pool = pool.filter((p) => !mobileBlockedSet.has(p) || overrideSet.has(p));
-    }
-
-    const historyStore = usePresetHistoryStore.getState();
-    const result = pickPreset(
-      pool,
-      historyStore.playedSet,
-      favoritePresets,
-      autopilot.mode,
-      autopilot.favoriteWeight,
-    );
-    if (!result) return;
-
-    if (result.roundReset) historyStore.resetRound();
-    historyStore.markPlayed(result.pick);
-    renderer.loadPreset(result.pick, transitionTime);
-  }, [
-    mergedBlockedSet,
-    enabledPacks,
-    isInEnabledPack,
-    presetPackMap,
+  const {
+    pickNextPreset,
+    handleNextPreset,
+    handlePreviousPreset,
+    handleSelectPreset,
+    handleToggleFavorite,
+    handleToggleBlock,
+    canGoBack,
+    blockedPresets,
     favoritePresets,
-    autopilot.mode,
-    autopilot.favoriteWeight,
-    transitionTime,
-  ]);
-
-  const handleNextPreset = useCallback(() => {
-    pickNextPreset();
-    resetAutopilotRef.current();
-  }, [pickNextPreset]);
-
-  const handlePreviousPreset = useCallback(() => {
-    const historyStore = usePresetHistoryStore.getState();
-    const overrideSet = new Set(useSettingsStore.getState().excludedOverrides);
-    let name = historyStore.goBack();
-    // Skip mobile-blocked presets (unless overridden) when navigating back
-    if (isMobileDevice) {
-      while (name && mobileBlockedSet.has(name) && !overrideSet.has(name)) {
-        name = historyStore.goBack();
-      }
-    }
-    if (name) {
-      historyStore.markPlayed(name);
-      rendererRef.current?.loadPreset(name, transitionTime);
-      resetAutopilotRef.current();
-    }
-  }, [transitionTime]);
-
-  const canGoBack = usePresetHistoryStore((s) => s.cursor > 0);
-
-  const handleSelectPreset = useCallback(
-    (name: string) => {
-      usePresetHistoryStore.getState().markPlayed(name);
-      rendererRef.current?.loadPreset(name, transitionTime);
-      resetAutopilotRef.current();
-    },
-    [transitionTime],
-  );
+  } = usePresetNavigation({ rendererRef, currentPreset, presetPackMap, resetAutopilotRef });
 
   const handleWebGLContextLost = useCallback(() => {
     setWebglContextLost(true);
@@ -400,286 +280,23 @@ function MainApp() {
   useEffect(() => {
     resetAutopilotRef.current = resetAutopilot;
   });
-  useEffect(() => {
-    return () => {
-      if (rateLimitTimeoutRef.current) clearTimeout(rateLimitTimeoutRef.current);
-    };
-  }, []);
 
   useHideCursor(3000);
   const isFullscreen = useFullscreen();
 
-  // Reset autopilot timer and shuffle round when mode changes
-  useEffect(() => {
-    resetAutopilot();
-    usePresetHistoryStore.getState().resetRound();
-  }, [autopilot.mode, enabledPacks, resetAutopilot]);
-
-  // If initial preset isn't in an enabled pack, pick one that is.
-  // Only runs once — the renderer's init() already filters blocked/quarantined.
-  const didFixInitialPreset = useRef(false);
-  useEffect(() => {
-    if (
-      !didFixInitialPreset.current &&
-      currentPreset &&
-      enabledPacks.length > 0 &&
-      presetPackMap.size > 0
-    ) {
-      didFixInitialPreset.current = true;
-      if (!isInEnabledPack(currentPreset)) {
-        pickNextPreset();
-      }
-    }
-  }, [currentPreset, enabledPacks, presetPackMap, isInEnabledPack, pickNextPreset]);
-
-  const handleToggleFavorite = useCallback(() => {
-    if (!currentPreset) return;
-    const wasFavorite = useSettingsStore.getState().favoritePresets.includes(currentPreset);
-    toggleFavoritePreset(currentPreset);
-    useToastStore
-      .getState()
-      .show(
-        wasFavorite
-          ? i18n.t('toasts.removedFromFavorites', { ns: 'messages' })
-          : i18n.t('toasts.addedToFavorites', { ns: 'messages' }),
-      );
-  }, [currentPreset, toggleFavoritePreset]);
-
-  const handleToggleBlock = useCallback(() => {
-    if (!currentPreset) return;
-    const isCurrentlyBlocked = useSettingsStore.getState().blockedPresets.includes(currentPreset);
-    toggleBlockPreset(currentPreset);
-    useToastStore
-      .getState()
-      .show(
-        isCurrentlyBlocked
-          ? i18n.t('toasts.presetUnblocked', { ns: 'messages' })
-          : i18n.t('toasts.presetBlocked', { ns: 'messages' }),
-      );
-    // If we just blocked the current preset, skip to next
-    if (!isCurrentlyBlocked) {
-      handleNextPreset();
-    }
-  }, [currentPreset, toggleBlockPreset, handleNextPreset]);
-
-  // --- Playback adapter (unified controls for local / spotify / mic / none) ---
-  const spotifyNowPlaying = useSpotifyStore((s) => s.nowPlaying);
-  const premiumError = useSpotifyStore((s) => s.premiumError);
-  const setPremiumError = useSpotifyStore((s) => s.setPremiumError);
-  const isRateLimited = useSpotifyStore((s) => s.isRateLimited);
-  const updateIsPlaying = useSpotifyStore((s) => s.updateIsPlaying);
-  const requestPoll = useSpotifyStore((s) => s.requestPoll);
-  const setRateLimited = useSpotifyStore((s) => s.setRateLimited);
-  const clearRateLimited = useSpotifyStore((s) => s.clearRateLimited);
-
-  const localIsPlaying = useMediaPlayerStore((s) => s.isPlaying);
-  const localCurrentTrack = useMediaPlayerStore((s) => s.tracks[s.currentTrackIndex] ?? null);
-  const localShuffle = useMediaPlayerStore((s) => s.shuffle);
-  const localRepeatMode = useMediaPlayerStore((s) => s.repeatMode);
-  const toggleShuffle = useMediaPlayerStore((s) => s.toggleShuffle);
-  const cycleRepeatMode = useMediaPlayerStore((s) => s.cycleRepeatMode);
-
-  const refreshAccessToken = useSpotifyStore((s) => s.refreshAccessToken);
-
-  const handleSpotifyError = useCallback(
-    (err: unknown) => {
-      if (err instanceof RateLimitedError) {
-        setRateLimited(err.retryAfterSeconds * 1000);
-        rateLimitTimeoutRef.current = setTimeout(
-          () => clearRateLimited(),
-          err.retryAfterSeconds * 1000,
-        );
-      } else if (err instanceof PremiumRequiredError) {
-        setPremiumError(true);
-        useToastStore
-          .getState()
-          .show(i18n.t('spotify.premiumRequired', { ns: 'messages' }), { type: 'warning' });
-      } else if (err instanceof TokenExpiredError) {
-        requestPoll(); // Triggers token refresh in useNowPlaying
-      } else {
-        useToastStore
-          .getState()
-          .show(i18n.t('spotify.networkError', { ns: 'messages' }), { type: 'error' });
-      }
-    },
-    [setRateLimited, clearRateLimited, setPremiumError, requestPoll],
-  );
-
-  /** Run a Spotify API call with automatic token refresh + single retry on 401 */
-  const withTokenRetry = useCallback(
-    async (apiCall: (token: string) => Promise<void>) => {
-      const token = useSpotifyStore.getState().accessToken;
-      if (!token) return;
-      try {
-        await apiCall(token);
-        requestPoll();
-      } catch (err) {
-        if (err instanceof TokenExpiredError) {
-          const newToken = await refreshAccessToken();
-          if (!newToken) return;
-          try {
-            await apiCall(newToken);
-            requestPoll();
-            return;
-          } catch (retryErr) {
-            handleSpotifyError(retryErr);
-            return;
-          }
-        }
-        handleSpotifyError(err);
-      }
-    },
-    [requestPoll, handleSpotifyError, refreshAccessToken],
-  );
-
-  const handleSpotifyAction = useCallback(
-    async (action: 'play' | 'pause' | 'next' | 'previous') => {
-      if (action === 'play') updateIsPlaying(true);
-      else if (action === 'pause') updateIsPlaying(false);
-      await withTokenRetry((t) => controlPlayback(t, action));
-    },
-    [updateIsPlaying, withTokenRetry],
-  );
-
-  const handleSpotifySeek = useCallback(
-    async (positionMs: number) => {
-      await withTokenRetry((t) => seekToPosition(t, positionMs));
-    },
-    [withTokenRetry],
-  );
-
-  const handleSpotifyToggleShuffle = useCallback(async () => {
-    const current = useSpotifyStore.getState().nowPlaying?.shuffleState ?? false;
-    await withTokenRetry((t) => apiToggleShuffle(t, !current));
-  }, [withTokenRetry]);
-
-  const handleSpotifyCycleRepeat = useCallback(async () => {
-    const current = useSpotifyStore.getState().nowPlaying?.repeatState ?? 'off';
-    const next = current === 'off' ? 'context' : current === 'context' ? 'track' : 'off';
-    await withTokenRetry((t) => setRepeatMode(t, next));
-  }, [withTokenRetry]);
-
-  const playbackAdapter: PlaybackAdapter = useMemo(() => {
-    if (local.isActive) {
-      const handleLocalPlay = () => {
-        // If the playlist fully ended (last track, not playing, audio at end), restart
-        const { tracks, currentTrackIndex, isPlaying, currentTime, duration } =
-          useMediaPlayerStore.getState();
-        const atEnd = duration > 0 && currentTime >= duration - 0.5;
-        if (!isPlaying && atEnd && tracks.length > 0 && currentTrackIndex === tracks.length - 1) {
-          useMediaPlayerStore.getState().setCurrentTrack(0);
-        } else {
-          local.play();
-        }
-      };
-      return {
-        source: 'local',
-        isPlaying: localIsPlaying,
-        canControl: !!localCurrentTrack,
-        onPlay: handleLocalPlay,
-        onPause: local.pause,
-        onNext: local.next,
-        onPrevious: local.previous,
-        shuffle: localShuffle,
-        repeatMode: localRepeatMode,
-        onToggleShuffle: toggleShuffle,
-        onCycleRepeat: cycleRepeatMode,
-      };
-    }
-    if (capture.captureSource === 'mic') {
-      return {
-        source: 'mic',
-        isPlaying: false,
-        canControl: false,
-        onPlay: () => {},
-        onPause: () => {},
-        onNext: () => {},
-        onPrevious: () => {},
-        tooltip: 'Microphone input — no playback controls',
-      };
-    }
-    if (isSpotifyConnected && !premiumError) {
-      return {
-        source: 'spotify',
-        isPlaying: spotifyNowPlaying?.isPlaying ?? false,
-        canControl: !isRateLimited,
-        onPlay: () => handleSpotifyAction('play'),
-        onPause: () => handleSpotifyAction('pause'),
-        onNext: () => handleSpotifyAction('next'),
-        onPrevious: () => handleSpotifyAction('previous'),
-        shuffle: spotifyNowPlaying?.shuffleState ?? false,
-        repeatMode:
-          spotifyNowPlaying?.repeatState === 'track'
-            ? 'one'
-            : spotifyNowPlaying?.repeatState === 'context'
-              ? 'all'
-              : 'off',
-        onToggleShuffle: handleSpotifyToggleShuffle,
-        onCycleRepeat: handleSpotifyCycleRepeat,
-        tooltip: isRateLimited ? 'Spotify rate limited' : undefined,
-      };
-    }
-    if (capture.captureSource === 'system') {
-      return {
-        source: 'system',
-        isPlaying: false,
-        canControl: false,
-        onPlay: () => {},
-        onPause: () => {},
-        onNext: () => {},
-        onPrevious: () => {},
-        tooltip: 'Sharing audio — no playback controls',
-      };
-    }
-    return {
-      source: 'none',
-      isPlaying: false,
-      canControl: false,
-      onPlay: () => {},
-      onPause: () => {},
-      onNext: () => {},
-      onPrevious: () => {},
-    };
-  }, [
-    local,
-    localIsPlaying,
-    localCurrentTrack,
-    localShuffle,
-    localRepeatMode,
-    toggleShuffle,
-    cycleRepeatMode,
-    capture,
-    isSpotifyConnected,
-    spotifyNowPlaying,
-    premiumError,
-    isRateLimited,
+  const {
     handleSpotifyAction,
+    handleSpotifySeek,
     handleSpotifyToggleShuffle,
     handleSpotifyCycleRepeat,
-  ]);
+  } = useSpotifyPlayback();
 
-  // Whether the PlaybackPanel is visible (local or Spotify source)
-  const hasPlaybackPanel = local.isActive || (isSpotifyConnected && !premiumError);
-
-  const nowPlayingTrack: NowPlayingTrackInfo | null = useMemo(() => {
-    if (local.isActive && localCurrentTrack) {
-      return {
-        title: localCurrentTrack.name,
-        artist: localCurrentTrack.artist ?? '',
-        albumName: localCurrentTrack.album ?? '',
-        albumArtUrl: localCurrentTrack.albumArtUrl ?? null,
-      };
-    }
-    if (spotifyNowPlaying) {
-      return {
-        title: spotifyNowPlaying.title,
-        artist: spotifyNowPlaying.artist,
-        albumName: spotifyNowPlaying.albumName,
-        albumArtUrl: spotifyNowPlaying.albumArtUrl,
-      };
-    }
-    return null;
-  }, [local.isActive, localCurrentTrack, spotifyNowPlaying]);
+  const { playbackAdapter, nowPlayingTrack, hasPlaybackPanel } = usePlaybackAdapter({
+    local,
+    captureSource: capture.captureSource,
+    isSpotifyConnected,
+    spotifyActions: { handleSpotifyAction, handleSpotifyToggleShuffle, handleSpotifyCycleRepeat },
+  });
 
   // Playback panel
   const handlePlaybackPanelSeek = useCallback(

@@ -50,8 +50,9 @@ src/
 ├── i18n/          # i18next config + 9 locale dirs (en, es, zh, hi, ja, ko, ru, id, pt-BR)
 │                  # 4 namespaces per locale: common, start, settings, messages
 ├── hooks/         # useAudioCapture, useLocalPlayback, useAutopilot, useKeyboardShortcuts,
-│                  # useIdleTimer, useHideCursor, useFullscreen, useSpotifyAuth, useNowPlaying,
-│                  # useUnlockCheck, useSettingsSync, useSpotifyProgress (smooth seek via rAF)
+│                  # useIdleTimer, useHideCursor, useFullscreen, useFocusTrap, useSpotifyAuth,
+│                  # useNowPlaying, useSpotifyPlayback, useSpotifyProgress (smooth seek via rAF),
+│                  # usePlaybackAdapter, usePresetNavigation, useUnlockCheck, useSettingsSync
 ├── lib/           # PostHog & Sentry init (no-op when env vars absent)
 ├── services/      # Spotify Web API client (owner-mode OAuth + PKCE utilities for self-hosters)
 ├── store/         # Zustand stores: useSettingsStore, useSpotifyStore, useMediaPlayerStore,

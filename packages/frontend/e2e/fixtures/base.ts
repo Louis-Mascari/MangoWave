@@ -23,6 +23,7 @@ export const test = base.extend<{ app: Page }>({
         state: {
           onboardingShown: true,
           enabledPacks: ['Minimal', 'Non-Minimal', 'Extra', 'Extra 2', 'MD1'],
+          presetNameDisplay: 'always',
         },
         version: 6,
       };

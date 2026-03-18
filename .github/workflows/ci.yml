@@ -87,6 +87,7 @@ jobs:
           key: playwright-${{ steps.playwright-version.outputs.version }}
 
       - name: Install Playwright browsers
+        id: playwright-install
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps
         working-directory: packages/frontend
@@ -97,7 +98,7 @@ jobs:
         working-directory: packages/frontend
 
       - name: Save Playwright browser cache
-        if: steps.playwright-cache.outputs.cache-hit != 'true' && !cancelled()
+        if: steps.playwright-install.outcome == 'success'
         uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ~/.cache/ms-playwright

@@ -282,7 +282,7 @@ export function MobileControlBar({
 
       {/* FAB hub — slides from bottom-right to center when open */}
       <div
-        className="pointer-events-none fixed z-[55] transition-all duration-400"
+        className="fixed z-[55] transition-all duration-400"
         style={{
           bottom: menuOpen ? `calc(50% - ${fabSize / 2}px)` : hasPlaybackPanel ? '110px' : '16px',
           right: menuOpen ? `calc(50% - ${fabSize / 2}px)` : '16px',
@@ -339,10 +339,10 @@ export function MobileControlBar({
           aria-label={menuOpen ? t('mobile.closeMenu') : t('mobile.openMenu')}
           className={`relative flex h-14 w-14 items-center justify-center rounded-full border-none bg-black/60 shadow-lg backdrop-blur-sm transition-all duration-400 ${
             menuOpen
-              ? 'pointer-events-auto rotate-45 opacity-100'
+              ? 'rotate-45 opacity-100'
               : isIdle
                 ? 'pointer-events-none opacity-0'
-                : 'pointer-events-auto opacity-100'
+                : 'opacity-100'
           } cursor-pointer`}
         >
           <img src={logoUrl} alt={t('mobile.menu')} className="h-[52px] w-[52px] object-contain" />

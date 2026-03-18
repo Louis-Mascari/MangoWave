@@ -71,6 +71,9 @@ test.describe('Mobile UI', () => {
   });
 
   test('radial menu: Settings item opens modal panel', async ({ app }) => {
+    // Touch the screen to reset the idle timer — the FAB hides after idle timeout
+    // and its container intercepts clicks, preventing the button from receiving them.
+    await app.locator('canvas').tap({ position: { x: 10, y: 10 } });
     await app.getByLabel(/Open menu/i).click();
     await app.waitForTimeout(500);
 

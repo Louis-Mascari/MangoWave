@@ -559,7 +559,7 @@ function ModeCard({
       <span className="text-white/70">{icon}</span>
       <span className="text-sm font-semibold text-white">{title}</span>
       <span className="text-xs text-[#999]">{description}</span>
-      {subtitle && <span className="text-[10px] text-white/60">{subtitle}</span>}
+      {subtitle && <span className="text-[10px] text-amber-400">{subtitle}</span>}
     </button>
   );
 }

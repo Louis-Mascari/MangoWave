@@ -9,7 +9,8 @@
   "localFilesDescription": "Воспроизведение аудиофайлов с вашего устройства",
   "useMicrophone": "Микрофон",
   "micDescription": "Визуализация окружающего звука. Беззвучный режим",
-  "mobileCallout": "На ноутбуке или ПК вы также можете захватывать звук с любого экрана, окна или вкладки браузера через демонстрацию экрана.",
+  "shareAudioMobileHint": "Только для ПК — требуется Chrome, Edge или Opera",
+  "shareAudioDesktopHint": "Требуется Chrome, Edge или Opera",
   "somethingWentWrong": "Что-то пошло не так",
 
   "shareAudioModal": {

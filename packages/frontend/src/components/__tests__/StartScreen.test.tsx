@@ -85,14 +85,11 @@ describe('StartScreen', () => {
     expect(screen.queryByText('Start Microphone')).not.toBeInTheDocument();
   });
 
-  it('shows mobile callout in jsdom (no getDisplayMedia, touch heuristic)', () => {
+  it('shows disabled Share Audio card with compat hint in jsdom (mobile-like environment)', () => {
     // In jsdom, getDisplayMedia is unavailable so isMobileDevice is true
     render(<StartScreen {...defaultProps} />);
-    expect(screen.getByText(/laptop or desktop/i)).toBeInTheDocument();
-  });
-
-  it('hides Share Audio card in jsdom (mobile-like environment)', () => {
-    render(<StartScreen {...defaultProps} />);
-    expect(screen.queryByText('Share Audio')).not.toBeInTheDocument();
+    expect(screen.getByText('Share Audio')).toBeInTheDocument();
+    const shareAudioBtn = screen.getByText('Share Audio').closest('button');
+    expect(shareAudioBtn).toBeDisabled();
   });
 });

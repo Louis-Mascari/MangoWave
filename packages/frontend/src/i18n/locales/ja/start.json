@@ -9,7 +9,8 @@
   "localFilesDescription": "デバイスから音声ファイルを再生します",
   "useMicrophone": "マイクを使用",
   "micDescription": "環境音をビジュアライズします。サイレントモード",
-  "mobileCallout": "ノートPCまたはデスクトップを使用すると、画面共有で任意の画面、ウィンドウ、またはブラウザタブからの音声もキャプチャできます。",
+  "shareAudioMobileHint": "PC専用 — Chrome、Edge、またはOperaが必要です",
+  "shareAudioDesktopHint": "Chrome、Edge、またはOperaが必要です",
   "somethingWentWrong": "エラーが発生しました",
 
   "shareAudioModal": {

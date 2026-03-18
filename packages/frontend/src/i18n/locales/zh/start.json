@@ -9,7 +9,8 @@
   "localFilesDescription": "播放设备上的音频文件",
   "useMicrophone": "使用麦克风",
   "micDescription": "可视化环境声音。静音模式",
-  "mobileCallout": "使用笔记本电脑或台式机，还可以通过屏幕共享捕获任何屏幕、窗口或浏览器标签页的音频。",
+  "shareAudioMobileHint": "仅限电脑 — 需要 Chrome、Edge 或 Opera",
+  "shareAudioDesktopHint": "需要 Chrome、Edge 或 Opera",
   "somethingWentWrong": "出了点问题",
 
   "shareAudioModal": {

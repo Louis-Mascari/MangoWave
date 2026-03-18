@@ -423,7 +423,7 @@ describe('useSettingsStore', () => {
   });
 
   describe('clearBlocked', () => {
-    it('clears all blocked presets', () => {
+    it('clears user-blocked presets', () => {
       const { result } = renderHook(() => useSettingsStore());
       act(() => {
         result.current.blockPreset('A');
@@ -432,6 +432,20 @@ describe('useSettingsStore', () => {
       expect(result.current.blockedPresets).toHaveLength(2);
       act(() => result.current.clearBlocked());
       expect(result.current.blockedPresets).toEqual([]);
+    });
+
+    it('retains presets that are also quarantined', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => {
+        result.current.blockPreset('User Blocked Preset');
+        result.current.blockPreset('martin - attack of the beast'); // quarantined
+        result.current.blockPreset('Geiss - Spiral Artifact'); // quarantined
+      });
+      expect(result.current.blockedPresets).toHaveLength(3);
+      act(() => result.current.clearBlocked());
+      expect(result.current.blockedPresets).toContain('martin - attack of the beast');
+      expect(result.current.blockedPresets).toContain('Geiss - Spiral Artifact');
+      expect(result.current.blockedPresets).not.toContain('User Blocked Preset');
     });
   });
 

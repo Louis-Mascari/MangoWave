@@ -9,7 +9,8 @@
   "localFilesDescription": "अपने डिवाइस से ऑडियो फ़ाइलें चलाओ",
   "useMicrophone": "माइक्रोफ़ोन इस्तेमाल करो",
   "micDescription": "आसपास की आवाज़ विज़ुअलाइज़ करो। साइलेंट मोड",
-  "mobileCallout": "स्क्रीन शेयरिंग के ज़रिए किसी भी स्क्रीन, विंडो या ब्राउज़र टैब से ऑडियो कैप्चर करने के लिए लैपटॉप या डेस्कटॉप का इस्तेमाल करो।",
+  "shareAudioMobileHint": "सिर्फ़ कंप्यूटर — Chrome, Edge, या Opera ज़रूरी है",
+  "shareAudioDesktopHint": "Chrome, Edge, या Opera ज़रूरी है",
   "somethingWentWrong": "कुछ गड़बड़ हो गई",
 
   "shareAudioModal": {

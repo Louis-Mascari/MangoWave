@@ -46,12 +46,8 @@ import { MediaPlaylist } from './components/MediaPlaylist.tsx';
 import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
 import { isMobileDevice } from './utils/isMobileDevice.ts';
 import { pickPreset } from './utils/pickPreset.ts';
-import quarantinedData from './data/quarantined-presets.json';
-import mobileBlockedData from './data/mobile-blocked-presets.json';
+import { quarantinedSet, mobileBlockedSet } from './data/excludedPresets.ts';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
-
-const quarantinedSet = new Set(quarantinedData.presets as string[]);
-const mobileBlockedSet = new Set(mobileBlockedData.presets as string[]);
 
 /**
  * Minimal shell for OAuth popup callbacks.

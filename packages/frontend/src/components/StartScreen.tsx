@@ -130,29 +130,35 @@ export function StartScreen({
 
         {/* Mode cards */}
         <div className="flex w-full max-w-2xl flex-col items-stretch gap-4 sm:flex-row">
-          {!isMobileDevice && (
-            <ModeCard
-              icon={
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-8 w-8"
-                >
-                  <rect x="2" y="3" width="20" height="14" rx="2" />
-                  <line x1="8" y1="21" x2="16" y2="21" />
-                  <line x1="12" y1="17" x2="12" y2="21" />
-                </svg>
-              }
-              title={t('shareAudio')}
-              description={t('shareAudioDescription')}
-              onClick={() => setActiveModal('share-audio')}
-              color="orange"
-            />
-          )}
+          <ModeCard
+            icon={
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-8 w-8"
+              >
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <line x1="8" y1="21" x2="16" y2="21" />
+                <line x1="12" y1="17" x2="12" y2="21" />
+              </svg>
+            }
+            title={t('shareAudio')}
+            description={t('shareAudioDescription')}
+            onClick={() => setActiveModal('share-audio')}
+            color="orange"
+            disabled={isMobileDevice}
+            subtitle={
+              isMobileDevice
+                ? t('shareAudioMobileHint')
+                : !browserInfo.isChromium
+                  ? t('shareAudioDesktopHint')
+                  : undefined
+            }
+          />
           <ModeCard
             icon={
               <svg
@@ -196,11 +202,6 @@ export function StartScreen({
             color="cyan"
           />
         </div>
-
-        {/* Mobile callout — only shown on mobile/tablet devices */}
-        {isMobileDevice && (
-          <p className="max-w-sm text-center text-xs text-[#666]">{t('mobileCallout')}</p>
-        )}
 
         {/* Error — only on base page when no modal is covering it */}
         {error && activeModal === 'none' && (
@@ -533,22 +534,32 @@ function ModeCard({
   description,
   onClick,
   color,
+  subtitle,
+  disabled,
 }: {
   icon: React.ReactNode;
   title: string;
   description: string;
   onClick: () => void;
   color: keyof typeof cardColors;
+  subtitle?: React.ReactNode;
+  disabled?: boolean;
 }) {
   return (
     <button
-      onClick={onClick}
-      className={`mode-card flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-2xl border bg-white/[0.04] px-5 py-6 text-center transition-all duration-200 hover:bg-white/[0.08] ${cardColors[color]}`}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      className={`mode-card flex flex-1 flex-col items-center gap-2 rounded-2xl border bg-white/[0.04] px-5 py-6 text-center transition-all duration-200 ${
+        disabled
+          ? 'cursor-not-allowed border-white/10 opacity-50'
+          : `cursor-pointer hover:bg-white/[0.08] ${cardColors[color]}`
+      }`}
       style={{ '--glow-color': glowColors[color] } as React.CSSProperties}
     >
       <span className="text-white/70">{icon}</span>
       <span className="text-sm font-semibold text-white">{title}</span>
       <span className="text-xs text-[#999]">{description}</span>
+      {subtitle && <span className="text-[10px] text-[#888]">{subtitle}</span>}
     </button>
   );
 }

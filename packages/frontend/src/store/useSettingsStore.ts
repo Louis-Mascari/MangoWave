@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { EQ_BANDS } from '../engine/AudioEngine.ts';
+import { quarantinedSet, mobileBlockedSet } from '../data/excludedPresets.ts';
+import { isMobileDevice } from '../utils/isMobileDevice.ts';
 
 export interface PerformanceSettings {
   fpsCap: number; // 0 = uncapped, 15–300
@@ -310,7 +312,12 @@ export const useSettingsStore = create<SettingsState>()(
           songInfoDisplay: 5,
           autopilot: { ...DEFAULT_AUTOPILOT },
         })),
-      clearBlocked: () => set({ blockedPresets: [] }),
+      clearBlocked: () =>
+        set((s) => ({
+          blockedPresets: s.blockedPresets.filter((p) => {
+            return quarantinedSet.has(p) || (isMobileDevice && mobileBlockedSet.has(p));
+          }),
+        })),
       clearFavorites: () => set({ favoritePresets: [] }),
 
       // Import — whitelist data keys only (never overwrite store actions/functions)

@@ -9,7 +9,8 @@
   "localFilesDescription": "Play audio files from your device",
   "useMicrophone": "Use Microphone",
   "micDescription": "Visualize ambient sound. Silent mode",
-  "mobileCallout": "Use a laptop or desktop to also capture audio from any screen, window, or browser tab using screen sharing.",
+  "shareAudioMobileHint": "Computer only — requires Chrome, Edge, or Opera",
+  "shareAudioDesktopHint": "Requires Chrome, Edge, or Opera",
   "somethingWentWrong": "Something went wrong",
 
   "shareAudioModal": {

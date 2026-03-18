@@ -9,7 +9,8 @@
   "localFilesDescription": "Reproduce archivos de audio desde tu dispositivo",
   "useMicrophone": "Usar micrófono",
   "micDescription": "Visualiza el sonido ambiente. Modo silencioso",
-  "mobileCallout": "Usa una laptop o computadora de escritorio para también capturar audio de cualquier pantalla, ventana o pestaña del navegador mediante pantalla compartida.",
+  "shareAudioMobileHint": "Solo en computadora — requiere Chrome, Edge u Opera",
+  "shareAudioDesktopHint": "Requiere Chrome, Edge u Opera",
   "somethingWentWrong": "Algo salió mal",
 
   "shareAudioModal": {

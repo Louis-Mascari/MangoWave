@@ -7,6 +7,7 @@ import { useToastStore } from '../store/useToastStore.ts';
 import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { Tooltip } from './Tooltip.tsx';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
+import { quarantinedSet, mobileBlockedSet } from '../data/excludedPresets.ts';
 import { SHORTCUTS } from '../constants/shortcuts.ts';
 import {
   EXPORT_CATEGORIES,
@@ -660,21 +661,26 @@ function PresetsTab() {
       </div>
 
       <div className="mt-1 flex flex-wrap gap-2 border-t border-white/10 pt-3">
-        <button
-          onClick={() => {
-            if (blockedPresets.length === 0) return;
-            if (
-              window.confirm(t('presets.clearBlockedConfirm', { count: blockedPresets.length }))
-            ) {
-              clearBlocked();
-              showToast(tm('toasts.blockedPresetsCleared'));
-            }
-          }}
-          disabled={blockedPresets.length === 0}
-          className="cursor-pointer rounded border-none bg-red-500/10 px-3 py-1 text-xs text-red-400 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {t('presets.clearBlocked', { count: blockedPresets.length })}
-        </button>
+        {(() => {
+          const clearableCount = blockedPresets.filter((p) => {
+            return !quarantinedSet.has(p) && (!isMobileDevice || !mobileBlockedSet.has(p));
+          }).length;
+          return (
+            <button
+              onClick={() => {
+                if (clearableCount === 0) return;
+                if (window.confirm(t('presets.clearBlockedConfirm', { count: clearableCount }))) {
+                  clearBlocked();
+                  showToast(tm('toasts.blockedPresetsCleared'));
+                }
+              }}
+              disabled={clearableCount === 0}
+              className="cursor-pointer rounded border-none bg-red-500/10 px-3 py-1 text-xs text-red-400 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {t('presets.clearBlocked', { count: clearableCount })}
+            </button>
+          );
+        })()}
         <button
           onClick={() => {
             if (favoritePresets.length === 0) return;

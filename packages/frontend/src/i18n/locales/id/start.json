@@ -9,7 +9,8 @@
   "localFilesDescription": "Putar file audio dari perangkatmu",
   "useMicrophone": "Gunakan Mikrofon",
   "micDescription": "Visualisasikan suara sekitar. Mode senyap",
-  "mobileCallout": "Gunakan laptop atau desktop untuk menangkap audio dari layar, jendela, atau tab browser mana pun menggunakan berbagi layar.",
+  "shareAudioMobileHint": "Khusus komputer — memerlukan Chrome, Edge, atau Opera",
+  "shareAudioDesktopHint": "Memerlukan Chrome, Edge, atau Opera",
   "somethingWentWrong": "Terjadi kesalahan",
 
   "shareAudioModal": {

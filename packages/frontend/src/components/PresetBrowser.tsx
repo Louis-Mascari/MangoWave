@@ -6,8 +6,7 @@ import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { usePresetHistoryStore } from '../store/usePresetHistoryStore.ts';
 import { usePresetBrowserStore } from '../store/usePresetBrowserStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
-import quarantinedData from '../data/quarantined-presets.json';
-import mobileBlockedData from '../data/mobile-blocked-presets.json';
+import { quarantinedSet, mobileBlockedSet } from '../data/excludedPresets.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { PACK_ORDER } from '../engine/VisualizerRenderer.ts';
 
@@ -18,9 +17,6 @@ interface PresetBrowserProps {
   onSelectPreset: (name: string) => void;
   onNextPreset: () => void;
 }
-
-const quarantinedSet = new Set(quarantinedData.presets as string[]);
-const mobileBlockedSet = new Set(mobileBlockedData.presets as string[]);
 
 const QUARANTINE_REASONS: Record<string, { labelKey: string; color: string }> = {
   'Geiss - Spiral Artifact': {

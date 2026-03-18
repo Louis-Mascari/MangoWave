@@ -450,7 +450,7 @@ export function PresetBrowser({
   const renderGroupedAll = () => (
     <>
       {/* Pack filter checkboxes */}
-      <div className="mb-1 flex flex-wrap items-center gap-x-3 gap-y-0.5">
+      <div className="mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
         {allPacks.map((pack) => (
           <label key={pack} className="flex cursor-pointer items-center gap-1 text-[10px]">
             <input
@@ -465,7 +465,7 @@ export function PresetBrowser({
           </label>
         ))}
       </div>
-      <div className="mb-1 flex items-center gap-2">
+      <div className="mb-1.5 flex items-center gap-2">
         <button
           onClick={handleSelectAll}
           className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
@@ -644,10 +644,10 @@ export function PresetBrowser({
   );
 
   return (
-    <div className="relative flex flex-col gap-2 rounded-lg bg-black/60 p-4 backdrop-blur-sm max-md:min-h-0 max-md:flex-1 md:max-h-96 landscape:max-h-[70vh]">
-      <div className="flex flex-col gap-1.5">
+    <div className="relative flex flex-col gap-3 rounded-lg bg-black/60 p-4 backdrop-blur-sm max-md:min-h-0 max-md:flex-1 md:max-h-96 landscape:max-h-[70vh]">
+      <div className="flex flex-col gap-2">
         {!isMobileDevice && <h3 className="text-sm font-semibold text-white">{tc('presets')}</h3>}
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1.5">
           {(['all', 'favorites', 'blocked', 'excluded', 'history'] as const).map((f) => (
             <button
               key={f}

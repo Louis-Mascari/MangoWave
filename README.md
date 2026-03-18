@@ -161,11 +161,30 @@ See **[SELF-HOSTING.md](SELF-HOSTING.md)** for full instructions.
 ## Requirements
 
 - **[WebGL 2](https://caniuse.com/webgl2)** — required for butterchurn rendering. A fallback message is shown if unsupported
-- **Audio source availability varies by browser and device:**
-  - **System audio** — desktop Chrome, Edge, or Opera (requires [`getDisplayMedia`](https://caniuse.com/mdn-api_mediadevices_getdisplaymedia_audio_capture_support) audio capture, not supported by Firefox, Safari, or mobile browsers)
-  - **Local files** — all modern browsers, desktop and mobile
-  - **Microphone** — all modern browsers, desktop and mobile
 - **Node >= 20** for local development
+
+### Browser & Device Compatibility
+
+The visualizer itself (WebGL 2 rendering, presets, EQ, settings) works on all modern browsers and devices. Audio source availability varies:
+
+| Audio Source     | Chrome / Edge / Opera | Firefox | Safari | Mobile (any browser) |
+| ---------------- | --------------------- | ------- | ------ | -------------------- |
+| **Local files**  | Yes                   | Yes     | Yes    | Yes                  |
+| **Microphone**   | Yes                   | Yes     | Yes    | Yes                  |
+| **System audio** | Yes (desktop only)    | No      | No     | No                   |
+
+System audio capture uses [`getDisplayMedia`](https://caniuse.com/mdn-api_mediadevices_getdisplaymedia_audio_capture_support) with audio. Firefox and Safari support `getDisplayMedia` for video but have not implemented audio capture. No mobile browser supports `getDisplayMedia` at all.
+
+**System audio by OS (Chromium browsers only):**
+
+| OS                     | Screen   | Window   | Tab   |
+| ---------------------- | -------- | -------- | ----- |
+| **Windows / ChromeOS** | Audio    | Audio    | Audio |
+| **macOS 14.2+**        | Audio    | Audio    | Audio |
+| **macOS < 14.2**       | No audio | No audio | Audio |
+| **Linux**              | No audio | No audio | Audio |
+
+On the start screen, the Share Audio card is disabled on mobile and shows a compatibility hint on non-Chromium desktop browsers. The Share Audio modal provides OS-specific guidance and disables the Start Visualizer button on unsupported browsers.
 
 ## Acknowledgments
 

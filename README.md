@@ -160,7 +160,7 @@ npm run build -w packages/frontend   # tsc + vite build
 - **Audio:** Web Audio API (`getDisplayMedia`, `HTMLAudioElement`, `getUserMedia`), music-metadata (ID3 parsing)
 - **Backend:** AWS Lambda (Node.js/TypeScript), API Gateway, DynamoDB
 - **Infrastructure:** AWS CDK v2
-- **Testing:** Vitest (unit/integration, jsdom), Playwright E2E (5 browser configs: Chromium + mobile Chrome full suite, Firefox + WebKit start-screen only; all 5 run full suite locally)
+- **Testing:** Vitest (unit/integration, jsdom), Playwright E2E (5 browser configs: Chromium + mobile Chrome full suite, Firefox + WebKit start-screen only, mobile Safari local-only; all 5 run full suite locally)
 - **Code quality:** ESLint (with jsx-a11y), Prettier, Knip (unused code detection), Husky pre-commit hooks (lint-staged + typecheck + Knip)
 - **CI/CD:** GitHub Actions — CI runs on push to `main` and PRs (lint → unit tests → E2E). Deploy triggers automatically after CI succeeds on `main` via `workflow_run` (CDK → S3/CloudFront)
 - **Analytics:** PostHog (user analytics), Sentry (error tracking)

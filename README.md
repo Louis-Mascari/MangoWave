@@ -66,11 +66,11 @@ Three audio sources feed the pipeline:
 | ---------------- | --------------------- | ------- | ------ | -------------------- |
 | **Local files**  | Yes                   | Yes     | Yes    | Yes                  |
 | **Microphone**   | Yes                   | Yes     | Yes    | Yes                  |
-| **System audio** | Yes (desktop only)    | No      | No     | No                   |
+| **System audio** | Yes (computer only)   | No      | No     | No                   |
 
 System audio capture uses `getDisplayMedia` with audio. Firefox and Safari support `getDisplayMedia` for video but have not implemented audio capture. No mobile browser supports `getDisplayMedia` at all. On the start screen, the Share Audio card is disabled on mobile and shows a compatibility hint on non-Chromium desktop browsers.
 
-**System audio by OS (Chromium desktop only):**
+**System audio by OS (Chromium only, computer):**
 
 | OS                     | Screen | Window | Tab   |
 | ---------------------- | ------ | ------ | ----- |

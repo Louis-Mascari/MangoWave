@@ -1,23 +1,27 @@
+import { UAParser } from 'ua-parser-js';
+
 function checkMatchMedia(query: string): boolean {
   return typeof window.matchMedia === 'function' && window.matchMedia(query).matches;
 }
 
 /** Compute mobile detection from current browser globals. Exported for testing. */
 export function detectMobile(): boolean {
+  const parser = new UAParser();
+  const deviceType = parser.getDevice().type; // undefined for desktop, "mobile", "tablet", etc.
+
+  // UAParser confidently identifies mobile/tablet via UA string
+  if (deviceType === 'mobile' || deviceType === 'tablet') return true;
+
+  // For known desktop devices (deviceType undefined), only trust hardware signals.
+  // A narrow browser window on a laptop is not a mobile device.
   const hasDisplayMedia = !!navigator.mediaDevices?.getDisplayMedia;
 
-  // Detect mobile/tablet via hardware signals
-  const isMobileHardware =
+  return (
     !hasDisplayMedia ||
     (navigator.maxTouchPoints > 0 &&
       checkMatchMedia('(pointer: coarse)') &&
-      window.innerWidth < 1024);
-
-  // Also treat narrow viewports (below Tailwind `md` breakpoint) as mobile,
-  // so behaviour stays consistent with the CSS `md:hidden` / `hidden md:block` split
-  const isNarrowViewport = checkMatchMedia('(max-width: 767px)');
-
-  return isMobileHardware || isNarrowViewport;
+      window.innerWidth < 1024)
+  );
 }
 
 export const isMobileDevice = detectMobile();

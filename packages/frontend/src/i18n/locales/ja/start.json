@@ -9,7 +9,7 @@
   "localFilesDescription": "デバイスから音声ファイルを再生します",
   "useMicrophone": "マイクを使用",
   "micDescription": "環境音をビジュアライズします。サイレントモード",
-  "shareAudioMobileHint": "PC専用 — Chrome、Edge、またはOperaが必要です",
+  "shareAudioMobileHint": "PC専用 - Chrome、Edge、またはOperaが必要です",
   "shareAudioDesktopHint": "Chrome、Edge、またはOperaが必要です",
   "somethingWentWrong": "エラーが発生しました",
 

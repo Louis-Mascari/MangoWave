@@ -9,7 +9,7 @@
   "localFilesDescription": "Play audio files from your device",
   "useMicrophone": "Use Microphone",
   "micDescription": "Visualize ambient sound. Silent mode",
-  "shareAudioMobileHint": "Computer only — requires Chrome, Edge, or Opera",
+  "shareAudioMobileHint": "Computer only - requires Chrome, Edge, or Opera",
   "shareAudioDesktopHint": "Requires Chrome, Edge, or Opera",
   "somethingWentWrong": "Something went wrong",
 

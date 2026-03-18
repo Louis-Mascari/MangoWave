@@ -9,7 +9,7 @@
   "localFilesDescription": "기기에 있는 오디오 파일을 재생합니다",
   "useMicrophone": "마이크 사용",
   "micDescription": "주변 소리를 시각화합니다. 무음 모드",
-  "shareAudioMobileHint": "PC 전용 — Chrome, Edge 또는 Opera 필요",
+  "shareAudioMobileHint": "PC 전용 - Chrome, Edge 또는 Opera 필요",
   "shareAudioDesktopHint": "Chrome, Edge 또는 Opera 필요",
   "somethingWentWrong": "문제가 발생했습니다",
 

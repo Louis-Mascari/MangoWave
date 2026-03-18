@@ -9,7 +9,7 @@
   "localFilesDescription": "Reproduce archivos de audio desde tu dispositivo",
   "useMicrophone": "Usar micrófono",
   "micDescription": "Visualiza el sonido ambiente. Modo silencioso",
-  "shareAudioMobileHint": "Solo en computadora — requiere Chrome, Edge u Opera",
+  "shareAudioMobileHint": "Solo en computadora - requiere Chrome, Edge u Opera",
   "shareAudioDesktopHint": "Requiere Chrome, Edge u Opera",
   "somethingWentWrong": "Algo salió mal",
 

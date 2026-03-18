@@ -9,7 +9,7 @@
   "localFilesDescription": "播放设备上的音频文件",
   "useMicrophone": "使用麦克风",
   "micDescription": "可视化环境声音。静音模式",
-  "shareAudioMobileHint": "仅限电脑 — 需要 Chrome、Edge 或 Opera",
+  "shareAudioMobileHint": "仅限电脑 - 需要 Chrome、Edge 或 Opera",
   "shareAudioDesktopHint": "需要 Chrome、Edge 或 Opera",
   "somethingWentWrong": "出了点问题",
 

@@ -6,6 +6,7 @@ import { useAudioCapture } from '../useAudioCapture.ts';
 const mockDestroy = vi.fn();
 let shouldRejectCapture = false;
 let trackEndedListeners: (() => void)[] = [];
+const mockRemoveEventListener = vi.fn();
 
 vi.mock('../../engine/AudioEngine.ts', () => {
   return {
@@ -22,6 +23,7 @@ vi.mock('../../engine/AudioEngine.ts', () => {
           addEventListener: (event: string, handler: () => void) => {
             if (event === 'ended') trackEndedListeners.push(handler);
           },
+          removeEventListener: mockRemoveEventListener,
           stop: vi.fn(),
         };
         return Promise.resolve({
@@ -43,6 +45,7 @@ describe('useAudioCapture', () => {
     vi.clearAllMocks();
     shouldRejectCapture = false;
     trackEndedListeners = [];
+    mockRemoveEventListener.mockClear();
   });
 
   it('starts in idle state', () => {
@@ -146,5 +149,34 @@ describe('useAudioCapture', () => {
 
     expect(result.current.isCapturing).toBe(false);
     expect(mockDestroy).toHaveBeenCalled();
+  });
+
+  it('removes ended listeners on stopCapture', async () => {
+    const { result } = renderHook(() => useAudioCapture());
+
+    await act(async () => {
+      await result.current.startCapture();
+    });
+
+    act(() => {
+      result.current.stopCapture();
+    });
+
+    expect(mockRemoveEventListener).toHaveBeenCalledWith('ended', expect.any(Function));
+  });
+
+  it('removes old ended listeners on re-start', async () => {
+    const { result } = renderHook(() => useAudioCapture());
+
+    await act(async () => {
+      await result.current.startCapture();
+    });
+
+    // Second start should remove listeners from the first stream
+    await act(async () => {
+      await result.current.startCapture();
+    });
+
+    expect(mockRemoveEventListener).toHaveBeenCalledWith('ended', expect.any(Function));
   });
 });

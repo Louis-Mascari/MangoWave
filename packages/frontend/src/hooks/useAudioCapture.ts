@@ -79,12 +79,25 @@ function buildNoAudioMessage(): string {
 
 export function useAudioCapture(): UseAudioCaptureReturn {
   const engineRef = useRef<AudioEngine | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const trackEndedRef = useRef<(() => void) | null>(null);
   const [audioEngine, setAudioEngine] = useState<AudioEngine | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [captureSource, setCaptureSource] = useState<CaptureSource>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const removeTrackListeners = useCallback(() => {
+    if (streamRef.current && trackEndedRef.current) {
+      streamRef.current.getTracks().forEach((track) => {
+        track.removeEventListener('ended', trackEndedRef.current!);
+      });
+    }
+    streamRef.current = null;
+    trackEndedRef.current = null;
+  }, []);
+
   const cleanup = useCallback(() => {
+    removeTrackListeners();
     if (engineRef.current) {
       engineRef.current.destroy();
       engineRef.current = null;
@@ -92,7 +105,7 @@ export function useAudioCapture(): UseAudioCaptureReturn {
     setAudioEngine(null);
     setIsCapturing(false);
     setCaptureSource(null);
-  }, []);
+  }, [removeTrackListeners]);
 
   const startCapture = useCallback(async (): Promise<boolean> => {
     try {
@@ -116,11 +129,14 @@ export function useAudioCapture(): UseAudioCaptureReturn {
 
       engine.initAudioPipeline(stream);
 
-      // Listen for the browser's native "Stop sharing" button
+      // Listen for the browser's native "Stop sharing" button.
+      // Store handler ref so listeners can be removed on cleanup/re-start.
+      removeTrackListeners();
+      const onTrackEnded = () => cleanup();
+      trackEndedRef.current = onTrackEnded;
+      streamRef.current = stream;
       stream.getTracks().forEach((track) => {
-        track.addEventListener('ended', () => {
-          cleanup();
-        });
+        track.addEventListener('ended', onTrackEnded);
       });
 
       engineRef.current = engine;
@@ -139,7 +155,7 @@ export function useAudioCapture(): UseAudioCaptureReturn {
       setIsCapturing(false);
       return false;
     }
-  }, [cleanup]);
+  }, [cleanup, removeTrackListeners]);
 
   const startMicCapture = useCallback(async (): Promise<boolean> => {
     try {

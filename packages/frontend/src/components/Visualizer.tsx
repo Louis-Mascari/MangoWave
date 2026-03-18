@@ -24,7 +24,9 @@ export function Visualizer({
   onContextLost,
 }: VisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { performance, eq, audio } = useSettingsStore();
+  const performance = useSettingsStore((s) => s.performance);
+  const eq = useSettingsStore((s) => s.eq);
+  const audio = useSettingsStore((s) => s.audio);
 
   // Initialize renderer
   useEffect(() => {

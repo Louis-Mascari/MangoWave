@@ -431,6 +431,13 @@ function SpotifySection({
 
   const [expanded, setExpanded] = useState(isSpotifyConnected);
   const [isConnecting, setIsConnecting] = useState(false);
+  const popupCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (popupCheckRef.current) clearInterval(popupCheckRef.current);
+    };
+  }, []);
 
   if (!isOwnerMode && !isSpotifyConnected) return null;
 
@@ -493,9 +500,11 @@ function SpotifySection({
                           const check = setInterval(() => {
                             if (popup.closed) {
                               clearInterval(check);
+                              popupCheckRef.current = null;
                               setIsConnecting(false);
                             }
                           }, 500);
+                          popupCheckRef.current = check;
                         }
                       } catch {
                         setIsConnecting(false);

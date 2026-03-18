@@ -7,6 +7,8 @@
 
 export const EQ_BANDS = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000] as const;
 
+const EMPTY_UINT8: Uint8Array<ArrayBuffer> = new Uint8Array(0);
+
 export class AudioEngine {
   private audioContext: AudioContext | null = null;
   private sourceNode: AudioNode | null = null;
@@ -15,6 +17,8 @@ export class AudioEngine {
   private analyser: AnalyserNode | null = null;
   private stream: MediaStream | null = null;
   private outputsAudio = false;
+  private freqBuffer: Uint8Array<ArrayBuffer> | null = null;
+  private timeBuffer: Uint8Array<ArrayBuffer> | null = null;
 
   get context(): AudioContext | null {
     return this.audioContext;
@@ -66,6 +70,10 @@ export class AudioEngine {
     this.analyser = ctx.createAnalyser();
     this.analyser.fftSize = 1024;
     this.analyser.smoothingTimeConstant = 0.3;
+
+    // Pre-allocate typed arrays for FFT data reads
+    this.freqBuffer = new Uint8Array(this.analyser.frequencyBinCount);
+    this.timeBuffer = new Uint8Array(this.analyser.frequencyBinCount);
 
     // Visual branch: source → preAmp → EQ chain → analyser
     source.connect(this.preAmpGain);
@@ -119,6 +127,9 @@ export class AudioEngine {
   setFftSize(size: number): void {
     if (this.analyser) {
       this.analyser.fftSize = size;
+      // frequencyBinCount changes with fftSize — reallocate buffers
+      this.freqBuffer = new Uint8Array(this.analyser.frequencyBinCount);
+      this.timeBuffer = new Uint8Array(this.analyser.frequencyBinCount);
     }
   }
 
@@ -128,22 +139,18 @@ export class AudioEngine {
     }
   }
 
+  /** Returns a shared buffer — contents are only valid until the next call. */
   getFrequencyData(): Uint8Array {
-    if (!this.analyser) {
-      return new Uint8Array(0);
-    }
-    const data = new Uint8Array(this.analyser.frequencyBinCount);
-    this.analyser.getByteFrequencyData(data);
-    return data;
+    if (!this.analyser || !this.freqBuffer) return EMPTY_UINT8;
+    this.analyser.getByteFrequencyData(this.freqBuffer);
+    return this.freqBuffer;
   }
 
+  /** Returns a shared buffer — contents are only valid until the next call. */
   getTimeDomainData(): Uint8Array {
-    if (!this.analyser) {
-      return new Uint8Array(0);
-    }
-    const data = new Uint8Array(this.analyser.frequencyBinCount);
-    this.analyser.getByteTimeDomainData(data);
-    return data;
+    if (!this.analyser || !this.timeBuffer) return EMPTY_UINT8;
+    this.analyser.getByteTimeDomainData(this.timeBuffer);
+    return this.timeBuffer;
   }
 
   destroy(): void {
@@ -167,5 +174,7 @@ export class AudioEngine {
     this.eqFilters = [];
     this.analyser = null;
     this.outputsAudio = false;
+    this.freqBuffer = null;
+    this.timeBuffer = null;
   }
 }

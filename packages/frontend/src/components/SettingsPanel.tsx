@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EQ_BANDS } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
@@ -891,6 +891,13 @@ function SpotifyTab() {
 
   const isConnected = !!(accessToken || sessionId);
   const [isConnecting, setIsConnecting] = useState(false);
+  const popupCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (popupCheckRef.current) clearInterval(popupCheckRef.current);
+    };
+  }, []);
 
   const handleOwnerConnect = () => {
     if (isConnecting) return;
@@ -904,9 +911,11 @@ function SpotifyTab() {
         const check = setInterval(() => {
           if (popup.closed) {
             clearInterval(check);
+            popupCheckRef.current = null;
             setIsConnecting(false);
           }
         }, 500);
+        popupCheckRef.current = check;
       }
     } catch {
       setIsConnecting(false);

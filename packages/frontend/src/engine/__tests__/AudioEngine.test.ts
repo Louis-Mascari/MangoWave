@@ -243,6 +243,53 @@ describe('AudioEngine', () => {
     });
   });
 
+  describe('buffer reuse', () => {
+    it('returns the same buffer reference on consecutive calls', () => {
+      const mockCtx = createMockAudioContext();
+      globalThis.AudioContext = vi.fn(function (this: Record<string, unknown>) {
+        Object.assign(this, mockCtx);
+        return this;
+      }) as unknown as typeof AudioContext;
+
+      const mockStream = {
+        getVideoTracks: () => [],
+        getAudioTracks: () => [],
+        getTracks: () => [],
+      } as unknown as MediaStream;
+
+      engine.initAudioPipeline(mockStream);
+
+      const freq1 = engine.getFrequencyData();
+      const freq2 = engine.getFrequencyData();
+      expect(freq1).toBe(freq2);
+
+      const time1 = engine.getTimeDomainData();
+      const time2 = engine.getTimeDomainData();
+      expect(time1).toBe(time2);
+    });
+
+    it('reallocates buffers when fftSize changes', () => {
+      const mockCtx = createMockAudioContext();
+      globalThis.AudioContext = vi.fn(function (this: Record<string, unknown>) {
+        Object.assign(this, mockCtx);
+        return this;
+      }) as unknown as typeof AudioContext;
+
+      const mockStream = {
+        getVideoTracks: () => [],
+        getAudioTracks: () => [],
+        getTracks: () => [],
+      } as unknown as MediaStream;
+
+      engine.initAudioPipeline(mockStream);
+
+      const freqBefore = engine.getFrequencyData();
+      engine.setFftSize(2048);
+      const freqAfter = engine.getFrequencyData();
+      expect(freqBefore).not.toBe(freqAfter);
+    });
+  });
+
   describe('setEQBandGain', () => {
     it('does nothing if index out of range', () => {
       engine.setEQBandGain(-1, 5);

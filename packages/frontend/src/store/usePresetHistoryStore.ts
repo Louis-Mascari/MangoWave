@@ -7,7 +7,9 @@ interface PresetHistoryState {
   cursor: number;
   _isNavigating: boolean;
 
-  // Shuffle-style exhaustion tracking
+  // Shuffle-style exhaustion tracking.
+  // Implicitly bounded: max size equals total preset count (~395).
+  // Resets on round exhaustion via resetRound().
   playedSet: Set<string>;
 
   push: (name: string) => void;

@@ -54,9 +54,30 @@ Source → GainNode (pre-amp) → 10× BiquadFilter (EQ) → AnalyserNode → bu
 
 Three audio sources feed the pipeline:
 
-- **System audio** ([`getDisplayMedia`](https://caniuse.com/mdn-api_mediadevices_getdisplaymedia_audio_capture_support)) — captures audio from a screen, window, or tab share. Desktop only (Chrome, Edge, Opera). Not available on mobile browsers, Safari, or Firefox (both support `getDisplayMedia` for video but not audio capture). On Windows and ChromeOS all sharing modes support audio; on macOS 14.2+ screen and window sharing also support audio via ScreenCaptureKit; on older macOS or Linux, only tab sharing supports audio
-- **Local files** (`HTMLAudioElement`) — plays audio files directly in the browser. Works on all browsers and devices. EQ feeds the visualizer while audio plays directly to speakers
-- **Microphone** (`getUserMedia`) — captures live audio input. Works on all browsers and devices
+- **System audio** ([`getDisplayMedia`](https://caniuse.com/mdn-api_mediadevices_getdisplaymedia_audio_capture_support)) — captures audio from a screen, window, or tab share
+- **Local files** (`HTMLAudioElement`) — plays audio files directly in the browser. EQ feeds the visualizer while audio plays directly to speakers
+- **Microphone** (`getUserMedia`) — captures live audio input (silent mode, no speaker output)
+
+### Browser & Device Compatibility
+
+[WebGL 2](https://caniuse.com/webgl2) is required for rendering (fallback shown if unsupported). The visualizer, presets, EQ, and settings work on all modern browsers and devices. Audio source availability varies:
+
+| Audio Source     | Chrome / Edge / Opera | Firefox | Safari | Mobile (any browser) |
+| ---------------- | --------------------- | ------- | ------ | -------------------- |
+| **Local files**  | Yes                   | Yes     | Yes    | Yes                  |
+| **Microphone**   | Yes                   | Yes     | Yes    | Yes                  |
+| **System audio** | Yes (desktop only)    | No      | No     | No                   |
+
+System audio capture uses `getDisplayMedia` with audio. Firefox and Safari support `getDisplayMedia` for video but have not implemented audio capture. No mobile browser supports `getDisplayMedia` at all. On the start screen, the Share Audio card is disabled on mobile and shows a compatibility hint on non-Chromium desktop browsers.
+
+**System audio by OS (Chromium desktop only):**
+
+| OS                     | Screen | Window | Tab   |
+| ---------------------- | ------ | ------ | ----- |
+| **Windows / ChromeOS** | Audio  | Audio  | Audio |
+| **macOS 14.2+**        | Audio  | Audio  | Audio |
+| **macOS < 14.2**       | No     | No     | Audio |
+| **Linux**              | No     | No     | Audio |
 
 ### Spotify Integration
 
@@ -160,31 +181,8 @@ See **[SELF-HOSTING.md](SELF-HOSTING.md)** for full instructions.
 
 ## Requirements
 
-- **[WebGL 2](https://caniuse.com/webgl2)** — required for butterchurn rendering. A fallback message is shown if unsupported
 - **Node >= 20** for local development
-
-### Browser & Device Compatibility
-
-The visualizer itself (WebGL 2 rendering, presets, EQ, settings) works on all modern browsers and devices. Audio source availability varies:
-
-| Audio Source     | Chrome / Edge / Opera | Firefox | Safari | Mobile (any browser) |
-| ---------------- | --------------------- | ------- | ------ | -------------------- |
-| **Local files**  | Yes                   | Yes     | Yes    | Yes                  |
-| **Microphone**   | Yes                   | Yes     | Yes    | Yes                  |
-| **System audio** | Yes (desktop only)    | No      | No     | No                   |
-
-System audio capture uses [`getDisplayMedia`](https://caniuse.com/mdn-api_mediadevices_getdisplaymedia_audio_capture_support) with audio. Firefox and Safari support `getDisplayMedia` for video but have not implemented audio capture. No mobile browser supports `getDisplayMedia` at all.
-
-**System audio by OS (Chromium browsers only):**
-
-| OS                     | Screen   | Window   | Tab   |
-| ---------------------- | -------- | -------- | ----- |
-| **Windows / ChromeOS** | Audio    | Audio    | Audio |
-| **macOS 14.2+**        | Audio    | Audio    | Audio |
-| **macOS < 14.2**       | No audio | No audio | Audio |
-| **Linux**              | No audio | No audio | Audio |
-
-On the start screen, the Share Audio card is disabled on mobile and shows a compatibility hint on non-Chromium desktop browsers. The Share Audio modal provides OS-specific guidance and disables the Start Visualizer button on unsupported browsers.
+- **WebGL 2** and browser compatibility — see [Browser & Device Compatibility](#browser--device-compatibility) above
 
 ## Acknowledgments
 

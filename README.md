@@ -95,8 +95,10 @@ MangoWave/
 ├── packages/backend/      # Lambda handlers for Spotify OAuth & settings sync
 ├── packages/landing/      # Static landing page (HTML + CSS, no JS)
 ├── infrastructure/        # AWS CDK v2 — DynamoDB, Lambda, API Gateway, S3, CloudFront, CloudWatch
-├── .github/workflows/     # CI (PR checks) + Deploy (OIDC -> CDK -> S3 -> CloudFront)
-└── SELF-HOSTING.md        # Guide for deploying your own instance
+├── .github/                # CI, deploy, dependabot, issue templates, PR template, CODEOWNERS, SECURITY
+├── SELF-HOSTING.md        # Guide for deploying your own instance
+├── knip.json              # Knip config (unused code detection)
+└── LICENSE                # AGPL-3.0
 ```
 
 See each package's README for details.

@@ -15,12 +15,5 @@ export function initPostHog(): void {
     capture_pageleave: true,
     persistence: 'localStorage',
     disable_session_recording: false,
-    session_recording: {
-      captureCanvas: {
-        recordCanvas: true,
-        canvasFps: 4,
-        canvasQuality: '0.4',
-      },
-    },
   });
 }

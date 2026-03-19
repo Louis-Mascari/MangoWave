@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ControlBar } from '../ControlBar.tsx';
 
@@ -29,15 +29,22 @@ const defaultProps = {
   forceIdle: vi.fn(),
 };
 
+// Helper: scope queries to the desktop toolbar (role="toolbar") to avoid
+// collisions with MobileControlBar labels that also render in JSDOM.
+function withinDesktop() {
+  return within(screen.getByRole('toolbar'));
+}
+
 describe('ControlBar', () => {
   it('renders all control buttons', () => {
     render(<ControlBar {...defaultProps} />);
 
-    expect(screen.getByText('Presets')).toBeInTheDocument();
-    expect(screen.getByText('Settings')).toBeInTheDocument();
-    expect(screen.getByText('Autopilot')).toBeInTheDocument();
-    expect(screen.getByText('Fullscreen')).toBeInTheDocument();
-    expect(screen.getByText('Exit')).toBeInTheDocument();
+    const desktop = withinDesktop();
+    expect(desktop.getByText('Presets')).toBeInTheDocument();
+    expect(desktop.getByText('Settings')).toBeInTheDocument();
+    expect(desktop.getByText('Autopilot')).toBeInTheDocument();
+    expect(desktop.getByText('Fullscreen')).toBeInTheDocument();
+    expect(desktop.getByText('Exit')).toBeInTheDocument();
   });
 
   it('renders previous and next preset icon buttons', () => {
@@ -80,7 +87,7 @@ describe('ControlBar', () => {
     const onStop = vi.fn();
     render(<ControlBar {...defaultProps} onStop={onStop} />);
 
-    await user.click(screen.getByText('Exit'));
+    await user.click(withinDesktop().getByText('Exit'));
     expect(onStop).toHaveBeenCalledTimes(1);
   });
 
@@ -94,7 +101,7 @@ describe('ControlBar', () => {
     const onTogglePanel = vi.fn();
     render(<ControlBar {...defaultProps} onTogglePanel={onTogglePanel} />);
 
-    await user.click(screen.getByText('Settings'));
+    await user.click(withinDesktop().getByText('Settings'));
     expect(onTogglePanel).toHaveBeenCalledWith('settings');
   });
 
@@ -103,19 +110,19 @@ describe('ControlBar', () => {
     const onToggleAutopilot = vi.fn();
     render(<ControlBar {...defaultProps} onToggleAutopilot={onToggleAutopilot} />);
 
-    await user.click(screen.getByText('Autopilot'));
+    await user.click(withinDesktop().getByText('Autopilot'));
     expect(onToggleAutopilot).toHaveBeenCalledTimes(1);
   });
 
   it('highlights Autopilot button when enabled', () => {
     render(<ControlBar {...defaultProps} autopilotEnabled={true} />);
-    const btn = screen.getByText('Autopilot');
+    const btn = withinDesktop().getByText('Autopilot');
     expect(btn.className).toContain('bg-orange-500');
   });
 
   it('highlights Fullscreen button when fullscreen is active', () => {
     render(<ControlBar {...defaultProps} isFullscreen={true} />);
-    const btn = screen.getByText('Fullscreen');
+    const btn = withinDesktop().getByText('Fullscreen');
     expect(btn.className).toContain('bg-orange-500');
   });
 });

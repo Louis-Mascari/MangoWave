@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <video src="demo.mp4" autoplay loop muted playsinline width="100%"></video>
+  <video src="https://github.com/user-attachments/assets/72154209-0dc2-49a0-8ad4-4f47c4e95f57" autoplay loop muted playsinline width="100%"></video>
 </p>
 
 ## Features

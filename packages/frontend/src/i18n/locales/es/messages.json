@@ -107,7 +107,7 @@
 
   "controlBar": {
     "previousPreset": "Preset anterior (P)",
-    "nextPreset": "Siguiente preset (N)",
+    "nextPreset": "Siguiente preset (Space / N)",
     "blockPreset": "Bloquear preset (B)",
     "unblockPreset": "Desbloquear preset (B)",
     "addToFavorites": "Agregar a favoritos (S)",

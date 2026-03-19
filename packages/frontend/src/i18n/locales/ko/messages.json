@@ -107,7 +107,7 @@
 
   "controlBar": {
     "previousPreset": "이전 프리셋 (P)",
-    "nextPreset": "다음 프리셋 (N)",
+    "nextPreset": "다음 프리셋 (Space / N)",
     "blockPreset": "프리셋 차단 (B)",
     "unblockPreset": "프리셋 차단 해제 (B)",
     "addToFavorites": "즐겨찾기에 추가 (S)",

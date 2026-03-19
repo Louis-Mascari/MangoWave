@@ -107,7 +107,7 @@
 
   "controlBar": {
     "previousPreset": "前のプリセット (P)",
-    "nextPreset": "次のプリセット (N)",
+    "nextPreset": "次のプリセット (Space / N)",
     "blockPreset": "プリセットをブロック (B)",
     "unblockPreset": "プリセットのブロックを解除 (B)",
     "addToFavorites": "お気に入りに追加 (S)",

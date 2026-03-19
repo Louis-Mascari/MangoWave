@@ -107,7 +107,7 @@
 
   "controlBar": {
     "previousPreset": "पिछला प्रीसेट (P)",
-    "nextPreset": "अगला प्रीसेट (N)",
+    "nextPreset": "अगला प्रीसेट (Space / N)",
     "blockPreset": "प्रीसेट ब्लॉक करो (B)",
     "unblockPreset": "प्रीसेट अनब्लॉक करो (B)",
     "addToFavorites": "फ़ेवरिट में जोड़ो (S)",

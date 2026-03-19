@@ -107,7 +107,7 @@
 
   "controlBar": {
     "previousPreset": "上一个预设 (P)",
-    "nextPreset": "下一个预设 (N)",
+    "nextPreset": "下一个预设 (Space / N)",
     "blockPreset": "屏蔽预设 (B)",
     "unblockPreset": "取消屏蔽预设 (B)",
     "addToFavorites": "添加到收藏 (S)",

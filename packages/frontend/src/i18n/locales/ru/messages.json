@@ -107,7 +107,7 @@
 
   "controlBar": {
     "previousPreset": "Предыдущий пресет (P)",
-    "nextPreset": "Следующий пресет (N)",
+    "nextPreset": "Следующий пресет (Space / N)",
     "blockPreset": "Заблокировать пресет (B)",
     "unblockPreset": "Разблокировать пресет (B)",
     "addToFavorites": "В избранное (S)",

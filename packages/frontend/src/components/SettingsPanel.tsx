@@ -208,10 +208,10 @@ function EqualizerTab() {
 
       <div className="mt-1 border-t border-white/10 pt-3">
         <div className="flex flex-col gap-1">
-          <label className="flex items-center text-xs text-white/60">
+          <span className="flex items-center text-xs text-white/60">
             {t('equalizer.preAmp')}
             <Tooltip text={t('equalizer.preAmpTooltip')} />
-          </label>
+          </span>
           <div className="flex items-center gap-2">
             <input
               type="range"
@@ -276,10 +276,10 @@ function RenderingTab() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="flex items-center text-xs text-white/60">
+        <span className="flex items-center text-xs text-white/60">
           {t('rendering.frameRate')}
           <Tooltip text={t('rendering.frameRateTooltip')} />
-        </label>
+        </span>
         <input
           type="number"
           min={15}
@@ -323,10 +323,10 @@ function RenderingTab() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="flex items-center text-xs text-white/60">
+        <span className="flex items-center text-xs text-white/60">
           {t('rendering.resolution')}
           <Tooltip text={t('rendering.resolutionTooltip')} />
-        </label>
+        </span>
         <div className="flex gap-2">
           {RESOLUTION_OPTIONS.map((opt) => (
             <button
@@ -345,10 +345,10 @@ function RenderingTab() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="flex items-center text-xs text-white/60">
+        <span className="flex items-center text-xs text-white/60">
           {t('rendering.meshResolution')}
           <Tooltip text={t('rendering.meshResolutionTooltip')} />
-        </label>
+        </span>
         <div className="flex gap-2">
           {MESH_OPTIONS.map((opt) => (
             <button
@@ -367,10 +367,10 @@ function RenderingTab() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="flex items-center text-xs text-white/60">
+        <span className="flex items-center text-xs text-white/60">
           {t('rendering.textureQuality')}
           <Tooltip text={t('rendering.textureQualityTooltip')} />
-        </label>
+        </span>
         <div className="flex gap-2">
           {TEXTURE_OPTIONS.map((opt) => (
             <button
@@ -389,10 +389,10 @@ function RenderingTab() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="flex items-center text-xs text-white/60">
+        <span className="flex items-center text-xs text-white/60">
           {t('rendering.antiAliasing')}
           <Tooltip text={t('rendering.antiAliasingTooltip')} />
-        </label>
+        </span>
         <div className="flex gap-2">
           <button
             onClick={() => setFxaa(true)}
@@ -422,10 +422,10 @@ function RenderingTab() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="flex items-center text-xs text-white/60">
+        <span className="flex items-center text-xs text-white/60">
           {t('rendering.audioSmoothing', { value: audio.smoothingConstant.toFixed(2) })}
           <Tooltip text={t('rendering.audioSmoothingTooltip')} />
-        </label>
+        </span>
         <input
           type="range"
           min="0"
@@ -441,10 +441,10 @@ function RenderingTab() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="flex items-center text-xs text-white/60">
+        <span className="flex items-center text-xs text-white/60">
           {t('rendering.fftSize')}
           <Tooltip text={t('rendering.fftSizeTooltip')} />
-        </label>
+        </span>
         <div className="flex gap-2">
           {FFT_OPTIONS.map((size) => (
             <button
@@ -501,10 +501,10 @@ function PresetsTab() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="flex items-center text-xs text-white/60">
+        <span className="flex items-center text-xs text-white/60">
           {t('presets.transitionTime', { value: transitionTime.toFixed(1) })}
           <Tooltip text={t('presets.transitionTimeTooltip')} />
-        </label>
+        </span>
         <input
           type="range"
           min="0"
@@ -520,10 +520,10 @@ function PresetsTab() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="flex items-center text-xs text-white/60">
+        <span className="flex items-center text-xs text-white/60">
           {t('presets.presetNameDisplay')}
           <Tooltip text={t('presets.presetNameDisplayTooltip')} />
-        </label>
+        </span>
         <div className="flex gap-2">
           <button
             onClick={() => setPresetNameDisplay('off')}
@@ -581,10 +581,10 @@ function PresetsTab() {
 
       <div className="mt-1 border-t border-white/10 pt-3">
         <div className="flex items-center justify-between">
-          <label className="flex items-center text-xs font-semibold text-white/80">
+          <span className="flex items-center text-xs font-semibold text-white/80">
             {tc('autopilot')}
             <Tooltip text={t('presets.autopilotTooltip')} />
-          </label>
+          </span>
           <button
             onClick={() => setAutopilotEnabled(!autopilot.enabled)}
             className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
@@ -616,10 +616,10 @@ function PresetsTab() {
         </div>
 
         <div className="mt-2 flex flex-col gap-1">
-          <label className="flex items-center text-xs text-white/60">
+          <span className="flex items-center text-xs text-white/60">
             {t('presets.mode')}
             <Tooltip text={t('presets.modeTooltip')} />
-          </label>
+          </span>
           <div className="flex gap-2">
             {[
               { mode: 'all' as const, label: t('presets.all') },
@@ -641,10 +641,10 @@ function PresetsTab() {
         </div>
 
         <div className="mt-2 flex flex-col gap-1">
-          <label className="flex items-center text-xs text-white/60">
+          <span className="flex items-center text-xs text-white/60">
             {t('presets.favoriteFrequency', { value: autopilot.favoriteWeight })}
             <Tooltip text={t('presets.favoriteFrequencyTooltip')} />
-          </label>
+          </span>
           <input
             type="range"
             min="1"

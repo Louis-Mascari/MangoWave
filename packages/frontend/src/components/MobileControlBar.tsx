@@ -297,39 +297,48 @@ export function MobileControlBar({
           const dy = Math.sin(rad) * radius;
 
           return (
-            <button
+            <div
               key={item.label}
-              onClick={item.action}
-              disabled={item.disabled}
-              aria-label={item.label}
-              title={item.label}
-              className={`absolute z-[56] flex h-11 w-11 items-center justify-center rounded-full border-none text-sm shadow-lg transition-all ${
+              className={`absolute z-[56] flex flex-col items-center transition-all ${
                 menuOpen
                   ? 'pointer-events-auto scale-100 opacity-100'
                   : 'pointer-events-none scale-50 opacity-0'
-              } ${
-                item.disabled
-                  ? 'cursor-not-allowed bg-white/5 text-white/20'
-                  : item.active
-                    ? `cursor-pointer ${
-                        item.activeColor === 'yellow'
-                          ? 'bg-yellow-500/30 text-yellow-400'
-                          : item.activeColor === 'red'
-                            ? 'bg-red-500/30 text-red-400'
-                            : 'bg-orange-500 text-white'
-                      }`
-                    : 'cursor-pointer bg-white/15 text-white/80 backdrop-blur-sm'
               }`}
               style={{
-                // Position relative to FAB center: cos→horizontal, sin→vertical
                 bottom: `${dy + itemOffset}px`,
                 left: `${dx + itemOffset}px`,
                 transitionDelay: menuOpen ? `${i * 40}ms` : '0ms',
                 transitionDuration: '250ms',
               }}
             >
-              {item.icon}
-            </button>
+              <button
+                onClick={item.action}
+                disabled={item.disabled}
+                aria-label={item.label}
+                className={`flex h-11 w-11 items-center justify-center rounded-full border-none text-sm shadow-lg ${
+                  item.disabled
+                    ? 'cursor-not-allowed bg-white/5 text-white/20'
+                    : item.active
+                      ? `cursor-pointer ${
+                          item.activeColor === 'yellow'
+                            ? 'bg-yellow-500/30 text-yellow-400'
+                            : item.activeColor === 'red'
+                              ? 'bg-red-500/30 text-red-400'
+                              : 'bg-orange-500 text-white'
+                        }`
+                      : 'cursor-pointer bg-white/15 text-white/80 backdrop-blur-sm'
+                }`}
+              >
+                {item.icon}
+              </button>
+              <span
+                className={`mt-0.5 max-w-16 truncate text-center text-[10px] leading-tight ${
+                  item.disabled ? 'text-white/20' : 'text-white/70'
+                }`}
+              >
+                {item.label}
+              </span>
+            </div>
           );
         })}
 

@@ -274,11 +274,9 @@ export function PlaybackPanel({
     <div
       onMouseEnter={onPauseIdle}
       onMouseLeave={onResumeIdle}
-      className={`fixed z-[48] transition-opacity duration-500 ${
+      className={`fixed z-[48] bottom-2 left-4 right-4 px-3 py-2 md:bottom-[52px] md:left-1/2 md:right-auto md:-translate-x-1/2 md:px-4 transition-opacity duration-500 ${
         isIdle ? 'pointer-events-none opacity-0' : 'opacity-100'
-      } ${
-        isMobileDevice ? 'bottom-2 left-4 right-4' : 'bottom-[52px] left-1/2 -translate-x-1/2'
-      } rounded-lg bg-black/60 backdrop-blur-sm ${isMobileDevice ? 'px-3 py-2' : 'px-4 py-2'}`}
+      } rounded-lg bg-black/60 backdrop-blur-sm`}
     >
       <SeekBar source={adapter.source} onSeek={onSeek} />
 

@@ -491,7 +491,7 @@ export function PresetBrowser({
       {groupNames.length > 0 ? (
         <GroupedVirtuoso
           ref={virtuosoRef}
-          style={{ height: isMobileDevice ? 'calc(100vh - 320px)' : '280px' }}
+          style={{ height: isMobileDevice ? 'max(280px, calc(100dvh - 320px))' : '280px' }}
           initialScrollTop={initialScrollTop.current}
           onScroll={(e) => {
             scrollTopRef.current = (e.target as HTMLElement).scrollTop;
@@ -644,7 +644,7 @@ export function PresetBrowser({
   );
 
   return (
-    <div className="relative flex flex-col gap-3 rounded-lg bg-black/60 p-4 backdrop-blur-sm max-md:min-h-0 max-md:flex-1 md:max-h-96 landscape:max-h-[70vh]">
+    <div className="relative flex flex-col gap-3 rounded-lg bg-black/60 p-4 backdrop-blur-sm max-md:min-h-0 max-md:flex-1 md:max-h-96">
       <div className="flex flex-col gap-2">
         {!isMobileDevice && <h3 className="text-sm font-semibold text-white">{tc('presets')}</h3>}
         <div className="flex flex-wrap gap-1.5">

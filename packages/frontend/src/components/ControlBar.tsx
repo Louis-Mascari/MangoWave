@@ -111,13 +111,14 @@ function DesktopControlBar({
       )}
       {activePanel !== 'none' && (
         <div
-          className={`mx-4 mb-2 lg:max-w-lg ${
+          className={`mx-4 mb-2 overflow-y-auto lg:max-w-lg ${
             activePanel === 'settings'
               ? 'lg:ml-auto'
               : activePanel === 'playlist'
                 ? 'lg:mx-auto'
                 : 'lg:mr-auto'
           }`}
+          style={{ maxHeight: 'calc(100dvh - 56px)' }}
         >
           {activePanel === 'settings' && <SettingsPanel />}
           {activePanel === 'presets' && (

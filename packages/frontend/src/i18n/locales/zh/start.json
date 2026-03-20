@@ -46,7 +46,7 @@
     "step1": "– 从设备中选择一个或多个音频文件",
     "step2Bold": "播放音乐",
     "step2": "沉浸其中",
-    "infoBox": "支持 MP3、WAV、FLAC、OGG、AAC 等格式。使用播放控件进行随机播放、重复、快进和管理队列。",
+    "infoBox": "支持 MP3、WAV、FLAC、OGG、AAC、Opus 和 M4A 格式。使用播放控件进行随机播放、重复、快进和管理队列。",
     "unsupportedFile": "不支持的文件",
     "chooseFiles": "选择文件"
   },

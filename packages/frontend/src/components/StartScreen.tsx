@@ -5,7 +5,11 @@ import { useToastStore } from '../store/useToastStore.ts';
 import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { browserInfo } from '../utils/browserInfo.ts';
-import { validateAudioFiles, rejectionMessage } from '../utils/audioFileValidation.ts';
+import {
+  validateAudioFiles,
+  rejectionMessage,
+  AUDIO_ACCEPT,
+} from '../utils/audioFileValidation.ts';
 import { useFocusTrap } from '../hooks/useFocusTrap.ts';
 import { supportedLanguages, type SupportedLanguage } from '../i18n/index.ts';
 import logoSrc from '../assets/logo.png';
@@ -357,7 +361,7 @@ export function StartScreen({
         ref={fileInputRef}
         type="file"
         multiple
-        accept="audio/*"
+        accept={AUDIO_ACCEPT}
         onChange={handleFilesChosen}
         className="hidden"
       />

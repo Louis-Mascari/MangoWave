@@ -2,7 +2,11 @@ import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMediaPlayerStore } from '../store/useMediaPlayerStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
-import { validateAudioFiles, rejectionMessage } from '../utils/audioFileValidation.ts';
+import {
+  validateAudioFiles,
+  rejectionMessage,
+  AUDIO_ACCEPT,
+} from '../utils/audioFileValidation.ts';
 
 function formatDuration(seconds: number): string {
   if (!seconds || !isFinite(seconds)) return '--:--';
@@ -145,7 +149,7 @@ export function MediaPlaylist({ onAddFiles, onClear, onClose }: MediaPlaylistPro
         ref={fileInputRef}
         type="file"
         multiple
-        accept="audio/*"
+        accept={AUDIO_ACCEPT}
         onChange={handleFilesChosen}
         className="hidden"
       />

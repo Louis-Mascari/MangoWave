@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import i18n from '../i18n/index.ts';
 import { AudioEngine } from '../engine/AudioEngine.ts';
 import { useMediaPlayerStore } from '../store/useMediaPlayerStore.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
+import { useToastStore } from '../store/useToastStore.ts';
 
 export interface UseLocalPlaybackReturn {
   audioEngine: AudioEngine | null;
@@ -140,12 +142,27 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
         nextTrack();
       }
     };
+    const onError = () => {
+      const { tracks, currentTrackIndex } = useMediaPlayerStore.getState();
+      const track = tracks[currentTrackIndex];
+      const filename = track?.file.name ?? i18n.t('errors.unknownFile', { ns: 'messages' });
+      useToastStore
+        .getState()
+        .show(i18n.t('errors.playbackDecodeError', { ns: 'messages', filename }), {
+          type: 'error',
+        });
+      // Auto-advance if there are more tracks in the queue
+      if (tracks.length > 1) {
+        nextTrack();
+      }
+    };
 
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('loadedmetadata', onLoadedMetadata);
     audio.addEventListener('play', onPlay);
     audio.addEventListener('pause', onPause);
     audio.addEventListener('ended', onEnded);
+    audio.addEventListener('error', onError);
 
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
@@ -153,6 +170,7 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
       audio.removeEventListener('play', onPlay);
       audio.removeEventListener('pause', onPause);
       audio.removeEventListener('ended', onEnded);
+      audio.removeEventListener('error', onError);
     };
   }, [isActive, setCurrentTime, setDuration, setIsPlaying, nextTrack]);
 

@@ -46,7 +46,7 @@
     "step1": "– 기기에서 하나 이상의 오디오 파일을 선택합니다",
     "step2Bold": "음악을 재생하고",
     "step2": "빠져들어 보세요",
-    "infoBox": "MP3, WAV, FLAC, OGG, AAC 등을 지원합니다. 재생 컨트롤로 셔플, 반복, 탐색, 재생 목록을 관리할 수 있습니다.",
+    "infoBox": "MP3, WAV, FLAC, OGG, AAC, Opus, M4A를 지원합니다. 재생 컨트롤로 셔플, 반복, 탐색, 재생 목록을 관리할 수 있습니다.",
     "unsupportedFile": "지원하지 않는 파일",
     "chooseFiles": "파일 선택"
   },

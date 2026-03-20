@@ -46,7 +46,7 @@
     "step1": "– select one or more audio files from your device",
     "step2Bold": "Play music",
     "step2": "and lose yourself",
-    "infoBox": "Supports MP3, WAV, FLAC, OGG, AAC, and more. Use the playback controls to shuffle, repeat, seek, and manage your queue.",
+    "infoBox": "Supports MP3, WAV, FLAC, OGG, AAC, Opus, and M4A. Use the playback controls to shuffle, repeat, seek, and manage your queue.",
     "unsupportedFile": "Unsupported file",
     "chooseFiles": "Choose Files"
   },

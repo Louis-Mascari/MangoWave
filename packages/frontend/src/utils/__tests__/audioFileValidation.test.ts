@@ -20,6 +20,18 @@ describe('validateAudioFiles', () => {
     expect(rejected).toHaveLength(0);
   });
 
+  it('rejects formats no browser can decode', () => {
+    const files = [
+      fakeFile('track.wma', ''),
+      fakeFile('song.mid', ''),
+      fakeFile('melody.midi', ''),
+      fakeFile('clip.aiff', ''),
+    ];
+    const { valid, rejected } = validateAudioFiles(files);
+    expect(valid).toHaveLength(0);
+    expect(rejected).toEqual(['track.wma', 'song.mid', 'melody.midi', 'clip.aiff']);
+  });
+
   it('rejects non-audio files', () => {
     const files = [fakeFile('photo.jpg', 'image/jpeg'), fakeFile('doc.pdf', 'application/pdf')];
     const { valid, rejected } = validateAudioFiles(files);

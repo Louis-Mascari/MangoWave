@@ -21,12 +21,14 @@
     "webgl2NotSupportedDesc": "MangoWave requires WebGL 2 to render visualizations. Please try a modern browser such as Chrome, Firefox, or Edge.",
     "webglContextLost": "Visualizer Lost Graphics Context",
     "webglContextLostDesc": "Your device's graphics system was interrupted. This can happen when your device is under heavy load, the GPU is shared with other applications, or the display configuration changed. Reloading the page will restore the visualizer.",
-    "renderingError": "A rendering error occurred, possibly a WebGL or Web Audio issue."
+    "renderingError": "A rendering error occurred, possibly a WebGL or Web Audio issue.",
+    "playbackDecodeError": "Could not play \"{{filename}}\". This format may not be supported by your browser.",
+    "unknownFile": "Unknown file"
   },
 
   "fileValidation": {
-    "singleRejected": "\"{{filename}}\" is not a supported audio file. Please use MP3, WAV, FLAC, OGG, AAC, or other common audio formats.",
-    "multipleRejected": "{{count}} files were not supported audio formats and were skipped: {{names}}. Please use MP3, WAV, FLAC, OGG, AAC, or other common audio formats."
+    "singleRejected": "\"{{filename}}\" is not a supported audio file. Supported formats: MP3, WAV, FLAC, OGG, AAC, Opus, and M4A.",
+    "multipleRejected": "{{count}} files were not supported audio formats and were skipped: {{names}}. Supported formats: MP3, WAV, FLAC, OGG, AAC, Opus, and M4A."
   },
 
   "settingsImport": {

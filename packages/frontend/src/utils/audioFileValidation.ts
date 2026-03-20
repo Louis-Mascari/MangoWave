@@ -22,12 +22,16 @@ const AUDIO_EXTENSIONS = new Set([
   'weba',
   'webm',
   'm4a',
-  'aiff',
-  'aif',
-  'wma',
-  'mid',
-  'midi',
+  'm4b',
+  '3gp',
 ]);
+
+/**
+ * `accept` attribute value for file inputs. Includes `audio/*` plus explicit extensions
+ * so Linux file pickers (which may not map all extensions to `audio/*` via shared-mime-info)
+ * still allow users to select common audio files.
+ */
+export const AUDIO_ACCEPT = ['audio/*', ...[...AUDIO_EXTENSIONS].map((ext) => `.${ext}`)].join(',');
 
 function isAudioFile(file: File): boolean {
   if (file.type.startsWith(AUDIO_MIME_PREFIX)) return true;

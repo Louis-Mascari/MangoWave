@@ -21,12 +21,14 @@
     "webgl2NotSupportedDesc": "MangoWave memerlukan WebGL 2 untuk merender visualisasi. Silakan coba browser modern seperti Chrome, Firefox, atau Edge.",
     "webglContextLost": "Visualizer Kehilangan Konteks Grafis",
     "webglContextLostDesc": "Sistem grafis perangkatmu terputus. Ini bisa terjadi saat perangkat dalam beban berat, GPU digunakan bersama aplikasi lain, atau konfigurasi layar berubah. Memuat ulang halaman akan memulihkan visualizer.",
-    "renderingError": "Terjadi kesalahan rendering, kemungkinan masalah WebGL atau Web Audio."
+    "renderingError": "Terjadi kesalahan rendering, kemungkinan masalah WebGL atau Web Audio.",
+    "playbackDecodeError": "Tidak dapat memutar \"{{filename}}\". Format ini mungkin tidak didukung oleh browser Anda.",
+    "unknownFile": "File tidak dikenal"
   },
 
   "fileValidation": {
-    "singleRejected": "\"{{filename}}\" bukan file audio yang didukung. Silakan gunakan format MP3, WAV, FLAC, OGG, AAC, atau format audio umum lainnya.",
-    "multipleRejected": "{{count}} file bukan format audio yang didukung dan dilewati: {{names}}. Silakan gunakan format MP3, WAV, FLAC, OGG, AAC, atau format audio umum lainnya."
+    "singleRejected": "\"{{filename}}\" bukan file audio yang didukung. Format yang didukung: MP3, WAV, FLAC, OGG, AAC, Opus, dan M4A.",
+    "multipleRejected": "{{count}} file bukan format audio yang didukung dan dilewati: {{names}}. Format yang didukung: MP3, WAV, FLAC, OGG, AAC, Opus, dan M4A."
   },
 
   "settingsImport": {

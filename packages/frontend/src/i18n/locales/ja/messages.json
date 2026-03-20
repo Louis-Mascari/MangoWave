@@ -21,12 +21,14 @@
     "webgl2NotSupportedDesc": "MangoWaveのビジュアライゼーションにはWebGL 2が必要です。Chrome、Firefox、Edgeなどのモダンブラウザをお試しください。",
     "webglContextLost": "ビジュアライザーがグラフィックスコンテキストを失いました",
     "webglContextLostDesc": "デバイスのグラフィックスシステムが中断されました。デバイスの負荷が高い場合、GPUが他のアプリケーションと共有されている場合、またはディスプレイ設定が変更された場合に発生することがあります。ページを再読み込みするとビジュアライザーが復元されます。",
-    "renderingError": "レンダリングエラーが発生しました。WebGLまたはWeb Audioの問題の可能性があります。"
+    "renderingError": "レンダリングエラーが発生しました。WebGLまたはWeb Audioの問題の可能性があります。",
+    "playbackDecodeError": "「{{filename}}」を再生できませんでした。お使いのブラウザがこの形式に対応していない可能性があります。",
+    "unknownFile": "不明なファイル"
   },
 
   "fileValidation": {
-    "singleRejected": "「{{filename}}」はサポートされている音声ファイルではありません。MP3、WAV、FLAC、OGG、AACなどの一般的な音声形式をご使用ください。",
-    "multipleRejected": "{{count}}件のファイルがサポートされていない音声形式のためスキップされました: {{names}}。MP3、WAV、FLAC、OGG、AACなどの一般的な音声形式をご使用ください。"
+    "singleRejected": "「{{filename}}」はサポートされている音声ファイルではありません。対応形式：MP3、WAV、FLAC、OGG、AAC、Opus、M4A。",
+    "multipleRejected": "{{count}}件のファイルがサポートされていない音声形式のためスキップされました: {{names}}。対応形式：MP3、WAV、FLAC、OGG、AAC、Opus、M4A。"
   },
 
   "settingsImport": {

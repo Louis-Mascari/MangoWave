@@ -21,12 +21,14 @@
     "webgl2NotSupportedDesc": "MangoWave को विज़ुअलाइज़ेशन रेंडर करने के लिए WebGL 2 चाहिए। कृपया Chrome, Firefox, या Edge जैसा मॉडर्न ब्राउज़र आज़माओ।",
     "webglContextLost": "विज़ुअलाइज़र ने ग्राफ़िक्स कॉन्टेक्स्ट खो दिया",
     "webglContextLostDesc": "तुम्हारे डिवाइस का ग्राफ़िक्स सिस्टम बाधित हो गया। यह तब हो सकता है जब डिवाइस पर भारी लोड हो, GPU अन्य एप्लिकेशन के साथ शेयर हो रहा हो, या डिस्प्ले कॉन्फ़िगरेशन बदल गया हो। पेज रीलोड करने से विज़ुअलाइज़र फिर से चालू हो जाएगा।",
-    "renderingError": "एक रेंडरिंग त्रुटि हुई, संभवतः WebGL या Web Audio समस्या।"
+    "renderingError": "एक रेंडरिंग त्रुटि हुई, संभवतः WebGL या Web Audio समस्या।",
+    "playbackDecodeError": "\"{{filename}}\" चलाया नहीं जा सका। हो सकता है कि तुम्हारा ब्राउज़र इस फ़ॉर्मेट को सपोर्ट न करता हो।",
+    "unknownFile": "अज्ञात फ़ाइल"
   },
 
   "fileValidation": {
-    "singleRejected": "\"{{filename}}\" एक समर्थित ऑडियो फ़ाइल नहीं है। कृपया MP3, WAV, FLAC, OGG, AAC या अन्य सामान्य ऑडियो फ़ॉर्मेट इस्तेमाल करो।",
-    "multipleRejected": "{{count}} फ़ाइलें समर्थित ऑडियो फ़ॉर्मेट नहीं थीं और छोड़ दी गईं: {{names}}। कृपया MP3, WAV, FLAC, OGG, AAC या अन्य सामान्य ऑडियो फ़ॉर्मेट इस्तेमाल करो।"
+    "singleRejected": "\"{{filename}}\" एक समर्थित ऑडियो फ़ाइल नहीं है। समर्थित फ़ॉर्मेट: MP3, WAV, FLAC, OGG, AAC, Opus और M4A।",
+    "multipleRejected": "{{count}} फ़ाइलें समर्थित ऑडियो फ़ॉर्मेट नहीं थीं और छोड़ दी गईं: {{names}}। समर्थित फ़ॉर्मेट: MP3, WAV, FLAC, OGG, AAC, Opus और M4A।"
   },
 
   "settingsImport": {

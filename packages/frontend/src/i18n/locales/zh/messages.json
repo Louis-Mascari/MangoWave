@@ -21,12 +21,14 @@
     "webgl2NotSupportedDesc": "MangoWave 需要 WebGL 2 来渲染可视化效果。请尝试使用 Chrome、Firefox 或 Edge 等现代浏览器。",
     "webglContextLost": "可视化工具失去图形上下文",
     "webglContextLostDesc": "你的设备图形系统被中断。这可能发生在设备负载较重、GPU 被其他应用占用或显示配置更改时。重新加载页面即可恢复可视化工具。",
-    "renderingError": "发生了渲染错误，可能是 WebGL 或 Web Audio 问题。"
+    "renderingError": "发生了渲染错误，可能是 WebGL 或 Web Audio 问题。",
+    "playbackDecodeError": "无法播放「{{filename}}」。你的浏览器可能不支持此格式。",
+    "unknownFile": "未知文件"
   },
 
   "fileValidation": {
-    "singleRejected": "「{{filename}}」不是受支持的音频文件。请使用 MP3、WAV、FLAC、OGG、AAC 或其他常见音频格式。",
-    "multipleRejected": "{{count}} 个文件不是受支持的音频格式，已被跳过：{{names}}。请使用 MP3、WAV、FLAC、OGG、AAC 或其他常见音频格式。"
+    "singleRejected": "「{{filename}}」不是受支持的音频文件。支持的格式：MP3、WAV、FLAC、OGG、AAC、Opus 和 M4A。",
+    "multipleRejected": "{{count}} 个文件不是受支持的音频格式，已被跳过：{{names}}。支持的格式：MP3、WAV、FLAC、OGG、AAC、Opus 和 M4A。"
   },
 
   "settingsImport": {

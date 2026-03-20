@@ -46,7 +46,7 @@
     "step1": "– selecciona uno o más archivos de audio desde tu dispositivo",
     "step2Bold": "Reproduce música",
     "step2": "y déjate llevar",
-    "infoBox": "Soporta MP3, WAV, FLAC, OGG, AAC y más. Usa los controles de reproducción para mezclar, repetir, avanzar y administrar tu cola.",
+    "infoBox": "Soporta MP3, WAV, FLAC, OGG, AAC, Opus y M4A. Usa los controles de reproducción para mezclar, repetir, avanzar y administrar tu cola.",
     "unsupportedFile": "Archivo no soportado",
     "chooseFiles": "Elegir archivos"
   },

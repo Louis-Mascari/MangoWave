@@ -27,6 +27,8 @@ const defaultProps = {
   onToggleBlock: vi.fn(),
   isIdle: false,
   forceIdle: vi.fn(),
+  onPauseIdle: vi.fn(),
+  onResumeIdle: vi.fn(),
 };
 
 // Helper: scope queries to the desktop toolbar (role="toolbar") to avoid

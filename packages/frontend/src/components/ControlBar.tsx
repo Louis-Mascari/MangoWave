@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next';
-import { useIdleTimer } from '../hooks/useIdleTimer.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { SettingsPanel } from './SettingsPanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
@@ -34,6 +33,8 @@ interface ControlBarProps {
   hasPlaybackPanel?: boolean;
   isIdle: boolean;
   forceIdle: () => void;
+  onPauseIdle: () => void;
+  onResumeIdle: () => void;
 }
 
 export function ControlBar(props: ControlBarProps) {
@@ -90,16 +91,18 @@ function DesktopControlBar({
   onToggleBlock,
   onAddLocalFiles,
   onClearPlaylist,
+  isIdle,
+  onPauseIdle,
+  onResumeIdle,
 }: ControlBarProps) {
   const { t } = useTranslation('messages');
   const { t: tc } = useTranslation('common');
   const { t: ts } = useTranslation('settings');
-  const { isIdle, pause, resume } = useIdleTimer(3000, 5000);
 
   return (
     <div
-      onMouseEnter={pause}
-      onMouseLeave={resume}
+      onMouseEnter={onPauseIdle}
+      onMouseLeave={onResumeIdle}
       className={`fixed inset-x-0 bottom-0 z-50 hidden transition-opacity duration-500 md:block ${
         isIdle && activePanel === 'none' ? 'pointer-events-none opacity-0' : 'opacity-100'
       }`}

@@ -2,15 +2,19 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 export function useIdleTimer(
   timeoutMs: number,
-  initialDelayMs?: number,
-): { isIdle: boolean; pause: () => void; resume: () => void; forceIdle: () => void } {
+  startPaused = false,
+): {
+  isIdle: boolean;
+  pause: () => void;
+  resume: () => void;
+  forceIdle: () => void;
+  reset: () => void;
+} {
   const [isIdle, setIsIdle] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hasInteractedRef = useRef(false);
-  const pausedRef = useRef(false);
+  const pausedRef = useRef(startPaused);
 
   const resetTimer = useCallback(() => {
-    hasInteractedRef.current = true;
     setIsIdle(false);
     if (timerRef.current) {
       clearTimeout(timerRef.current);
@@ -52,20 +56,17 @@ export function useIdleTimer(
     const events = ['mousemove', 'mousedown', 'touchstart'] as const;
     events.forEach((event) => window.addEventListener(event, resetTimer, { passive: true }));
 
-    // On mount: if user hasn't interacted yet and an initial delay is set,
-    // wait longer before starting the idle timer (e.g. after launch animation)
-    const delay = !hasInteractedRef.current && initialDelayMs != null ? initialDelayMs : 0;
-
-    const initialTimer = setTimeout(resetTimer, delay);
+    // Only auto-start the countdown if not starting paused
+    const initialTimer = !pausedRef.current ? setTimeout(resetTimer, 0) : null;
 
     return () => {
       events.forEach((event) => window.removeEventListener(event, resetTimer));
-      clearTimeout(initialTimer);
+      if (initialTimer) clearTimeout(initialTimer);
       if (timerRef.current) {
         clearTimeout(timerRef.current);
       }
     };
-  }, [resetTimer, initialDelayMs]);
+  }, [resetTimer]);
 
-  return { isIdle, pause, resume, forceIdle };
+  return { isIdle, pause, resume, forceIdle, reset: resetTimer };
 }

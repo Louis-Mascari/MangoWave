@@ -315,7 +315,7 @@ function MainApp() {
     pause: pausePlaybackIdle,
     resume: resumePlaybackIdle,
     forceIdle: forcePlaybackIdle,
-  } = useIdleTimer(3000, 5000);
+  } = useIdleTimer(4000, true);
 
   const handleToggleQueue = useCallback(() => {
     handleTogglePanel('playlist');
@@ -404,7 +404,12 @@ function MainApp() {
             />
           )}
           {showLaunchAnimation && (
-            <LaunchAnimation onComplete={() => setShowLaunchAnimation(false)} />
+            <LaunchAnimation
+              onComplete={() => {
+                setShowLaunchAnimation(false);
+                resumePlaybackIdle();
+              }}
+            />
           )}
           <div className="pointer-events-none fixed top-4 left-4 z-[49] flex flex-col items-start gap-2">
             {presetNameDisplay !== 'off' && (
@@ -439,6 +444,8 @@ function MainApp() {
             hasPlaybackPanel={hasPlaybackPanel}
             isIdle={playbackPanelIdle}
             forceIdle={forcePlaybackIdle}
+            onPauseIdle={pausePlaybackIdle}
+            onResumeIdle={resumePlaybackIdle}
           />
           <PlaybackPanel
             adapter={playbackAdapter}

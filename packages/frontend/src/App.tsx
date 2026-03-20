@@ -315,7 +315,7 @@ function MainApp() {
     pause: pausePlaybackIdle,
     resume: resumePlaybackIdle,
     forceIdle: forcePlaybackIdle,
-  } = useIdleTimer(isMobileDevice ? 5000 : 3000, 5000);
+  } = useIdleTimer(3000, 5000);
 
   const handleToggleQueue = useCallback(() => {
     handleTogglePanel('playlist');

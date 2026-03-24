@@ -155,7 +155,7 @@ npm run build -w packages/frontend   # tsc + vite build
 
 ## Tech Stack
 
-- **Frontend:** React 19, Vite 8, TypeScript 5.9, Tailwind CSS 4, Zustand, react-i18next
+- **Frontend:** React 19, Vite 8, TypeScript 6, Tailwind CSS 4, Zustand, react-i18next
 - **Visual engine:** butterchurn (WebGL 2 MilkDrop port)
 - **Audio:** Web Audio API (`getDisplayMedia`, `HTMLAudioElement`, `getUserMedia`), music-metadata (ID3 parsing)
 - **Backend:** AWS Lambda (Node.js/TypeScript), API Gateway, DynamoDB

@@ -15,5 +15,17 @@ export function initPostHog(): void {
     capture_pageleave: true,
     persistence: 'localStorage',
     disable_session_recording: false,
+    session_recording: {
+      maskTextSelector: '[data-ph-mask], [data-ph-mask-filenames]',
+      maskTextFn: (text: string, element?: HTMLElement) => {
+        if (element?.hasAttribute?.('data-ph-mask-filenames')) {
+          return text.replace(
+            /[\w\s\-().]+\.(mp3|wav|flac|aac|ogg|oga|opus|weba|webm|m4a|m4b|3gp)\b/gi,
+            (match, ext: string) => '*'.repeat(match.length - ext.length - 1) + '.' + ext,
+          );
+        }
+        return '*'.repeat(text.length);
+      },
+    },
   });
 }

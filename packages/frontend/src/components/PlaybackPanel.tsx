@@ -265,6 +265,7 @@ export function PlaybackPanel({
     <span
       className="ml-1 max-w-[120px] truncate text-[10px] text-white/30"
       title={t('playback.playingOn', { device: spotifyDeviceName })}
+      data-ph-mask
     >
       {spotifyDeviceName}
     </span>

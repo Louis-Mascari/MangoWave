@@ -22,6 +22,7 @@ export function ActionToast() {
           key={key}
           className={`fixed bottom-20 left-1/2 z-[60] max-w-sm -translate-x-1/2 px-4 py-1.5 text-center text-xs backdrop-blur ${typeStyles[type]}`}
           style={{ animation: `toast-fade ${durationS}s ease-in-out forwards` }}
+          data-ph-mask-filenames
         >
           {message}
         </div>

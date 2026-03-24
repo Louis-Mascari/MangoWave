@@ -939,7 +939,7 @@ function SpotifyTab() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 text-sm">
             <span className="text-green-400">&#10003;</span>
-            <span className="text-white/80">
+            <span className="text-white/80" data-ph-mask>
               {user?.displayName
                 ? t('spotifyTab.connectedAs', { name: user.displayName })
                 : t('spotifyTab.connected')}

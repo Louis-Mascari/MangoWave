@@ -451,7 +451,7 @@ function SpotifySection({
         <div className="flex flex-col items-center gap-1.5">
           <div className="flex items-center gap-2 text-sm">
             <span className="text-green-400">&#10003;</span>
-            <span className="text-[#ccc]">
+            <span className="text-[#ccc]" data-ph-mask>
               {user?.displayName
                 ? t('spotify.connectedAs', { name: user.displayName })
                 : t('spotify.connected')}

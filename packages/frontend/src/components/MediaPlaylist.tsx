@@ -100,7 +100,9 @@ export function MediaPlaylist({ onAddFiles, onClear, onClose }: MediaPlaylistPro
               }
             }}
           >
-            <span className="min-w-0 flex-1 truncate">{track.name}</span>
+            <span className="min-w-0 flex-1 truncate" data-ph-mask>
+              {track.name}
+            </span>
             <span className="shrink-0 text-white/40">{formatDuration(track.duration)}</span>
             {!shuffle && tracks.length > 1 && (
               <span className="flex shrink-0 gap-1">

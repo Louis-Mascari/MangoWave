@@ -12,46 +12,15 @@ updates:
           - minor
           - patch
 
-  # npm — root
+  # npm — all workspaces managed from root (npm workspaces share a single
+  # package-lock.json; per-workspace entries produce PRs without lockfile
+  # updates, which always fail npm ci)
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
     groups:
       npm-root-minor-patch:
-        update-types:
-          - minor
-          - patch
-
-  # npm — frontend
-  - package-ecosystem: npm
-    directory: /packages/frontend
-    schedule:
-      interval: weekly
-    groups:
-      npm-frontend-minor-patch:
-        update-types:
-          - minor
-          - patch
-
-  # npm — backend
-  - package-ecosystem: npm
-    directory: /packages/backend
-    schedule:
-      interval: weekly
-    groups:
-      npm-backend-minor-patch:
-        update-types:
-          - minor
-          - patch
-
-  # npm — infrastructure
-  - package-ecosystem: npm
-    directory: /infrastructure
-    schedule:
-      interval: weekly
-    groups:
-      npm-infra-minor-patch:
         update-types:
           - minor
           - patch

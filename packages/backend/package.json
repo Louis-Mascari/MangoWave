@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.161",
+    "@types/node": "^25.5.0",
     "typescript": "^5",
     "vitest": "^4.1.0"
   },

@@ -58,7 +58,7 @@ src/
 ├── services/      # Spotify Web API client (owner-mode OAuth + PKCE utilities for self-hosters),
 │                  # WindowSyncService (BroadcastChannel-based multi-window sync)
 ├── store/         # Zustand stores: useSettingsStore, useSpotifyStore, useMediaPlayerStore,
-│                  #     usePresetHistoryStore, usePresetBrowserStore, useToastStore,
+│                  #     usePresetHistoryStore, usePresetBrowserStore, useToastStore, useConfirmStore,
 │                  #     useWindowSyncStatusStore
 ├── utils/         # Shared utilities (isMobileDevice, browserInfo, settingsPortability, audioFileValidation)
 ├── types/         # butterchurn.d.ts, music-metadata.d.ts (type declarations for untyped packages)
@@ -73,35 +73,41 @@ e2e/                 # Playwright E2E tests (separate from Vitest, own tsconfig)
 
 Zustand with `localStorage` persistence. Key sections:
 
-| Section             | Fields                                                                         | Defaults                    |
-| ------------------- | ------------------------------------------------------------------------------ | --------------------------- |
-| `performance`       | `fpsCap`, `resolutionScale`, `meshWidth`, `meshHeight`, `textureRatio`, `fxaa` | 60, 1.0, 48, 36, 1.0, false |
-| `audio`             | `smoothingConstant`, `fftSize`                                                 | 0.3, 1024                   |
-| `autopilot`         | `enabled`, `interval`, `mode`, `favoriteWeight`                                | true, 15s, `'all'`, 2       |
-| `eq`                | `preAmpGain`, `bandGains[10]`                                                  | 1.5, all 0dB                |
-| `blockedPresets`    | string[]                                                                       | []                          |
-| `favoritePresets`   | string[]                                                                       | []                          |
-| `presetNameDisplay` | `'off' \| 'always' \| number`                                                  | 5                           |
-| `songInfoDisplay`   | `'off' \| number` (on/off toggle, hardcoded 5s when on)                        | 5                           |
-| `transitionTime`    | number (seconds)                                                               | 2.0                         |
-| `volume`            | number (0.0–1.0)                                                               | 0.5                         |
-| `enabledPacks`      | string[]                                                                       | all packs                   |
-| `excludedOverrides` | string[]                                                                       | []                          |
-| `windowSyncEnabled` | boolean                                                                        | false                       |
-| `syncPerformance`   | boolean                                                                        | true                        |
-| `onboardingShown`   | boolean                                                                        | false                       |
+| Section              | Fields                                                                         | Defaults                    |
+| -------------------- | ------------------------------------------------------------------------------ | --------------------------- |
+| `performance`        | `fpsCap`, `resolutionScale`, `meshWidth`, `meshHeight`, `textureRatio`, `fxaa` | 60, 1.0, 48, 36, 1.0, false |
+| `audio`              | `smoothingConstant`, `fftSize`                                                 | 0.3, 1024                   |
+| `autopilot`          | `enabled`, `interval`, `mode`, `favoriteWeight`                                | true, 15s, `'all'`, 2       |
+| `eq`                 | `preAmpGain`, `bandGains[10]`                                                  | 1.5, all 0dB                |
+| `blockedPresets`     | string[]                                                                       | []                          |
+| `favoritePresets`    | string[]                                                                       | []                          |
+| `presetNameDisplay`  | `'off' \| 'always' \| number`                                                  | 5                           |
+| `songInfoDisplay`    | `'off' \| number` (on/off toggle, hardcoded 5s when on)                        | 5                           |
+| `transitionTime`     | number (seconds)                                                               | 2.0                         |
+| `volume`             | number (0.0–1.0)                                                               | 0.5                         |
+| `enabledPacks`       | string[]                                                                       | all packs                   |
+| `customPacks`        | `CustomPack[]` (`id`, `name`, `presets[]`, `createdAt`)                        | []                          |
+| `activeCustomPackId` | `string \| null`                                                               | null                        |
+| `excludedOverrides`  | string[]                                                                       | []                          |
+| `windowSyncEnabled`  | boolean                                                                        | false                       |
+| `syncPerformance`    | boolean                                                                        | true                        |
+| `onboardingShown`    | boolean                                                                        | false                       |
 
 Blocked and favorited presets are mutually exclusive.
 
 On mobile, 27 GPU-heavy presets (identified via Pixel 10 Pro testing) are filtered from the pool and shown in the Excluded tab alongside quarantined presets. Users can permanently restore any excluded preset via the Excluded tab — overrides persist in `excludedOverrides`.
 
+**Custom packs** are user-created preset collections (max 50 packs, up to 395 presets each). Starting a pack takes highest priority in pool-building — autopilot and manual prev/next cycle within the pack's presets only (minus blocked). Starting a pack auto-switches `favorites` autopilot mode to `all` and auto-advances if the current preset isn't in the pack. Empty packs cannot be started (Start button hidden). Removing the currently playing preset from the active pack during editing auto-advances to the next preset. Packs can be exported/imported as standalone `.json` files (`_meta.source: 'mangowave-pack'`, distinct from settings export). In the pack edit view, presets show status tags (blocked/excluded/mobile-skipped) so users can see which will be skipped at play time. All tab pack filter checkboxes are disabled while a pack is active. Synced via window sync (BroadcastChannel); cloud sync pending backend support.
+
 `useMediaPlayerStore` manages local file playback state (queue, current track, shuffle history, repeat mode). Not persisted — `File` objects can't survive page reload.
 
 `usePresetHistoryStore` tracks preset navigation history (max 100 entries, cursor-based) for previous/next preset navigation. Also tracks `playedSet` for shuffle-style autopilot rounds. Not persisted.
 
-`usePresetBrowserStore` holds preset browser panel UI state (active filter tab, search term, collapsed packs, scroll position). Session-scoped (not persisted) — survives panel open/close but resets on page refresh.
+`usePresetBrowserStore` holds preset browser panel UI state (active filter tab including "packs", search term, collapsed packs, selected pack for editing, scroll position). Session-scoped (not persisted) — survives panel open/close but resets on page refresh.
 
 **Language preference** is persisted separately by `i18next-browser-languagedetector` to `localStorage` key `mangowave-language` (not Zustand). This allows i18n to resolve synchronously at module load before React mounts.
+
+`useConfirmStore` drives the reusable `ConfirmDialog` component. API: `show({ title, message, onConfirm, confirmLabel?, destructive? })`. Supports destructive (red) and normal (orange) confirm buttons.
 
 `useToastStore` drives single-message action toasts with typed variants (`info`, `error`, `warning`). API: `show(message, { type?, durationMs? })` — info auto-clears at 3.5s, error/warning at 6s. `durationMs` stored in state and drives both the JS cleanup timer and the CSS `toast-fade` animation duration (set dynamically via inline style).
 

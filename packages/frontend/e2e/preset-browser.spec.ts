@@ -75,4 +75,113 @@ test.describe('Preset Browser', () => {
     await allTab.click();
     await expect(app.locator('input[placeholder*="Search"]')).toBeVisible();
   });
+
+  test('Packs tab: create, activate, and deactivate a custom pack', async ({ app }) => {
+    await app.getByRole('button', { name: /Presets/ }).click();
+
+    // Switch to Packs tab
+    await app.getByRole('button', { name: /packs/i }).click();
+
+    // Create a pack (auto-enters edit view)
+    await app.getByRole('button', { name: /Create Custom Pack/ }).click();
+
+    // Add a preset so the Start button appears
+    const addButton = app.locator('[aria-label^="Add to pack"]').first();
+    await expect(addButton).toBeVisible({ timeout: 5000 });
+    await addButton.click();
+
+    // Go back to pack list view
+    await app.getByLabel(/Back/).click();
+
+    // Pack should appear with start button
+    await expect(app.getByText('Pack 1', { exact: true })).toBeVisible();
+    await expect(app.getByRole('button', { name: /^Start$/ })).toBeVisible();
+
+    // Start the pack
+    await app.getByRole('button', { name: /^Start$/ }).click();
+
+    // Active pack chip should appear
+    await expect(app.getByText(/Playing from: Pack 1/)).toBeVisible();
+
+    // Deactivate via the chip's Stop button
+    await app.getByRole('button', { name: /Stop pack/ }).click();
+
+    // Chip should disappear
+    await expect(app.getByText(/Playing from: Pack 1/)).not.toBeVisible();
+  });
+
+  test('Packs tab: edit pack name and add presets', async ({ app }) => {
+    await app.getByRole('button', { name: /Presets/ }).click();
+    await app.getByRole('button', { name: /packs/i }).click();
+
+    // Create a pack (auto-enters edit view)
+    await app.getByRole('button', { name: /Create Custom Pack/ }).click();
+
+    // Already in edit view — should see pack name input and "Add presets" section
+    await expect(app.getByLabel(/Pack name/)).toBeVisible();
+    await expect(app.getByText(/Add presets/)).toBeVisible();
+    await expect(app.getByPlaceholder(/Search presets to add/)).toBeVisible();
+
+    // Rename the pack
+    const nameInput = app.getByLabel(/Pack name/);
+    await nameInput.fill('My Test Pack');
+    await nameInput.blur();
+
+    // Add a preset using the + button (inside virtualized addable list)
+    const addButton = app.locator('[aria-label^="Add to pack"]').first();
+    await expect(addButton).toBeVisible({ timeout: 5000 });
+    await addButton.click();
+
+    // Preset count should update
+    await expect(app.getByText(/1 preset/)).toBeVisible();
+
+    // Go back to pack list
+    await app.getByLabel(/Back/).click();
+
+    // Pack should show the new name
+    await expect(app.getByText('My Test Pack')).toBeVisible();
+  });
+
+  test('Packs tab: delete pack shows confirmation dialog', async ({ app }) => {
+    await app.getByRole('button', { name: /Presets/ }).click();
+    await app.getByRole('button', { name: /packs/i }).click();
+
+    // Create a pack (auto-enters edit view)
+    await app.getByRole('button', { name: /Create Custom Pack/ }).click();
+
+    // Go back to pack list view where delete button is
+    await app.getByLabel(/Back/).click();
+
+    // Click delete (icon button with title)
+    await app.getByTitle(/Delete pack/).click();
+
+    // Confirmation dialog should appear
+    await expect(app.getByRole('dialog', { name: /Delete pack/ })).toBeVisible();
+    await expect(app.getByText(/cannot be undone/)).toBeVisible();
+
+    // Cancel — pack should still exist
+    await app.getByRole('button', { name: /Cancel/ }).click();
+    await expect(app.getByText('Pack 1', { exact: true })).toBeVisible();
+  });
+
+  test('active pack dims All tab filters with override notice', async ({ app }) => {
+    await app.getByRole('button', { name: /Presets/ }).click();
+    await app.getByRole('button', { name: /packs/i }).click();
+
+    // Create a pack (auto-enters edit view) and add a preset
+    await app.getByRole('button', { name: /Create Custom Pack/ }).click();
+    const addBtn = app.locator('[aria-label^="Add to pack"]').first();
+    await expect(addBtn).toBeVisible({ timeout: 5000 });
+    await addBtn.click();
+
+    // Go back to pack list and start
+    await app.getByLabel(/Back/).click();
+    await app.getByRole('button', { name: /^Start$/ }).click();
+
+    // Switch to All tab
+    await app.getByRole('button', { name: /^all$/i }).click();
+
+    // Override notice should be visible
+    await expect(app.getByText(/filters don't apply/)).toBeVisible();
+  });
 });

@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { SettingsPanel } from './SettingsPanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
 import { useFocusTrap } from '../hooks/useFocusTrap.ts';
@@ -62,6 +63,14 @@ export function MobileControlBar({
 }: MobileControlBarProps) {
   const { t } = useTranslation('messages');
   const { t: tc } = useTranslation('common');
+
+  const activeCustomPackId = useSettingsStore((s) => s.activeCustomPackId);
+  const customPacks = useSettingsStore((s) => s.customPacks);
+  const activePackName = useMemo(
+    () => customPacks.find((p) => p.id === activeCustomPackId)?.name ?? null,
+    [customPacks, activeCustomPackId],
+  );
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [modalPanel, setModalPanel] = useState<PanelView>('none');
 
@@ -374,11 +383,27 @@ export function MobileControlBar({
             className="relative mx-2 my-2 flex max-h-full w-full flex-col overflow-hidden rounded-lg bg-gray-900/95 landscape:my-1"
           >
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 landscape:py-1.5">
-              <h3 className="text-sm font-semibold text-white">
-                {activePanel === 'settings' && tc('settings')}
-                {activePanel === 'presets' && tc('presets')}
-                {activePanel === 'playlist' && tc('queue')}
-              </h3>
+              <div>
+                <h3 className="text-sm font-semibold text-white">
+                  {activePanel === 'settings' && tc('settings')}
+                  {activePanel === 'presets' && tc('presets')}
+                  {activePanel === 'playlist' && tc('queue')}
+                </h3>
+                {activePanel === 'presets' && activePackName && (
+                  <div className="flex items-center gap-1.5">
+                    <p className="min-w-0 truncate text-[10px] text-orange-400/60" data-ph-mask>
+                      {t('customPacks.packActive', { name: activePackName })}
+                    </p>
+                    <button
+                      onClick={() => useSettingsStore.getState().setActiveCustomPackId(null)}
+                      className="shrink-0 cursor-pointer rounded-full border-none bg-red-500/80 px-2 py-0.5 text-[9px] font-semibold text-white hover:bg-red-500"
+                      aria-label={t('customPacks.deactivatePack')}
+                    >
+                      {t('customPacks.deactivate')}
+                    </button>
+                  </div>
+                )}
+              </div>
               <button
                 onClick={closeModal}
                 className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-none bg-white/10 text-sm text-white/70 hover:bg-white/20"
@@ -387,7 +412,9 @@ export function MobileControlBar({
                 ✕
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-3 landscape:p-2">
+            <div
+              className={`flex flex-1 flex-col p-3 landscape:p-2 ${activePanel === 'presets' ? 'overflow-hidden' : 'overflow-y-auto'}`}
+            >
               {activePanel === 'settings' && <SettingsPanel />}
               {activePanel === 'presets' && (
                 <PresetBrowser

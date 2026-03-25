@@ -18,14 +18,16 @@ export const test = base.extend<{ app: Page }>({
       // - onboardingShown: skip the onboarding overlay
       // - enabledPacks: all packs enabled (normally initialized by PresetBrowser on first open,
       //   but tests that use keyboard shortcuts or next-preset need them before that)
-      // - version must match the current Zustand persist migration version (6)
+      // - version must match the current Zustand persist migration version (8)
       const settings = {
         state: {
           onboardingShown: true,
           enabledPacks: ['Minimal', 'Non-Minimal', 'Extra', 'Extra 2', 'MD1'],
           presetNameDisplay: 'always',
+          customPacks: [],
+          activeCustomPackId: null,
         },
-        version: 6,
+        version: 8,
       };
       localStorage.setItem('mangowave-settings', JSON.stringify(settings));
     });

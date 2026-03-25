@@ -52,7 +52,7 @@ export const EXPORT_CATEGORIES: ExportCategory[] = [
   {
     key: 'packs',
     labelKey: 'data.categoryPacks',
-    fields: ['enabledPacks', 'excludedOverrides'],
+    fields: ['enabledPacks', 'excludedOverrides', 'customPacks', 'activeCustomPackId'],
   },
   {
     key: 'sync',
@@ -127,8 +127,12 @@ export function parseImportFile(file: File): Promise<ParseResult> {
         const parsed = sjson(reader.result as string);
 
         if (!parsed._meta || parsed._meta.source !== 'mangowave') {
-          captureImportFailure('Not a MangoWave settings file');
-          resolve({ ok: false, error: t('settingsImport.notMangoWaveFile') });
+          const isPackFile = parsed._meta?.source === 'mangowave-pack';
+          captureImportFailure(isPackFile ? 'Pack file, not settings' : 'Not a MangoWave file');
+          resolve({
+            ok: false,
+            error: isPackFile ? t('customPacks.notPackFile') : t('settingsImport.notMangoWaveFile'),
+          });
           return;
         }
 
@@ -256,6 +260,24 @@ const SANITIZERS: Record<string, (val: unknown) => unknown> = {
   },
   transitionTime: (v) => clamp(v, 0, 10, 2.0),
   volume: (v) => clamp(v, 0, 1, 0.5),
+  customPacks: (v) => {
+    if (!Array.isArray(v)) return undefined;
+    return v
+      .filter(
+        (p): p is Record<string, unknown> =>
+          !!p && typeof p === 'object' && !Array.isArray(p) && typeof p.id === 'string',
+      )
+      .slice(0, 50)
+      .map((p) => ({
+        id: typeof p.id === 'string' ? p.id : crypto.randomUUID(),
+        name: typeof p.name === 'string' ? (p.name as string).slice(0, 50) : 'Imported Pack',
+        presets: Array.isArray(p.presets)
+          ? (p.presets as unknown[]).filter((s): s is string => typeof s === 'string').slice(0, 500)
+          : [],
+        createdAt: typeof p.createdAt === 'number' ? p.createdAt : Date.now(),
+      }));
+  },
+  activeCustomPackId: (v) => (typeof v === 'string' || v === null ? v : null),
   windowSyncEnabled: (v) => (typeof v === 'boolean' ? v : false),
   syncPerformance: (v) => (typeof v === 'boolean' ? v : true),
 };
@@ -288,4 +310,97 @@ export function buildImportPayload(
   }
 
   return { payload: payload as Partial<SettingsState>, warnings };
+}
+
+// --- Standalone pack export/import ---
+
+interface PackExportMeta {
+  version: number;
+  exportedAt: string;
+  source: 'mangowave-pack';
+}
+
+export interface PackExportData {
+  _meta: PackExportMeta;
+  name: string;
+  presets: string[];
+}
+
+export function buildPackExport(pack: { name: string; presets: string[] }): PackExportData {
+  return {
+    _meta: {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      source: 'mangowave-pack',
+    },
+    name: pack.name,
+    presets: pack.presets,
+  };
+}
+
+export function downloadPackExport(data: PackExportData): void {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `mangowave-pack-${data.name
+    .replace(/[^a-zA-Z0-9-_ ]/g, '')
+    .replace(/\s+/g, '-')
+    .toLowerCase()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+export type PackParseResult =
+  | { ok: true; name: string; presets: string[] }
+  | { ok: false; error: string };
+
+export function parsePackImportFile(file: File): Promise<PackParseResult> {
+  return new Promise((resolve) => {
+    const t = i18n.getFixedT(null, 'messages');
+
+    if (!file.name.endsWith('.json') && file.type !== 'application/json') {
+      resolve({ ok: false, error: t('settingsImport.mustBeJson') });
+      return;
+    }
+
+    if (file.size > MAX_IMPORT_SIZE) {
+      resolve({ ok: false, error: t('settingsImport.fileTooLarge') });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = sjson(reader.result as string);
+
+        if (!parsed._meta || parsed._meta.source !== 'mangowave-pack') {
+          const isSettingsFile = parsed._meta?.source === 'mangowave';
+          resolve({
+            ok: false,
+            error: isSettingsFile
+              ? t('settingsImport.notMangoWaveFile')
+              : t('customPacks.notPackFile'),
+          });
+          return;
+        }
+
+        const name =
+          typeof parsed.name === 'string' ? (parsed.name as string).slice(0, 50) : 'Imported Pack';
+        const presets = Array.isArray(parsed.presets)
+          ? parsed.presets.filter((s: unknown): s is string => typeof s === 'string').slice(0, 500)
+          : [];
+
+        resolve({ ok: true, name, presets });
+      } catch {
+        resolve({ ok: false, error: t('settingsImport.invalidFile') });
+      }
+    };
+    reader.onerror = () => {
+      resolve({ ok: false, error: t('settingsImport.invalidFile') });
+    };
+    reader.readAsText(file);
+  });
 }

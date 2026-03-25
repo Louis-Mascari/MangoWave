@@ -154,6 +154,45 @@
     "restoreToPool": "Restaurar ao pool",
     "quarantineBroken": "Quebrado",
     "quarantineContent": "Conteúdo",
-    "quarantineMobilePerf": "Desempenho mobile"
+    "quarantineMobilePerf": "Desempenho mobile",
+    "addToPack": "Adicionar ao pacote",
+    "addedToPack": "Adicionado a \"{{pack}}\"",
+    "createPackFirst": "Crie um pacote personalizado primeiro"
+  },
+
+  "customPacks": {
+    "tabs": {
+      "packs": "pacotes"
+    },
+    "createPack": "Criar Pacote Personalizado",
+    "importPack": "Importar Pacote",
+    "exportPack": "Exportar Pacote",
+    "activate": "Iniciar",
+    "deactivate": "Parar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "deletePack": "Excluir pacote",
+    "deleteConfirm": "Excluir \"{{name}}\"? Isso não pode ser desfeito.",
+    "emptyState": "Nenhum pacote personalizado ainda. Crie um para montar suas próprias coleções de presets.",
+    "presetCount_one": "{{count}} preset",
+    "presetCount_other": "{{count}} presets",
+    "back": "Voltar",
+    "removePreset": "Remover",
+    "tagBlocked": "bloqueado",
+    "tagExcluded": "excluído",
+    "tagMobileSkipped": "ignorado no celular",
+    "addPresets": "Adicionar presets",
+    "searchPresets": "Buscar presets para adicionar...",
+    "allPresetsAdded": "Todos os presets já foram adicionados a este pacote",
+    "packName": "Nome do pacote",
+    "packCreated": "Pacote \"{{name}}\" criado",
+    "packDeleted": "Pacote excluído",
+    "packImported": "Pacote \"{{name}}\" importado com {{count}} presets",
+    "notPackFile": "Não é um arquivo de pacote do MangoWave",
+    "maxPacksReached": "Limite máximo de 50 pacotes personalizados atingido",
+    "packActive": "Reproduzindo de: {{name}}",
+    "deactivatePack": "Parar pacote",
+    "packOverridesFilters": "Estes filtros não se aplicam enquanto um pacote personalizado está ativo",
+    "favoritesAutoSwitch": "Alternado de favoritos para o modo todos"
   }
 }

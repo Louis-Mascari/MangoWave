@@ -154,6 +154,45 @@
     "restoreToPool": "恢复到池中",
     "quarantineBroken": "损坏",
     "quarantineContent": "内容",
-    "quarantineMobilePerf": "移动端性能"
+    "quarantineMobilePerf": "移动端性能",
+    "addToPack": "添加到合集",
+    "addedToPack": "已添加到「{{pack}}」",
+    "createPackFirst": "请先创建自定义合集"
+  },
+
+  "customPacks": {
+    "tabs": {
+      "packs": "合集"
+    },
+    "createPack": "创建自定义合集",
+    "importPack": "导入合集",
+    "exportPack": "导出合集",
+    "activate": "开始",
+    "deactivate": "停止",
+    "edit": "编辑",
+    "delete": "删除",
+    "deletePack": "删除合集",
+    "deleteConfirm": "删除「{{name}}」？此操作无法撤销。",
+    "emptyState": "还没有自定义合集。创建一个来构建你自己的预设收藏吧。",
+    "presetCount_one": "{{count}} 个预设",
+    "presetCount_other": "{{count}} 个预设",
+    "back": "返回",
+    "removePreset": "移除",
+    "tagBlocked": "已屏蔽",
+    "tagExcluded": "已排除",
+    "tagMobileSkipped": "手机端跳过",
+    "addPresets": "添加预设",
+    "searchPresets": "搜索要添加的预设...",
+    "allPresetsAdded": "所有预设已添加到此合集",
+    "packName": "合集名称",
+    "packCreated": "合集「{{name}}」已创建",
+    "packDeleted": "合集已删除",
+    "packImported": "合集「{{name}}」已导入，包含 {{count}} 个预设",
+    "notPackFile": "不是 MangoWave 合集文件",
+    "maxPacksReached": "最多只能创建 50 个自定义合集",
+    "packActive": "播放自：{{name}}",
+    "deactivatePack": "停止播放包",
+    "packOverridesFilters": "自定义合集激活时，这些筛选不生效",
+    "favoritesAutoSwitch": "已从收藏模式切换到全部模式"
   }
 }

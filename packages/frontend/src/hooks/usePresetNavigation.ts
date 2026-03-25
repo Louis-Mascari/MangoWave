@@ -28,6 +28,7 @@ export interface UsePresetNavigationReturn {
   blockedPresets: string[];
   favoritePresets: string[];
   enabledPacks: string[];
+  activeCustomPackId: string | null;
 }
 
 export function usePresetNavigation({
@@ -41,6 +42,8 @@ export function usePresetNavigation({
   const transitionTime = useSettingsStore((s) => s.transitionTime);
   const excludedOverrides = useSettingsStore((s) => s.excludedOverrides);
   const enabledPacks = useSettingsStore((s) => s.enabledPacks);
+  const customPacks = useSettingsStore((s) => s.customPacks);
+  const activeCustomPackId = useSettingsStore((s) => s.activeCustomPackId);
   const toggleFavoritePreset = useSettingsStore((s) => s.toggleFavoritePreset);
   const toggleBlockPreset = useSettingsStore((s) => s.toggleBlockPreset);
   const autopilotMode = useSettingsStore((s) => s.autopilot.mode);
@@ -80,6 +83,13 @@ export function usePresetNavigation({
     [enabledPackSet, presetPackMap],
   );
 
+  // Active custom pack's preset set (for pool filtering)
+  const activeCustomPackPresets = useMemo(() => {
+    if (!activeCustomPackId) return null;
+    const pack = customPacks.find((p) => p.id === activeCustomPackId);
+    return pack ? new Set(pack.presets) : null;
+  }, [activeCustomPackId, customPacks]);
+
   // Shared shuffle pick: used by both manual next and autopilot
   const pickNextPreset = useCallback(() => {
     const renderer = rendererRef.current;
@@ -88,7 +98,10 @@ export function usePresetNavigation({
     const allPresets = renderer.presetList;
 
     let pool: string[];
-    if (autopilotMode === 'favorites' && favoritePresets.length > 0) {
+    if (activeCustomPackPresets) {
+      // Custom pack active: pool is pack's presets minus blocked
+      pool = allPresets.filter((p) => activeCustomPackPresets.has(p) && !mergedBlockedSet.has(p));
+    } else if (autopilotMode === 'favorites' && favoritePresets.length > 0) {
       // Favorites mode: pool is favorites only (not blocked), ignores pack filtering
       pool = favoritePresets.filter((p) => !mergedBlockedSet.has(p));
     } else if (enabledPacks.length > 0) {
@@ -121,6 +134,7 @@ export function usePresetNavigation({
   }, [
     rendererRef,
     mergedBlockedSet,
+    activeCustomPackPresets,
     enabledPacks,
     isInEnabledPack,
     presetPackMap,
@@ -195,7 +209,7 @@ export function usePresetNavigation({
   useEffect(() => {
     resetAutopilotRef.current();
     usePresetHistoryStore.getState().resetRound();
-  }, [autopilotMode, enabledPacks, resetAutopilotRef]);
+  }, [autopilotMode, enabledPacks, activeCustomPackId, resetAutopilotRef]);
 
   // If initial preset isn't in an enabled pack, pick one that is.
   // Only runs once — the renderer's init() already filters blocked/quarantined.
@@ -227,5 +241,6 @@ export function usePresetNavigation({
     blockedPresets,
     favoritePresets,
     enabledPacks,
+    activeCustomPackId,
   };
 }

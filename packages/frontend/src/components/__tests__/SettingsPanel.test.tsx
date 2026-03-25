@@ -100,7 +100,7 @@ describe('SettingsPanel', () => {
     expect(screen.getByText('Display & Volume')).toBeInTheDocument();
     expect(screen.getByText('Favorites')).toBeInTheDocument();
     expect(screen.getByText('Blocked Presets')).toBeInTheDocument();
-    expect(screen.getByText('Packs & Exclusions')).toBeInTheDocument();
+    expect(screen.getByText('Packs, Custom Packs & Exclusions')).toBeInTheDocument();
     expect(screen.getByText('Window Sync')).toBeInTheDocument();
   });
 });

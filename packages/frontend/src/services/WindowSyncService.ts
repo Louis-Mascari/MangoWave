@@ -3,6 +3,7 @@ import type {
   EQSettings,
   AudioSettings,
   AutopilotSettings,
+  CustomPack,
 } from '../store/useSettingsStore.ts';
 
 const CHANNEL_NAME = 'mangowave-sync';
@@ -23,6 +24,8 @@ export interface SyncableSettings {
   songInfoDisplay?: 'off' | number;
   volume?: number;
   syncPerformance?: boolean;
+  customPacks?: CustomPack[];
+  activeCustomPackId?: string | null;
 }
 
 interface SyncMessageBase {

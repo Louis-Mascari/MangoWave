@@ -23,6 +23,13 @@ export interface AudioSettings {
   fftSize: number; // 512, 1024, 2048, 4096
 }
 
+export interface CustomPack {
+  id: string; // crypto.randomUUID()
+  name: string; // max 50 chars
+  presets: string[]; // preset names (no duplicates), max 395
+  createdAt: number; // Date.now()
+}
+
 export type AutopilotMode = 'all' | 'favorites';
 
 export interface AutopilotSettings {
@@ -71,6 +78,16 @@ export interface SettingsState {
   enabledPacks: string[];
   setEnabledPacks: (packs: string[]) => void;
   togglePack: (pack: string) => void;
+
+  // Custom packs
+  customPacks: CustomPack[];
+  activeCustomPackId: string | null;
+  createCustomPack: (name: string, presets?: string[]) => string | null;
+  renameCustomPack: (id: string, name: string) => void;
+  deleteCustomPack: (id: string) => void;
+  addPresetToCustomPack: (packId: string, presetName: string) => void;
+  removePresetFromCustomPack: (packId: string, presetName: string) => void;
+  setActiveCustomPackId: (id: string | null) => void;
 
   // Exclusions (quarantined + mobile-blocked preset overrides)
   excludedOverrides: string[];
@@ -148,6 +165,8 @@ const IMPORTABLE_KEYS: (keyof SettingsState)[] = [
   'songInfoDisplay',
   'transitionTime',
   'volume',
+  'customPacks',
+  'activeCustomPackId',
   'windowSyncEnabled',
   'syncPerformance',
 ];
@@ -276,6 +295,63 @@ export const useSettingsStore = create<SettingsState>()(
             : [...state.enabledPacks, pack],
         })),
 
+      // Custom packs
+      customPacks: [],
+      activeCustomPackId: null,
+      createCustomPack: (name, presets) => {
+        let newId: string | null = null;
+        set((state) => {
+          if (state.customPacks.length >= 50) return state;
+          const id = crypto.randomUUID();
+          newId = id;
+          return {
+            customPacks: [
+              ...state.customPacks,
+              {
+                id,
+                name: name.slice(0, 50),
+                presets: presets ?? [],
+                createdAt: Date.now(),
+              },
+            ],
+          };
+        });
+        return newId;
+      },
+      renameCustomPack: (id, name) =>
+        set((state) => ({
+          customPacks: state.customPacks.map((p) =>
+            p.id === id ? { ...p, name: name.slice(0, 50) } : p,
+          ),
+        })),
+      deleteCustomPack: (id) =>
+        set((state) => ({
+          customPacks: state.customPacks.filter((p) => p.id !== id),
+          activeCustomPackId: state.activeCustomPackId === id ? null : state.activeCustomPackId,
+        })),
+      addPresetToCustomPack: (packId, presetName) =>
+        set((state) => ({
+          customPacks: state.customPacks.map((p) =>
+            p.id === packId && !p.presets.includes(presetName)
+              ? { ...p, presets: [...p.presets, presetName] }
+              : p,
+          ),
+        })),
+      removePresetFromCustomPack: (packId, presetName) =>
+        set((state) => ({
+          customPacks: state.customPacks.map((p) =>
+            p.id === packId ? { ...p, presets: p.presets.filter((n) => n !== presetName) } : p,
+          ),
+        })),
+      setActiveCustomPackId: (id) =>
+        set((state) => ({
+          activeCustomPackId: id,
+          autopilot:
+            id !== null && state.autopilot.mode === 'favorites'
+              ? { ...state.autopilot, mode: 'all' }
+              : state.autopilot,
+        })),
+
       // Exclusions (quarantined + mobile-blocked preset overrides)
       excludedOverrides: [],
       addExcludedOverride: (name) =>
@@ -325,6 +401,7 @@ export const useSettingsStore = create<SettingsState>()(
           presetNameDisplay: 5,
           songInfoDisplay: 5,
           autopilot: { ...DEFAULT_AUTOPILOT },
+          activeCustomPackId: null,
         })),
       clearBlocked: () =>
         set((s) => ({
@@ -419,9 +496,14 @@ export const useSettingsStore = create<SettingsState>()(
           state.windowSyncEnabled = state.windowSyncEnabled ?? false;
           state.syncPerformance = state.syncPerformance ?? true;
         }
+        // v7 → v8: Add custom packs
+        if ((version ?? 0) < 8) {
+          state.customPacks = state.customPacks ?? [];
+          state.activeCustomPackId = state.activeCustomPackId ?? null;
+        }
         return state as unknown as SettingsState;
       },
-      version: 7,
+      version: 8,
     },
   ),
 );

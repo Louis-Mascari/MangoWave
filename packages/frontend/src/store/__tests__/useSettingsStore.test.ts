@@ -26,6 +26,9 @@ describe('useSettingsStore', () => {
       // Clear presets
       result.current.blockedPresets.forEach((p) => result.current.unblockPreset(p));
       result.current.favoritePresets.forEach((p) => result.current.toggleFavoritePreset(p));
+      // Clear custom packs
+      result.current.setActiveCustomPackId(null);
+      result.current.customPacks.forEach((p) => result.current.deleteCustomPack(p.id));
     });
   });
 
@@ -459,6 +462,184 @@ describe('useSettingsStore', () => {
       expect(result.current.favoritePresets).toHaveLength(2);
       act(() => result.current.clearFavorites());
       expect(result.current.favoritePresets).toEqual([]);
+    });
+  });
+
+  describe('custom packs', () => {
+    it('starts with empty packs and no active pack', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      expect(result.current.customPacks).toEqual([]);
+      expect(result.current.activeCustomPackId).toBeNull();
+    });
+
+    it('creates a custom pack', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      let id: string | null = null;
+      act(() => {
+        id = result.current.createCustomPack('My Pack');
+      });
+      expect(id).toBeTruthy();
+      expect(result.current.customPacks).toHaveLength(1);
+      expect(result.current.customPacks[0].name).toBe('My Pack');
+      expect(result.current.customPacks[0].presets).toEqual([]);
+      expect(result.current.customPacks[0].id).toBe(id);
+    });
+
+    it('clamps pack name to 50 characters', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => {
+        result.current.createCustomPack('A'.repeat(100));
+      });
+      expect(result.current.customPacks[0].name).toHaveLength(50);
+    });
+
+    it('enforces max 50 packs', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => {
+        for (let i = 0; i < 50; i++) result.current.createCustomPack(`Pack ${i}`);
+      });
+      expect(result.current.customPacks).toHaveLength(50);
+      let id: string | null = null;
+      act(() => {
+        id = result.current.createCustomPack('Pack 51');
+      });
+      expect(id).toBeNull();
+      expect(result.current.customPacks).toHaveLength(50);
+    });
+
+    it('renames a pack', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      let id: string | null = null;
+      act(() => {
+        id = result.current.createCustomPack('Old Name');
+      });
+      act(() => result.current.renameCustomPack(id!, 'New Name'));
+      expect(result.current.customPacks[0].name).toBe('New Name');
+    });
+
+    it('clamps rename to 50 characters', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      let id: string | null = null;
+      act(() => {
+        id = result.current.createCustomPack('Pack');
+      });
+      act(() => result.current.renameCustomPack(id!, 'B'.repeat(100)));
+      expect(result.current.customPacks[0].name).toHaveLength(50);
+    });
+
+    it('deletes a pack', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      let id: string | null = null;
+      act(() => {
+        id = result.current.createCustomPack('To Delete');
+      });
+      act(() => result.current.deleteCustomPack(id!));
+      expect(result.current.customPacks).toHaveLength(0);
+    });
+
+    it('clears activeCustomPackId when active pack is deleted', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      let id: string | null = null;
+      act(() => {
+        id = result.current.createCustomPack('Active Pack');
+      });
+      act(() => result.current.setActiveCustomPackId(id!));
+      expect(result.current.activeCustomPackId).toBe(id);
+      act(() => result.current.deleteCustomPack(id!));
+      expect(result.current.activeCustomPackId).toBeNull();
+    });
+
+    it('does not clear activeCustomPackId when a different pack is deleted', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      let id1: string | null = null;
+      let id2: string | null = null;
+      act(() => {
+        id1 = result.current.createCustomPack('Pack 1');
+        id2 = result.current.createCustomPack('Pack 2');
+      });
+      act(() => result.current.setActiveCustomPackId(id1!));
+      act(() => result.current.deleteCustomPack(id2!));
+      expect(result.current.activeCustomPackId).toBe(id1);
+    });
+
+    it('adds a preset to a pack', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      let id: string | null = null;
+      act(() => {
+        id = result.current.createCustomPack('Pack');
+      });
+      act(() => result.current.addPresetToCustomPack(id!, 'Cool Preset'));
+      expect(result.current.customPacks[0].presets).toEqual(['Cool Preset']);
+    });
+
+    it('does not add duplicate presets', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      let id: string | null = null;
+      act(() => {
+        id = result.current.createCustomPack('Pack');
+      });
+      act(() => {
+        result.current.addPresetToCustomPack(id!, 'Cool Preset');
+        result.current.addPresetToCustomPack(id!, 'Cool Preset');
+      });
+      expect(result.current.customPacks[0].presets).toEqual(['Cool Preset']);
+    });
+
+    it('removes a preset from a pack', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      let id: string | null = null;
+      act(() => {
+        id = result.current.createCustomPack('Pack');
+      });
+      act(() => {
+        result.current.addPresetToCustomPack(id!, 'A');
+        result.current.addPresetToCustomPack(id!, 'B');
+      });
+      act(() => result.current.removePresetFromCustomPack(id!, 'A'));
+      expect(result.current.customPacks[0].presets).toEqual(['B']);
+    });
+
+    it('auto-switches autopilot mode from favorites to all when activating a pack', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setAutopilotMode('favorites'));
+      let id: string | null = null;
+      act(() => {
+        id = result.current.createCustomPack('Pack');
+      });
+      act(() => result.current.setActiveCustomPackId(id!));
+      expect(result.current.autopilot.mode).toBe('all');
+    });
+
+    it('does not switch autopilot mode when deactivating a pack', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setAutopilotMode('favorites'));
+      act(() => result.current.setActiveCustomPackId(null));
+      expect(result.current.autopilot.mode).toBe('favorites');
+    });
+
+    it('does not switch autopilot mode if already in all mode', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setAutopilotMode('all'));
+      let id: string | null = null;
+      act(() => {
+        id = result.current.createCustomPack('Pack');
+      });
+      act(() => result.current.setActiveCustomPackId(id!));
+      expect(result.current.autopilot.mode).toBe('all');
+    });
+  });
+
+  describe('resetPresets clears activeCustomPackId', () => {
+    it('resets activeCustomPackId to null', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      let id: string | null = null;
+      act(() => {
+        id = result.current.createCustomPack('Pack');
+      });
+      act(() => result.current.setActiveCustomPackId(id!));
+      expect(result.current.activeCustomPackId).toBe(id);
+      act(() => result.current.resetPresets());
+      expect(result.current.activeCustomPackId).toBeNull();
     });
   });
 

@@ -154,6 +154,45 @@
     "restoreToPool": "Restaurar al grupo",
     "quarantineBroken": "Roto",
     "quarantineContent": "Contenido",
-    "quarantineMobilePerf": "Rendimiento móvil"
+    "quarantineMobilePerf": "Rendimiento móvil",
+    "addToPack": "Añadir al pack",
+    "addedToPack": "Añadido a \"{{pack}}\"",
+    "createPackFirst": "Crea primero un pack personalizado"
+  },
+
+  "customPacks": {
+    "tabs": {
+      "packs": "packs"
+    },
+    "createPack": "Crear pack personalizado",
+    "importPack": "Importar pack",
+    "exportPack": "Exportar pack",
+    "activate": "Iniciar",
+    "deactivate": "Parar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "deletePack": "Eliminar pack",
+    "deleteConfirm": "¿Eliminar \"{{name}}\"? Esta acción no se puede deshacer.",
+    "emptyState": "Aún no hay packs personalizados. Crea uno para armar tus propias colecciones de presets.",
+    "presetCount_one": "{{count}} preset",
+    "presetCount_other": "{{count}} presets",
+    "back": "Atrás",
+    "removePreset": "Eliminar",
+    "tagBlocked": "bloqueado",
+    "tagExcluded": "excluido",
+    "tagMobileSkipped": "omitido en móvil",
+    "addPresets": "Añadir presets",
+    "searchPresets": "Buscar presets para añadir...",
+    "allPresetsAdded": "Todos los presets ya han sido añadidos a este pack",
+    "packName": "Nombre del pack",
+    "packCreated": "Pack \"{{name}}\" creado",
+    "packDeleted": "Pack eliminado",
+    "packImported": "Pack \"{{name}}\" importado con {{count}} presets",
+    "notPackFile": "No es un archivo de pack de MangoWave",
+    "maxPacksReached": "Se alcanzó el máximo de 50 packs personalizados",
+    "packActive": "Reproduciendo de: {{name}}",
+    "deactivatePack": "Parar pack",
+    "packOverridesFilters": "Estos filtros no aplican mientras un pack personalizado está activo",
+    "favoritesAutoSwitch": "Cambiado de favoritos al modo todo"
   }
 }

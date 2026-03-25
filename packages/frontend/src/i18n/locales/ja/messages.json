@@ -154,6 +154,45 @@
     "restoreToPool": "プールに復元",
     "quarantineBroken": "破損",
     "quarantineContent": "コンテンツ",
-    "quarantineMobilePerf": "モバイルパフォーマンス"
+    "quarantineMobilePerf": "モバイルパフォーマンス",
+    "addToPack": "パックに追加",
+    "addedToPack": "「{{pack}}」に追加しました",
+    "createPackFirst": "まずカスタムパックを作成してください"
+  },
+
+  "customPacks": {
+    "tabs": {
+      "packs": "パック"
+    },
+    "createPack": "カスタムパックを作成",
+    "importPack": "パックをインポート",
+    "exportPack": "パックをエクスポート",
+    "activate": "開始",
+    "deactivate": "停止",
+    "edit": "編集",
+    "delete": "削除",
+    "deletePack": "パックを削除",
+    "deleteConfirm": "「{{name}}」を削除しますか？この操作は元に戻せません。",
+    "emptyState": "カスタムパックはまだありません。作成して独自のプリセットコレクションを構築しましょう。",
+    "presetCount_one": "{{count}}件のプリセット",
+    "presetCount_other": "{{count}}件のプリセット",
+    "back": "戻る",
+    "removePreset": "削除",
+    "tagBlocked": "ブロック",
+    "tagExcluded": "除外",
+    "tagMobileSkipped": "モバイルでスキップ",
+    "addPresets": "プリセットを追加",
+    "searchPresets": "追加するプリセットを検索...",
+    "allPresetsAdded": "すべてのプリセットがこのパックに追加済みです",
+    "packName": "パック名",
+    "packCreated": "パック「{{name}}」を作成しました",
+    "packDeleted": "パックを削除しました",
+    "packImported": "パック「{{name}}」を{{count}}件のプリセットとともにインポートしました",
+    "notPackFile": "MangoWaveのパックファイルではありません",
+    "maxPacksReached": "カスタムパックの上限（50個）に達しました",
+    "packActive": "再生中：{{name}}",
+    "deactivatePack": "パック停止",
+    "packOverridesFilters": "カスタムパックが有効な間、これらのフィルターは適用されません",
+    "favoritesAutoSwitch": "お気に入りモードからすべてモードに切り替えました"
   }
 }

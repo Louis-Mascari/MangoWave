@@ -154,6 +154,47 @@
     "restoreToPool": "Вернуть в пул",
     "quarantineBroken": "Сломанный",
     "quarantineContent": "Контент",
-    "quarantineMobilePerf": "Мобильная произв."
+    "quarantineMobilePerf": "Мобильная произв.",
+    "addToPack": "Добавить в пак",
+    "addedToPack": "Добавлено в «{{pack}}»",
+    "createPackFirst": "Сначала создайте пользовательский пак"
+  },
+
+  "customPacks": {
+    "tabs": {
+      "packs": "паки"
+    },
+    "createPack": "Создать пак",
+    "importPack": "Импортировать пак",
+    "exportPack": "Экспортировать пак",
+    "activate": "Запуск",
+    "deactivate": "Стоп",
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "deletePack": "Удалить пак",
+    "deleteConfirm": "Удалить «{{name}}»? Это действие нельзя отменить.",
+    "emptyState": "Пользовательских паков пока нет. Создайте один, чтобы собрать свою коллекцию пресетов.",
+    "presetCount_one": "{{count}} пресет",
+    "presetCount_few": "{{count}} пресета",
+    "presetCount_many": "{{count}} пресетов",
+    "presetCount_other": "{{count}} пресета",
+    "back": "Назад",
+    "removePreset": "Удалить",
+    "tagBlocked": "заблокирован",
+    "tagExcluded": "исключён",
+    "tagMobileSkipped": "пропуск на мобильном",
+    "addPresets": "Добавить пресеты",
+    "searchPresets": "Поиск пресетов для добавления...",
+    "allPresetsAdded": "Все пресеты уже добавлены в этот пак",
+    "packName": "Название пака",
+    "packCreated": "Пак «{{name}}» создан",
+    "packDeleted": "Пак удалён",
+    "packImported": "Пак «{{name}}» импортирован с {{count}} пресетами",
+    "notPackFile": "Это не файл пака MangoWave",
+    "maxPacksReached": "Достигнут максимум в 50 пользовательских паков",
+    "packActive": "Воспроизведение из: {{name}}",
+    "deactivatePack": "Остановить пак",
+    "packOverridesFilters": "Эти фильтры не применяются, пока активен пользовательский пак",
+    "favoritesAutoSwitch": "Переключено с избранного на режим «Все»"
   }
 }

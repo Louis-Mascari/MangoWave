@@ -4,6 +4,7 @@ import { EQ_BANDS } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
+import { useConfirmStore } from '../store/useConfirmStore.ts';
 import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { Tooltip } from './Tooltip.tsx';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
@@ -677,10 +678,16 @@ function PresetsTab() {
             <button
               onClick={() => {
                 if (clearableCount === 0) return;
-                if (window.confirm(t('presets.clearBlockedConfirm', { count: clearableCount }))) {
-                  clearBlocked();
-                  showToast(tm('toasts.blockedPresetsCleared'));
-                }
+                useConfirmStore.getState().show({
+                  title: t('presets.clearBlocked', { count: clearableCount }),
+                  message: t('presets.clearBlockedConfirm', { count: clearableCount }),
+                  confirmLabel: tc('clear'),
+                  destructive: true,
+                  onConfirm: () => {
+                    clearBlocked();
+                    showToast(tm('toasts.blockedPresetsCleared'));
+                  },
+                });
               }}
               disabled={clearableCount === 0}
               className="cursor-pointer rounded border-none bg-red-500/10 px-3 py-1 text-xs text-red-400 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-40"
@@ -692,12 +699,16 @@ function PresetsTab() {
         <button
           onClick={() => {
             if (favoritePresets.length === 0) return;
-            if (
-              window.confirm(t('presets.clearFavoritesConfirm', { count: favoritePresets.length }))
-            ) {
-              clearFavorites();
-              showToast(tm('toasts.favoritePresetsCleared'));
-            }
+            useConfirmStore.getState().show({
+              title: t('presets.clearFavorites', { count: favoritePresets.length }),
+              message: t('presets.clearFavoritesConfirm', { count: favoritePresets.length }),
+              confirmLabel: tc('clear'),
+              destructive: true,
+              onConfirm: () => {
+                clearFavorites();
+                showToast(tm('toasts.favoritePresetsCleared'));
+              },
+            });
           }}
           disabled={favoritePresets.length === 0}
           className="cursor-pointer rounded border-none bg-red-500/10 px-3 py-1 text-xs text-red-400 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-40"

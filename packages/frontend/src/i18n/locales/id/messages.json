@@ -154,6 +154,45 @@
     "restoreToPool": "Kembalikan ke pool",
     "quarantineBroken": "Rusak",
     "quarantineContent": "Konten",
-    "quarantineMobilePerf": "Performa mobile"
+    "quarantineMobilePerf": "Performa mobile",
+    "addToPack": "Tambah ke paket",
+    "addedToPack": "Ditambahkan ke \"{{pack}}\"",
+    "createPackFirst": "Buat paket kustom terlebih dahulu"
+  },
+
+  "customPacks": {
+    "tabs": {
+      "packs": "paket"
+    },
+    "createPack": "Buat Paket Kustom",
+    "importPack": "Impor Paket",
+    "exportPack": "Ekspor Paket",
+    "activate": "Mulai",
+    "deactivate": "Berhenti",
+    "edit": "Edit",
+    "delete": "Hapus",
+    "deletePack": "Hapus paket",
+    "deleteConfirm": "Hapus \"{{name}}\"? Tindakan ini tidak dapat dibatalkan.",
+    "emptyState": "Belum ada paket kustom. Buat satu untuk membangun koleksi preset milikmu sendiri.",
+    "presetCount_one": "{{count}} preset",
+    "presetCount_other": "{{count}} preset",
+    "back": "Kembali",
+    "removePreset": "Hapus",
+    "tagBlocked": "diblokir",
+    "tagExcluded": "dikecualikan",
+    "tagMobileSkipped": "dilewati di ponsel",
+    "addPresets": "Tambah preset",
+    "searchPresets": "Cari preset untuk ditambahkan...",
+    "allPresetsAdded": "Semua preset sudah ditambahkan ke paket ini",
+    "packName": "Nama paket",
+    "packCreated": "Paket \"{{name}}\" dibuat",
+    "packDeleted": "Paket dihapus",
+    "packImported": "Paket \"{{name}}\" diimpor dengan {{count}} preset",
+    "notPackFile": "Bukan file paket MangoWave",
+    "maxPacksReached": "Maksimum 50 paket kustom telah tercapai",
+    "packActive": "Memutar dari: {{name}}",
+    "deactivatePack": "Hentikan paket",
+    "packOverridesFilters": "Filter ini tidak berlaku selama paket kustom aktif",
+    "favoritesAutoSwitch": "Beralih dari favorit ke mode semua"
   }
 }

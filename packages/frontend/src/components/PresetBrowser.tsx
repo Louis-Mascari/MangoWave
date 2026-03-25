@@ -1,14 +1,22 @@
-import { useCallback, useDeferredValue, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { GroupedVirtuoso, type GroupedVirtuosoHandle } from 'react-virtuoso';
+import { GroupedVirtuoso, Virtuoso, type GroupedVirtuosoHandle } from 'react-virtuoso';
 
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { usePresetHistoryStore } from '../store/usePresetHistoryStore.ts';
 import { usePresetBrowserStore } from '../store/usePresetBrowserStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
+import { useConfirmStore } from '../store/useConfirmStore.ts';
 import { quarantinedSet, mobileBlockedSet } from '../data/excludedPresets.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
+import {
+  buildPackExport,
+  downloadPackExport,
+  parsePackImportFile,
+} from '../utils/settingsPortability.ts';
 import { PACK_ORDER } from '../engine/VisualizerRenderer.ts';
+import type { CustomPack } from '../store/useSettingsStore.ts';
 
 interface PresetBrowserProps {
   presetList: string[];
@@ -41,6 +49,7 @@ function PresetRow({
   onSelect,
   onToggleFavorite,
   onToggleBlock,
+  customPacks,
 }: {
   name: string;
   isCurrent: boolean;
@@ -49,6 +58,7 @@ function PresetRow({
   onSelect: () => void;
   onToggleFavorite: () => void;
   onToggleBlock: () => void;
+  customPacks?: CustomPack[];
 }) {
   const { t } = useTranslation('messages');
 
@@ -106,6 +116,7 @@ function PresetRow({
             <line x1="5" y1="5" x2="15" y2="15" />
           </svg>
         </button>
+        {customPacks && <AddToPackButton presetName={name} customPacks={customPacks} />}
       </div>
     </div>
   );
@@ -185,6 +196,145 @@ function HistoryRow({
   );
 }
 
+function PackNameInput({
+  packId,
+  name,
+  onRename,
+}: {
+  packId: string;
+  name: string;
+  onRename: (id: string, name: string) => void;
+}) {
+  const { t } = useTranslation('messages');
+  const [localName, setLocalName] = useState(name);
+
+  useEffect(() => {
+    setLocalName(name);
+  }, [name]);
+
+  return (
+    <input
+      type="text"
+      value={localName}
+      onChange={(e) => setLocalName(e.target.value)}
+      onBlur={() => {
+        const trimmed = localName.trim();
+        if (trimmed) {
+          onRename(packId, trimmed);
+        } else {
+          setLocalName(name);
+        }
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+      }}
+      maxLength={50}
+      className="min-w-0 flex-1 rounded border-none bg-white/10 px-2 py-0.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+      aria-label={t('customPacks.packName')}
+      data-ph-mask
+    />
+  );
+}
+
+function AddToPackButton({
+  presetName,
+  customPacks,
+}: {
+  presetName: string;
+  customPacks: CustomPack[];
+}) {
+  const { t } = useTranslation('messages');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [dropdownStyle, setDropdownStyle] = useState<Record<string, number>>({});
+  const addPresetToCustomPack = useSettingsStore((s) => s.addPresetToCustomPack);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!showDropdown) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (
+        (!wrapperRef.current || !wrapperRef.current.contains(target)) &&
+        (!menuRef.current || !menuRef.current.contains(target))
+      ) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showDropdown]);
+
+  const handleClick = () => {
+    if (customPacks.length === 0) {
+      useToastStore.getState().show(t('presetBrowser.createPackFirst'));
+      return;
+    }
+    if (customPacks.length === 1) {
+      addPresetToCustomPack(customPacks[0].id, presetName);
+      useToastStore.getState().show(t('presetBrowser.addedToPack', { pack: customPacks[0].name }));
+      return;
+    }
+    if (showDropdown) {
+      setShowDropdown(false);
+      return;
+    }
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      if (spaceBelow < 150) {
+        setDropdownStyle({
+          bottom: window.innerHeight - rect.top + 4,
+          right: window.innerWidth - rect.right,
+        });
+      } else {
+        setDropdownStyle({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
+      }
+    }
+    setShowDropdown(true);
+  };
+
+  return (
+    <div ref={wrapperRef}>
+      <button
+        ref={buttonRef}
+        onClick={handleClick}
+        className="flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent text-sm leading-none text-white/40 hover:bg-white/10 hover:text-green-400"
+        title={t('presetBrowser.addToPack')}
+        aria-label={t('presetBrowser.addToPack')}
+      >
+        +
+      </button>
+      {showDropdown &&
+        createPortal(
+          <div
+            ref={menuRef}
+            className="fixed z-[100] min-w-[140px] rounded bg-black/90 py-1 shadow-lg ring-1 ring-white/20"
+            style={dropdownStyle}
+          >
+            {customPacks.map((pack) => (
+              <button
+                key={pack.id}
+                onClick={() => {
+                  addPresetToCustomPack(pack.id, presetName);
+                  useToastStore
+                    .getState()
+                    .show(t('presetBrowser.addedToPack', { pack: pack.name }));
+                  setShowDropdown(false);
+                }}
+                className="block w-full cursor-pointer border-none bg-transparent px-3 py-1 text-left text-xs text-white/70 hover:bg-white/10 hover:text-white"
+              >
+                <span data-ph-mask>{pack.name}</span>
+              </button>
+            ))}
+          </div>,
+          document.body,
+        )}
+    </div>
+  );
+}
+
 export function PresetBrowser({
   presetList,
   currentPreset,
@@ -205,6 +355,18 @@ export function PresetBrowser({
   const blockPreset = useSettingsStore((s) => s.blockPreset);
   const unblockPreset = useSettingsStore((s) => s.unblockPreset);
   const toggleFavoritePreset = useSettingsStore((s) => s.toggleFavoritePreset);
+  const customPacks = useSettingsStore((s) => s.customPacks);
+  const activeCustomPackId = useSettingsStore((s) => s.activeCustomPackId);
+  const createCustomPack = useSettingsStore((s) => s.createCustomPack);
+  const renameCustomPack = useSettingsStore((s) => s.renameCustomPack);
+  const deleteCustomPack = useSettingsStore((s) => s.deleteCustomPack);
+  const removePresetFromCustomPack = useSettingsStore((s) => s.removePresetFromCustomPack);
+  const setActiveCustomPackId = useSettingsStore((s) => s.setActiveCustomPackId);
+
+  const activePackName = useMemo(
+    () => customPacks.find((p) => p.id === activeCustomPackId)?.name ?? null,
+    [customPacks, activeCustomPackId],
+  );
 
   const presetHistory = usePresetHistoryStore((s) => s.history);
 
@@ -215,6 +377,8 @@ export function PresetBrowser({
   const deferredSearch = useDeferredValue(search);
   const collapsedPacks = usePresetBrowserStore((s) => s.collapsedPacks);
   const toggleCollapsePack = usePresetBrowserStore((s) => s.toggleCollapsePack);
+  const selectedPackId = usePresetBrowserStore((s) => s.selectedPackId);
+  const setSelectedPackId = usePresetBrowserStore((s) => s.setSelectedPackId);
 
   const blockedSet = useMemo(() => new Set(blockedPresets), [blockedPresets]);
   const favoriteSet = useMemo(() => new Set(favoritePresets), [favoritePresets]);
@@ -450,13 +614,21 @@ export function PresetBrowser({
   const renderGroupedAll = () => (
     <>
       {/* Pack filter checkboxes */}
-      <div className="mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+      {activeCustomPackId && (
+        <p className="mb-1 text-[9px] text-orange-400/50">
+          {t('customPacks.packOverridesFilters')}
+        </p>
+      )}
+      <div
+        className={`mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 ${activeCustomPackId ? 'pointer-events-none opacity-40' : ''}`}
+      >
         {allPacks.map((pack) => (
           <label key={pack} className="flex cursor-pointer items-center gap-1 text-[10px]">
             <input
               type="checkbox"
               checked={enabledPackSet.has(pack)}
               onChange={() => togglePack(pack)}
+              disabled={!!activeCustomPackId}
               className="h-3 w-3 accent-orange-500"
             />
             <span className={enabledPackSet.has(pack) ? 'text-white/70' : 'text-white/30'}>
@@ -465,7 +637,9 @@ export function PresetBrowser({
           </label>
         ))}
       </div>
-      <div className="mb-1.5 flex items-center gap-2">
+      <div
+        className={`mb-1.5 flex items-center gap-2 ${activeCustomPackId ? 'pointer-events-none opacity-40' : ''}`}
+      >
         <button
           onClick={handleSelectAll}
           className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
@@ -534,6 +708,7 @@ export function PresetBrowser({
                 onSelect={() => handleSelectPreset(name)}
                 onToggleFavorite={() => handleToggleFavorite(name)}
                 onToggleBlock={() => handleToggleBlock(name)}
+                customPacks={customPacks}
               />
             );
           }}
@@ -547,31 +722,50 @@ export function PresetBrowser({
   );
 
   // Render flat list (search, favorites, blocked)
-  const renderFlatList = () => (
-    <div className="flex flex-col gap-0.5 overflow-y-auto max-md:min-h-0 max-md:flex-1 md:max-h-[280px]">
-      {filteredPresets.map((name) => (
-        <PresetRow
-          key={name}
-          name={name}
-          isCurrent={name === currentPreset}
-          isFavorite={favoriteSet.has(name)}
-          isBlocked={blockedSet.has(name)}
-          onSelect={() => handleSelectPreset(name)}
-          onToggleFavorite={() => handleToggleFavorite(name)}
-          onToggleBlock={() => handleToggleBlock(name)}
-        />
-      ))}
-      {filteredPresets.length === 0 && (
+  // Virtualize large lists (50+) to avoid DOM stutter; small lists render flat
+  const renderFlatList = () => {
+    if (filteredPresets.length === 0) {
+      return (
         <p className="py-2 text-center text-xs text-white/40">
           {t('presetBrowser.noPresetsFound')}
         </p>
-      )}
-    </div>
-  );
+      );
+    }
+
+    const row = (name: string) => (
+      <PresetRow
+        key={name}
+        name={name}
+        isCurrent={name === currentPreset}
+        isFavorite={favoriteSet.has(name)}
+        isBlocked={blockedSet.has(name)}
+        onSelect={() => handleSelectPreset(name)}
+        onToggleFavorite={() => handleToggleFavorite(name)}
+        onToggleBlock={() => handleToggleBlock(name)}
+        customPacks={customPacks}
+      />
+    );
+
+    if (filteredPresets.length < 50) {
+      return (
+        <div className="flex flex-col gap-0.5 overflow-y-auto max-md:min-h-0 max-md:flex-1 md:max-h-[400px]">
+          {filteredPresets.map(row)}
+        </div>
+      );
+    }
+
+    return (
+      <Virtuoso
+        data={filteredPresets}
+        className="max-md:min-h-0 max-md:flex-1 md:max-h-[400px]"
+        itemContent={(_index, name) => row(name)}
+      />
+    );
+  };
 
   // Render history tab
   const renderHistory = () => (
-    <div className="flex flex-col gap-0.5 overflow-y-auto max-md:min-h-0 max-md:flex-1 md:max-h-[280px]">
+    <div className="flex flex-col gap-0.5 overflow-y-auto max-md:min-h-0 max-md:flex-1 md:max-h-[400px]">
       {historyList.map((name, i) => (
         <HistoryRow
           key={`${name}-${i}`}
@@ -591,7 +785,7 @@ export function PresetBrowser({
 
   // Render excluded tab (quarantined + mobile-blocked)
   const renderExcluded = () => (
-    <div className="flex flex-col gap-0.5 overflow-y-auto max-md:min-h-0 max-md:flex-1 md:max-h-[280px]">
+    <div className="flex flex-col gap-0.5 overflow-y-auto max-md:min-h-0 max-md:flex-1 md:max-h-[400px]">
       <p className="mb-1 text-[10px] leading-snug text-white/40">
         {t('presetBrowser.excludedDescription')}
       </p>
@@ -643,45 +837,432 @@ export function PresetBrowser({
     </div>
   );
 
+  // Pack detail search state
+  const [packSearch, setPackSearch] = useState('');
+  const deferredPackSearch = useDeferredValue(packSearch);
+
+  const selectedPack = useMemo(
+    () => customPacks.find((p) => p.id === selectedPackId) ?? null,
+    [customPacks, selectedPackId],
+  );
+
+  // Presets available to add to selected pack (not already in it)
+  const addablePresets = useMemo(() => {
+    if (!selectedPack) return [];
+    const inPack = new Set(selectedPack.presets);
+    const lowerSearch = deferredPackSearch.toLowerCase();
+    return presetList.filter((name) => {
+      if (inPack.has(name)) return false;
+      if (deferredPackSearch && !name.toLowerCase().includes(lowerSearch)) return false;
+      return true;
+    });
+  }, [selectedPack, presetList, deferredPackSearch]);
+
+  const handleCreatePack = useCallback(() => {
+    if (customPacks.length >= 50) {
+      useToastStore.getState().show(t('customPacks.maxPacksReached'));
+      return;
+    }
+    const name = `Pack ${customPacks.length + 1}`;
+    const id = createCustomPack(name);
+    if (id) {
+      useToastStore.getState().show(t('customPacks.packCreated', { name }));
+      setSelectedPackId(id);
+    }
+  }, [customPacks.length, createCustomPack, setSelectedPackId, t]);
+
+  const handleDeletePack = useCallback(
+    (pack: CustomPack) => {
+      useConfirmStore.getState().show({
+        title: t('customPacks.deletePack'),
+        message: t('customPacks.deleteConfirm', { name: pack.name }),
+        confirmLabel: t('customPacks.delete'),
+        destructive: true,
+        onConfirm: () => {
+          deleteCustomPack(pack.id);
+          if (selectedPackId === pack.id) setSelectedPackId(null);
+          useToastStore.getState().show(t('customPacks.packDeleted'));
+        },
+      });
+    },
+    [deleteCustomPack, selectedPackId, setSelectedPackId, t],
+  );
+
+  const handleActivatePack = useCallback(
+    (id: string | null) => {
+      const prevMode = useSettingsStore.getState().autopilot.mode;
+      setActiveCustomPackId(id);
+      if (id !== null && prevMode === 'favorites') {
+        useToastStore.getState().show(t('customPacks.favoritesAutoSwitch'));
+      }
+      // Auto-advance if current preset isn't in the activated pack
+      if (id !== null) {
+        const pack = useSettingsStore.getState().customPacks.find((p) => p.id === id);
+        if (pack && !pack.presets.includes(currentPreset)) {
+          // Delay to let pool recompute after store change
+          setTimeout(() => onNextPreset(), 0);
+        }
+      }
+    },
+    [setActiveCustomPackId, t, currentPreset, onNextPreset],
+  );
+
+  const handleImportPack = useCallback(async () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,application/json';
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      if (customPacks.length >= 50) {
+        useToastStore.getState().show(t('customPacks.maxPacksReached'));
+        return;
+      }
+      const result = await parsePackImportFile(file);
+      if (!result.ok) {
+        useToastStore.getState().show(result.error);
+        return;
+      }
+      const id = createCustomPack(result.name, result.presets);
+      if (id) {
+        useToastStore
+          .getState()
+          .show(t('customPacks.packImported', { name: result.name, count: result.presets.length }));
+        setSelectedPackId(id);
+      }
+    };
+    input.click();
+  }, [customPacks.length, createCustomPack, setSelectedPackId, t]);
+
+  const handleExportPack = useCallback((pack: CustomPack) => {
+    downloadPackExport(buildPackExport(pack));
+  }, []);
+
+  // Render packs tab
+  const renderPacks = () => {
+    if (selectedPack) {
+      // Pack detail view
+      return (
+        <div className="flex min-h-0 flex-1 flex-col gap-2">
+          {/* Header — stays outside scroll so focus ring isn't clipped */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                setSelectedPackId(null);
+                setPackSearch('');
+              }}
+              className="cursor-pointer border-none bg-transparent p-0 text-white/60 hover:text-white"
+              aria-label={t('customPacks.back')}
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                <path
+                  fillRule="evenodd"
+                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+            <PackNameInput
+              packId={selectedPack.id}
+              name={selectedPack.name}
+              onRename={renameCustomPack}
+            />
+            <span className="shrink-0 text-[10px] text-white/40">
+              {t('customPacks.presetCount', { count: selectedPack.presets.length })}
+            </span>
+          </div>
+
+          {/* Pack's presets — scrollable, shares space with add list */}
+          {selectedPack.presets.length > 0 && (
+            <div className="flex min-h-24 flex-1 flex-col gap-0.5 overflow-y-auto max-md:max-h-48">
+              {selectedPack.presets.map((name) => {
+                const isBlocked = blockedSet.has(name);
+                const isExcluded = !isBlocked && quarantinedSet.has(name);
+                const isMobileSkipped = !isBlocked && !isExcluded && mobileBlockedSet.has(name);
+                return (
+                  <div
+                    key={name}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => onSelectPreset(name)}
+                    onKeyDown={(e) => {
+                      if (e.currentTarget !== e.target) return;
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onSelectPreset(name);
+                      }
+                    }}
+                    className={`flex shrink-0 cursor-pointer items-center justify-between rounded px-2 py-1 text-xs ${
+                      name === currentPreset
+                        ? 'bg-orange-500/30 text-white'
+                        : 'text-white/70 hover:bg-white/10'
+                    }`}
+                  >
+                    <span className="flex min-w-0 flex-1 items-center gap-1.5 text-left">
+                      <span className="truncate">{name}</span>
+                      {isBlocked && (
+                        <span className="shrink-0 rounded bg-red-500/20 px-1 py-px text-[8px] text-red-400/80">
+                          {t('customPacks.tagBlocked')}
+                        </span>
+                      )}
+                      {isExcluded && (
+                        <span className="shrink-0 rounded bg-yellow-500/20 px-1 py-px text-[8px] text-yellow-400/80">
+                          {t('customPacks.tagExcluded')}
+                        </span>
+                      )}
+                      {isMobileSkipped && (
+                        <span className="shrink-0 rounded bg-blue-500/20 px-1 py-px text-[8px] text-blue-400/80">
+                          {t('customPacks.tagMobileSkipped')}
+                        </span>
+                      )}
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removePresetFromCustomPack(selectedPack.id, name);
+                        if (name === currentPreset && selectedPack.id === activeCustomPackId) {
+                          onNextPreset();
+                        }
+                      }}
+                      className="flex h-5 w-5 cursor-pointer items-center justify-center rounded border-none bg-transparent text-sm leading-none text-red-400/60 hover:bg-white/10 hover:text-red-400"
+                      aria-label={t('customPacks.removePreset')}
+                    >
+                      −
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Add presets — header + search stay pinned, list scrolls */}
+          <div className="flex min-h-0 flex-[1.5] flex-col border-t border-white/10 pt-2">
+            <p className="mb-1 text-[10px] font-semibold text-white/50">
+              {t('customPacks.addPresets')}
+            </p>
+            <input
+              type="text"
+              placeholder={t('customPacks.searchPresets')}
+              value={packSearch}
+              onChange={(e) => setPackSearch(e.target.value)}
+              className="mb-1 w-full rounded border-none bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
+            />
+            {addablePresets.length === 0 ? (
+              <p className="py-1 text-center text-[10px] text-white/30">
+                {t('customPacks.allPresetsAdded')}
+              </p>
+            ) : (
+              <div className="min-h-0 flex-1 overflow-hidden">
+                <Virtuoso
+                  data={addablePresets}
+                  style={{ height: isMobileDevice ? 'max(200px, calc(100dvh - 420px))' : '100%' }}
+                  itemContent={(_index, name) => (
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => onSelectPreset(name)}
+                      onKeyDown={(e) => {
+                        if (e.currentTarget !== e.target) return;
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          onSelectPreset(name);
+                        }
+                      }}
+                      className={`flex shrink-0 cursor-pointer items-center justify-between rounded px-2 py-0.5 text-xs ${
+                        name === currentPreset
+                          ? 'bg-orange-500/30 text-white'
+                          : 'text-white/60 hover:bg-white/10'
+                      }`}
+                    >
+                      <span className="min-w-0 flex-1 truncate text-left">{name}</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          useSettingsStore.getState().addPresetToCustomPack(selectedPack.id, name);
+                        }}
+                        className="flex h-5 w-5 cursor-pointer items-center justify-center rounded border-none bg-transparent text-sm leading-none text-green-500/60 hover:bg-white/10 hover:text-green-400"
+                        aria-label={`${t('presetBrowser.addToPack')} ${name}`}
+                      >
+                        +
+                      </button>
+                    </div>
+                  )}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // Pack list view
+    return (
+      <div className="flex flex-col gap-2 max-md:min-h-0 max-md:flex-1">
+        <div className="border-t border-white/10" />
+        <div className="flex gap-2">
+          <button
+            onClick={handleCreatePack}
+            className="cursor-pointer rounded border border-white/10 bg-white/10 px-2 py-1 text-[10px] font-medium text-white/60 hover:bg-white/20"
+          >
+            {t('customPacks.createPack')}
+          </button>
+          <button
+            onClick={handleImportPack}
+            className="cursor-pointer rounded border border-white/10 bg-white/10 px-2 py-1 text-[10px] font-medium text-white/60 hover:bg-white/20"
+          >
+            {t('customPacks.importPack')}
+          </button>
+        </div>
+
+        <div className="border-t border-white/10" />
+
+        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
+          {customPacks.length === 0 && (
+            <p className="py-2 text-center text-xs text-white/40">{t('customPacks.emptyState')}</p>
+          )}
+
+          {customPacks.map((pack) => {
+            const isActive = activeCustomPackId === pack.id;
+            return (
+              <div
+                key={pack.id}
+                className={`flex items-center justify-between rounded px-2 py-1.5 ${
+                  isActive ? 'bg-orange-500/15 ring-1 ring-orange-500/30' : 'bg-white/5'
+                }`}
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={`truncate text-xs ${isActive ? 'text-orange-400' : 'text-white/70'}`}
+                      data-ph-mask
+                    >
+                      {pack.name}
+                    </span>
+                    <span className="text-[9px] text-white/30">
+                      {t('customPacks.presetCount', { count: pack.presets.length })}
+                    </span>
+                  </div>
+                </div>
+                {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+                <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                  {(isActive || pack.presets.length > 0) && (
+                    <button
+                      onClick={() => handleActivatePack(isActive ? null : pack.id)}
+                      className={`cursor-pointer rounded border-none px-1.5 py-0.5 text-[9px] ${
+                        isActive
+                          ? 'bg-orange-500/30 text-orange-300 hover:bg-orange-500/40'
+                          : 'bg-white/10 text-white/50 hover:bg-white/20'
+                      }`}
+                    >
+                      {isActive ? t('customPacks.deactivate') : t('customPacks.activate')}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setSelectedPackId(pack.id)}
+                    className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[9px] text-white/50 hover:bg-white/20"
+                  >
+                    {t('customPacks.edit')}
+                  </button>
+                  <button
+                    onClick={() => handleExportPack(pack)}
+                    className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[9px] text-white/50 hover:bg-white/20"
+                    title={t('customPacks.exportPack')}
+                  >
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
+                      <path
+                        fillRule="evenodd"
+                        d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => handleDeletePack(pack)}
+                    className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[9px] text-red-400/60 hover:bg-red-500/20 hover:text-red-400"
+                    title={t('customPacks.deletePack')}
+                  >
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
+                      <path
+                        fillRule="evenodd"
+                        d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="relative flex flex-col gap-3 rounded-lg bg-black/60 p-4 backdrop-blur-sm max-md:min-h-0 max-md:flex-1 md:max-h-96">
+    <div
+      className={`relative flex flex-col gap-3 overflow-hidden rounded-lg bg-black/60 p-4 backdrop-blur-sm max-md:min-h-0 max-md:flex-1 ${selectedPack ? 'md:h-[36rem]' : 'md:max-h-[32rem]'}`}
+    >
       <div className="flex flex-col gap-2">
-        {!isMobileDevice && <h3 className="text-sm font-semibold text-white">{tc('presets')}</h3>}
+        {!isMobileDevice && (
+          <div>
+            <h3 className="text-sm font-semibold text-white">{tc('presets')}</h3>
+            {activePackName && (
+              <div className="mt-1 inline-flex w-fit items-center gap-1.5 rounded bg-orange-500/15 px-2 py-0.5 ring-1 ring-orange-500/30">
+                <p className="min-w-0 truncate text-[10px] text-orange-400" data-ph-mask>
+                  {t('customPacks.packActive', { name: activePackName })}
+                </p>
+                <button
+                  onClick={() => handleActivatePack(null)}
+                  className="shrink-0 cursor-pointer rounded-full border-none bg-red-500/80 px-2 py-0.5 text-[9px] font-semibold text-white hover:bg-red-500"
+                  aria-label={t('customPacks.deactivatePack')}
+                  title={t('customPacks.deactivatePack')}
+                >
+                  {t('customPacks.deactivate')}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
         <div className="flex flex-wrap gap-1.5">
-          {(['all', 'favorites', 'blocked', 'excluded', 'history'] as const).map((f) => (
+          {(['all', 'favorites', 'blocked', 'excluded', 'history', 'packs'] as const).map((f) => (
             <button
               key={f}
-              onClick={() => setFilter(f)}
+              onClick={() => {
+                setFilter(f);
+                if (f !== 'packs') setSelectedPackId(null);
+              }}
               className={`cursor-pointer rounded border-none px-2 py-0.5 text-[10px] capitalize ${
                 filter === f
                   ? 'bg-orange-500 text-white'
                   : 'bg-white/10 text-white/60 hover:bg-white/20'
               }`}
             >
-              {t(`presetBrowser.tabs.${f}`)}
+              {f === 'packs' ? t('customPacks.tabs.packs') : t(`presetBrowser.tabs.${f}`)}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="relative">
-        <input
-          type="text"
-          placeholder={t('presetBrowser.searchPlaceholder')}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded border-none bg-white/10 px-2 py-1 pr-7 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
-        />
-        <button
-          onClick={() => setSearch('')}
-          className={`absolute top-1/2 right-1.5 flex h-4 w-4 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-none bg-white/20 text-[10px] leading-none text-white/60 hover:bg-white/30 hover:text-white ${
-            search ? 'visible' : 'invisible'
-          }`}
-          aria-label={t('presetBrowser.clearSearch')}
-        >
-          ✕
-        </button>
-      </div>
+      {filter !== 'packs' && (
+        <div className="relative">
+          <input
+            type="text"
+            placeholder={t('presetBrowser.searchPlaceholder')}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded border-none bg-white/10 px-2 py-1 pr-7 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
+          />
+          <button
+            onClick={() => setSearch('')}
+            className={`absolute top-1/2 right-1.5 flex h-4 w-4 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-none bg-white/20 text-[10px] leading-none text-white/60 hover:bg-white/30 hover:text-white ${
+              search ? 'visible' : 'invisible'
+            }`}
+            aria-label={t('presetBrowser.clearSearch')}
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       <div
         className="min-h-0 flex-1 flex-col"
@@ -691,6 +1272,7 @@ export function PresetBrowser({
       </div>
       {filter === 'excluded' && renderExcluded()}
       {filter === 'history' && renderHistory()}
+      {filter === 'packs' && <div className="flex min-h-0 flex-1 flex-col">{renderPacks()}</div>}
       {(filter === 'favorites' || filter === 'blocked' || (deferredSearch && filter === 'all')) &&
         renderFlatList()}
     </div>

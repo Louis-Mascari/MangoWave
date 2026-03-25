@@ -154,6 +154,45 @@
     "restoreToPool": "Restore to pool",
     "quarantineBroken": "Broken",
     "quarantineContent": "Content",
-    "quarantineMobilePerf": "Mobile perf"
+    "quarantineMobilePerf": "Mobile perf",
+    "addToPack": "Add to pack",
+    "addedToPack": "Added to \"{{pack}}\"",
+    "createPackFirst": "Create a custom pack first"
+  },
+
+  "customPacks": {
+    "tabs": {
+      "packs": "packs"
+    },
+    "createPack": "Create Custom Pack",
+    "importPack": "Import Pack",
+    "exportPack": "Export Pack",
+    "activate": "Start",
+    "deactivate": "Stop",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deletePack": "Delete pack",
+    "deleteConfirm": "Delete \"{{name}}\"? This cannot be undone.",
+    "emptyState": "No custom packs yet. Create one to build your own preset collections.",
+    "presetCount_one": "{{count}} preset",
+    "presetCount_other": "{{count}} presets",
+    "back": "Back",
+    "removePreset": "Remove",
+    "tagBlocked": "blocked",
+    "tagExcluded": "excluded",
+    "tagMobileSkipped": "skipped on mobile",
+    "addPresets": "Add presets",
+    "searchPresets": "Search presets to add...",
+    "allPresetsAdded": "All presets have been added to this pack",
+    "packName": "Pack name",
+    "packCreated": "Pack \"{{name}}\" created",
+    "packDeleted": "Pack deleted",
+    "packImported": "Pack \"{{name}}\" imported with {{count}} presets",
+    "notPackFile": "Not a MangoWave pack file",
+    "maxPacksReached": "Maximum of 50 custom packs reached",
+    "packActive": "Playing from: {{name}}",
+    "deactivatePack": "Stop pack",
+    "packOverridesFilters": "These filters don't apply while a custom pack is active",
+    "favoritesAutoSwitch": "Switched from favorites to all mode"
   }
 }

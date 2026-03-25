@@ -20,6 +20,8 @@ function getSettingsSnapshot(): CloudSettings {
     presetNameDisplay,
     songInfoDisplay,
     volume,
+    customPacks,
+    activeCustomPackId,
   } = useSettingsStore.getState();
   return {
     performance: { ...performance },
@@ -34,6 +36,8 @@ function getSettingsSnapshot(): CloudSettings {
     presetNameDisplay,
     songInfoDisplay,
     volume,
+    customPacks: customPacks.map((p) => ({ ...p, presets: [...p.presets] })),
+    activeCustomPackId,
   };
 }
 
@@ -53,6 +57,12 @@ function applyCloudSettings(cloud: CloudSettings): void {
     ...(cloud.presetNameDisplay !== undefined && { presetNameDisplay: cloud.presetNameDisplay }),
     ...(cloud.songInfoDisplay !== undefined && { songInfoDisplay: cloud.songInfoDisplay }),
     ...(cloud.volume !== undefined && { volume: cloud.volume }),
+    ...(cloud.customPacks && {
+      customPacks: cloud.customPacks.map((p) => ({ ...p, presets: [...p.presets] })),
+    }),
+    ...(cloud.activeCustomPackId !== undefined && {
+      activeCustomPackId: cloud.activeCustomPackId,
+    }),
   });
 }
 

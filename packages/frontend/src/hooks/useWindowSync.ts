@@ -23,6 +23,8 @@ function getSettingsSnapshot(): SyncableSettings {
     songInfoDisplay,
     volume,
     syncPerformance,
+    customPacks,
+    activeCustomPackId,
   } = useSettingsStore.getState();
   return {
     ...(syncPerformance && { performance: { ...performance } }),
@@ -38,6 +40,8 @@ function getSettingsSnapshot(): SyncableSettings {
     songInfoDisplay,
     volume,
     syncPerformance,
+    customPacks: customPacks.map((p) => ({ ...p, presets: [...p.presets] })),
+    activeCustomPackId,
   };
 }
 
@@ -71,6 +75,12 @@ function applyInboundSettings(settings: SyncableSettings): void {
     }),
     ...(settings.songInfoDisplay !== undefined && { songInfoDisplay: settings.songInfoDisplay }),
     ...(settings.volume !== undefined && { volume: settings.volume }),
+    ...(settings.customPacks && {
+      customPacks: settings.customPacks.map((p) => ({ ...p, presets: [...p.presets] })),
+    }),
+    ...(settings.activeCustomPackId !== undefined && {
+      activeCustomPackId: settings.activeCustomPackId,
+    }),
   });
 }
 

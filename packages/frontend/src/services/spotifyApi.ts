@@ -275,6 +275,8 @@ export interface CloudSettings {
   presetNameDisplay: 'off' | 'always' | number;
   songInfoDisplay: 'off' | number;
   volume: number;
+  customPacks?: { id: string; name: string; presets: string[]; createdAt: number }[];
+  activeCustomPackId?: string | null;
 }
 
 export async function saveSettings(sessionId: string, settings: CloudSettings): Promise<void> {

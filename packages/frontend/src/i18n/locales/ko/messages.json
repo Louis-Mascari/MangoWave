@@ -154,6 +154,45 @@
     "restoreToPool": "풀에 복원",
     "quarantineBroken": "오류",
     "quarantineContent": "콘텐츠",
-    "quarantineMobilePerf": "모바일 성능"
+    "quarantineMobilePerf": "모바일 성능",
+    "addToPack": "팩에 추가",
+    "addedToPack": "\"{{pack}}\"에 추가됨",
+    "createPackFirst": "먼저 커스텀 팩을 만드세요"
+  },
+
+  "customPacks": {
+    "tabs": {
+      "packs": "팩"
+    },
+    "createPack": "커스텀 팩 만들기",
+    "importPack": "팩 가져오기",
+    "exportPack": "팩 내보내기",
+    "activate": "시작",
+    "deactivate": "중지",
+    "edit": "편집",
+    "delete": "삭제",
+    "deletePack": "팩 삭제",
+    "deleteConfirm": "\"{{name}}\"을(를) 삭제할까요? 이 작업은 되돌릴 수 없습니다.",
+    "emptyState": "아직 커스텀 팩이 없습니다. 나만의 프리셋 컬렉션을 만들어 보세요.",
+    "presetCount_one": "프리셋 {{count}}개",
+    "presetCount_other": "프리셋 {{count}}개",
+    "back": "뒤로",
+    "removePreset": "제거",
+    "tagBlocked": "차단됨",
+    "tagExcluded": "제외됨",
+    "tagMobileSkipped": "모바일에서 건너뜀",
+    "addPresets": "프리셋 추가",
+    "searchPresets": "추가할 프리셋 검색...",
+    "allPresetsAdded": "모든 프리셋이 이 팩에 추가되었습니다",
+    "packName": "팩 이름",
+    "packCreated": "팩 \"{{name}}\" 생성됨",
+    "packDeleted": "팩이 삭제됨",
+    "packImported": "팩 \"{{name}}\"을(를) {{count}}개의 프리셋과 함께 가져왔습니다",
+    "notPackFile": "MangoWave 팩 파일이 아닙니다",
+    "maxPacksReached": "커스텀 팩은 최대 50개까지 만들 수 있습니다",
+    "packActive": "재생 중: {{name}}",
+    "deactivatePack": "팩 중지",
+    "packOverridesFilters": "커스텀 팩이 활성화된 동안에는 이 필터가 적용되지 않습니다",
+    "favoritesAutoSwitch": "즐겨찾기 모드에서 전체 모드로 전환됨"
   }
 }

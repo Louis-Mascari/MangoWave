@@ -74,7 +74,7 @@ export function Tooltip({ text }: { text: string }) {
     <button
       ref={triggerRef}
       type="button"
-      className="ml-1 inline-flex cursor-help border-none bg-transparent p-0"
+      className="ml-1 inline-flex cursor-help border-none bg-transparent p-0 max-sm:p-2 max-sm:-m-2"
       aria-describedby={id}
       onClick={show}
       onKeyDown={handleKeyDown}
@@ -99,7 +99,7 @@ export function Tooltip({ text }: { text: string }) {
           <span
             id={id}
             role="tooltip"
-            className="pointer-events-none fixed z-50 w-48 rounded bg-gray-900 px-2 py-1 text-center text-xs leading-snug text-white/80 shadow-lg"
+            className="pointer-events-none fixed z-[70] w-48 rounded border border-orange-400/50 bg-gray-900 px-2 py-1 text-center text-xs leading-snug text-white/80 shadow-lg"
             style={{
               top: position.top,
               left: position.left,

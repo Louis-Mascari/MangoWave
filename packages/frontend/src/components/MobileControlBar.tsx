@@ -324,7 +324,7 @@ export function MobileControlBar({
                 onClick={item.action}
                 disabled={item.disabled}
                 aria-label={item.label}
-                className={`flex h-11 w-11 items-center justify-center rounded-full border-none text-sm shadow-lg ${
+                className={`flex h-11 w-11 items-center justify-center rounded-full border-none text-sm shadow-[0_0_10px_rgba(0,0,0,0.7)] backdrop-blur-md ${
                   item.disabled
                     ? 'cursor-not-allowed bg-white/5 text-white/20'
                     : item.active
@@ -335,14 +335,14 @@ export function MobileControlBar({
                               ? 'bg-red-500/30 text-red-400'
                               : 'bg-orange-500 text-white'
                         }`
-                      : 'cursor-pointer bg-white/15 text-white/80 backdrop-blur-sm'
+                      : 'cursor-pointer bg-white/15 text-white/80'
                 }`}
               >
                 {item.icon}
               </button>
               <span
-                className={`mt-0.5 max-w-16 truncate text-center text-[10px] leading-tight ${
-                  item.disabled ? 'text-white/20' : 'text-white/70'
+                className={`mt-0.5 max-w-16 truncate text-center text-[10px] leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] ${
+                  item.disabled ? 'text-white/20' : 'text-white/80'
                 }`}
               >
                 {item.label}

@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AudioEngine, EQ_BANDS } from '../AudioEngine.ts';
 
+vi.mock('../../utils/browserInfo', () => ({
+  browserInfo: { browser: 'Chrome', os: 'Windows', isChromium: true },
+}));
+
+import { browserInfo } from '../../utils/browserInfo';
+
 // Mock Web Audio API nodes
 function createMockAudioContext() {
   const mockGain = {
@@ -59,6 +65,7 @@ describe('AudioEngine', () => {
 
   beforeEach(() => {
     engine = new AudioEngine();
+    (browserInfo as { os: string }).os = 'Windows';
   });
 
   it('starts with no active context', () => {
@@ -73,7 +80,7 @@ describe('AudioEngine', () => {
   });
 
   describe('captureAudio', () => {
-    it('calls getDisplayMedia and stops video tracks', async () => {
+    function setupGetDisplayMedia() {
       const mockVideoTrack = { stop: vi.fn(), kind: 'video' };
       const mockAudioTrack = { stop: vi.fn(), kind: 'audio' };
       const mockStream = {
@@ -90,15 +97,57 @@ describe('AudioEngine', () => {
         configurable: true,
       });
 
+      return { mockVideoTrack, mockAudioTrack, mockStream };
+    }
+
+    it('calls getDisplayMedia and stops video tracks', async () => {
+      const { mockVideoTrack, mockAudioTrack, mockStream } = setupGetDisplayMedia();
+
       const stream = await engine.captureAudio();
 
       expect(navigator.mediaDevices.getDisplayMedia).toHaveBeenCalledWith({
         audio: true,
-        video: true,
+        video: { displaySurface: 'monitor' },
+        selfBrowserSurface: 'exclude',
+        surfaceSwitching: 'include',
+        systemAudio: 'include',
       });
       expect(mockVideoTrack.stop).toHaveBeenCalled();
       expect(mockAudioTrack.stop).not.toHaveBeenCalled();
       expect(stream).toBe(mockStream);
+    });
+
+    it('pre-selects monitor surface on ChromeOS', async () => {
+      (browserInfo as { os: string }).os = 'ChromeOS';
+      setupGetDisplayMedia();
+
+      await engine.captureAudio();
+
+      expect(navigator.mediaDevices.getDisplayMedia).toHaveBeenCalledWith(
+        expect.objectContaining({ video: { displaySurface: 'monitor' } }),
+      );
+    });
+
+    it('pre-selects browser surface on macOS', async () => {
+      (browserInfo as { os: string }).os = 'macOS';
+      setupGetDisplayMedia();
+
+      await engine.captureAudio();
+
+      expect(navigator.mediaDevices.getDisplayMedia).toHaveBeenCalledWith(
+        expect.objectContaining({ video: { displaySurface: 'browser' } }),
+      );
+    });
+
+    it('pre-selects browser surface on Linux', async () => {
+      (browserInfo as { os: string }).os = 'Linux';
+      setupGetDisplayMedia();
+
+      await engine.captureAudio();
+
+      expect(navigator.mediaDevices.getDisplayMedia).toHaveBeenCalledWith(
+        expect.objectContaining({ video: { displaySurface: 'browser' } }),
+      );
     });
   });
 

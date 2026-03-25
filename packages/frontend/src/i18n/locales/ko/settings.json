@@ -5,6 +5,7 @@
     "presets": "프리셋",
     "shortcuts": "단축키",
     "data": "데이터",
+    "sync": "동기화",
     "spotify": "Spotify"
   },
 
@@ -80,7 +81,8 @@
     "categoryDisplay": "디스플레이 & 볼륨",
     "categoryFavorites": "즐겨찾기",
     "categoryBlocked": "차단된 프리셋",
-    "categoryPacks": "팩 & 제외 항목"
+    "categoryPacks": "팩 & 제외 항목",
+    "categorySync": "창 동기화"
   },
 
   "spotifyTab": {
@@ -108,6 +110,19 @@
     "nextTrack": "다음 트랙",
     "closePanel": "패널 / 오버레이 닫기",
     "toggleShortcuts": "단축키 오버레이 전환"
+  },
+
+  "sync": {
+    "title": "다중 창 동기화",
+    "description": "같은 기기의 여러 브라우저 창에서 프리셋과 설정을 동기화합니다. 여러 모니터에서 시각화하려면 여러 창에서 MangoWave를 여세요. 시스템 오디오 또는 마이크에 최적화되어 있습니다 — 각 창이 동일한 소스를 캡처합니다. 로컬 파일 재생은 창별로 독립적입니다.",
+    "enabled": "창 동기화",
+    "unavailable": "이 브라우저에서는 다중 창 동기화가 지원되지 않습니다.",
+    "noPeers": "연결된 피어 없음",
+    "peerCount_one": "{{count}}개의 다른 창이 연결됨",
+    "peerCount_other": "{{count}}개의 다른 창이 연결됨",
+    "autoSyncNote": "프리셋, EQ, 오토파일럿, 즐겨찾기 및 기타 모든 설정이 창 간에 자동으로 동기화됩니다. 하나의 창에서 변경하면 나머지도 업데이트됩니다.",
+    "syncPerformance": "렌더링 설정 동기화",
+    "syncPerformanceHint": "프레임 레이트, 해상도, 메시, 텍스처 품질 및 안티앨리어싱. 모니터마다 다른 성능 설정이 필요한 경우 체크 해제하세요."
   },
 
   "language": {

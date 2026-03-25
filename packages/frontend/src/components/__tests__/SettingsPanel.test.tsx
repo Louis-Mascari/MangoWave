@@ -87,19 +87,20 @@ describe('SettingsPanel', () => {
     expect(screen.getByText('Import Settings')).toBeInTheDocument();
   });
 
-  it('shows all 8 export category checkboxes on Data tab', async () => {
+  it('shows all 9 export category checkboxes on Data tab', async () => {
     const user = userEvent.setup();
     render(<SettingsPanel />);
 
     await user.click(screen.getByRole('button', { name: 'Data' }));
 
     const checkboxes = screen.getAllByRole('checkbox');
-    expect(checkboxes).toHaveLength(8);
+    expect(checkboxes).toHaveLength(9);
     expect(screen.getByText('Audio Smoothing & FFT')).toBeInTheDocument();
     expect(screen.getByText('EQ')).toBeInTheDocument();
     expect(screen.getByText('Display & Volume')).toBeInTheDocument();
     expect(screen.getByText('Favorites')).toBeInTheDocument();
     expect(screen.getByText('Blocked Presets')).toBeInTheDocument();
     expect(screen.getByText('Packs & Exclusions')).toBeInTheDocument();
+    expect(screen.getByText('Window Sync')).toBeInTheDocument();
   });
 });

@@ -35,6 +35,7 @@
 - **Mobile-optimized UI** with radial FAB menu, full-screen modal panels, and automatic filtering of 27 GPU-heavy presets on mobile devices
 - **Optional Spotify integration** — Now Playing metadata for all authorized users; seek, shuffle, and repeat controls for Premium users. Cloud-synced settings. Owner-mode only due to Spotify's dev mode policy (1 Client ID per developer, max 5 authorized users, Premium required to register the app). Self-hosters can set up their own Spotify developer app via the included PKCE code
 - **Visual quality controls** — mesh resolution, texture quality, FXAA anti-aliasing, plus FPS cap, resolution scaling, FFT size, smoothing
+- **Multi-window sync** — sync presets and settings across browser windows on the same device via BroadcastChannel. Any window can make changes; automatic leader election drives autopilot from one window
 - **Settings export/import** — transfer settings between browsers or devices via JSON file
 - **First-time onboarding** — guided tips overlay for new visitors (separate desktop and mobile variants)
 - **9-language i18n** — English, Spanish, Chinese, Hindi, Japanese, Korean, Russian, Indonesian, Brazilian Portuguese. Browser language auto-detected with manual override on the start screen. Non-English translations are AI-generated — if you spot an error, please [open an issue](https://github.com/Louis-Mascari/MangoWave/issues/new/choose)

@@ -54,6 +54,11 @@ export const EXPORT_CATEGORIES: ExportCategory[] = [
     labelKey: 'data.categoryPacks',
     fields: ['enabledPacks', 'excludedOverrides'],
   },
+  {
+    key: 'sync',
+    labelKey: 'data.categorySync',
+    fields: ['windowSyncEnabled', 'syncPerformance'],
+  },
 ];
 
 interface ExportMeta {
@@ -251,6 +256,8 @@ const SANITIZERS: Record<string, (val: unknown) => unknown> = {
   },
   transitionTime: (v) => clamp(v, 0, 10, 2.0),
   volume: (v) => clamp(v, 0, 1, 0.5),
+  windowSyncEnabled: (v) => (typeof v === 'boolean' ? v : false),
+  syncPerformance: (v) => (typeof v === 'boolean' ? v : true),
 };
 
 export interface ImportResult {

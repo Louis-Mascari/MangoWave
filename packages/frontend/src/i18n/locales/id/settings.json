@@ -5,6 +5,7 @@
     "presets": "Preset",
     "shortcuts": "Pintasan",
     "data": "Data",
+    "sync": "Sinkronisasi",
     "spotify": "Spotify"
   },
 
@@ -80,7 +81,8 @@
     "categoryDisplay": "Tampilan & Volume",
     "categoryFavorites": "Favorit",
     "categoryBlocked": "Preset Diblokir",
-    "categoryPacks": "Paket & Pengecualian"
+    "categoryPacks": "Paket & Pengecualian",
+    "categorySync": "Sinkronisasi Jendela"
   },
 
   "spotifyTab": {
@@ -108,6 +110,19 @@
     "nextTrack": "Lagu berikutnya",
     "closePanel": "Tutup panel / overlay",
     "toggleShortcuts": "Alihkan overlay pintasan"
+  },
+
+  "sync": {
+    "title": "Sinkronisasi Multi-Jendela",
+    "description": "Sinkronkan preset dan pengaturan di beberapa jendela browser pada perangkat yang sama. Buka MangoWave di beberapa jendela untuk visualisasi di beberapa monitor. Paling cocok dengan audio sistem atau mikrofon — setiap jendela menangkap sumber yang sama. Pemutaran file lokal bersifat per-jendela.",
+    "enabled": "Sinkronisasi Jendela",
+    "unavailable": "Sinkronisasi multi-jendela tidak didukung di browser ini.",
+    "noPeers": "Tidak ada peer yang terhubung",
+    "peerCount_one": "{{count}} jendela lain terhubung",
+    "peerCount_other": "{{count}} jendela lain terhubung",
+    "autoSyncNote": "Preset, EQ, autopilot, favorit, dan semua pengaturan lainnya otomatis tersinkronisasi antar jendela. Ubah sesuatu di satu jendela dan yang lain akan terupdate.",
+    "syncPerformance": "Sinkronkan pengaturan rendering",
+    "syncPerformanceHint": "Frame rate, resolusi, mesh, kualitas tekstur, dan anti-aliasing. Hapus centang jika monitor Anda memerlukan pengaturan performa yang berbeda."
   },
 
   "language": {

@@ -5,6 +5,7 @@
     "presets": "Presets",
     "shortcuts": "Shortcuts",
     "data": "Data",
+    "sync": "Sync",
     "spotify": "Spotify"
   },
 
@@ -80,7 +81,8 @@
     "categoryDisplay": "Display & Volume",
     "categoryFavorites": "Favorites",
     "categoryBlocked": "Blocked Presets",
-    "categoryPacks": "Packs & Exclusions"
+    "categoryPacks": "Packs & Exclusions",
+    "categorySync": "Window Sync"
   },
 
   "spotifyTab": {
@@ -108,6 +110,19 @@
     "nextTrack": "Next track",
     "closePanel": "Close panel / overlay",
     "toggleShortcuts": "Toggle shortcut overlay"
+  },
+
+  "sync": {
+    "title": "Multi-Window Sync",
+    "description": "Sync presets and settings across multiple browser windows on the same device. Open MangoWave in multiple windows to visualize on multiple monitors. Works best with system audio or microphone — each window captures the same source. Local file playback is per-window.",
+    "enabled": "Window Sync",
+    "unavailable": "Multi-window sync is not supported in this browser.",
+    "noPeers": "No peers connected",
+    "peerCount_one": "{{count}} other window connected",
+    "peerCount_other": "{{count}} other windows connected",
+    "autoSyncNote": "Presets, EQ, autopilot, favorites, and all other settings automatically sync across windows. Change something on one and the others will update.",
+    "syncPerformance": "Sync rendering settings",
+    "syncPerformanceHint": "Frame rate, resolution, mesh, texture quality, and anti-aliasing. Uncheck if your monitors need different performance settings."
   },
 
   "language": {

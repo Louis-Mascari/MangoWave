@@ -11,6 +11,7 @@ import { useSpotifyAuth } from './hooks/useSpotifyAuth.ts';
 import { useSettingsSync } from './hooks/useSettingsSync.ts';
 import { useNowPlaying } from './hooks/useNowPlaying.ts';
 import { useAutopilot } from './hooks/useAutopilot.ts';
+import { useWindowSync } from './hooks/useWindowSync.ts';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.ts';
 import { useHideCursor } from './hooks/useHideCursor.ts';
 import { useFullscreen } from './hooks/useFullscreen.ts';
@@ -101,12 +102,16 @@ function MainApp() {
   // Only poll Spotify when the visualizer is running — no need on the start screen
   useNowPlaying(isSpotifyConnected && isActive);
   const rendererRef = useRef<VisualizerRenderer | null>(null);
+  const [currentPreset, setCurrentPreset] = useState('');
+  const { isLeader, broadcastPreset, isRemotePresetRef } = useWindowSync(
+    rendererRef,
+    currentPreset,
+  );
   const autopilot = useSettingsStore((s) => s.autopilot);
   const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
   const presetNameDisplay = useSettingsStore((s) => s.presetNameDisplay);
   const songInfoDisplay = useSettingsStore((s) => s.songInfoDisplay);
   const setSongInfoDisplay = useSettingsStore((s) => s.setSongInfoDisplay);
-  const [currentPreset, setCurrentPreset] = useState('');
   const [presetList, setPresetList] = useState<string[]>([]);
   const [presetPackMap, setPresetPackMap] = useState<Map<string, string>>(new Map());
   const [activePanel, setActivePanel] = useState<PanelView>('none');
@@ -158,10 +163,18 @@ function MainApp() {
     setActivePanel('none');
   }, [capture, local]);
 
-  const handlePresetChange = useCallback((name: string) => {
-    setCurrentPreset(name);
-    usePresetHistoryStore.getState().push(name);
-  }, []);
+  const handlePresetChange = useCallback(
+    (name: string) => {
+      setCurrentPreset(name);
+      usePresetHistoryStore.getState().push(name);
+      if (isRemotePresetRef.current) {
+        isRemotePresetRef.current = false;
+      } else {
+        broadcastPreset(name, useSettingsStore.getState().transitionTime);
+      }
+    },
+    [broadcastPreset, isRemotePresetRef],
+  );
 
   const handlePresetsLoaded = useCallback((presets: string[], packMap: Map<string, string>) => {
     setPresetList(presets);
@@ -276,7 +289,10 @@ function MainApp() {
     pickNextPreset();
   }, [pickNextPreset]);
 
-  const { reset: resetAutopilot } = useAutopilot(handleAutopilotAdvance);
+  const windowSyncEnabled = useSettingsStore((s) => s.windowSyncEnabled);
+  const { reset: resetAutopilot } = useAutopilot(handleAutopilotAdvance, {
+    suppress: windowSyncEnabled && !isLeader,
+  });
   useEffect(() => {
     resetAutopilotRef.current = resetAutopilot;
   });

@@ -5,6 +5,7 @@
     "presets": "プリセット",
     "shortcuts": "ショートカット",
     "data": "データ",
+    "sync": "同期",
     "spotify": "Spotify"
   },
 
@@ -80,7 +81,8 @@
     "categoryDisplay": "表示と音量",
     "categoryFavorites": "お気に入り",
     "categoryBlocked": "ブロック済みプリセット",
-    "categoryPacks": "パックと除外設定"
+    "categoryPacks": "パックと除外設定",
+    "categorySync": "ウィンドウ同期"
   },
 
   "spotifyTab": {
@@ -108,6 +110,19 @@
     "nextTrack": "次のトラック",
     "closePanel": "パネル / オーバーレイを閉じる",
     "toggleShortcuts": "ショートカットオーバーレイ切り替え"
+  },
+
+  "sync": {
+    "title": "マルチウィンドウ同期",
+    "description": "同じデバイス上の複数のブラウザウィンドウ間でプリセットと設定を同期します。複数のモニターで表示するには、複数のウィンドウでMangoWaveを開いてください。システムオーディオまたはマイクに最適です — 各ウィンドウが同じソースをキャプチャします。ローカルファイルの再生はウィンドウごとに独立です。",
+    "enabled": "ウィンドウ同期",
+    "unavailable": "このブラウザではマルチウィンドウ同期はサポートされていません。",
+    "noPeers": "接続されたピアなし",
+    "peerCount_one": "{{count}} 個の他のウィンドウが接続中",
+    "peerCount_other": "{{count}} 個の他のウィンドウが接続中",
+    "autoSyncNote": "プリセット、EQ、オートパイロット、お気に入り、その他すべての設定はウィンドウ間で自動的に同期されます。1つのウィンドウで変更すると、他のウィンドウも更新されます。",
+    "syncPerformance": "レンダリング設定を同期",
+    "syncPerformanceHint": "フレームレート、解像度、メッシュ、テクスチャ品質、アンチエイリアシング。モニターごとに異なるパフォーマンス設定が必要な場合はオフにしてください。"
   },
 
   "language": {

@@ -1,13 +1,21 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 
+interface UseAutopilotOptions {
+  suppress?: boolean;
+}
+
 interface UseAutopilotResult {
   reset: () => void;
 }
 
-export function useAutopilot(onAdvance: () => void): UseAutopilotResult {
+export function useAutopilot(
+  onAdvance: () => void,
+  options?: UseAutopilotOptions,
+): UseAutopilotResult {
   const enabled = useSettingsStore((s) => s.autopilot.enabled);
   const interval = useSettingsStore((s) => s.autopilot.interval);
+  const suppress = options?.suppress ?? false;
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const onAdvanceRef = useRef(onAdvance);
 
@@ -24,12 +32,12 @@ export function useAutopilot(onAdvance: () => void): UseAutopilotResult {
 
   const startTimer = useCallback(() => {
     clearTimer();
-    if (enabled) {
+    if (enabled && !suppress) {
       intervalRef.current = setInterval(() => {
         onAdvanceRef.current();
       }, interval * 1000);
     }
-  }, [enabled, interval, clearTimer]);
+  }, [enabled, suppress, interval, clearTimer]);
 
   useEffect(() => {
     startTimer();

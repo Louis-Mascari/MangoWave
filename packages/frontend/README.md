@@ -40,7 +40,7 @@ Key details:
 
 ```
 src/
-├── components/    # UI: ControlBar, SettingsPanel (tabbed: EQ/Rendering/Presets/Shortcuts/Data/Spotify),
+├── components/    # UI: ControlBar, SettingsPanel (tabbed: EQ/Rendering/Presets/Shortcuts/Data/Sync/Spotify),
 │                  #     PresetBrowser, MediaPlaylist, NowPlaying, PlaybackPanel, StartScreen,
 │                  #     OnboardingOverlay (first-time tips), etc.
 ├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (butterchurn),
@@ -52,11 +52,14 @@ src/
 ├── hooks/         # useAudioCapture, useLocalPlayback, useAutopilot, useKeyboardShortcuts,
 │                  # useIdleTimer, useHideCursor, useFullscreen, useFocusTrap, useSpotifyAuth,
 │                  # useNowPlaying, useSpotifyPlayback, useSpotifyProgress (smooth seek via rAF),
-│                  # usePlaybackAdapter, usePresetNavigation, useUnlockCheck, useSettingsSync
+│                  # usePlaybackAdapter, usePresetNavigation, useUnlockCheck, useSettingsSync,
+│                  # useWindowSync (multi-window sync bridge)
 ├── lib/           # PostHog & Sentry init (no-op when env vars absent)
-├── services/      # Spotify Web API client (owner-mode OAuth + PKCE utilities for self-hosters)
+├── services/      # Spotify Web API client (owner-mode OAuth + PKCE utilities for self-hosters),
+│                  # WindowSyncService (BroadcastChannel-based multi-window sync)
 ├── store/         # Zustand stores: useSettingsStore, useSpotifyStore, useMediaPlayerStore,
-│                  #     usePresetHistoryStore, usePresetBrowserStore, useToastStore
+│                  #     usePresetHistoryStore, usePresetBrowserStore, useToastStore,
+│                  #     useWindowSyncStatusStore
 ├── utils/         # Shared utilities (isMobileDevice, browserInfo, settingsPortability, audioFileValidation)
 ├── types/         # butterchurn.d.ts, music-metadata.d.ts (type declarations for untyped packages)
 └── test/          # Vitest global setup
@@ -84,6 +87,8 @@ Zustand with `localStorage` persistence. Key sections:
 | `volume`            | number (0.0–1.0)                                                               | 0.5                         |
 | `enabledPacks`      | string[]                                                                       | all packs                   |
 | `excludedOverrides` | string[]                                                                       | []                          |
+| `windowSyncEnabled` | boolean                                                                        | false                       |
+| `syncPerformance`   | boolean                                                                        | true                        |
 | `onboardingShown`   | boolean                                                                        | false                       |
 
 Blocked and favorited presets are mutually exclusive.

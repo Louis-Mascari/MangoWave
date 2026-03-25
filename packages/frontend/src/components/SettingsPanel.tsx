@@ -7,6 +7,7 @@ import { useToastStore } from '../store/useToastStore.ts';
 import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { Tooltip } from './Tooltip.tsx';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
+import { useWindowSyncStatusStore } from '../store/useWindowSyncStatusStore.ts';
 import { quarantinedSet, mobileBlockedSet } from '../data/excludedPresets.ts';
 import { SHORTCUTS } from '../constants/shortcuts.ts';
 import {
@@ -18,7 +19,7 @@ import {
 } from '../utils/settingsPortability.ts';
 import type { ParseResult } from '../utils/settingsPortability.ts';
 
-type Tab = 'equalizer' | 'rendering' | 'presets' | 'shortcuts' | 'data' | 'spotify';
+type Tab = 'equalizer' | 'rendering' | 'presets' | 'shortcuts' | 'data' | 'sync' | 'spotify';
 
 /** Compute CSS custom property for range-fill slider track */
 function rangeFillStyle(value: number, min: number, max: number) {
@@ -69,6 +70,7 @@ export function SettingsPanel() {
   const sessionId = useSpotifyStore((s) => s.sessionId);
   const authMode = getAuthMode();
   const showSpotifyTab = !isMobileDevice && (authMode !== 'locked' || !!(accessToken || sessionId));
+  const showSyncTab = !isMobileDevice;
 
   return (
     <div className="flex flex-col gap-3 rounded-lg bg-black/60 p-4 backdrop-blur-sm">
@@ -88,6 +90,11 @@ export function SettingsPanel() {
         <TabButton active={activeTab === 'data'} onClick={() => setActiveTab('data')}>
           {t('tabs.data')}
         </TabButton>
+        {showSyncTab && (
+          <TabButton active={activeTab === 'sync'} onClick={() => setActiveTab('sync')}>
+            {t('tabs.sync')}
+          </TabButton>
+        )}
         {showSpotifyTab && (
           <TabButton active={activeTab === 'spotify'} onClick={() => setActiveTab('spotify')}>
             {t('tabs.spotify')}
@@ -100,6 +107,7 @@ export function SettingsPanel() {
       {activeTab === 'presets' && <PresetsTab />}
       {activeTab === 'shortcuts' && <ShortcutsTab />}
       {activeTab === 'data' && <DataTab />}
+      {activeTab === 'sync' && showSyncTab && <SyncTab />}
       {activeTab === 'spotify' && showSpotifyTab && <SpotifyTab />}
 
       <div className="mt-2 border-t border-white/10 pt-2">
@@ -967,6 +975,71 @@ function SpotifyTab() {
             <p className="text-[10px] text-white/30">{t('spotifyTab.devInfo')}</p>
           </div>
         </div>
+      )}
+    </>
+  );
+}
+
+function SyncTab() {
+  const { t } = useTranslation('settings');
+  const { t: tc } = useTranslation('common');
+  const windowSyncEnabled = useSettingsStore((s) => s.windowSyncEnabled);
+  const setWindowSyncEnabled = useSettingsStore((s) => s.setWindowSyncEnabled);
+  const syncPerformance = useSettingsStore((s) => s.syncPerformance);
+  const setSyncPerformance = useSettingsStore((s) => s.setSyncPerformance);
+  const { peerCount, isSyncAvailable } = useWindowSyncStatusStore();
+
+  return (
+    <>
+      <h3 className="text-sm font-semibold text-white">{t('sync.title')}</h3>
+      <p className="text-xs text-white/50">{t('sync.description')}</p>
+
+      {!isSyncAvailable ? (
+        <p className="text-xs text-white/40">{t('sync.unavailable')}</p>
+      ) : (
+        <>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-white/60">{t('sync.enabled')}</span>
+            <button
+              onClick={() => setWindowSyncEnabled(!windowSyncEnabled)}
+              className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
+                windowSyncEnabled
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-white/10 text-white/70 hover:bg-white/20'
+              }`}
+            >
+              {windowSyncEnabled ? tc('on') : tc('off')}
+            </button>
+          </div>
+
+          {windowSyncEnabled && (
+            <>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`inline-block h-2 w-2 rounded-full ${
+                    peerCount > 0 ? 'bg-green-400' : 'bg-white/30'
+                  }`}
+                />
+                <span className="text-xs text-white/60">
+                  {peerCount > 0 ? t('sync.peerCount', { count: peerCount }) : t('sync.noPeers')}
+                </span>
+              </div>
+
+              <p className="text-xs text-white/40">{t('sync.autoSyncNote')}</p>
+
+              <label className="flex items-center gap-1.5 text-xs text-white/70">
+                <input
+                  type="checkbox"
+                  checked={syncPerformance}
+                  onChange={(e) => setSyncPerformance(e.target.checked)}
+                  className="accent-orange-500"
+                />
+                {t('sync.syncPerformance')}
+                <Tooltip text={t('sync.syncPerformanceHint')} />
+              </label>
+            </>
+          )}
+        </>
       )}
     </>
   );

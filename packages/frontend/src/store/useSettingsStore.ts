@@ -91,6 +91,12 @@ export interface SettingsState {
   onboardingShown: boolean;
   setOnboardingShown: (shown: boolean) => void;
 
+  // Window sync
+  windowSyncEnabled: boolean;
+  setWindowSyncEnabled: (enabled: boolean) => void;
+  syncPerformance: boolean;
+  setSyncPerformance: (enabled: boolean) => void;
+
   // Volume (persisted for local file playback)
   volume: number; // 0.0 to 1.0
   setVolume: (volume: number) => void;
@@ -142,6 +148,8 @@ const IMPORTABLE_KEYS: (keyof SettingsState)[] = [
   'songInfoDisplay',
   'transitionTime',
   'volume',
+  'windowSyncEnabled',
+  'syncPerformance',
 ];
 
 export const useSettingsStore = create<SettingsState>()(
@@ -295,6 +303,12 @@ export const useSettingsStore = create<SettingsState>()(
       transitionTime: 2.0,
       setTransitionTime: (seconds) => set({ transitionTime: seconds }),
 
+      // Window sync
+      windowSyncEnabled: false,
+      setWindowSyncEnabled: (enabled) => set({ windowSyncEnabled: enabled }),
+      syncPerformance: true,
+      setSyncPerformance: (enabled) => set({ syncPerformance: enabled }),
+
       // Volume
       volume: 0.5,
       setVolume: (volume) => set({ volume }),
@@ -400,9 +414,14 @@ export const useSettingsStore = create<SettingsState>()(
           }
           delete state.showQuarantined;
         }
+        // v6 → v7: Add windowSyncEnabled, syncPerformance
+        if ((version ?? 0) < 7) {
+          state.windowSyncEnabled = state.windowSyncEnabled ?? false;
+          state.syncPerformance = state.syncPerformance ?? true;
+        }
         return state as unknown as SettingsState;
       },
-      version: 6,
+      version: 7,
     },
   ),
 );

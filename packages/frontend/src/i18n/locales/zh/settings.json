@@ -5,6 +5,7 @@
     "presets": "预设",
     "shortcuts": "快捷键",
     "data": "数据",
+    "sync": "同步",
     "spotify": "Spotify"
   },
 
@@ -80,7 +81,8 @@
     "categoryDisplay": "显示与音量",
     "categoryFavorites": "收藏",
     "categoryBlocked": "已屏蔽预设",
-    "categoryPacks": "预设包与排除项"
+    "categoryPacks": "预设包与排除项",
+    "categorySync": "窗口同步"
   },
 
   "spotifyTab": {
@@ -108,6 +110,19 @@
     "nextTrack": "下一首",
     "closePanel": "关闭面板 / 覆盖层",
     "toggleShortcuts": "切换快捷键面板"
+  },
+
+  "sync": {
+    "title": "多窗口同步",
+    "description": "在同一设备上的多个浏览器窗口之间同步预设和设置。在多个窗口中打开 MangoWave，可在多个显示器上进行可视化。最适合系统音频或麦克风——每个窗口捕获相同的音源。本地文件播放为各窗口独立。",
+    "enabled": "窗口同步",
+    "unavailable": "此浏览器不支持多窗口同步。",
+    "noPeers": "无已连接的窗口",
+    "peerCount_one": "已连接 {{count}} 个其他窗口",
+    "peerCount_other": "已连接 {{count}} 个其他窗口",
+    "autoSyncNote": "预设、均衡器、自动驾驶、收藏夹及所有其他设置会自动在窗口之间同步。在一个窗口中更改，其他窗口会自动更新。",
+    "syncPerformance": "同步渲染设置",
+    "syncPerformanceHint": "帧率、分辨率、网格、纹理质量和抗锯齿。如果您的显示器需要不同的性能设置，请取消勾选。"
   },
 
   "language": {

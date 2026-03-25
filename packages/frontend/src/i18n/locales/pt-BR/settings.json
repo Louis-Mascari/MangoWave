@@ -5,6 +5,7 @@
     "presets": "Presets",
     "shortcuts": "Atalhos",
     "data": "Dados",
+    "sync": "Sincronizar",
     "spotify": "Spotify"
   },
 
@@ -80,7 +81,8 @@
     "categoryDisplay": "Exibição e Volume",
     "categoryFavorites": "Favoritos",
     "categoryBlocked": "Presets Bloqueados",
-    "categoryPacks": "Pacotes e Exclusões"
+    "categoryPacks": "Pacotes e Exclusões",
+    "categorySync": "Sincronização de Janelas"
   },
 
   "spotifyTab": {
@@ -108,6 +110,19 @@
     "nextTrack": "Próxima faixa",
     "closePanel": "Fechar painel / sobreposição",
     "toggleShortcuts": "Alternar sobreposição de atalhos"
+  },
+
+  "sync": {
+    "title": "Sincronização Multi-Janela",
+    "description": "Sincronize presets e configurações entre múltiplas janelas do navegador no mesmo dispositivo. Abra o MangoWave em múltiplas janelas para visualizar em múltiplos monitores. Funciona melhor com áudio do sistema ou microfone — cada janela captura a mesma fonte. A reprodução de arquivos locais é por janela.",
+    "enabled": "Sincronização de Janelas",
+    "unavailable": "A sincronização multi-janela não é suportada neste navegador.",
+    "noPeers": "Nenhum par conectado",
+    "peerCount_one": "{{count}} outra janela conectada",
+    "peerCount_other": "{{count}} outras janelas conectadas",
+    "autoSyncNote": "Presets, EQ, autopilot, favoritos e todas as outras configurações sincronizam automaticamente entre janelas. Mude algo em uma e as outras serão atualizadas.",
+    "syncPerformance": "Sincronizar configurações de renderização",
+    "syncPerformanceHint": "Taxa de quadros, resolução, malha, qualidade de textura e anti-aliasing. Desmarque se seus monitores precisam de configurações de desempenho diferentes."
   },
 
   "language": {

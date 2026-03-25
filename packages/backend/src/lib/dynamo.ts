@@ -107,6 +107,13 @@ export interface AutopilotSettings {
   favoriteWeight: number;
 }
 
+export interface CustomPack {
+  id: string;
+  name: string;
+  presets: string[];
+  createdAt: number;
+}
+
 export interface UserSettings {
   performance: PerformanceSettings;
   eqSettings: {
@@ -123,6 +130,8 @@ export interface UserSettings {
   presetNameDisplay: 'off' | 'always' | number;
   songInfoDisplay: 'off' | number;
   volume: number;
+  customPacks: CustomPack[];
+  activeCustomPackId: string | null;
 }
 
 export async function storeUserSettings(
@@ -168,5 +177,7 @@ export async function getUserSettings(spotifyUserId: string): Promise<UserSettin
     presetNameDisplay: result.Item.presetNameDisplay as 'off' | 'always' | number,
     songInfoDisplay: result.Item.songInfoDisplay as 'off' | number,
     volume: result.Item.volume as number,
+    customPacks: (result.Item.customPacks as CustomPack[]) ?? [],
+    activeCustomPackId: (result.Item.activeCustomPackId as string | null) ?? null,
   };
 }

@@ -73,6 +73,8 @@ Authenticated users can sync all visualizer settings to the cloud via `settings-
 - **presetNameDisplay** — "off", "always", or duration in seconds (1–10)
 - **songInfoDisplay** — "off" or duration in seconds (1–10)
 - **volume** — local file playback volume (0–1)
+- **customPacks** — user-created preset collections (up to 50 packs, each with id, name, presets list, createdAt)
+- **activeCustomPackId** — currently active custom pack ID, or null
 
 Settings are keyed to the user's Spotify ID (resolved from their session). Spotify credentials are never included in settings sync.
 

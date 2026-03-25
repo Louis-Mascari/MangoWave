@@ -55,6 +55,8 @@ const mockSettings = {
   presetNameDisplay: 5,
   songInfoDisplay: 5,
   volume: 0.5,
+  customPacks: [],
+  activeCustomPackId: null,
 };
 
 describe('settings-save handler', () => {
@@ -250,6 +252,8 @@ describe('settings-save handler', () => {
       'presetNameDisplay',
       'songInfoDisplay',
       'volume',
+      'customPacks',
+      'activeCustomPackId',
     ]);
   });
 

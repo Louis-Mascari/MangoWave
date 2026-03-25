@@ -1,4 +1,4 @@
-import type { UserSettings } from './dynamo';
+import type { CustomPack, UserSettings } from './dynamo';
 
 const MAX_BODY_SIZE = 1024 * 1024; // 1 MB
 const MAX_TRANSITION_TIME = 30;
@@ -8,6 +8,9 @@ const BAND_COUNT = 10;
 const MAX_PRESET_LIST_LENGTH = 500;
 const MAX_PRESET_NAME_LENGTH = 200;
 const MAX_PACK_LIST_LENGTH = 100;
+const MAX_CUSTOM_PACKS = 50;
+const MAX_CUSTOM_PACK_NAME_LENGTH = 50;
+const MAX_CUSTOM_PACK_ID_LENGTH = 36;
 const VALID_FFT_SIZES = [512, 1024, 2048, 4096];
 
 interface ValidationResult {
@@ -198,6 +201,64 @@ function validateSongInfoDisplay(
   return { value: clamp(raw as number, 1, 10) };
 }
 
+function validateCustomPacks(
+  raw: unknown,
+): { value: CustomPack[]; error?: undefined } | ValidationError {
+  if (raw === undefined || raw === null) {
+    return { value: [] };
+  }
+  if (!Array.isArray(raw)) {
+    return { valid: false, error: 'customPacks must be an array' };
+  }
+
+  const packs = raw.slice(0, MAX_CUSTOM_PACKS);
+  const validated: CustomPack[] = [];
+
+  for (let i = 0; i < packs.length; i++) {
+    const packErr = requireObject(packs[i], `customPacks[${i}]`);
+    if (packErr) return packErr;
+
+    const pack = packs[i] as Record<string, unknown>;
+
+    if (typeof pack.id !== 'string') {
+      return { valid: false, error: `customPacks[${i}].id must be a string` };
+    }
+    if (pack.id.length > MAX_CUSTOM_PACK_ID_LENGTH) {
+      return {
+        valid: false,
+        error: `customPacks[${i}].id exceeds maximum length of ${MAX_CUSTOM_PACK_ID_LENGTH}`,
+      };
+    }
+
+    if (typeof pack.name !== 'string') {
+      return { valid: false, error: `customPacks[${i}].name must be a string` };
+    }
+    if (pack.name.length > MAX_CUSTOM_PACK_NAME_LENGTH) {
+      return {
+        valid: false,
+        error: `customPacks[${i}].name exceeds maximum length of ${MAX_CUSTOM_PACK_NAME_LENGTH}`,
+      };
+    }
+
+    const presets = validatePresetList(pack.presets, `customPacks[${i}].presets`);
+    if (presets.error) {
+      return { valid: false, error: presets.error };
+    }
+
+    const createdAtErr = requireFiniteNumber(pack.createdAt, `customPacks[${i}].createdAt`);
+    if (createdAtErr) return createdAtErr;
+
+    validated.push({
+      id: pack.id,
+      name: pack.name,
+      presets: presets.values,
+      createdAt: pack.createdAt as number,
+    });
+  }
+
+  return { value: validated };
+}
+
 export function validateSettings(input: unknown): ValidationResult | ValidationError {
   if (typeof input !== 'object' || input === null || Array.isArray(input)) {
     return { valid: false, error: 'Settings must be an object' };
@@ -283,6 +344,25 @@ export function validateSettings(input: unknown): ValidationResult | ValidationE
   if (volumeErr) return volumeErr;
   const volume = clamp(raw.volume as number, 0, 1);
 
+  // customPacks (optional, backward compat)
+  const customPacksResult = validateCustomPacks(raw.customPacks);
+  if ('valid' in customPacksResult) return customPacksResult;
+
+  // activeCustomPackId (optional, backward compat)
+  let activeCustomPackId: string | null = null;
+  if (raw.activeCustomPackId !== undefined && raw.activeCustomPackId !== null) {
+    if (typeof raw.activeCustomPackId !== 'string') {
+      return { valid: false, error: 'activeCustomPackId must be a string or null' };
+    }
+    if (raw.activeCustomPackId.length > MAX_CUSTOM_PACK_ID_LENGTH) {
+      return {
+        valid: false,
+        error: `activeCustomPackId exceeds maximum length of ${MAX_CUSTOM_PACK_ID_LENGTH}`,
+      };
+    }
+    activeCustomPackId = raw.activeCustomPackId;
+  }
+
   // Strip unexpected keys — only return known fields
   return {
     valid: true,
@@ -299,6 +379,8 @@ export function validateSettings(input: unknown): ValidationResult | ValidationE
       presetNameDisplay: presetNameResult.value,
       songInfoDisplay: songInfoResult.value,
       volume,
+      customPacks: customPacksResult.value,
+      activeCustomPackId,
     },
   };
 }

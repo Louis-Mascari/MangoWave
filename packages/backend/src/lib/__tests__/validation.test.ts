@@ -21,6 +21,10 @@ const validSettings = {
   presetNameDisplay: 5,
   songInfoDisplay: 5,
   volume: 0.5,
+  customPacks: [
+    { id: 'pack-1', name: 'My Pack', presets: ['preset-a', 'preset-b'], createdAt: 1700000000000 },
+  ],
+  activeCustomPackId: 'pack-1',
 };
 
 describe('checkBodySize', () => {
@@ -266,6 +270,106 @@ describe('validateSettings', () => {
     expect(result.valid).toBe(false);
     if (!result.valid) {
       expect(result.error).toContain('enabledPacks must be an array');
+    }
+  });
+
+  // customPacks
+  it('accepts valid custom packs', () => {
+    const result = validateSettings(validSettings);
+    expect(result.valid).toBe(true);
+    if (result.valid) {
+      expect(result.settings.customPacks).toEqual(validSettings.customPacks);
+      expect(result.settings.activeCustomPackId).toBe('pack-1');
+    }
+  });
+
+  it('defaults missing customPacks to [] and activeCustomPackId to null', () => {
+    const { customPacks: _, activeCustomPackId: __, ...withoutPacks } = validSettings;
+    const result = validateSettings(withoutPacks);
+    expect(result.valid).toBe(true);
+    if (result.valid) {
+      expect(result.settings.customPacks).toEqual([]);
+      expect(result.settings.activeCustomPackId).toBeNull();
+    }
+  });
+
+  it('rejects non-array customPacks', () => {
+    const result = validateSettings({ ...validSettings, customPacks: 'wrong' });
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.error).toContain('customPacks must be an array');
+    }
+  });
+
+  it('rejects pack with invalid fields', () => {
+    // non-string id
+    expect(
+      validateSettings({
+        ...validSettings,
+        customPacks: [{ id: 123, name: 'x', presets: [], createdAt: 1 }],
+      }).valid,
+    ).toBe(false);
+
+    // name too long
+    const result = validateSettings({
+      ...validSettings,
+      customPacks: [{ id: 'a', name: 'x'.repeat(51), presets: [], createdAt: 1 }],
+    });
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.error).toContain('exceeds maximum length');
+    }
+
+    // non-array presets
+    expect(
+      validateSettings({
+        ...validSettings,
+        customPacks: [{ id: 'a', name: 'x', presets: 'wrong', createdAt: 1 }],
+      }).valid,
+    ).toBe(false);
+
+    // non-number createdAt
+    expect(
+      validateSettings({
+        ...validSettings,
+        customPacks: [{ id: 'a', name: 'x', presets: [], createdAt: 'nope' }],
+      }).valid,
+    ).toBe(false);
+  });
+
+  it('truncates customPacks to 50 max', () => {
+    const packs = Array.from({ length: 60 }, (_, i) => ({
+      id: `pack-${i}`,
+      name: `Pack ${i}`,
+      presets: [],
+      createdAt: 1700000000000,
+    }));
+    const result = validateSettings({ ...validSettings, customPacks: packs });
+    expect(result.valid).toBe(true);
+    if (result.valid) {
+      expect(result.settings.customPacks).toHaveLength(50);
+    }
+  });
+
+  it('validates activeCustomPackId as string or null', () => {
+    const withNull = validateSettings({ ...validSettings, activeCustomPackId: null });
+    expect(withNull.valid).toBe(true);
+    if (withNull.valid) {
+      expect(withNull.settings.activeCustomPackId).toBeNull();
+    }
+
+    const withString = validateSettings({ ...validSettings, activeCustomPackId: 'some-id' });
+    expect(withString.valid).toBe(true);
+    if (withString.valid) {
+      expect(withString.settings.activeCustomPackId).toBe('some-id');
+    }
+  });
+
+  it('rejects non-string activeCustomPackId', () => {
+    const result = validateSettings({ ...validSettings, activeCustomPackId: 123 });
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.error).toContain('activeCustomPackId must be a string or null');
     }
   });
 });

@@ -1,5 +1,18 @@
 @import 'tailwindcss';
 
+@theme {
+  --animate-fade-in: fade-in 200ms ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @property --glow-angle {
   syntax: '<angle>';
   initial-value: 0deg;

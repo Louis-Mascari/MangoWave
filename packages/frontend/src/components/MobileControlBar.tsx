@@ -99,16 +99,6 @@ export function MobileControlBar({
     popHistory();
   }, [popHistory, onMenuOpenChange]);
 
-  const openModal = useCallback(
-    (panel: PanelView) => {
-      setModalPanel(panel);
-      onTogglePanel(panel);
-      onMenuOpenChange?.(true);
-      pushHistory();
-    },
-    [onTogglePanel, pushHistory, onMenuOpenChange],
-  );
-
   const closeModal = useCallback(() => {
     const wasOpen = modalPanel !== 'none';
     setModalPanel('none');
@@ -167,15 +157,17 @@ export function MobileControlBar({
   // Transition from radial menu directly to a modal without dropping mobileMenuOpen.
   // closeMenu() sets mobileMenuOpen(false), which would flash the PlaybackPanel
   // before openModal() sets it back to true. Instead, close the menu visually
-  // but keep mobileMenuOpen true, then open the modal.
+  // but keep mobileMenuOpen true, then swap to the modal panel.
+  // Reuses the menu's existing history entry (no pop/push) to avoid an async
+  // popstate from history.back() racing with the modal open.
   const menuToModal = useCallback(
     (panel: PanelView) => {
       setMenuOpen(false);
-      popHistory();
-      // Don't call onMenuOpenChange(false) — keep it true through the transition
-      setTimeout(() => openModal(panel), 50);
+      setModalPanel(panel);
+      onTogglePanel(panel);
+      onMenuOpenChange?.(true);
     },
-    [popHistory, openModal],
+    [onTogglePanel, onMenuOpenChange],
   );
 
   // Radial items clockwise from 12 o'clock:
@@ -369,7 +361,7 @@ export function MobileControlBar({
 
       {/* Modal panels */}
       {modalPanel !== 'none' && (
-        <div className="fixed inset-0 z-[60] flex items-stretch justify-center bg-black/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] flex animate-fade-in items-stretch justify-center bg-black/50 backdrop-blur-sm">
           <div
             ref={modalRef}
             role="dialog"
@@ -382,8 +374,8 @@ export function MobileControlBar({
             }
             className="relative mx-2 my-2 flex max-h-full w-full flex-col overflow-hidden rounded-lg bg-gray-900/95 landscape:my-1"
           >
-            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 landscape:py-1.5">
-              <div>
+            <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-3 landscape:py-1.5">
+              <div className="min-w-0">
                 <h3 className="text-sm font-semibold text-white">
                   {activePanel === 'settings' && tc('settings')}
                   {activePanel === 'presets' && tc('presets')}

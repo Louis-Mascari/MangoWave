@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { Tooltip } from '../Tooltip.tsx';
 
 describe('Tooltip', () => {
@@ -8,8 +9,16 @@ describe('Tooltip', () => {
     expect(container.querySelector('svg')).toBeInTheDocument();
   });
 
-  it('renders tooltip text in the DOM', () => {
+  it('shows tooltip text on hover', async () => {
+    const user = userEvent.setup();
     render(<Tooltip text="Lower values are snappier" />);
+
+    expect(screen.queryByText('Lower values are snappier')).not.toBeInTheDocument();
+
+    await user.hover(screen.getByRole('button'));
     expect(screen.getByText('Lower values are snappier')).toBeInTheDocument();
+
+    await user.unhover(screen.getByRole('button'));
+    expect(screen.queryByText('Lower values are snappier')).not.toBeInTheDocument();
   });
 });

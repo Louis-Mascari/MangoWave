@@ -1,24 +1,85 @@
-import { useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+
+interface TooltipPosition {
+  top: number;
+  left: number;
+  flipped: boolean;
+}
 
 export function Tooltip({ text }: { text: string }) {
   const id = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const [alignRight, setAlignRight] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [position, setPosition] = useState<TooltipPosition>({ top: 0, left: 0, flipped: false });
 
-  const handlePosition = () => {
+  const updatePosition = useCallback(() => {
     if (!triggerRef.current) return;
     const rect = triggerRef.current.getBoundingClientRect();
-    setAlignRight(rect.right + 96 > window.innerWidth);
-  };
+    const tooltipWidth = 192; // w-48 = 12rem = 192px
+    const margin = 4;
+
+    let left = rect.left + rect.width / 2 - tooltipWidth / 2;
+    left = Math.max(margin, Math.min(left, window.innerWidth - tooltipWidth - margin));
+
+    let top = rect.top - margin;
+    let flipped = false;
+
+    // If tooltip would go above viewport, show below instead
+    if (top < 40) {
+      top = rect.bottom + margin;
+      flipped = true;
+    }
+
+    setPosition({ top, left, flipped });
+  }, []);
+
+  const show = useCallback(() => {
+    updatePosition();
+    setVisible(true);
+  }, [updatePosition]);
+
+  const handlePointerEnter = useCallback(
+    (e: React.PointerEvent) => {
+      if (e.pointerType === 'mouse') show();
+    },
+    [show],
+  );
+
+  const handlePointerLeave = useCallback((e: React.PointerEvent) => {
+    if (e.pointerType === 'mouse') setVisible(false);
+  }, []);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') setVisible(false);
+  }, []);
+
+  // Dismiss on outside tap/click or scroll
+  useEffect(() => {
+    if (!visible) return;
+    const dismiss = (e: PointerEvent) => {
+      if (triggerRef.current?.contains(e.target as Node)) return;
+      setVisible(false);
+    };
+    const hide = () => setVisible(false);
+    document.addEventListener('pointerdown', dismiss);
+    document.addEventListener('scroll', hide, true);
+    return () => {
+      document.removeEventListener('pointerdown', dismiss);
+      document.removeEventListener('scroll', hide, true);
+    };
+  }, [visible]);
 
   return (
     <button
       ref={triggerRef}
       type="button"
-      className="group relative ml-1 inline-flex cursor-help border-none bg-transparent p-0"
+      className="ml-1 inline-flex cursor-help border-none bg-transparent p-0"
       aria-describedby={id}
-      onMouseEnter={handlePosition}
-      onFocus={handlePosition}
+      onClick={show}
+      onKeyDown={handleKeyDown}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -33,15 +94,22 @@ export function Tooltip({ text }: { text: string }) {
           clipRule="evenodd"
         />
       </svg>
-      <span
-        id={id}
-        role="tooltip"
-        className={`pointer-events-none absolute bottom-full z-50 mb-1 hidden w-48 rounded bg-gray-900 px-2 py-1 text-center text-[10px] leading-tight text-white/80 shadow-lg group-hover:block group-focus:block ${
-          alignRight ? 'right-0' : 'left-1/2 -translate-x-1/2'
-        }`}
-      >
-        {text}
-      </span>
+      {visible &&
+        createPortal(
+          <span
+            id={id}
+            role="tooltip"
+            className="pointer-events-none fixed z-50 w-48 rounded bg-gray-900 px-2 py-1 text-center text-xs leading-snug text-white/80 shadow-lg"
+            style={{
+              top: position.top,
+              left: position.left,
+              transform: position.flipped ? undefined : 'translateY(-100%)',
+            }}
+          >
+            {text}
+          </span>,
+          document.body,
+        )}
     </button>
   );
 }

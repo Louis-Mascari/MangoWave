@@ -728,8 +728,12 @@ function DataTab() {
   const sessionId = useSpotifyStore((s) => s.sessionId);
   const isSpotifyConnected = !!(accessToken || sessionId);
 
+  const categories = isMobileDevice
+    ? EXPORT_CATEGORIES.filter((c) => c.key !== 'sync')
+    : EXPORT_CATEGORIES;
+
   const [exportSelected, setExportSelected] = useState<Set<string>>(
-    () => new Set(EXPORT_CATEGORIES.map((c) => c.key)),
+    () => new Set(categories.map((c) => c.key)),
   );
   const [importResult, setImportResult] = useState<(ParseResult & { ok: true }) | null>(null);
   const [importSelected, setImportSelected] = useState<Set<string>>(new Set());
@@ -803,7 +807,7 @@ function DataTab() {
       <div className="mt-1 flex flex-col gap-2">
         <label className="text-xs font-semibold text-white/80">{t('data.export')}</label>
         <div className="grid grid-cols-2 gap-1.5">
-          {EXPORT_CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <label key={cat.key} className="flex items-center gap-1.5 text-xs text-white/70">
               <input
                 type="checkbox"
@@ -817,7 +821,7 @@ function DataTab() {
         </div>
         <div className="flex gap-3 text-[10px]">
           <button
-            onClick={() => setExportSelected(new Set(EXPORT_CATEGORIES.map((c) => c.key)))}
+            onClick={() => setExportSelected(new Set(categories.map((c) => c.key)))}
             className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
           >
             {tc('selectAll')}
@@ -852,8 +856,9 @@ function DataTab() {
           <div className="flex flex-col gap-2">
             <p className="text-xs text-white/60">{t('data.importDescription')}</p>
             <div className="grid grid-cols-2 gap-1.5">
-              {EXPORT_CATEGORIES.filter((cat) => importResult.categories.includes(cat.key)).map(
-                (cat) => (
+              {categories
+                .filter((cat) => importResult.categories.includes(cat.key))
+                .map((cat) => (
                   <label key={cat.key} className="flex items-center gap-1.5 text-xs text-white/70">
                     <input
                       type="checkbox"
@@ -863,8 +868,7 @@ function DataTab() {
                     />
                     {t(cat.labelKey)}
                   </label>
-                ),
-              )}
+                ))}
             </div>
             <div className="flex gap-2">
               <button

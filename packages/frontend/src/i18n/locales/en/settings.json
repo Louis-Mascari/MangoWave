@@ -120,7 +120,7 @@
     "noPeers": "No peers connected",
     "peerCount_one": "{{count}} other window connected",
     "peerCount_other": "{{count}} other windows connected",
-    "autoSyncNote": "Presets, EQ, autopilot, favorites, and all other settings automatically sync across windows. Change something on one and the others will update.",
+    "autoSyncNote": "Presets, EQ, autopilot, favorites, and all other settings automatically sync across windows. Change something on one and the others will update. Turn Window Sync on or off in each window separately.",
     "syncPerformance": "Sync rendering settings",
     "syncPerformanceHint": "Frame rate, resolution, mesh, texture quality, and anti-aliasing. Uncheck if your monitors need different performance settings."
   },

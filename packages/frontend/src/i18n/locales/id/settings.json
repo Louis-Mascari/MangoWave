@@ -120,7 +120,7 @@
     "noPeers": "Tidak ada peer yang terhubung",
     "peerCount_one": "{{count}} jendela lain terhubung",
     "peerCount_other": "{{count}} jendela lain terhubung",
-    "autoSyncNote": "Preset, EQ, autopilot, favorit, dan semua pengaturan lainnya otomatis tersinkronisasi antar jendela. Ubah sesuatu di satu jendela dan yang lain akan terupdate.",
+    "autoSyncNote": "Preset, EQ, autopilot, favorit, dan semua pengaturan lainnya otomatis tersinkronisasi antar jendela. Ubah sesuatu di satu jendela dan yang lain akan terupdate. Aktifkan atau nonaktifkan Sinkronisasi Jendela di setiap jendela secara terpisah.",
     "syncPerformance": "Sinkronkan pengaturan rendering",
     "syncPerformanceHint": "Frame rate, resolusi, mesh, kualitas tekstur, dan anti-aliasing. Hapus centang jika monitor Anda memerlukan pengaturan performa yang berbeda."
   },

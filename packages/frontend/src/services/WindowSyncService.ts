@@ -35,7 +35,8 @@ type SyncMessagePayload =
   | { type: 'settings-change'; settings: SyncableSettings }
   | { type: 'heartbeat'; isLeader: boolean }
   | { type: 'join' }
-  | { type: 'welcome'; currentPreset: string };
+  | { type: 'welcome'; currentPreset: string }
+  | { type: 'leave' };
 
 type SyncMessage = SyncMessageBase & SyncMessagePayload;
 
@@ -59,6 +60,7 @@ function isValidSyncMessage(data: unknown): data is SyncMessage {
     case 'heartbeat':
       return typeof msg.isLeader === 'boolean';
     case 'join':
+    case 'leave':
       return true;
     case 'welcome':
       return typeof (msg as Record<string, unknown>).currentPreset === 'string';
@@ -168,6 +170,8 @@ export class WindowSyncService {
       clearInterval(this.heartbeatTimer);
       this.heartbeatTimer = null;
     }
+    // Notify peers before closing
+    this.send({ type: 'leave' });
     if (this.channel) {
       this.channel.close();
       this.channel = null;
@@ -192,6 +196,14 @@ export class WindowSyncService {
   private handleMessage(msg: SyncMessage): void {
     // Echo suppression
     if (msg.senderId === this.tabId) return;
+
+    // Leave: remove peer immediately and re-elect
+    if (msg.type === 'leave') {
+      this.peers.delete(msg.senderId);
+      this.electLeader();
+      this.notifyPeerCount();
+      return;
+    }
 
     // Track peer
     this.peers.set(msg.senderId, msg.timestamp);

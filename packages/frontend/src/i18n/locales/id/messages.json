@@ -23,7 +23,8 @@
     "webglContextLostDesc": "Sistem grafis perangkatmu terputus. Ini bisa terjadi saat perangkat dalam beban berat, GPU digunakan bersama aplikasi lain, atau konfigurasi layar berubah. Memuat ulang halaman akan memulihkan visualizer.",
     "renderingError": "Terjadi kesalahan rendering, kemungkinan masalah WebGL atau Web Audio.",
     "playbackDecodeError": "Tidak dapat memutar \"{{filename}}\". Format ini mungkin tidak didukung oleh browser Anda.",
-    "unknownFile": "File tidak dikenal"
+    "unknownFile": "File tidak dikenal",
+    "fullscreenNotSupported": "Sayangnya, perangkat Anda tidak mendukung layar penuh dari browser."
   },
 
   "fileValidation": {

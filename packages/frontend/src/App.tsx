@@ -39,6 +39,12 @@ import { PlaybackPanel } from './components/PlaybackPanel.tsx';
 import { MediaPlaylist } from './components/MediaPlaylist.tsx';
 import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
 import { isMobileDevice } from './utils/isMobileDevice.ts';
+import {
+  exitFullscreen,
+  getFullscreenElement,
+  requestFullscreen,
+  supportsFullscreen,
+} from './utils/fullscreen.ts';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
 
 /**
@@ -152,8 +158,8 @@ function MainApp() {
   }, []);
 
   const handleStop = useCallback(() => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
+    if (getFullscreenElement()) {
+      exitFullscreen();
     }
     if (capture.isCapturing) {
       capture.stopCapture();
@@ -254,10 +260,16 @@ function MainApp() {
   }, [isActive, capture.captureSource, audioEngine]);
 
   const handleToggleFullscreen = useCallback(() => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
+    if (getFullscreenElement()) {
+      exitFullscreen();
+    } else if (supportsFullscreen) {
+      requestFullscreen();
     } else {
-      document.documentElement.requestFullscreen();
+      useToastStore
+        .getState()
+        .show(i18n.getFixedT(null, 'messages')('errors.fullscreenNotSupported'), {
+          type: 'warning',
+        });
     }
   }, []);
 

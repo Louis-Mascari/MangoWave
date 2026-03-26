@@ -23,7 +23,8 @@
     "webglContextLostDesc": "기기의 그래픽 시스템이 중단되었습니다. 기기에 부하가 많거나, GPU를 다른 애플리케이션과 공유하고 있거나, 디스플레이 설정이 변경되었을 때 발생할 수 있습니다. 페이지를 새로고침하면 비주얼라이저가 복원됩니다.",
     "renderingError": "렌더링 오류가 발생했습니다. WebGL 또는 Web Audio 관련 문제일 수 있습니다.",
     "playbackDecodeError": "\"{{filename}}\"을(를) 재생할 수 없습니다. 브라우저에서 지원하지 않는 형식일 수 있습니다.",
-    "unknownFile": "알 수 없는 파일"
+    "unknownFile": "알 수 없는 파일",
+    "fullscreenNotSupported": "안타깝게도 이 기기는 브라우저에서 전체 화면을 지원하지 않습니다."
   },
 
   "fileValidation": {

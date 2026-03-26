@@ -23,7 +23,8 @@
     "webglContextLostDesc": "你的设备图形系统被中断。这可能发生在设备负载较重、GPU 被其他应用占用或显示配置更改时。重新加载页面即可恢复可视化工具。",
     "renderingError": "发生了渲染错误，可能是 WebGL 或 Web Audio 问题。",
     "playbackDecodeError": "无法播放「{{filename}}」。你的浏览器可能不支持此格式。",
-    "unknownFile": "未知文件"
+    "unknownFile": "未知文件",
+    "fullscreenNotSupported": "很遗憾，您的设备不支持从浏览器进入全屏。"
   },
 
   "fileValidation": {

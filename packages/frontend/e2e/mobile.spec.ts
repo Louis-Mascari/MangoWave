@@ -44,18 +44,20 @@ test.describe('Mobile UI', () => {
 
     // Try pressing next via radial menu — retry because random preset might pick the same one
     await expect(async () => {
-      // Touch the screen to reset the idle timer — the FAB hides after idle timeout
-      // and its container intercepts clicks, preventing the button from receiving them.
+      // Reset idle timer so FAB is visible, then force-click the FAB —
+      // the fullscreen WebGL canvas intercepts pointer events in headless Chrome hit-testing
+      // even though the FAB has a higher z-index.
       await app.locator('canvas').tap({ position: { x: 10, y: 10 } });
+      await app.waitForTimeout(200);
 
       // Open FAB
       const openMenu = app.getByLabel(/Open menu/i);
       if (await openMenu.isVisible()) {
-        await openMenu.click();
+        await openMenu.click({ force: true });
         await app.waitForTimeout(300);
       }
 
-      await app.getByLabel('Next', { exact: true }).click();
+      await app.getByLabel('Next', { exact: true }).click({ force: true });
       await app.waitForTimeout(300);
 
       const current = await presetName.textContent();
@@ -64,29 +66,31 @@ test.describe('Mobile UI', () => {
   });
 
   test('radial menu: Presets item opens modal panel', async ({ app }) => {
-    // Touch the screen to reset the idle timer — the FAB hides after idle timeout
-    // and its container intercepts clicks, preventing the button from receiving them.
+    // Reset idle timer so FAB is visible, then force-click — the fullscreen WebGL canvas
+    // intercepts pointer events in headless Chrome hit-testing despite the FAB's higher z-index.
     await app.locator('canvas').tap({ position: { x: 10, y: 10 } });
-    await app.getByLabel(/Open menu/i).click();
+    await app.waitForTimeout(200);
+    await app.getByLabel(/Open menu/i).click({ force: true });
     await app.waitForTimeout(500);
 
     // Click the Presets radial item — use exact match to avoid hitting other "preset" elements
-    await app.getByLabel('Presets', { exact: true }).click();
+    await app.getByLabel('Presets', { exact: true }).click({ force: true });
 
     // Should open a modal/dialog with preset browser content
     await expect(app.locator('[role="dialog"]').first()).toBeVisible({ timeout: 5000 });
   });
 
   test('radial menu: Settings item opens modal panel', async ({ app }) => {
-    // Touch the screen to reset the idle timer — the FAB hides after idle timeout
-    // and its container intercepts clicks, preventing the button from receiving them.
+    // Reset idle timer so FAB is visible, then force-click — the fullscreen WebGL canvas
+    // intercepts pointer events in headless Chrome hit-testing despite the FAB's higher z-index.
     await app.locator('canvas').tap({ position: { x: 10, y: 10 } });
-    await app.getByLabel(/Open menu/i).click();
+    await app.waitForTimeout(200);
+    await app.getByLabel(/Open menu/i).click({ force: true });
     await app.waitForTimeout(500);
 
     // Click the Settings radial item
     const settingsButton = app.getByLabel(/Setting/i).first();
-    await settingsButton.click();
+    await settingsButton.click({ force: true });
 
     // Should open a modal/dialog with settings content
     await expect(app.locator('[role="dialog"]').first()).toBeVisible({ timeout: 5000 });

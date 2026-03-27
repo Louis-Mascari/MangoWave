@@ -19,7 +19,12 @@ export function initPostHog(): void {
       maskTextSelector: '[data-ph-mask], [data-ph-mask-filenames]',
       maskTextFn: (text: string, element?: HTMLElement) => {
         if (element?.hasAttribute?.('data-ph-mask-filenames')) {
-          return text.replace(
+          let masked = text;
+          const maskValue = element.getAttribute('data-ph-mask-value');
+          if (maskValue) {
+            masked = masked.replace(maskValue, '*'.repeat(maskValue.length));
+          }
+          return masked.replace(
             /[\w\s\-().]+\.(mp3|wav|flac|aac|ogg|oga|opus|weba|webm|m4a|m4b|3gp)\b/gi,
             (match, ext: string) => '*'.repeat(match.length - ext.length - 1) + '.' + ext,
           );

@@ -4,10 +4,14 @@ export type ToastType = 'info' | 'error' | 'warning';
 
 interface ToastState {
   message: string | null;
+  maskValue: string | null;
   type: ToastType;
   durationMs: number;
   key: number;
-  show: (message: string, options?: { type?: ToastType; durationMs?: number }) => void;
+  show: (
+    message: string,
+    options?: { type?: ToastType; durationMs?: number; maskValue?: string },
+  ) => void;
   clear: () => void;
 }
 
@@ -15,6 +19,7 @@ let activeTimer: ReturnType<typeof setTimeout> | null = null;
 
 export const useToastStore = create<ToastState>((set, get) => ({
   message: null,
+  maskValue: null,
   type: 'info',
   durationMs: 3500,
   key: 0,
@@ -22,11 +27,12 @@ export const useToastStore = create<ToastState>((set, get) => ({
   show: (message, options) => {
     const type = options?.type ?? 'info';
     const durationMs = options?.durationMs ?? (type === 'info' ? 3500 : 6000);
+    const maskValue = options?.maskValue ?? null;
     if (activeTimer) clearTimeout(activeTimer);
-    set({ message, type, durationMs, key: get().key + 1 });
+    set({ message, type, durationMs, maskValue, key: get().key + 1 });
     activeTimer = setTimeout(() => {
       activeTimer = null;
-      set({ message: null });
+      set({ message: null, maskValue: null });
     }, durationMs);
   },
 
@@ -35,6 +41,6 @@ export const useToastStore = create<ToastState>((set, get) => ({
       clearTimeout(activeTimer);
       activeTimer = null;
     }
-    set({ message: null });
+    set({ message: null, maskValue: null });
   },
 }));

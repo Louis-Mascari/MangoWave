@@ -310,6 +310,7 @@ export function StartScreen({
           <div className="mt-3 rounded-lg border border-blue-500/20 bg-blue-500/5 px-3 py-2">
             <p className="text-xs text-blue-300/70">{t('localFilesModal.infoBox')}</p>
           </div>
+          <CollapsibleTip />
           {fileError && (
             <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3">
               <p className="text-xs font-semibold text-red-400">
@@ -342,6 +343,7 @@ export function StartScreen({
           <div className="mt-3 rounded-lg border border-blue-500/20 bg-blue-500/5 px-3 py-2">
             <p className="text-xs text-blue-300/70">{t('micModal.infoBox')}</p>
           </div>
+          <CollapsibleTip />
           {error && (
             <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3">
               <p className="text-xs font-semibold text-red-400">{t('somethingWentWrong')}</p>

@@ -273,7 +273,9 @@ function AddToPackButton({
     }
     if (customPacks.length === 1) {
       addPresetToCustomPack(customPacks[0].id, presetName);
-      useToastStore.getState().show(t('presetBrowser.addedToPack', { pack: customPacks[0].name }));
+      useToastStore.getState().show(t('presetBrowser.addedToPack', { pack: customPacks[0].name }), {
+        maskValue: customPacks[0].name,
+      });
       return;
     }
     if (showDropdown) {
@@ -320,7 +322,9 @@ function AddToPackButton({
                   addPresetToCustomPack(pack.id, presetName);
                   useToastStore
                     .getState()
-                    .show(t('presetBrowser.addedToPack', { pack: pack.name }));
+                    .show(t('presetBrowser.addedToPack', { pack: pack.name }), {
+                      maskValue: pack.name,
+                    });
                   setShowDropdown(false);
                 }}
                 className="block w-full cursor-pointer border-none bg-transparent px-3 py-1 text-left text-xs text-white/70 hover:bg-white/10 hover:text-white"
@@ -866,7 +870,7 @@ export function PresetBrowser({
     const name = `Pack ${customPacks.length + 1}`;
     const id = createCustomPack(name);
     if (id) {
-      useToastStore.getState().show(t('customPacks.packCreated', { name }));
+      useToastStore.getState().show(t('customPacks.packCreated', { name }), { maskValue: name });
       setSelectedPackId(id);
     }
   }, [customPacks.length, createCustomPack, setSelectedPackId, t]);
@@ -936,7 +940,7 @@ export function PresetBrowser({
                 skipped,
               })
             : t('customPacks.packImported', { name: result.name, count: validPresets.length });
-        useToastStore.getState().show(msg);
+        useToastStore.getState().show(msg, { maskValue: result.name });
         setSelectedPackId(id);
       }
     };

@@ -9,6 +9,7 @@ const typeStyles: Record<ToastType, string> = {
 
 export function ActionToast() {
   const message = useToastStore((s) => s.message);
+  const maskValue = useToastStore((s) => s.maskValue);
   const type = useToastStore((s) => s.type);
   const durationMs = useToastStore((s) => s.durationMs);
   const key = useToastStore((s) => s.key);
@@ -23,6 +24,7 @@ export function ActionToast() {
           className={`fixed bottom-20 left-1/2 z-[60] max-w-sm -translate-x-1/2 px-4 py-1.5 text-center text-xs backdrop-blur ${typeStyles[type]}`}
           style={{ animation: `toast-fade ${durationS}s ease-in-out forwards` }}
           data-ph-mask-filenames
+          {...(maskValue ? { 'data-ph-mask-value': maskValue } : {})}
         >
           {message}
         </div>

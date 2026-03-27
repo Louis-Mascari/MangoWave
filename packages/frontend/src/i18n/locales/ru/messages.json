@@ -192,6 +192,8 @@
     "packDeleted": "Пак удалён",
     "packImported": "Пак «{{name}}» импортирован с {{count}} пресетами",
     "notPackFile": "Это не файл пака MangoWave",
+    "settingsFileNotPack": "Это файл настроек — используйте Настройки › Данные для импорта пользовательских паков",
+    "packImportedPartial": "Пак «{{name}}» импортирован с {{count}} пресетами ({{skipped}} не найдено и пропущено)",
     "maxPacksReached": "Достигнут максимум в 50 пользовательских паков",
     "packActive": "Воспроизведение из: {{name}}",
     "deactivatePack": "Остановить пак",

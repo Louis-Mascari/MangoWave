@@ -381,7 +381,7 @@ export function parsePackImportFile(file: File): Promise<PackParseResult> {
           resolve({
             ok: false,
             error: isSettingsFile
-              ? t('settingsImport.notMangoWaveFile')
+              ? t('customPacks.settingsFileNotPack')
               : t('customPacks.notPackFile'),
           });
           return;

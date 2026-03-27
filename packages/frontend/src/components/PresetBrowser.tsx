@@ -923,16 +923,25 @@ export function PresetBrowser({
         useToastStore.getState().show(result.error);
         return;
       }
-      const id = createCustomPack(result.name, result.presets);
+      const knownPresets = new Set(presetList);
+      const validPresets = result.presets.filter((p) => knownPresets.has(p));
+      const skipped = result.presets.length - validPresets.length;
+      const id = createCustomPack(result.name, validPresets);
       if (id) {
-        useToastStore
-          .getState()
-          .show(t('customPacks.packImported', { name: result.name, count: result.presets.length }));
+        const msg =
+          skipped > 0
+            ? t('customPacks.packImportedPartial', {
+                name: result.name,
+                count: validPresets.length,
+                skipped,
+              })
+            : t('customPacks.packImported', { name: result.name, count: validPresets.length });
+        useToastStore.getState().show(msg);
         setSelectedPackId(id);
       }
     };
     input.click();
-  }, [customPacks.length, createCustomPack, setSelectedPackId, t]);
+  }, [customPacks.length, createCustomPack, setSelectedPackId, t, presetList]);
 
   const handleExportPack = useCallback((pack: CustomPack) => {
     downloadPackExport(buildPackExport(pack));

@@ -190,6 +190,8 @@
     "packDeleted": "Pack deleted",
     "packImported": "Pack \"{{name}}\" imported with {{count}} presets",
     "notPackFile": "Not a MangoWave pack file",
+    "settingsFileNotPack": "This is a settings file — use Settings › Data to import custom packs",
+    "packImportedPartial": "Pack \"{{name}}\" imported with {{count}} presets ({{skipped}} not found and skipped)",
     "maxPacksReached": "Maximum of 50 custom packs reached",
     "packActive": "Playing from: {{name}}",
     "deactivatePack": "Stop pack",

@@ -190,6 +190,8 @@
     "packDeleted": "Paket dihapus",
     "packImported": "Paket \"{{name}}\" diimpor dengan {{count}} preset",
     "notPackFile": "Bukan file paket MangoWave",
+    "settingsFileNotPack": "Ini adalah file pengaturan — gunakan Pengaturan › Data untuk mengimpor paket kustom",
+    "packImportedPartial": "Paket \"{{name}}\" diimpor dengan {{count}} preset ({{skipped}} tidak ditemukan dan dilewati)",
     "maxPacksReached": "Maksimum 50 paket kustom telah tercapai",
     "packActive": "Memutar dari: {{name}}",
     "deactivatePack": "Hentikan paket",

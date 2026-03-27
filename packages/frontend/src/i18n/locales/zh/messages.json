@@ -190,6 +190,8 @@
     "packDeleted": "合集已删除",
     "packImported": "合集「{{name}}」已导入，包含 {{count}} 个预设",
     "notPackFile": "不是 MangoWave 合集文件",
+    "settingsFileNotPack": "这是一个设置文件 — 请使用设置 › 数据来导入自定义合集",
+    "packImportedPartial": "合集「{{name}}」已导入，包含 {{count}} 个预设（{{skipped}} 个未找到，已跳过）",
     "maxPacksReached": "最多只能创建 50 个自定义合集",
     "packActive": "播放自：{{name}}",
     "deactivatePack": "停止播放包",

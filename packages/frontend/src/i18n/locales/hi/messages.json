@@ -190,6 +190,8 @@
     "packDeleted": "पैक हटाया गया",
     "packImported": "पैक \"{{name}}\" {{count}} प्रीसेट के साथ इम्पोर्ट हुआ",
     "notPackFile": "यह MangoWave पैक फ़ाइल नहीं है",
+    "settingsFileNotPack": "यह एक सेटिंग्स फ़ाइल है — कस्टम पैक इम्पोर्ट करने के लिए सेटिंग्स › डेटा का उपयोग करें",
+    "packImportedPartial": "पैक \"{{name}}\" {{count}} प्रीसेट के साथ इम्पोर्ट हुआ ({{skipped}} नहीं मिले और छोड़े गए)",
     "maxPacksReached": "अधिकतम 50 कस्टम पैक की सीमा पहुँच गई",
     "packActive": "चल रहा है: {{name}}",
     "deactivatePack": "पैक रोकें",

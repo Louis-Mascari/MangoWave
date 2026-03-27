@@ -50,18 +50,18 @@ test.describe('Mobile UI', () => {
       await app.locator('canvas').tap({ position: { x: 10, y: 10 } });
       await app.waitForTimeout(200);
 
-      // Open FAB
+      // Open FAB if not already open
       const openMenu = app.getByLabel(/Open menu/i);
       if (await openMenu.isVisible()) {
         await openMenu.click({ force: true });
-        await app.waitForTimeout(300);
+        await app.waitForTimeout(400);
       }
 
       await app.getByLabel('Next', { exact: true }).click({ force: true });
-      await app.waitForTimeout(300);
 
-      const current = await presetName.textContent();
-      expect(current).not.toBe(initial);
+      // Wait for the preset name to actually update rather than a fixed timeout —
+      // on slow CI runners 300ms was not always enough for the transition to commit
+      await expect(presetName).not.toHaveText(initial ?? '', { timeout: 2000 });
     }).toPass({ timeout: 20000 });
   });
 

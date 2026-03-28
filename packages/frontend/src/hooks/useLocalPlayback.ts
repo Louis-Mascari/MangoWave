@@ -63,7 +63,6 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
       addTracks(files);
 
       const audio = new Audio();
-      audio.crossOrigin = 'anonymous';
       audio.volume = useSettingsStore.getState().volume;
       audioRef.current = audio;
 
@@ -102,7 +101,9 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
 
     audio.src = url;
     audio.play().catch(() => {
-      // Autoplay may be blocked
+      useToastStore
+        .getState()
+        .show(i18n.t('errors.playbackBlocked', { ns: 'messages' }), { type: 'warning' });
     });
 
     return () => {

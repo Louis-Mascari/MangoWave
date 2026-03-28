@@ -23,6 +23,7 @@
     "webglContextLostDesc": "Sistem grafis perangkatmu terputus. Ini bisa terjadi saat perangkat dalam beban berat, GPU digunakan bersama aplikasi lain, atau konfigurasi layar berubah. Memuat ulang halaman akan memulihkan visualizer.",
     "renderingError": "Terjadi kesalahan rendering, kemungkinan masalah WebGL atau Web Audio.",
     "playbackDecodeError": "Tidak dapat memutar \"{{filename}}\". Format ini mungkin tidak didukung oleh browser Anda.",
+    "playbackBlocked": "Pemutaran diblokir oleh browser. Coba ketuk tombol putar di panel kontrol.",
     "unknownFile": "File tidak dikenal",
     "fullscreenNotSupported": "Sayangnya, perangkat Anda tidak mendukung layar penuh dari browser."
   },
@@ -64,7 +65,8 @@
     "blockedPresetsCleared": "Preset yang diblokir dihapus",
     "favoritePresetsCleared": "Preset favorit dihapus",
     "silenceDetected": "Tidak ada audio terdeteksi. Pastikan audio sedang diputar di layar, jendela, atau tab yang dibagikan, dan kamu telah mencentang \"Bagikan audio\" di dialog browser.",
-    "silenceDetectedMic": "Tidak ada audio terdeteksi dari mikrofon. Pastikan mikrofon tidak di-mute dan menangkap suara."
+    "silenceDetectedMic": "Tidak ada audio terdeteksi dari mikrofon. Pastikan mikrofon tidak di-mute dan menangkap suara.",
+    "silenceDetectedLocal": "Tidak ada audio terdeteksi. Pastikan file berformat yang didukung dan volume perangkat sudah dinyalakan."
   },
 
   "playback": {

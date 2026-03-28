@@ -1,7 +1,7 @@
 import sjson from 'secure-json-parse';
 
 const MAX_FILE_SIZE = 500_000; // 500KB
-const VALID_EXTENSIONS = ['.milk', '.milk2'];
+const VALID_EXTENSIONS = ['.milk'];
 
 // Blocked identifiers in EEL equation strings — prevents script injection
 const BLOCKED_IDENTIFIERS =
@@ -39,11 +39,11 @@ export async function convertMilkText(text: string): Promise<object> {
   return convertPreset(text);
 }
 
-/** Read a .milk/.milk2 file, validate size/extension, return raw text + derived name. */
+/** Read a .milk file, validate size/extension, return raw text + derived name. */
 export async function readMilkFile(file: File): Promise<{ name: string; text: string }> {
   const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
   if (!VALID_EXTENSIONS.includes(ext)) {
-    throw new Error(`Invalid file type: ${ext}. Expected .milk or .milk2`);
+    throw new Error(`Invalid file type: ${ext}. Expected .milk`);
   }
   if (file.size > MAX_FILE_SIZE) {
     throw new Error(`File too large (${Math.round(file.size / 1024)}KB). Maximum is 500KB.`);
@@ -53,7 +53,7 @@ export async function readMilkFile(file: File): Promise<{ name: string; text: st
   }
 
   const text = await file.text();
-  const name = file.name.replace(/\.milk2?$/i, '');
+  const name = file.name.replace(/\.milk$/i, '');
   return { name, text };
 }
 

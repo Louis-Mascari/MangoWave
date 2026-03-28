@@ -11,10 +11,9 @@ describe('readMilkFile', () => {
     expect(result.text).toBe('[preset00]\nfoo=bar');
   });
 
-  it('reads a .milk2 file', async () => {
+  it('rejects .milk2 files (unsupported double-preset format)', async () => {
     const file = new File(['content'], 'My Preset.milk2');
-    const result = await readMilkFile(file);
-    expect(result.name).toBe('My Preset');
+    await expect(readMilkFile(file)).rejects.toThrow('Invalid file type');
   });
 
   it('rejects non-.milk extensions', async () => {

@@ -158,7 +158,7 @@
     "importPartial": "已导入 {{success}}/{{total}} 个预设，{{failed}} 个失败。",
     "importAllFailed": "全部 {{count}} 个预设导入失败",
     "fileTooLarge": "\"{{name}}\" 文件过大（最大 500KB）",
-    "invalidFileType": "\"{{name}}\" 不是 .milk 或 .milk2 文件",
+    "invalidFileType": "\"{{name}}\" 不是 .milk 文件",
     "emptyFile": "\"{{name}}\" 是空文件",
     "duplicateName": "\"{{name}}\" 已存在",
     "conversionFailed": "预设 \"{{name}}\" 转换失败，已跳过。",

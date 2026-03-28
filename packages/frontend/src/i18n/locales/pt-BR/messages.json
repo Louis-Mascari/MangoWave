@@ -158,7 +158,7 @@
     "importPartial": "Importados {{success}} de {{total}} presets. {{failed}} falharam.",
     "importAllFailed": "Todos os {{count}} preset(s) falharam ao importar",
     "fileTooLarge": "\"{{name}}\" é muito grande (máx. 500KB)",
-    "invalidFileType": "\"{{name}}\" não é um arquivo .milk ou .milk2",
+    "invalidFileType": "\"{{name}}\" não é um arquivo .milk",
     "emptyFile": "\"{{name}}\" está vazio",
     "duplicateName": "\"{{name}}\" já existe",
     "conversionFailed": "Falha ao converter o preset \"{{name}}\". Pulando.",

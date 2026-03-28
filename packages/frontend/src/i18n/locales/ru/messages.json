@@ -158,7 +158,7 @@
     "importPartial": "Импортировано {{success}} из {{total}} пресетов. {{failed}} не удалось.",
     "importAllFailed": "Не удалось импортировать все {{count}} пресет(ов)",
     "fileTooLarge": "\"{{name}}\" слишком большой (макс. 500КБ)",
-    "invalidFileType": "\"{{name}}\" — не файл .milk или .milk2",
+    "invalidFileType": "\"{{name}}\" — не файл .milk",
     "emptyFile": "\"{{name}}\" пустой",
     "duplicateName": "\"{{name}}\" уже существует",
     "conversionFailed": "Не удалось конвертировать пресет \"{{name}}\". Пропуск.",

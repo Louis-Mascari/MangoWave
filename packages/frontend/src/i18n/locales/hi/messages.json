@@ -158,7 +158,7 @@
     "importPartial": "{{total}} में से {{success}} प्रीसेट आयात किए गए। {{failed}} विफल।",
     "importAllFailed": "सभी {{count}} प्रीसेट आयात करने में विफल",
     "fileTooLarge": "\"{{name}}\" बहुत बड़ा है (अधिकतम 500KB)",
-    "invalidFileType": "\"{{name}}\" एक .milk या .milk2 फ़ाइल नहीं है",
+    "invalidFileType": "\"{{name}}\" एक .milk फ़ाइल नहीं है",
     "emptyFile": "\"{{name}}\" खाली है",
     "duplicateName": "\"{{name}}\" पहले से मौजूद है",
     "conversionFailed": "प्रीसेट \"{{name}}\" को कनवर्ट करने में विफल। छोड़ा जा रहा है।",

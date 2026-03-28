@@ -158,7 +158,7 @@
     "importPartial": "{{total}}개 중 {{success}}개의 프리셋을 가져왔습니다. {{failed}}개 실패.",
     "importAllFailed": "{{count}}개의 프리셋을 모두 가져오지 못했습니다",
     "fileTooLarge": "\"{{name}}\"이(가) 너무 큽니다 (최대 500KB)",
-    "invalidFileType": "\"{{name}}\"은(는) .milk 또는 .milk2 파일이 아닙니다",
+    "invalidFileType": "\"{{name}}\"은(는) .milk 파일이 아닙니다",
     "emptyFile": "\"{{name}}\"이(가) 비어 있습니다",
     "duplicateName": "\"{{name}}\"이(가) 이미 존재합니다",
     "conversionFailed": "프리셋 \"{{name}}\" 변환에 실패했습니다. 건너뜁니다.",

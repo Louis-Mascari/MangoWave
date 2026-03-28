@@ -952,7 +952,7 @@ export function PresetBrowser({
 
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.milk,.milk2';
+    input.accept = '.milk';
     input.multiple = true;
     input.onchange = async () => {
       const files = input.files;

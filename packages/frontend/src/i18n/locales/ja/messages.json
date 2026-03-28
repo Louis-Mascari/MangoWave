@@ -158,7 +158,7 @@
     "importPartial": "{{total}} 件中 {{success}} 件をインポートしました。{{failed}} 件が失敗しました。",
     "importAllFailed": "{{count}} 件すべてのプリセットのインポートに失敗しました",
     "fileTooLarge": "\"{{name}}\" が大きすぎます（最大 500KB）",
-    "invalidFileType": "\"{{name}}\" は .milk または .milk2 ファイルではありません",
+    "invalidFileType": "\"{{name}}\" は .milk ファイルではありません",
     "emptyFile": "\"{{name}}\" は空です",
     "duplicateName": "\"{{name}}\" は既に存在します",
     "conversionFailed": "プリセット \"{{name}}\" の変換に失敗しました。スキップします。",

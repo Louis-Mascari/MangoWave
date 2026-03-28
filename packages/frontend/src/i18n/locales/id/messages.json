@@ -158,7 +158,7 @@
     "importPartial": "{{success}} dari {{total}} preset berhasil diimpor. {{failed}} gagal.",
     "importAllFailed": "Semua {{count}} preset gagal diimpor",
     "fileTooLarge": "\"{{name}}\" terlalu besar (maks. 500KB)",
-    "invalidFileType": "\"{{name}}\" bukan file .milk atau .milk2",
+    "invalidFileType": "\"{{name}}\" bukan file .milk",
     "emptyFile": "\"{{name}}\" kosong",
     "duplicateName": "\"{{name}}\" sudah ada",
     "conversionFailed": "Gagal mengonversi preset \"{{name}}\". Dilewati.",

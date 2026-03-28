@@ -27,6 +27,7 @@ const defaultProps = {
   onToggleBlock: vi.fn(),
   isIdle: false,
   forceIdle: vi.fn(),
+  resetIdle: vi.fn(),
   onPauseIdle: vi.fn(),
   onResumeIdle: vi.fn(),
 };

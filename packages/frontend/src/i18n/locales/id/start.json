@@ -12,7 +12,6 @@
   "shareAudioMobileHint": "Khusus komputer - memerlukan Chrome, Edge, atau Opera",
   "shareAudioDesktopHint": "Memerlukan Chrome, Edge, atau Opera",
   "somethingWentWrong": "Terjadi kesalahan",
-
   "shareAudioModal": {
     "browserNoSupport": "{{browser}} tidak mendukung tangkapan audio",
     "browserCompatMessage": "Tangkapan audio melalui berbagi layar memerlukan browser berbasis Chromium (Chrome, Edge, atau Opera). Kamu masih bisa menggunakan",
@@ -27,7 +26,6 @@
     "step3": "dan nikmati",
     "startVisualizer": "Mulai Visualizer"
   },
-
   "osTips": {
     "windowsChromeOS": "Semua mode berbagi (layar, jendela, dan tab) mendukung audio di {{os}}. Berbagi seluruh layar atau jendela memberikan pengalaman terbaik (tanpa banner browser).",
     "macOSChromium": "Di macOS 14.2+, berbagi layar dan jendela mendukung audio. Versi macOS yang lebih lama hanya mendukung berbagi tab.",
@@ -35,12 +33,10 @@
     "linux": "Di Linux, hanya berbagi tab yang mendukung audio.",
     "unknown": "Di Windows dan ChromeOS, semua mode berbagi mendukung audio. Di macOS 14.2+, berbagi layar dan jendela mendukung audio di Chrome. Di Linux, hanya berbagi tab yang mendukung audio."
   },
-
   "sensitivityTips": {
     "title": "Tips sensitivitas & reaktivitas",
     "description": "Beberapa preset lebih ambient dan kurang reaktif dibanding yang lain. Buka panel Pengaturan untuk menyesuaikan sensitivitas dan parameter lain yang menggerakkan mesin visualisasi."
   },
-
   "localFilesModal": {
     "step1Bold": "Pilih file kamu",
     "step1": "– pilih satu atau lebih file audio dari perangkatmu",
@@ -50,7 +46,6 @@
     "unsupportedFile": "File tidak didukung",
     "chooseFiles": "Pilih File"
   },
-
   "micModal": {
     "step1Bold": "Klik Mulai Mikrofon",
     "step1": "dan berikan izin saat diminta",
@@ -59,7 +54,6 @@
     "infoBox": "Mode senyap: audio ditangkap tapi tidak diputar melalui speaker.",
     "startMicrophone": "Mulai Mikrofon"
   },
-
   "spotify": {
     "connectedAs": "Terhubung sebagai {{name}}",
     "connected": "Spotify terhubung",
@@ -70,7 +64,6 @@
     "connectSpotify": "Hubungkan Spotify",
     "devInfo": "Jika kamu bukan pemilik aplikasi, pastikan mereka telah menambahkan nama dan email yang terkait dengan akun Spotify kamu ke tab User Management di aplikasi developer mereka."
   },
-
   "onboarding": {
     "desktop": {
       "skipPresetsTitle": "Lewati Preset",
@@ -83,8 +76,8 @@
       "shortcutsDesc": "Tekan H untuk melihat semua pintasan keyboard, atau temukan di menu Pengaturan."
     },
     "mobile": {
-      "menuTitle": "Menu",
-      "menuDesc": "Ketuk logo di sudut untuk membuka menu radial. Menu ini memberi akses cepat ke semua fitur: preset, pengaturan, layar penuh, dan lainnya.",
+      "menuTitle": "Ketuk untuk Kontrol",
+      "menuDesc": "Ketuk di mana saja untuk menampilkan atau menyembunyikan kontrol. Kontrol akan menghilang setelah beberapa detik agar visual tetap menjadi fokus utama.",
       "navigateTitle": "Navigasi Preset",
       "navigateDesc": "Gunakan Berikutnya (▶) dan Sebelumnya (◀) untuk berpindah antar preset. Setiap preset bereaksi terhadap musikmu dengan caranya sendiri.",
       "curateTitle": "Kurasi Pengalamanmu",
@@ -93,7 +86,6 @@
       "autopilotDesc": "Aktifkan Autopilot (A) untuk beralih preset secara otomatis. Buka Pengaturan (⚙) untuk menyesuaikan equalizer dan rendering."
     }
   },
-
   "landing": {
     "title": "MangoWave | Audio Visualizer",
     "metaDescription": "Visualizer audio-reaktif gratis dengan 400+ visual. Tanpa daftar akun, tanpa install, tanpa iklan. Setiap ketukan, setiap dentuman. Langsung mulai.",

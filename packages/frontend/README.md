@@ -147,8 +147,8 @@ Key details:
 
 Floating panel (`components/PlaybackPanel.tsx`) rendered by App.tsx when local playback is active or Spotify is connected (Premium only). Contains seek bar, transport controls (prev/play/next), shuffle, repeat, Now Playing toggle, queue toggle (local only), and volume (local only, desktop only).
 
-- **Idle auto-hide** — `useIdleTimer` with `pause`/`resume` (hover keeps visible on desktop) and `forceIdle` (instant hide after mobile radial actions). 5s mobile, 3s desktop
-- **Mobile** — hidden when FAB menu is open (`mobileMenuOpen` state in App.tsx)
+- **Idle auto-hide** — `useIdleTimer` with `pause`/`resume` (hover keeps visible on desktop) and `forceIdle` (instant hide after mobile actions). 5s timeout, starts paused until launch animation completes
+- **Mobile** — fades in sync with mobile circle buttons via shared idle timer
 
 ## Key Technical Notes
 

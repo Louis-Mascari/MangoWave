@@ -27,12 +27,10 @@
     "unknownFile": "Arquivo desconhecido",
     "fullscreenNotSupported": "Infelizmente, seu dispositivo não suporta tela cheia pelo navegador."
   },
-
   "fileValidation": {
     "singleRejected": "\"{{filename}}\" não é um arquivo de áudio suportado. Formatos suportados: MP3, WAV, FLAC, OGG, AAC, Opus e M4A.",
     "multipleRejected": "{{count}} arquivos não eram formatos de áudio suportados e foram ignorados: {{names}}. Formatos suportados: MP3, WAV, FLAC, OGG, AAC, Opus e M4A."
   },
-
   "settingsImport": {
     "mustBeJson": "O arquivo deve ser um arquivo .json",
     "fileTooLarge": "Arquivo muito grande",
@@ -43,7 +41,6 @@
     "importedWithWarnings": "Configurações importadas. Algumas configurações não puderam ser aplicadas devido a mudanças no aplicativo",
     "importedSuccess": "Configurações importadas com sucesso"
   },
-
   "spotify": {
     "connectingToSpotify": "Conectando ao Spotify...",
     "connectionFailed": "A conexão com o Spotify falhou. Por favor, tente novamente. Se o problema persistir, verifique se sua conta foi adicionada aos usuários autorizados do aplicativo.",
@@ -52,7 +49,6 @@
     "popupBlocked": "Não foi possível abrir a janela de login do Spotify. Por favor, verifique se pop-ups são permitidos para este site e tente novamente.",
     "rateLimited": "Limite de requisições do Spotify atingido. Tentando novamente em {{seconds}}s"
   },
-
   "toasts": {
     "autopilotOn": "Piloto automático ligado",
     "autopilotOff": "Piloto automático desligado",
@@ -68,7 +64,6 @@
     "silenceDetectedMic": "Nenhum áudio detectado do microfone. Certifique-se de que seu mic não está mutado e está captando som.",
     "silenceDetectedLocal": "Nenhum áudio detectado. Certifique-se de que o arquivo é um formato suportado e que o volume do dispositivo está ligado."
   },
-
   "playback": {
     "addSongsToQueue": "Adicione músicas à sua fila",
     "micNoControls": "Entrada de microfone: sem controles de reprodução",
@@ -99,7 +94,6 @@
     "queueShortcut": "Fila (Q)",
     "playingOn": "Reproduzindo em {{device}}"
   },
-
   "queue": {
     "title": "Fila",
     "addFiles": "Adicionar Arquivos",
@@ -109,7 +103,6 @@
     "remove": "Remover {{name}}",
     "noTracksLoaded": "Nenhuma faixa carregada"
   },
-
   "controlBar": {
     "previousPreset": "Preset anterior (P)",
     "nextPreset": "Próximo preset (Space / N)",
@@ -121,18 +114,13 @@
     "toggleFullscreen": "Alternar tela cheia (F)",
     "exitFS": "Sair TC"
   },
-
   "mobile": {
     "next": "Próximo",
     "favorite": "Favoritar",
     "unfavorite": "Desfavoritar",
     "block": "Bloquear",
-    "unblock": "Desbloquear",
-    "openMenu": "Abrir menu",
-    "closeMenu": "Fechar menu",
-    "menu": "Menu"
+    "unblock": "Desbloquear"
   },
-
   "presetBrowser": {
     "tabs": {
       "all": "todos",
@@ -162,7 +150,6 @@
     "addedToPack": "Adicionado a \"{{pack}}\"",
     "createPackFirst": "Crie um pacote personalizado primeiro"
   },
-
   "customPacks": {
     "tabs": {
       "packs": "pacotes"

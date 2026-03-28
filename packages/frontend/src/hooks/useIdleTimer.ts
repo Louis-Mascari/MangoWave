@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 export function useIdleTimer(
   timeoutMs: number,
   startPaused = false,
+  /** When true, don't add window-level mouse/touch listeners. Caller manages reset/forceIdle. */
+  suppressEvents = false,
 ): {
   isIdle: boolean;
   pause: () => void;
@@ -53,6 +55,15 @@ export function useIdleTimer(
   }, []);
 
   useEffect(() => {
+    if (suppressEvents) {
+      // No window listeners — caller manages reset/forceIdle. Start countdown if not paused.
+      const initialTimer = !pausedRef.current ? setTimeout(resetTimer, 0) : null;
+      return () => {
+        if (initialTimer) clearTimeout(initialTimer);
+        if (timerRef.current) clearTimeout(timerRef.current);
+      };
+    }
+
     const events = ['mousemove', 'mousedown', 'touchstart'] as const;
     events.forEach((event) => window.addEventListener(event, resetTimer, { passive: true }));
 
@@ -66,7 +77,7 @@ export function useIdleTimer(
         clearTimeout(timerRef.current);
       }
     };
-  }, [resetTimer]);
+  }, [resetTimer, suppressEvents]);
 
   return { isIdle, pause, resume, forceIdle, reset: resetTimer };
 }

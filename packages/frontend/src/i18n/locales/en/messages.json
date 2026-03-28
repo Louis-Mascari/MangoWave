@@ -127,10 +127,7 @@
     "favorite": "Favorite",
     "unfavorite": "Unfavorite",
     "block": "Block",
-    "unblock": "Unblock",
-    "openMenu": "Open menu",
-    "closeMenu": "Close menu",
-    "menu": "Menu"
+    "unblock": "Unblock"
   },
 
   "presetBrowser": {

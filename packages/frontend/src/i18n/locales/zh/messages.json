@@ -27,12 +27,10 @@
     "unknownFile": "未知文件",
     "fullscreenNotSupported": "很遗憾，您的设备不支持从浏览器进入全屏。"
   },
-
   "fileValidation": {
     "singleRejected": "「{{filename}}」不是受支持的音频文件。支持的格式：MP3、WAV、FLAC、OGG、AAC、Opus 和 M4A。",
     "multipleRejected": "{{count}} 个文件不是受支持的音频格式，已被跳过：{{names}}。支持的格式：MP3、WAV、FLAC、OGG、AAC、Opus 和 M4A。"
   },
-
   "settingsImport": {
     "mustBeJson": "文件必须是 .json 文件",
     "fileTooLarge": "文件太大",
@@ -43,7 +41,6 @@
     "importedWithWarnings": "设置已导入。由于应用变更，部分设置无法应用",
     "importedSuccess": "设置导入成功"
   },
-
   "spotify": {
     "connectingToSpotify": "正在连接 Spotify...",
     "connectionFailed": "Spotify 连接失败。请重试。如果问题持续存在，请检查你的账户是否已添加到应用的授权用户中。",
@@ -52,7 +49,6 @@
     "popupBlocked": "无法打开 Spotify 登录窗口。请检查是否允许此站点弹出窗口，然后重试。",
     "rateLimited": "Spotify 请求频率受限。将在 {{seconds}}s 后重试"
   },
-
   "toasts": {
     "autopilotOn": "自动播放已开启",
     "autopilotOff": "自动播放已关闭",
@@ -68,7 +64,6 @@
     "silenceDetectedMic": "未检测到麦克风音频。请确保麦克风未静音并且正在拾取声音。",
     "silenceDetectedLocal": "未检测到音频。请确保文件格式受支持，并且设备音量已开启。"
   },
-
   "playback": {
     "addSongsToQueue": "将歌曲添加到队列",
     "micNoControls": "麦克风输入：无播放控制",
@@ -99,7 +94,6 @@
     "queueShortcut": "队列 (Q)",
     "playingOn": "正在 {{device}} 上播放"
   },
-
   "queue": {
     "title": "队列",
     "addFiles": "添加文件",
@@ -109,7 +103,6 @@
     "remove": "移除 {{name}}",
     "noTracksLoaded": "未加载任何曲目"
   },
-
   "controlBar": {
     "previousPreset": "上一个预设 (P)",
     "nextPreset": "下一个预设 (Space / N)",
@@ -121,18 +114,13 @@
     "toggleFullscreen": "切换全屏 (F)",
     "exitFS": "退出全屏"
   },
-
   "mobile": {
     "next": "下一个",
     "favorite": "收藏",
     "unfavorite": "取消收藏",
     "block": "屏蔽",
-    "unblock": "取消屏蔽",
-    "openMenu": "打开菜单",
-    "closeMenu": "关闭菜单",
-    "menu": "菜单"
+    "unblock": "取消屏蔽"
   },
-
   "presetBrowser": {
     "tabs": {
       "all": "全部",
@@ -162,7 +150,6 @@
     "addedToPack": "已添加到「{{pack}}」",
     "createPackFirst": "请先创建自定义合集"
   },
-
   "customPacks": {
     "tabs": {
       "packs": "合集"

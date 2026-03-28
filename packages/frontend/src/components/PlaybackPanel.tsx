@@ -26,7 +26,6 @@ interface PlaybackPanelProps {
   onToggleNowPlaying: () => void;
   onToggleQueue?: () => void;
   isQueueOpen?: boolean;
-  hidden?: boolean;
 }
 
 /**
@@ -113,14 +112,12 @@ export function PlaybackPanel({
   onToggleNowPlaying,
   onToggleQueue,
   isQueueOpen,
-  hidden,
 }: PlaybackPanelProps) {
   const { t } = useTranslation('messages');
 
   const spotifyDeviceName = useSpotifyStore((s) => s.nowPlaying?.deviceName);
 
   if (adapter.source !== 'local' && adapter.source !== 'spotify') return null;
-  if (hidden) return null;
 
   const isDisabled = !adapter.canControl;
   const showVolume = volume != null && onVolumeChange != null && onToggleMute != null;

@@ -5,7 +5,6 @@ import { SettingsPanel } from './SettingsPanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
 import { useFocusTrap } from '../hooks/useFocusTrap.ts';
 import type { PanelView } from './ControlBar.tsx';
-import logoUrl from '../assets/logo.png';
 
 // Module-level counter (not a ref) to avoid React Compiler refs-during-render lint
 let historyDepth = 0;
@@ -29,11 +28,23 @@ interface MobileControlBarProps {
   isBlocked: boolean;
   onToggleFavorite: () => void;
   onToggleBlock: () => void;
-  onMenuOpenChange?: (open: boolean) => void;
-  onForcePlaybackIdle?: () => void;
-  hasPlaybackPanel?: boolean;
   isIdle: boolean;
   forceIdle: () => void;
+  resetIdle: () => void;
+}
+
+// Circular layout: 9 items evenly spaced around a 360° circle.
+// Starting at 90° (top) going clockwise, same as original radial.
+const ITEM_COUNT = 9;
+const ITEM_SIZE = 44; // h-11 w-11
+
+function circlePosition(index: number, radiusX: number, radiusY: number): { x: number; y: number } {
+  const angle = 90 - (index * 360) / ITEM_COUNT;
+  const rad = (angle * Math.PI) / 180;
+  return {
+    x: Math.cos(rad) * radiusX,
+    y: Math.sin(rad) * radiusY,
+  };
 }
 
 export function MobileControlBar({
@@ -55,14 +66,48 @@ export function MobileControlBar({
   isBlocked,
   onToggleFavorite,
   onToggleBlock,
-  onMenuOpenChange,
-  onForcePlaybackIdle,
-  hasPlaybackPanel,
   isIdle,
   forceIdle,
+  resetIdle,
 }: MobileControlBarProps) {
   const { t } = useTranslation('messages');
   const { t: tc } = useTranslation('common');
+
+  // Responsive layout: smaller circle in landscape to fit within reduced viewport height.
+  // Using matchMedia instead of window.innerHeight to avoid layout thrashing.
+  const [isLandscape, setIsLandscape] = useState(() =>
+    typeof window.matchMedia === 'function'
+      ? window.matchMedia('(orientation: landscape)').matches
+      : false,
+  );
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return;
+    const mql = window.matchMedia('(orientation: landscape)');
+    const handler = (e: MediaQueryListEvent) => setIsLandscape(e.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
+  }, []);
+
+  // Landscape: wider ellipse shifted up to clear the PlaybackPanel
+  const circleRadiusX = isLandscape ? 150 : 110;
+  const circleRadiusY = isLandscape ? 80 : 110;
+
+  // "Just revealed" guard: after controls appear, block button clicks for 400ms so the
+  // touch that revealed controls doesn't accidentally trigger a button action.
+  const [justRevealed, setJustRevealed] = useState(false);
+  const justRevealedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleReveal = useCallback(() => {
+    resetIdle();
+    setJustRevealed(true);
+    if (justRevealedTimer.current) clearTimeout(justRevealedTimer.current);
+    justRevealedTimer.current = setTimeout(() => setJustRevealed(false), 400);
+  }, [resetIdle]);
+  useEffect(
+    () => () => {
+      if (justRevealedTimer.current) clearTimeout(justRevealedTimer.current);
+    },
+    [],
+  );
 
   const activeCustomPackId = useSettingsStore((s) => s.activeCustomPackId);
   const customPacks = useSettingsStore((s) => s.customPacks);
@@ -71,10 +116,9 @@ export function MobileControlBar({
     [customPacks, activeCustomPackId],
   );
 
-  const [menuOpen, setMenuOpen] = useState(false);
   const [modalPanel, setModalPanel] = useState<PanelView>('none');
 
-  // History management for Android back button
+  // History management for Android back button (modals only)
   const pushHistory = useCallback(() => {
     historyDepth += 1;
     history.pushState({ mobileUI: historyDepth }, '');
@@ -87,25 +131,12 @@ export function MobileControlBar({
     }
   }, []);
 
-  const openMenu = useCallback(() => {
-    setMenuOpen(true);
-    onMenuOpenChange?.(true);
-    pushHistory();
-  }, [pushHistory, onMenuOpenChange]);
-
-  const closeMenu = useCallback(() => {
-    setMenuOpen(false);
-    onMenuOpenChange?.(false);
-    popHistory();
-  }, [popHistory, onMenuOpenChange]);
-
   const closeModal = useCallback(() => {
     const wasOpen = modalPanel !== 'none';
     setModalPanel('none');
     onTogglePanel('none');
-    onMenuOpenChange?.(false);
     if (wasOpen) popHistory();
-  }, [modalPanel, onTogglePanel, popHistory, onMenuOpenChange]);
+  }, [modalPanel, onTogglePanel, popHistory]);
 
   // Handle browser back button
   useEffect(() => {
@@ -116,80 +147,40 @@ export function MobileControlBar({
       if (modalPanel !== 'none') {
         setModalPanel('none');
         onTogglePanel('none');
-      } else if (menuOpen) {
-        setMenuOpen(false);
-        onMenuOpenChange?.(false);
       }
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [menuOpen, modalPanel, onTogglePanel, onMenuOpenChange]);
+  }, [modalPanel, onTogglePanel]);
 
-  // Auto-close radial menu after 10s of inactivity (resets on interaction)
-  useEffect(() => {
-    if (!menuOpen) return;
-
-    let timer: ReturnType<typeof setTimeout>;
-    const startTimer = () => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        setMenuOpen(false);
-        onMenuOpenChange?.(false);
-        while (historyDepth > 0) {
-          historyDepth -= 1;
-          history.back();
-        }
-      }, 10_000);
-    };
-
-    const resetTimer = () => startTimer();
-    startTimer();
-
-    const events = ['touchstart', 'mousemove', 'mousedown'] as const;
-    events.forEach((e) => window.addEventListener(e, resetTimer, { passive: true }));
-    return () => {
-      clearTimeout(timer);
-      events.forEach((e) => window.removeEventListener(e, resetTimer));
-    };
-  }, [menuOpen, onMenuOpenChange]);
-
-  // Transition from radial menu directly to a modal without dropping mobileMenuOpen.
-  // closeMenu() sets mobileMenuOpen(false), which would flash the PlaybackPanel
-  // before openModal() sets it back to true. Instead, close the menu visually
-  // but keep mobileMenuOpen true, then swap to the modal panel.
-  // Reuses the menu's existing history entry (no pop/push) to avoid an async
-  // popstate from history.back() racing with the modal open.
-  const menuToModal = useCallback(
+  // Open a modal panel (push history entry for back button)
+  const openModal = useCallback(
     (panel: PanelView) => {
-      setMenuOpen(false);
       setModalPanel(panel);
       onTogglePanel(panel);
-      onMenuOpenChange?.(true);
+      pushHistory();
     },
-    [onTogglePanel, onMenuOpenChange],
+    [onTogglePanel, pushHistory],
   );
 
-  // Radial items clockwise from 12 o'clock:
-  // Top half (preset): Previous(10), Block(11), Presets(12), Next(1), Favorite(2)
-  // Bottom half (app): Settings(3), Exit(4), Fullscreen(6), Autopilot(8)
   const modalRef = useRef<HTMLDivElement>(null);
   useFocusTrap(modalRef, modalPanel !== 'none');
 
-  const radialItems = [
+  // Circle items clockwise from top:
+  // Presets (12), Next (1:20), Favorite (2:40), Settings (4), Exit (5:20), Fullscreen (6:40), Autopilot (8), Block (9:20), Previous (10:40)
+  const circleItems = [
     {
       label: tc('presets'),
       icon: 'P',
-      action: () => menuToModal('presets'),
+      action: () => openModal('presets'),
     },
     {
       label: t('mobile.next'),
       icon: '▶',
       action: () => {
         onNextPreset();
-        closeMenu();
         forceIdle();
-        onForcePlaybackIdle?.();
       },
     },
     {
@@ -197,9 +188,7 @@ export function MobileControlBar({
       icon: '★',
       action: () => {
         onToggleFavorite();
-        closeMenu();
         forceIdle();
-        onForcePlaybackIdle?.();
       },
       active: isFavorite,
       activeColor: 'yellow' as const,
@@ -207,24 +196,19 @@ export function MobileControlBar({
     {
       label: tc('settings'),
       icon: '⚙',
-      action: () => menuToModal('settings'),
+      action: () => openModal('settings'),
     },
     {
       label: tc('exit'),
       icon: '✕',
-      action: () => {
-        onStop();
-        closeMenu();
-      },
+      action: onStop,
     },
     {
       label: isFullscreen ? t('controlBar.exitFS') : tc('fullscreen'),
       icon: '⛶',
       action: () => {
         onToggleFullscreen();
-        closeMenu();
         forceIdle();
-        onForcePlaybackIdle?.();
       },
       active: isFullscreen,
     },
@@ -233,9 +217,7 @@ export function MobileControlBar({
       icon: 'A',
       action: () => {
         onToggleAutopilot();
-        closeMenu();
         forceIdle();
-        onForcePlaybackIdle?.();
       },
       active: autopilotEnabled,
     },
@@ -244,9 +226,7 @@ export function MobileControlBar({
       icon: '⊘',
       action: () => {
         onToggleBlock();
-        closeMenu();
         forceIdle();
-        onForcePlaybackIdle?.();
       },
       active: isBlocked,
       activeColor: 'red' as const,
@@ -256,69 +236,52 @@ export function MobileControlBar({
       icon: '◀',
       action: () => {
         onPreviousPreset?.();
-        closeMenu();
         forceIdle();
-        onForcePlaybackIdle?.();
       },
       disabled: !canGoBack,
     },
   ];
 
-  // Radial layout: 360° circle, items evenly spaced starting from top (90°) going clockwise
-  const itemCount = radialItems.length;
-  const radius = 110;
-
-  // FAB size (px) — used for centering items relative to hub
-  const fabSize = 56; // h-14 w-14
-  const itemSize = 44; // h-11 w-11
-  const itemOffset = (fabSize - itemSize) / 2;
-
   return (
     <div className="md:hidden">
-      {/* Backdrop overlay when menu is open */}
-      {menuOpen && (
-        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-        <div className="fixed inset-0 z-[54] bg-black/30" onClick={closeMenu} />
+      {/* Transparent overlay — toggles controls on tap.
+          Always present (except when modal open) to intercept taps before they reach buttons.
+          When idle: tap reveals controls (with justRevealed guard preventing accidental button clicks).
+          When visible: tap hides controls via forceIdle. On mobile, useIdleTimer's window
+          listeners are suppressed (suppressEvents), so this overlay is the sole input handler. */}
+      {modalPanel === 'none' && (
+        <div
+          role="presentation"
+          className="fixed inset-0 z-[47]"
+          onClick={isIdle ? handleReveal : forceIdle}
+        />
       )}
 
-      {/* FAB hub — slides from bottom-right to center when open */}
+      {/* Circular action buttons — centered on screen, fade with idle state (matches PlaybackPanel) */}
       <div
-        className="pointer-events-none fixed z-[55] transition-all duration-400"
-        style={{
-          bottom: menuOpen ? `calc(50% - ${fabSize / 2}px)` : hasPlaybackPanel ? '110px' : '16px',
-          right: menuOpen ? `calc(50% - ${fabSize / 2}px)` : '16px',
-        }}
+        data-testid="mobile-circle"
+        className={`pointer-events-none fixed left-1/2 z-[55] transition-opacity duration-500 ${isIdle ? 'opacity-0' : 'opacity-100'}`}
+        style={{ top: isLandscape ? '40%' : '50%', transform: 'translate(-50%, -50%)' }}
       >
-        {/* Radial menu items (positioned relative to FAB center) */}
-        {radialItems.map((item, i) => {
-          // 360° circle starting at 90° (top), going clockwise
-          const angle = 90 - (i * 360) / itemCount;
-          const rad = (angle * Math.PI) / 180;
-          const dx = Math.cos(rad) * radius;
-          const dy = Math.sin(rad) * radius;
+        {circleItems.map((item, i) => {
+          const { x, y } = circlePosition(i, circleRadiusX, circleRadiusY);
 
           return (
             <div
               key={item.label}
-              className={`absolute z-[56] flex flex-col items-center transition-[transform,opacity] ${
-                menuOpen
-                  ? 'pointer-events-auto scale-100 opacity-100'
-                  : 'pointer-events-none scale-50 opacity-0'
-              }`}
+              className={`absolute flex flex-col items-center ${isIdle || justRevealed ? 'pointer-events-none' : 'pointer-events-auto'}`}
               style={{
-                bottom: `${dy + itemOffset}px`,
-                left: `${dx + itemOffset}px`,
-                transitionDelay: menuOpen ? `${i * 40}ms` : '0ms',
-                transitionDuration: '250ms',
+                left: `${x - ITEM_SIZE / 2}px`,
+                bottom: `${y - ITEM_SIZE / 2}px`,
               }}
             >
               <button
                 onClick={item.action}
                 disabled={item.disabled}
                 aria-label={item.label}
-                className={`flex h-11 w-11 items-center justify-center rounded-full border-none text-sm shadow-[0_0_10px_rgba(0,0,0,0.7)] ${
+                className={`flex h-11 w-11 items-center justify-center rounded-full border-none text-sm shadow-[0_0_10px_rgba(0,0,0,0.5)] ${
                   item.disabled
-                    ? 'cursor-not-allowed bg-black/80 text-white/20'
+                    ? 'cursor-not-allowed bg-gray-900/90 text-white/20'
                     : item.active
                       ? `cursor-pointer ${
                           item.activeColor === 'yellow'
@@ -327,13 +290,13 @@ export function MobileControlBar({
                               ? 'bg-red-900/80 text-red-400'
                               : 'bg-orange-500 text-white'
                         }`
-                      : 'cursor-pointer bg-black/80 text-white/80'
+                      : 'cursor-pointer bg-gray-900/90 text-white/80'
                 }`}
               >
                 {item.icon}
               </button>
               <span
-                className={`mt-0.5 max-w-16 truncate text-center text-[10px] leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] ${
+                className={`mt-0.5 max-w-16 truncate rounded-sm bg-gray-900/90 px-1 text-center text-[10px] leading-tight ${
                   item.disabled ? 'text-white/20' : 'text-white/80'
                 }`}
               >
@@ -342,21 +305,6 @@ export function MobileControlBar({
             </div>
           );
         })}
-
-        {/* FAB button */}
-        <button
-          onClick={menuOpen ? closeMenu : openMenu}
-          aria-label={menuOpen ? t('mobile.closeMenu') : t('mobile.openMenu')}
-          className={`relative flex h-14 w-14 items-center justify-center rounded-full border-none bg-black/60 shadow-lg backdrop-blur-sm transition-all duration-400 ${
-            menuOpen
-              ? 'pointer-events-auto rotate-45 opacity-100'
-              : isIdle
-                ? 'pointer-events-none opacity-0'
-                : 'pointer-events-auto opacity-100'
-          } cursor-pointer`}
-        >
-          <img src={logoUrl} alt={t('mobile.menu')} className="h-[52px] w-[52px] object-contain" />
-        </button>
       </div>
 
       {/* Modal panels */}

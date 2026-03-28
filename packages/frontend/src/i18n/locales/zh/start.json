@@ -12,7 +12,6 @@
   "shareAudioMobileHint": "仅限电脑 - 需要 Chrome、Edge 或 Opera",
   "shareAudioDesktopHint": "需要 Chrome、Edge 或 Opera",
   "somethingWentWrong": "出了点问题",
-
   "shareAudioModal": {
     "browserNoSupport": "{{browser}} 不支持音频捕获",
     "browserCompatMessage": "通过屏幕共享进行音频捕获需要基于 Chromium 的浏览器（Chrome、Edge 或 Opera）。你仍然可以使用",
@@ -27,7 +26,6 @@
     "step3": "沉浸其中",
     "startVisualizer": "启动可视化工具"
   },
-
   "osTips": {
     "windowsChromeOS": "在 {{os}} 上，所有共享模式（屏幕、窗口和标签页）均支持音频。共享整个屏幕或窗口可获得最佳体验（无浏览器横幅）。",
     "macOSChromium": "在 macOS 14.2+ 上，屏幕和窗口共享支持音频。较旧的 macOS 版本仅支持标签页共享。",
@@ -35,12 +33,10 @@
     "linux": "在 Linux 上，仅标签页共享支持音频。",
     "unknown": "在 Windows 和 ChromeOS 上，所有共享模式均支持音频。在 macOS 14.2+ 上，Chrome 中的屏幕和窗口共享支持音频。在 Linux 上，仅标签页共享支持音频。"
   },
-
   "sensitivityTips": {
     "title": "灵敏度和响应度提示",
     "description": "有些预设偏向环境氛围，对声音的响应较弱。你可以在设置面板中调整灵敏度和其他参数来优化可视化效果。"
   },
-
   "localFilesModal": {
     "step1Bold": "选择你的文件",
     "step1": "– 从设备中选择一个或多个音频文件",
@@ -50,7 +46,6 @@
     "unsupportedFile": "不支持的文件",
     "chooseFiles": "选择文件"
   },
-
   "micModal": {
     "step1Bold": "点击启动麦克风",
     "step1": "并在提示时授予权限",
@@ -59,7 +54,6 @@
     "infoBox": "静音模式：音频被捕获但不会通过扬声器播放。",
     "startMicrophone": "启动麦克风"
   },
-
   "spotify": {
     "connectedAs": "已连接为 {{name}}",
     "connected": "Spotify 已连接",
@@ -70,7 +64,6 @@
     "connectSpotify": "连接 Spotify",
     "devInfo": "如果你不是应用所有者，请确保他们已将你的 Spotify 账户关联的姓名和电子邮件添加到其开发者应用的用户管理标签页中。"
   },
-
   "onboarding": {
     "desktop": {
       "skipPresetsTitle": "跳过预设",
@@ -83,8 +76,8 @@
       "shortcutsDesc": "按 H 查看所有键盘快捷键，或在设置菜单中找到它们。"
     },
     "mobile": {
-      "menuTitle": "菜单",
-      "menuDesc": "点击角落的图标打开径向菜单。它可以快速访问所有功能：预设、设置、全屏等。",
+      "menuTitle": "点击显示控制",
+      "menuDesc": "点击任意位置即可显示或隐藏控制按钮。几秒后会自动消失，让视觉效果保持最佳状态。",
       "navigateTitle": "浏览预设",
       "navigateDesc": "使用下一个 (▶) 和上一个 (◀) 在预设之间切换。每个预设以自己的方式响应你的音乐。",
       "curateTitle": "定制你的体验",
@@ -93,7 +86,6 @@
       "autopilotDesc": "开启自动播放 (A) 自动循环预设。打开设置 (⚙) 调整均衡器和渲染效果。"
     }
   },
-
   "landing": {
     "title": "MangoWave | 音频可视化工具",
     "metaDescription": "免费音频响应可视化工具，拥有 400+ 视觉效果。无需注册、无需安装、没有广告。每一个节拍，每一次律动。立即启动。",

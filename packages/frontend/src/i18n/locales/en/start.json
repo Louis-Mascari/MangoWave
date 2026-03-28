@@ -83,8 +83,8 @@
       "shortcutsDesc": "Press H to see all keyboard shortcuts, or find them in the Settings menu."
     },
     "mobile": {
-      "menuTitle": "The Menu",
-      "menuDesc": "Tap the logo in the corner to open the radial menu. It gives you quick access to everything: presets, settings, fullscreen, and more.",
+      "menuTitle": "Tap to Reveal",
+      "menuDesc": "Tap anywhere to show or hide the controls. They fade away after a few seconds so the visuals stay front and center.",
       "navigateTitle": "Navigate Presets",
       "navigateDesc": "Use Next (▶) and Previous (◀) to skip between presets. Each one reacts to your music in its own way.",
       "curateTitle": "Curate Your Experience",

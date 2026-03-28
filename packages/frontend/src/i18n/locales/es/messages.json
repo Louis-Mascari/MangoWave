@@ -27,12 +27,10 @@
     "unknownFile": "Archivo desconocido",
     "fullscreenNotSupported": "Lamentablemente, tu dispositivo no admite pantalla completa desde el navegador."
   },
-
   "fileValidation": {
     "singleRejected": "\"{{filename}}\" no es un archivo de audio soportado. Formatos compatibles: MP3, WAV, FLAC, OGG, AAC, Opus y M4A.",
     "multipleRejected": "{{count}} archivos no eran formatos de audio soportados y fueron omitidos: {{names}}. Formatos compatibles: MP3, WAV, FLAC, OGG, AAC, Opus y M4A."
   },
-
   "settingsImport": {
     "mustBeJson": "El archivo debe ser un archivo .json",
     "fileTooLarge": "Archivo demasiado grande",
@@ -43,7 +41,6 @@
     "importedWithWarnings": "Configuración importada. Algunas configuraciones no se pudieron aplicar debido a cambios en la app",
     "importedSuccess": "Configuración importada exitosamente"
   },
-
   "spotify": {
     "connectingToSpotify": "Conectando a Spotify...",
     "connectionFailed": "La conexión con Spotify falló. Por favor, inténtalo de nuevo. Si el problema persiste, verifica que tu cuenta haya sido agregada a los usuarios autorizados de la app.",
@@ -52,7 +49,6 @@
     "popupBlocked": "No se pudo abrir la ventana de inicio de sesión de Spotify. Por favor, verifica que las ventanas emergentes estén permitidas para este sitio e inténtalo de nuevo.",
     "rateLimited": "Límite de Spotify alcanzado. Reintentando en {{seconds}}s"
   },
-
   "toasts": {
     "autopilotOn": "Autopilot activado",
     "autopilotOff": "Autopilot desactivado",
@@ -68,7 +64,6 @@
     "silenceDetectedMic": "No se detectó audio del micrófono. Asegúrate de que tu mic no esté silenciado y esté captando sonido.",
     "silenceDetectedLocal": "No se detectó audio. Asegúrate de que el archivo sea un formato compatible y de que el volumen de tu dispositivo esté activado."
   },
-
   "playback": {
     "addSongsToQueue": "Agrega canciones a tu cola",
     "micNoControls": "Entrada de micrófono: sin controles de reproducción",
@@ -99,7 +94,6 @@
     "queueShortcut": "Cola (Q)",
     "playingOn": "Reproduciendo en {{device}}"
   },
-
   "queue": {
     "title": "Cola",
     "addFiles": "Agregar archivos",
@@ -109,7 +103,6 @@
     "remove": "Eliminar {{name}}",
     "noTracksLoaded": "No hay pistas cargadas"
   },
-
   "controlBar": {
     "previousPreset": "Preset anterior (P)",
     "nextPreset": "Siguiente preset (Space / N)",
@@ -121,18 +114,13 @@
     "toggleFullscreen": "Alternar pantalla completa (F)",
     "exitFS": "Salir de PC"
   },
-
   "mobile": {
     "next": "Siguiente",
     "favorite": "Favorito",
     "unfavorite": "No favorito",
     "block": "Bloquear",
-    "unblock": "Desbloquear",
-    "openMenu": "Abrir menú",
-    "closeMenu": "Cerrar menú",
-    "menu": "Menú"
+    "unblock": "Desbloquear"
   },
-
   "presetBrowser": {
     "tabs": {
       "all": "todos",
@@ -162,7 +150,6 @@
     "addedToPack": "Añadido a \"{{pack}}\"",
     "createPackFirst": "Crea primero un pack personalizado"
   },
-
   "customPacks": {
     "tabs": {
       "packs": "packs"

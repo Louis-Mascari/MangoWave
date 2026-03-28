@@ -12,7 +12,6 @@
   "shareAudioMobileHint": "Apenas computador - requer Chrome, Edge ou Opera",
   "shareAudioDesktopHint": "Requer Chrome, Edge ou Opera",
   "somethingWentWrong": "Algo deu errado",
-
   "shareAudioModal": {
     "browserNoSupport": "{{browser}} não suporta captura de áudio",
     "browserCompatMessage": "A captura de áudio via compartilhamento de tela requer um navegador baseado em Chromium (Chrome, Edge ou Opera). Você ainda pode usar",
@@ -27,7 +26,6 @@
     "step3": "e se deixe levar",
     "startVisualizer": "Iniciar Visualizador"
   },
-
   "osTips": {
     "windowsChromeOS": "Todos os modos de compartilhamento (tela, janela e aba) suportam áudio no {{os}}. Compartilhar a tela inteira ou uma janela oferece a melhor experiência (sem banner do navegador).",
     "macOSChromium": "No macOS 14.2+, compartilhamento de tela e janela suportam áudio. Versões anteriores do macOS são limitadas ao compartilhamento de aba.",
@@ -35,12 +33,10 @@
     "linux": "No Linux, apenas o compartilhamento de aba suporta áudio.",
     "unknown": "No Windows e ChromeOS, todos os modos de compartilhamento suportam áudio. No macOS 14.2+, compartilhamento de tela e janela suportam áudio no Chrome. No Linux, apenas o compartilhamento de aba suporta áudio."
   },
-
   "sensitivityTips": {
     "title": "Dicas de sensibilidade e reatividade",
     "description": "Alguns presets são mais ambientes e menos reativos que outros. Verifique o painel de Configurações para ajustar a sensibilidade e outros parâmetros que alimentam o motor de visualização."
   },
-
   "localFilesModal": {
     "step1Bold": "Escolha seus arquivos",
     "step1": "– selecione um ou mais arquivos de áudio do seu dispositivo",
@@ -50,7 +46,6 @@
     "unsupportedFile": "Arquivo não suportado",
     "chooseFiles": "Escolher Arquivos"
   },
-
   "micModal": {
     "step1Bold": "Clique em Iniciar Microfone",
     "step1": "e conceda permissão quando solicitado",
@@ -59,7 +54,6 @@
     "infoBox": "Modo silencioso: o áudio é capturado, mas não reproduzido nos seus alto-falantes.",
     "startMicrophone": "Iniciar Microfone"
   },
-
   "spotify": {
     "connectedAs": "Conectado como {{name}}",
     "connected": "Spotify conectado",
@@ -70,7 +64,6 @@
     "connectSpotify": "Conectar Spotify",
     "devInfo": "Se você não é o proprietário do aplicativo, certifique-se de que ele adicionou seu nome e e-mail associados à sua conta Spotify na aba Gerenciamento de Usuários do aplicativo de desenvolvedor."
   },
-
   "onboarding": {
     "desktop": {
       "skipPresetsTitle": "Pular Presets",
@@ -83,8 +76,8 @@
       "shortcutsDesc": "Pressione H para ver todos os atalhos de teclado, ou encontre-os no menu de Configurações."
     },
     "mobile": {
-      "menuTitle": "O Menu",
-      "menuDesc": "Toque no logo no canto para abrir o menu radial. Ele dá acesso rápido a tudo: presets, configurações, tela cheia e mais.",
+      "menuTitle": "Toque para Controlar",
+      "menuDesc": "Toque em qualquer lugar para mostrar ou ocultar os controles. Eles desaparecem após alguns segundos para que os visuais fiquem em destaque.",
       "navigateTitle": "Navegar Presets",
       "navigateDesc": "Use Próximo (▶) e Anterior (◀) para alternar entre presets. Cada um reage à sua música de forma única.",
       "curateTitle": "Personalize Sua Experiência",
@@ -93,7 +86,6 @@
       "autopilotDesc": "Ative o Piloto Automático (A) para alternar entre presets automaticamente. Abra Configurações (⚙) para ajustar o equalizador e a renderização."
     }
   },
-
   "landing": {
     "title": "MangoWave | Visualizador de Áudio",
     "metaDescription": "Visualizador reativo a áudio gratuito com mais de 400 visuais. Sem cadastro, sem instalação, sem anúncios. Cada batida, cada drop. É só clicar em lançar.",

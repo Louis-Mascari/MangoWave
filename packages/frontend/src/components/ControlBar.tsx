@@ -28,11 +28,9 @@ interface ControlBarProps {
   onToggleBlock: () => void;
   onAddLocalFiles?: (files: File[]) => void;
   onClearPlaylist?: () => void;
-  onMobileMenuChange?: (open: boolean) => void;
-  onForcePlaybackIdle?: () => void;
-  hasPlaybackPanel?: boolean;
   isIdle: boolean;
   forceIdle: () => void;
+  resetIdle: () => void;
   onPauseIdle: () => void;
   onResumeIdle: () => void;
 }
@@ -60,11 +58,9 @@ export function ControlBar(props: ControlBarProps) {
         isBlocked={props.isBlocked}
         onToggleFavorite={props.onToggleFavorite}
         onToggleBlock={props.onToggleBlock}
-        onMenuOpenChange={props.onMobileMenuChange}
-        onForcePlaybackIdle={props.onForcePlaybackIdle}
-        hasPlaybackPanel={props.hasPlaybackPanel}
         isIdle={props.isIdle}
         forceIdle={props.forceIdle}
+        resetIdle={props.resetIdle}
       />
     </>
   );

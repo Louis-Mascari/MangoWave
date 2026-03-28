@@ -122,7 +122,6 @@ function MainApp() {
   const [presetList, setPresetList] = useState<string[]>([]);
   const [presetPackMap, setPresetPackMap] = useState<Map<string, string>>(new Map());
   const [activePanel, setActivePanel] = useState<PanelView>('none');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLaunchAnimation, setShowLaunchAnimation] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [webglContextLost, setWebglContextLost] = useState(false);
@@ -327,7 +326,7 @@ function MainApp() {
     handleSpotifyCycleRepeat,
   } = useSpotifyPlayback();
 
-  const { playbackAdapter, nowPlayingTrack, hasPlaybackPanel } = usePlaybackAdapter({
+  const { playbackAdapter, nowPlayingTrack } = usePlaybackAdapter({
     local,
     captureSource: capture.captureSource,
     isSpotifyConnected,
@@ -351,7 +350,8 @@ function MainApp() {
     pause: pausePlaybackIdle,
     resume: resumePlaybackIdle,
     forceIdle: forcePlaybackIdle,
-  } = useIdleTimer(4000, true);
+    reset: resetPlaybackIdle,
+  } = useIdleTimer(5000, true, isMobileDevice);
 
   const handleToggleQueue = useCallback(() => {
     handleTogglePanel('playlist');
@@ -475,11 +475,9 @@ function MainApp() {
             onToggleBlock={handleToggleBlock}
             onAddLocalFiles={handleAddLocalFiles}
             onClearPlaylist={local.clearQueue}
-            onMobileMenuChange={setMobileMenuOpen}
-            onForcePlaybackIdle={forcePlaybackIdle}
-            hasPlaybackPanel={hasPlaybackPanel}
             isIdle={playbackPanelIdle}
             forceIdle={forcePlaybackIdle}
+            resetIdle={resetPlaybackIdle}
             onPauseIdle={pausePlaybackIdle}
             onResumeIdle={resumePlaybackIdle}
           />
@@ -497,7 +495,6 @@ function MainApp() {
             onToggleNowPlaying={handleToggleNowPlaying}
             onToggleQueue={handleToggleQueue}
             isQueueOpen={activePanel === 'playlist'}
-            hidden={mobileMenuOpen}
           />
           {/* Mobile queue modal — desktop queue renders inside ControlBar */}
           {isMobileDevice && activePanel === 'playlist' && (

@@ -27,12 +27,10 @@
     "unknownFile": "File tidak dikenal",
     "fullscreenNotSupported": "Sayangnya, perangkat Anda tidak mendukung layar penuh dari browser."
   },
-
   "fileValidation": {
     "singleRejected": "\"{{filename}}\" bukan file audio yang didukung. Format yang didukung: MP3, WAV, FLAC, OGG, AAC, Opus, dan M4A.",
     "multipleRejected": "{{count}} file bukan format audio yang didukung dan dilewati: {{names}}. Format yang didukung: MP3, WAV, FLAC, OGG, AAC, Opus, dan M4A."
   },
-
   "settingsImport": {
     "mustBeJson": "File harus berformat .json",
     "fileTooLarge": "File terlalu besar",
@@ -43,7 +41,6 @@
     "importedWithWarnings": "Pengaturan diimpor. Beberapa pengaturan tidak dapat diterapkan karena perubahan aplikasi",
     "importedSuccess": "Pengaturan berhasil diimpor"
   },
-
   "spotify": {
     "connectingToSpotify": "Menghubungkan ke Spotify...",
     "connectionFailed": "Koneksi Spotify gagal. Silakan coba lagi. Jika masalah berlanjut, pastikan akunmu telah ditambahkan ke daftar pengguna resmi aplikasi.",
@@ -52,7 +49,6 @@
     "popupBlocked": "Tidak dapat membuka jendela login Spotify. Pastikan pop-up diizinkan untuk situs ini dan coba lagi.",
     "rateLimited": "Spotify dibatasi. Mencoba lagi dalam {{seconds}}d"
   },
-
   "toasts": {
     "autopilotOn": "Autopilot aktif",
     "autopilotOff": "Autopilot nonaktif",
@@ -68,7 +64,6 @@
     "silenceDetectedMic": "Tidak ada audio terdeteksi dari mikrofon. Pastikan mikrofon tidak di-mute dan menangkap suara.",
     "silenceDetectedLocal": "Tidak ada audio terdeteksi. Pastikan file berformat yang didukung dan volume perangkat sudah dinyalakan."
   },
-
   "playback": {
     "addSongsToQueue": "Tambahkan lagu ke antrean",
     "micNoControls": "Input mikrofon — tanpa kontrol pemutaran",
@@ -99,7 +94,6 @@
     "queueShortcut": "Antrean (Q)",
     "playingOn": "Diputar di {{device}}"
   },
-
   "queue": {
     "title": "Antrean",
     "addFiles": "Tambah File",
@@ -109,7 +103,6 @@
     "remove": "Hapus {{name}}",
     "noTracksLoaded": "Tidak ada lagu dimuat"
   },
-
   "controlBar": {
     "previousPreset": "Preset sebelumnya (P)",
     "nextPreset": "Preset berikutnya (Space / N)",
@@ -121,18 +114,13 @@
     "toggleFullscreen": "Alihkan layar penuh (F)",
     "exitFS": "Keluar"
   },
-
   "mobile": {
     "next": "Berikutnya",
     "favorite": "Favorit",
     "unfavorite": "Hapus Favorit",
     "block": "Blokir",
-    "unblock": "Buka Blokir",
-    "openMenu": "Buka menu",
-    "closeMenu": "Tutup menu",
-    "menu": "Menu"
+    "unblock": "Buka Blokir"
   },
-
   "presetBrowser": {
     "tabs": {
       "all": "semua",
@@ -162,7 +150,6 @@
     "addedToPack": "Ditambahkan ke \"{{pack}}\"",
     "createPackFirst": "Buat paket kustom terlebih dahulu"
   },
-
   "customPacks": {
     "tabs": {
       "packs": "paket"

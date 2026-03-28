@@ -2,8 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { useFocusTrap } from '../hooks/useFocusTrap.ts';
-import logoUrl from '../assets/logo.png';
-
 interface OnboardingOverlayProps {
   onComplete: () => void;
 }
@@ -42,9 +40,16 @@ const MOBILE_TIPS: Tip[] = [
     titleKey: 'onboarding.mobile.menuTitle',
     descKey: 'onboarding.mobile.menuDesc',
     icon: (
-      <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-black/60">
-        <img src={logoUrl} alt="MangoWave logo" className="h-11 w-11 object-contain" />
-      </div>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 36 36"
+        fill="none"
+        className="inline-block h-10 w-10"
+      >
+        <circle cx="18" cy="18" r="14" stroke="#f97316" strokeWidth="2" />
+        <circle cx="18" cy="14" r="2" fill="#f97316" />
+        <path d="M18 18v8" stroke="#f97316" strokeWidth="2" strokeLinecap="round" />
+      </svg>
     ),
   },
   {

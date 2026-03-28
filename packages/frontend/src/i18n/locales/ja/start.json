@@ -12,7 +12,6 @@
   "shareAudioMobileHint": "PC専用 - Chrome、Edge、またはOperaが必要です",
   "shareAudioDesktopHint": "Chrome、Edge、またはOperaが必要です",
   "somethingWentWrong": "エラーが発生しました",
-
   "shareAudioModal": {
     "browserNoSupport": "{{browser}}は音声キャプチャをサポートしていません",
     "browserCompatMessage": "画面共有による音声キャプチャには、Chromiumベースのブラウザ（Chrome、Edge、またはOpera）が必要です。代わりに",
@@ -27,7 +26,6 @@
     "step3": "してお楽しみください",
     "startVisualizer": "ビジュアライザーを開始"
   },
-
   "osTips": {
     "windowsChromeOS": "{{os}}では、すべての共有モード（画面、ウィンドウ、タブ）で音声がサポートされています。画面全体またはウィンドウを共有すると、ブラウザバナーなしでより快適に利用できます。",
     "macOSChromium": "macOS 14.2以降では、画面とウィンドウの共有で音声がサポートされています。古いmacOSバージョンではタブ共有に限定されます。",
@@ -35,12 +33,10 @@
     "linux": "Linuxでは、タブ共有のみが音声をサポートしています。",
     "unknown": "WindowsとChromeOSでは、すべての共有モードで音声がサポートされています。macOS 14.2以降では、Chromeで画面とウィンドウの共有が音声をサポートしています。Linuxでは、タブ共有のみが音声をサポートしています。"
   },
-
   "sensitivityTips": {
     "title": "感度とリアクティビティのヒント",
     "description": "プリセットによって、アンビエント寄りのものやリアクティブなものがあります。設定パネルで感度やビジュアライゼーションエンジンに影響するパラメーターを調整できます。"
   },
-
   "localFilesModal": {
     "step1Bold": "ファイルを選択",
     "step1": "– デバイスから1つまたは複数の音声ファイルを選択してください",
@@ -50,7 +46,6 @@
     "unsupportedFile": "サポートされていないファイル",
     "chooseFiles": "ファイルを選択"
   },
-
   "micModal": {
     "step1Bold": "「マイクを開始」をクリック",
     "step1": "プロンプトが表示されたら許可してください",
@@ -59,7 +54,6 @@
     "infoBox": "サイレントモード：音声はキャプチャされますが、スピーカーからは再生されません。",
     "startMicrophone": "マイクを開始"
   },
-
   "spotify": {
     "connectedAs": "{{name}}として接続中",
     "connected": "Spotify接続済み",
@@ -70,7 +64,6 @@
     "connectSpotify": "Spotifyを接続",
     "devInfo": "アプリオーナーでない場合は、Spotifyアカウントに関連付けられた名前とメールアドレスが、開発者アプリのユーザー管理タブに追加されていることを確認してください。"
   },
-
   "onboarding": {
     "desktop": {
       "skipPresetsTitle": "プリセットをスキップ",
@@ -83,8 +76,8 @@
       "shortcutsDesc": "H を押すとすべてのキーボードショートカットを確認できます。設定メニューからも見られます。"
     },
     "mobile": {
-      "menuTitle": "メニュー",
-      "menuDesc": "画面の角にあるロゴをタップすると、ラジアルメニューが開きます。プリセット、設定、フルスクリーンなど、すべてにすばやくアクセスできます。",
+      "menuTitle": "タップで表示",
+      "menuDesc": "画面のどこかをタップすると、コントロールの表示・非表示が切り替わります。数秒後に自動で消えるので、ビジュアルの邪魔になりません。",
       "navigateTitle": "プリセットを移動",
       "navigateDesc": "次へ（▶）と前へ（◀）でプリセットを切り替えられます。それぞれが独自の方法で音楽に反応します。",
       "curateTitle": "自分好みにカスタマイズ",
@@ -93,7 +86,6 @@
       "autopilotDesc": "オートパイロット（A）をオンにすると、プリセットが自動的に切り替わります。設定（⚙）でイコライザーやレンダリングを調整できます。"
     }
   },
-
   "landing": {
     "title": "MangoWave | オーディオビジュアライザー",
     "metaDescription": "400以上のビジュアルを備えた無料の音声リアクティブビジュアライザー。登録不要、インストール不要、広告なし。すべてのビート、すべてのドロップ。ローンチボタンを押すだけ。",

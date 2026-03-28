@@ -12,7 +12,6 @@
   "shareAudioMobileHint": "PC 전용 - Chrome, Edge 또는 Opera 필요",
   "shareAudioDesktopHint": "Chrome, Edge 또는 Opera 필요",
   "somethingWentWrong": "문제가 발생했습니다",
-
   "shareAudioModal": {
     "browserNoSupport": "{{browser}}은(는) 오디오 캡처를 지원하지 않습니다",
     "browserCompatMessage": "화면 공유를 통한 오디오 캡처는 Chromium 기반 브라우저(Chrome, Edge, Opera)가 필요합니다. 대신",
@@ -27,7 +26,6 @@
     "step3": "빠져들어 보세요",
     "startVisualizer": "비주얼라이저 시작"
   },
-
   "osTips": {
     "windowsChromeOS": "{{os}}에서는 모든 공유 모드(화면, 창, 탭)가 오디오를 지원합니다. 전체 화면이나 창을 공유하면 브라우저 배너 없이 가장 깔끔합니다.",
     "macOSChromium": "macOS 14.2 이상에서는 화면 및 창 공유가 오디오를 지원합니다. 이전 macOS 버전은 탭 공유만 지원됩니다.",
@@ -35,12 +33,10 @@
     "linux": "Linux에서는 탭 공유만 오디오를 지원합니다.",
     "unknown": "Windows와 ChromeOS에서는 모든 공유 모드가 오디오를 지원합니다. macOS 14.2 이상에서는 Chrome에서 화면 및 창 공유가 오디오를 지원합니다. Linux에서는 탭 공유만 오디오를 지원합니다."
   },
-
   "sensitivityTips": {
     "title": "감도 및 반응성 팁",
     "description": "프리셋마다 반응성이 다릅니다. 어떤 프리셋은 더 차분하고, 어떤 프리셋은 더 역동적입니다. 설정 패널에서 감도와 시각화 엔진에 영향을 주는 다양한 파라미터를 조절할 수 있습니다."
   },
-
   "localFilesModal": {
     "step1Bold": "파일을 선택하세요",
     "step1": "– 기기에서 하나 이상의 오디오 파일을 선택합니다",
@@ -50,7 +46,6 @@
     "unsupportedFile": "지원하지 않는 파일",
     "chooseFiles": "파일 선택"
   },
-
   "micModal": {
     "step1Bold": "마이크 시작을 클릭하고",
     "step1": "메시지가 나타나면 권한을 허용하세요",
@@ -59,7 +54,6 @@
     "infoBox": "무음 모드: 오디오가 캡처되지만 스피커로 재생되지는 않습니다.",
     "startMicrophone": "마이크 시작"
   },
-
   "spotify": {
     "connectedAs": "{{name}}(으)로 연결됨",
     "connected": "Spotify 연결됨",
@@ -70,7 +64,6 @@
     "connectSpotify": "Spotify 연결",
     "devInfo": "앱 소유자가 아닌 경우, 소유자에게 Spotify 계정에 연결된 이름과 이메일을 개발자 앱의 사용자 관리 탭에 추가해 달라고 요청하세요."
   },
-
   "onboarding": {
     "desktop": {
       "skipPresetsTitle": "프리셋 넘기기",
@@ -83,8 +76,8 @@
       "shortcutsDesc": "H 키를 눌러 모든 키보드 단축키를 확인하거나 설정 메뉴에서 찾을 수 있습니다."
     },
     "mobile": {
-      "menuTitle": "메뉴",
-      "menuDesc": "모서리의 로고를 탭하면 방사형 메뉴가 열립니다. 프리셋, 설정, 전체 화면 등 모든 기능에 빠르게 접근할 수 있습니다.",
+      "menuTitle": "탭하여 컨트롤 표시",
+      "menuDesc": "화면 아무 곳이나 탭하면 컨트롤이 나타나거나 숨겨집니다. 몇 초 후 자동으로 사라져 비주얼이 방해받지 않습니다.",
       "navigateTitle": "프리셋 탐색",
       "navigateDesc": "다음(▶)과 이전(◀)을 사용해 프리셋을 넘겨보세요. 각 프리셋은 음악에 고유한 방식으로 반응합니다.",
       "curateTitle": "나만의 경험 만들기",
@@ -93,7 +86,6 @@
       "autopilotDesc": "자동 전환(A)을 켜면 프리셋이 자동으로 순환합니다. 설정(⚙)을 열어 이퀄라이저와 렌더링을 조절하세요."
     }
   },
-
   "landing": {
     "title": "MangoWave | 오디오 비주얼라이저",
     "metaDescription": "400개 이상의 비주얼을 갖춘 무료 오디오 반응형 비주얼라이저. 가입 없이, 설치 없이, 광고 없이. 모든 비트, 모든 드롭. 시작만 누르세요.",

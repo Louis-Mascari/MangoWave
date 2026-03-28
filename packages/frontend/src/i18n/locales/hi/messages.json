@@ -27,12 +27,10 @@
     "unknownFile": "अज्ञात फ़ाइल",
     "fullscreenNotSupported": "दुर्भाग्य से, आपका डिवाइस ब्राउज़र से फ़ुलस्क्रीन का समर्थन नहीं करता।"
   },
-
   "fileValidation": {
     "singleRejected": "\"{{filename}}\" एक समर्थित ऑडियो फ़ाइल नहीं है। समर्थित फ़ॉर्मेट: MP3, WAV, FLAC, OGG, AAC, Opus और M4A।",
     "multipleRejected": "{{count}} फ़ाइलें समर्थित ऑडियो फ़ॉर्मेट नहीं थीं और छोड़ दी गईं: {{names}}। समर्थित फ़ॉर्मेट: MP3, WAV, FLAC, OGG, AAC, Opus और M4A।"
   },
-
   "settingsImport": {
     "mustBeJson": "फ़ाइल .json होनी चाहिए",
     "fileTooLarge": "फ़ाइल बहुत बड़ी है",
@@ -43,7 +41,6 @@
     "importedWithWarnings": "सेटिंग्स इम्पोर्ट हो गईं। ऐप बदलावों के कारण कुछ सेटिंग्स लागू नहीं हो सकीं",
     "importedSuccess": "सेटिंग्स सफलतापूर्वक इम्पोर्ट हो गईं"
   },
-
   "spotify": {
     "connectingToSpotify": "Spotify से कनेक्ट हो रहा है...",
     "connectionFailed": "Spotify कनेक्शन विफल हो गया। कृपया फिर से कोशिश करो। अगर समस्या बनी रहे, तो जाँचो कि तुम्हारा अकाउंट ऐप के अधिकृत उपयोगकर्ताओं में जोड़ा गया है।",
@@ -52,7 +49,6 @@
     "popupBlocked": "Spotify लॉगिन विंडो नहीं खुल सकी। कृपया जाँचो कि इस साइट के लिए पॉप-अप अनुमत हैं और फिर से कोशिश करो।",
     "rateLimited": "Spotify रेट लिमिटेड। {{seconds}}s में फिर कोशिश होगी"
   },
-
   "toasts": {
     "autopilotOn": "ऑटोपायलट चालू",
     "autopilotOff": "ऑटोपायलट बंद",
@@ -68,7 +64,6 @@
     "silenceDetectedMic": "माइक्रोफ़ोन से कोई ऑडियो नहीं मिला। सुनिश्चित करो कि तुम्हारा mic म्यूट नहीं है और आवाज़ कैप्चर कर रहा है।",
     "silenceDetectedLocal": "कोई ऑडियो नहीं मिला। सुनिश्चित करो कि फ़ाइल सपोर्टेड फ़ॉर्मेट में है और तुम्हारे डिवाइस का वॉल्यूम चालू है।"
   },
-
   "playback": {
     "addSongsToQueue": "क़तार में गाने जोड़ो",
     "micNoControls": "माइक्रोफ़ोन इनपुट: कोई प्लेबैक कंट्रोल नहीं",
@@ -99,7 +94,6 @@
     "queueShortcut": "क़तार (Q)",
     "playingOn": "{{device}} पर चल रहा है"
   },
-
   "queue": {
     "title": "क़तार",
     "addFiles": "फ़ाइलें जोड़ो",
@@ -109,7 +103,6 @@
     "remove": "{{name}} हटाओ",
     "noTracksLoaded": "कोई ट्रैक लोड नहीं"
   },
-
   "controlBar": {
     "previousPreset": "पिछला प्रीसेट (P)",
     "nextPreset": "अगला प्रीसेट (Space / N)",
@@ -121,18 +114,13 @@
     "toggleFullscreen": "फ़ुलस्क्रीन टॉगल (F)",
     "exitFS": "FS बाहर"
   },
-
   "mobile": {
     "next": "अगला",
     "favorite": "फ़ेवरिट",
     "unfavorite": "अनफ़ेवरिट",
     "block": "ब्लॉक",
-    "unblock": "अनब्लॉक",
-    "openMenu": "मेन्यू खोलो",
-    "closeMenu": "मेन्यू बंद करो",
-    "menu": "मेन्यू"
+    "unblock": "अनब्लॉक"
   },
-
   "presetBrowser": {
     "tabs": {
       "all": "सभी",
@@ -162,7 +150,6 @@
     "addedToPack": "\"{{pack}}\" में जोड़ा गया",
     "createPackFirst": "पहले एक कस्टम पैक बनाओ"
   },
-
   "customPacks": {
     "tabs": {
       "packs": "पैक"

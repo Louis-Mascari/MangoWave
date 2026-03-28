@@ -1,98 +1,93 @@
+import { type Page, type Locator } from '@playwright/test';
 import { test, expect } from './fixtures/base';
 import { installAudioMocks } from './fixtures/audio-mock';
 
 // Mobile viewport, user agent, and touch are set by the mobile-chrome / mobile-safari
 // projects in playwright.config.ts (Pixel 7 / iPhone 14 device profiles).
 
+/** Dispatch click on the overlay to reveal controls, then wait for justRevealed guard. */
+async function revealControls(app: Page) {
+  await app.locator('div[role="presentation"]').dispatchEvent('click');
+  await app.waitForTimeout(500);
+}
+
+/** Get a locator scoped to the mobile control bar (md:hidden container). */
+function mobileButton(app: Page, label: string): Locator {
+  return app.locator('.md\\:hidden').getByLabel(label, { exact: true });
+}
+
+/** Check that mobile controls are visible (opacity-100 on container). */
+function expectControlsVisible(app: Page) {
+  return expect(app.locator('.md\\:hidden [data-testid="mobile-circle"]')).toHaveClass(
+    /opacity-100/,
+    { timeout: 5000 },
+  );
+}
+
+/** Check that mobile controls are hidden (opacity-0 on container). */
+function expectControlsHidden(app: Page, timeout = 10000) {
+  return expect(app.locator('.md\\:hidden [data-testid="mobile-circle"]')).toHaveClass(
+    /opacity-0/,
+    { timeout },
+  );
+}
+
 test.describe('Mobile UI', () => {
   test.beforeEach(async ({ app }) => {
     await app.addInitScript(installAudioMocks());
     await app.goto('/');
 
-    // On mobile, start screen shows differently — start via microphone (simpler flow)
     await app.getByRole('button', { name: /Use Microphone/ }).click();
     await app.getByRole('button', { name: /Start Microphone/ }).click();
 
-    // Wait for FAB to appear (the mobile control bar)
-    await expect(app.getByLabel(/Open menu/i)).toBeVisible({ timeout: 15000 });
+    // Wait for visualizer + launch animation to complete.
+    // Controls appear after launch animation calls resumeIdle.
+    await app.waitForSelector('canvas', { timeout: 15000 });
+    await app.waitForTimeout(3000);
+    await expectControlsVisible(app);
   });
 
-  test('FAB button is visible', async ({ app }) => {
-    await expect(app.getByLabel(/Open menu/i)).toBeVisible();
+  test('controls are visible after launch', async ({ app }) => {
+    await expect(mobileButton(app, 'Presets')).toBeVisible();
+    await expect(mobileButton(app, 'Settings')).toBeVisible();
+    await expect(mobileButton(app, 'Next')).toBeVisible();
   });
 
-  test('clicking FAB opens radial menu with items', async ({ app }) => {
-    await app.getByLabel(/Open menu/i).click();
-
-    // Should show Close menu now
-    await expect(app.getByLabel(/Close menu/i)).toBeVisible();
-
-    // Wait for radial items to animate in
-    await app.waitForTimeout(500);
-
-    // Check that multiple radial action buttons are visible
-    // The radial menu has items like Next, Settings, Presets, etc.
-    const buttons = app.locator('button').filter({ hasText: /.+/ });
-    const count = await buttons.count();
-    expect(count).toBeGreaterThan(3);
+  test('controls hide after idle timeout', async ({ app }) => {
+    // Idle timer is 5s — controls should fade out
+    await expectControlsHidden(app);
   });
 
-  test('radial menu: next preset triggers action', async ({ app }) => {
+  test('tap hides visible controls', async ({ app }) => {
+    // Tap the overlay to trigger forceIdle → controls fade out
+    await app.locator('div[role="presentation"]').dispatchEvent('click');
+    await expectControlsHidden(app, 3000);
+  });
+
+  test('next preset triggers action', async ({ app }) => {
     const presetName = app.locator('[data-testid="preset-name"]');
     await expect(presetName).toBeVisible({ timeout: 10000 });
     const initial = await presetName.textContent();
 
-    // Try pressing next via radial menu — retry because random preset might pick the same one
     await expect(async () => {
-      // Reset idle timer so FAB is visible, then force-click the FAB —
-      // the fullscreen WebGL canvas intercepts pointer events in headless Chrome hit-testing
-      // even though the FAB has a higher z-index.
-      await app.locator('canvas').tap({ position: { x: 10, y: 10 } });
-      await app.waitForTimeout(200);
+      // Re-reveal if controls have auto-hidden
+      const isHidden = await app
+        .locator('.md\\:hidden [data-testid="mobile-circle"]')
+        .evaluate((el) => el.classList.contains('opacity-0'));
+      if (isHidden) await revealControls(app);
 
-      // Open FAB if not already open
-      const openMenu = app.getByLabel(/Open menu/i);
-      if (await openMenu.isVisible()) {
-        await openMenu.click({ force: true });
-        await app.waitForTimeout(400);
-      }
-
-      await app.getByLabel('Next', { exact: true }).click({ force: true });
-
-      // Wait for the preset name to actually update rather than a fixed timeout —
-      // on slow CI runners 300ms was not always enough for the transition to commit
+      await mobileButton(app, 'Next').dispatchEvent('click');
       await expect(presetName).not.toHaveText(initial ?? '', { timeout: 2000 });
     }).toPass({ timeout: 20000 });
   });
 
-  test('radial menu: Presets item opens modal panel', async ({ app }) => {
-    // Reset idle timer so FAB is visible, then force-click — the fullscreen WebGL canvas
-    // intercepts pointer events in headless Chrome hit-testing despite the FAB's higher z-index.
-    await app.locator('canvas').tap({ position: { x: 10, y: 10 } });
-    await app.waitForTimeout(200);
-    await app.getByLabel(/Open menu/i).click({ force: true });
-    await app.waitForTimeout(500);
-
-    // Click the Presets radial item — use exact match to avoid hitting other "preset" elements
-    await app.getByLabel('Presets', { exact: true }).click({ force: true });
-
-    // Should open a modal/dialog with preset browser content
+  test('Presets button opens modal panel', async ({ app }) => {
+    await mobileButton(app, 'Presets').dispatchEvent('click');
     await expect(app.locator('[role="dialog"]').first()).toBeVisible({ timeout: 5000 });
   });
 
-  test('radial menu: Settings item opens modal panel', async ({ app }) => {
-    // Reset idle timer so FAB is visible, then force-click — the fullscreen WebGL canvas
-    // intercepts pointer events in headless Chrome hit-testing despite the FAB's higher z-index.
-    await app.locator('canvas').tap({ position: { x: 10, y: 10 } });
-    await app.waitForTimeout(200);
-    await app.getByLabel(/Open menu/i).click({ force: true });
-    await app.waitForTimeout(500);
-
-    // Click the Settings radial item
-    const settingsButton = app.getByLabel(/Setting/i).first();
-    await settingsButton.click({ force: true });
-
-    // Should open a modal/dialog with settings content
+  test('Settings button opens modal panel', async ({ app }) => {
+    await mobileButton(app, 'Settings').dispatchEvent('click');
     await expect(app.locator('[role="dialog"]').first()).toBeVisible({ timeout: 5000 });
   });
 });

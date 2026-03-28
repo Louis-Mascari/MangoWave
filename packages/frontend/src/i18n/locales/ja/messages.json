@@ -27,12 +27,10 @@
     "unknownFile": "不明なファイル",
     "fullscreenNotSupported": "申し訳ありませんが、お使いのデバイスはブラウザからのフルスクリーンに対応していません。"
   },
-
   "fileValidation": {
     "singleRejected": "「{{filename}}」はサポートされている音声ファイルではありません。対応形式：MP3、WAV、FLAC、OGG、AAC、Opus、M4A。",
     "multipleRejected": "{{count}}件のファイルがサポートされていない音声形式のためスキップされました: {{names}}。対応形式：MP3、WAV、FLAC、OGG、AAC、Opus、M4A。"
   },
-
   "settingsImport": {
     "mustBeJson": "ファイルは.json形式である必要があります",
     "fileTooLarge": "ファイルが大きすぎます",
@@ -43,7 +41,6 @@
     "importedWithWarnings": "設定をインポートしました。アプリの変更により一部の設定を適用できませんでした",
     "importedSuccess": "設定のインポートが完了しました"
   },
-
   "spotify": {
     "connectingToSpotify": "Spotifyに接続中...",
     "connectionFailed": "Spotifyへの接続に失敗しました。もう一度お試しください。問題が続く場合は、アカウントがアプリの承認済みユーザーに追加されていることを確認してください。",
@@ -52,7 +49,6 @@
     "popupBlocked": "Spotifyのログインウィンドウを開けませんでした。このサイトのポップアップが許可されていることを確認して、もう一度お試しください。",
     "rateLimited": "Spotifyのレート制限を受けました。{{seconds}}秒後に再試行します"
   },
-
   "toasts": {
     "autopilotOn": "オートパイロット オン",
     "autopilotOff": "オートパイロット オフ",
@@ -68,7 +64,6 @@
     "silenceDetectedMic": "マイクからの音声が検出されません。マイクがミュートになっていないこと、音を拾っていることを確認してください。",
     "silenceDetectedLocal": "音声が検出されません。ファイルが対応形式であること、デバイスの音量が上がっていることを確認してください。"
   },
-
   "playback": {
     "addSongsToQueue": "キューに曲を追加",
     "micNoControls": "マイク入力：再生コントロールなし",
@@ -99,7 +94,6 @@
     "queueShortcut": "キュー (Q)",
     "playingOn": "{{device}}で再生中"
   },
-
   "queue": {
     "title": "キュー",
     "addFiles": "ファイルを追加",
@@ -109,7 +103,6 @@
     "remove": "{{name}}を削除",
     "noTracksLoaded": "トラックが読み込まれていません"
   },
-
   "controlBar": {
     "previousPreset": "前のプリセット (P)",
     "nextPreset": "次のプリセット (Space / N)",
@@ -121,18 +114,13 @@
     "toggleFullscreen": "フルスクリーン切り替え (F)",
     "exitFS": "FS終了"
   },
-
   "mobile": {
     "next": "次へ",
     "favorite": "お気に入り",
     "unfavorite": "お気に入り解除",
     "block": "ブロック",
-    "unblock": "ブロック解除",
-    "openMenu": "メニューを開く",
-    "closeMenu": "メニューを閉じる",
-    "menu": "メニュー"
+    "unblock": "ブロック解除"
   },
-
   "presetBrowser": {
     "tabs": {
       "all": "すべて",
@@ -162,7 +150,6 @@
     "addedToPack": "「{{pack}}」に追加しました",
     "createPackFirst": "まずカスタムパックを作成してください"
   },
-
   "customPacks": {
     "tabs": {
       "packs": "パック"

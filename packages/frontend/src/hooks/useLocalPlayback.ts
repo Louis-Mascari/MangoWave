@@ -45,7 +45,10 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
 
   const currentTrack = tracks[currentTrackIndex] ?? null;
 
-  // Initialize audio element + engine on first file load
+  // Initialize audio element + engine on first file load.
+  // IMPORTANT: The first track is loaded and played here (not in useEffect) so that
+  // audio.play() runs within the user-gesture call chain. Mobile browsers block play()
+  // calls outside of user gestures, causing silent playback with no error.
   const startWithFiles = useCallback(
     (files: File[]) => {
       // Clean up any existing audio element and engine
@@ -70,15 +73,32 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
       engine.initFromMediaElement(audio);
       engineRef.current = engine;
       setAudioEngine(engine);
+
+      // Play the first track immediately within the gesture context
+      const firstTrack = useMediaPlayerStore.getState().tracks[0];
+      if (firstTrack) {
+        const url = URL.createObjectURL(firstTrack.file);
+        useMediaPlayerStore.setState((state) => ({
+          tracks: state.tracks.map((t) => (t.id === firstTrack.id ? { ...t, objectUrl: url } : t)),
+        }));
+        audio.src = url;
+        audio.play().catch(() => {});
+      }
+
       setIsActive(true);
     },
     [addTracks, clearPlaylist],
   );
 
-  // Load and play track when currentTrack changes
+  // Load and play track when currentTrack changes (next/prev/ended).
+  // The first track is played synchronously in startWithFiles (within user gesture),
+  // so this effect skips tracks that already have an objectUrl (already loaded).
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !isActive || !currentTrack) return;
+
+    // Skip if this track was already loaded by startWithFiles
+    if (currentTrack.objectUrl) return;
 
     // Revoke ALL stale objectUrls from other tracks
     const staleTracks = useMediaPlayerStore
@@ -101,9 +121,7 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
 
     audio.src = url;
     audio.play().catch(() => {
-      useToastStore
-        .getState()
-        .show(i18n.t('errors.playbackBlocked', { ns: 'messages' }), { type: 'warning' });
+      // Autoplay may be blocked on mobile — first track handled in startWithFiles
     });
 
     return () => {

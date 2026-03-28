@@ -24,6 +24,7 @@
 
 - **400+ MilkDrop presets** from 5 butterchurn packs, organized by source pack with virtualized browsing
 - **Import .milk/.milk2 presets** — add community MilkDrop presets from the thousands available online. Raw files stored in IndexedDB, converted lazily on-demand via `milkdrop-preset-converter`
+- **Import custom textures** — upload JPEG/PNG/WebP images for MilkDrop presets that reference `sampler_<name>`. Built-in textures (cells, etc.) loaded automatically from butterchurn
 - **Custom packs** — create, edit, import/export preset collections; start a pack to lock autopilot and navigation to its presets only
 - **Pack filtering** — enable/disable built-in packs to control which presets appear and which autopilot draws from
 - **Excluded presets** — quarantined presets (broken or inappropriate content) and mobile-blocked presets (27 GPU-heavy presets identified via device testing) collected in a unified Excluded tab with reason badges and per-preset overrides

@@ -44,7 +44,8 @@ src/
 │                  #     PresetBrowser, MediaPlaylist, NowPlaying, PlaybackPanel, StartScreen,
 │                  #     OnboardingOverlay (first-time tips), etc.
 ├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (butterchurn),
-│                  # milkdropConverter (.milk → butterchurn JSON), isWebGL2Supported
+│                  # milkdropConverter (.milk → butterchurn JSON), textureLoader (image validation),
+│                  # isWebGL2Supported
 ├── data/          # quarantined-presets.json, mobile-blocked-presets.json, excludedPresets.ts (shared Sets)
 ├── constants/     # shortcuts.ts (keyboard/mouse shortcut definitions)
 ├── i18n/          # i18next config + 9 locale dirs (en, es, zh, hi, ja, ko, ru, id, pt-BR)
@@ -59,7 +60,7 @@ src/
 │                  # WindowSyncService (BroadcastChannel-based multi-window sync)
 ├── store/         # Zustand stores: useSettingsStore, useSpotifyStore, useMediaPlayerStore,
 │                  #     usePresetHistoryStore, usePresetBrowserStore, useImportedPresetsStore,
-│                  #     useToastStore, useConfirmStore, useWindowSyncStatusStore
+│                  #     useImportedTexturesStore, useToastStore, useConfirmStore, useWindowSyncStatusStore
 ├── utils/         # Shared utilities (isMobileDevice, browserInfo, settingsPortability, audioFileValidation)
 ├── types/         # music-metadata.d.ts, getDisplayMedia.d.ts (type declarations for untyped APIs)
 └── test/          # Vitest global setup
@@ -73,26 +74,27 @@ e2e/                 # Playwright E2E tests (separate from Vitest, own tsconfig)
 
 Zustand with `localStorage` persistence. Key sections:
 
-| Section              | Fields                                                                         | Defaults                    |
-| -------------------- | ------------------------------------------------------------------------------ | --------------------------- |
-| `performance`        | `fpsCap`, `resolutionScale`, `meshWidth`, `meshHeight`, `textureRatio`, `fxaa` | 60, 1.0, 48, 36, 1.0, false |
-| `audio`              | `smoothingConstant`, `fftSize`                                                 | 0.3, 1024                   |
-| `autopilot`          | `enabled`, `interval`, `mode`, `favoriteWeight`                                | true, 15s, `'all'`, 2       |
-| `eq`                 | `preAmpGain`, `bandGains[10]`                                                  | 1.5, all 0dB                |
-| `blockedPresets`     | string[]                                                                       | []                          |
-| `favoritePresets`    | string[]                                                                       | []                          |
-| `presetNameDisplay`  | `'off' \| 'always' \| number`                                                  | 5                           |
-| `songInfoDisplay`    | `'off' \| number` (on/off toggle, hardcoded 5s when on)                        | 5                           |
-| `transitionTime`     | number (seconds)                                                               | 2.0                         |
-| `volume`             | number (0.0–1.0)                                                               | 0.5                         |
-| `enabledPacks`       | string[]                                                                       | all packs                   |
-| `customPacks`        | `CustomPack[]` (`id`, `name`, `presets[]`, `createdAt`)                        | []                          |
-| `activeCustomPackId` | `string \| null`                                                               | null                        |
-| `excludedOverrides`  | string[]                                                                       | []                          |
-| `importedPresets`    | `ImportedPresetMeta[]` (`name`, `fileName`, `addedAt`)                         | []                          |
-| `windowSyncEnabled`  | boolean                                                                        | false                       |
-| `syncPerformance`    | boolean                                                                        | true                        |
-| `onboardingShown`    | boolean                                                                        | false                       |
+| Section              | Fields                                                                                  | Defaults                    |
+| -------------------- | --------------------------------------------------------------------------------------- | --------------------------- |
+| `performance`        | `fpsCap`, `resolutionScale`, `meshWidth`, `meshHeight`, `textureRatio`, `fxaa`          | 60, 1.0, 48, 36, 1.0, false |
+| `audio`              | `smoothingConstant`, `fftSize`                                                          | 0.3, 1024                   |
+| `autopilot`          | `enabled`, `interval`, `mode`, `favoriteWeight`                                         | true, 15s, `'all'`, 2       |
+| `eq`                 | `preAmpGain`, `bandGains[10]`                                                           | 1.5, all 0dB                |
+| `blockedPresets`     | string[]                                                                                | []                          |
+| `favoritePresets`    | string[]                                                                                | []                          |
+| `presetNameDisplay`  | `'off' \| 'always' \| number`                                                           | 5                           |
+| `songInfoDisplay`    | `'off' \| number` (on/off toggle, hardcoded 5s when on)                                 | 5                           |
+| `transitionTime`     | number (seconds)                                                                        | 2.0                         |
+| `volume`             | number (0.0–1.0)                                                                        | 0.5                         |
+| `enabledPacks`       | string[]                                                                                | all packs                   |
+| `customPacks`        | `CustomPack[]` (`id`, `name`, `presets[]`, `createdAt`)                                 | []                          |
+| `activeCustomPackId` | `string \| null`                                                                        | null                        |
+| `excludedOverrides`  | string[]                                                                                | []                          |
+| `importedPresets`    | `ImportedPresetMeta[]` (`name`, `fileName`, `addedAt`)                                  | []                          |
+| `importedTextures`   | `ImportedTextureMeta[]` (`name`, `fileName`, `width`, `height`, `sizeBytes`, `addedAt`) | []                          |
+| `windowSyncEnabled`  | boolean                                                                                 | false                       |
+| `syncPerformance`    | boolean                                                                                 | true                        |
+| `onboardingShown`    | boolean                                                                                 | false                       |
 
 Blocked and favorited presets are mutually exclusive.
 

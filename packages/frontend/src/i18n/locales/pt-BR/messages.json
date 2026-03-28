@@ -23,6 +23,7 @@
     "webglContextLostDesc": "O sistema gráfico do seu dispositivo foi interrompido. Isso pode acontecer quando seu dispositivo está sob carga pesada, a GPU é compartilhada com outros aplicativos ou a configuração de exibição mudou. Recarregar a página restaurará o visualizador.",
     "renderingError": "Ocorreu um erro de renderização, possivelmente um problema de WebGL ou Web Audio.",
     "playbackDecodeError": "Não foi possível reproduzir \"{{filename}}\". Esse formato pode não ser suportado pelo seu navegador.",
+    "playbackBlocked": "A reprodução foi bloqueada pelo seu navegador. Tente tocar o botão de reproduzir no painel de controle.",
     "unknownFile": "Arquivo desconhecido",
     "fullscreenNotSupported": "Infelizmente, seu dispositivo não suporta tela cheia pelo navegador."
   },
@@ -64,7 +65,8 @@
     "blockedPresetsCleared": "Presets bloqueados limpos",
     "favoritePresetsCleared": "Presets favoritos limpos",
     "silenceDetected": "Nenhum áudio detectado. Certifique-se de que o áudio está tocando na tela, janela ou aba compartilhada, e que você marcou \"Compartilhar áudio\" na caixa de diálogo do navegador.",
-    "silenceDetectedMic": "Nenhum áudio detectado do microfone. Certifique-se de que seu mic não está mutado e está captando som."
+    "silenceDetectedMic": "Nenhum áudio detectado do microfone. Certifique-se de que seu mic não está mutado e está captando som.",
+    "silenceDetectedLocal": "Nenhum áudio detectado. Certifique-se de que o arquivo é um formato suportado e que o volume do dispositivo está ligado."
   },
 
   "playback": {

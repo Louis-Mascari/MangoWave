@@ -204,19 +204,22 @@ function MainApp() {
     setWebglContextLost(true);
   }, []);
 
-  // Silence detection for system/mic audio — warns if no audio is flowing after capture starts
+  // Silence detection — warns if no audio is flowing after any source starts.
+  // Covers system capture, microphone, and local file playback.
+  const audioSource: 'system' | 'mic' | 'local' | null =
+    capture.captureSource ?? (local.isActive ? 'local' : null);
   useEffect(() => {
     if (silenceCheckRef.current) {
       clearInterval(silenceCheckRef.current);
       silenceCheckRef.current = null;
     }
 
-    if (!isActive || !capture.captureSource || !audioEngine) return;
+    if (!isActive || !audioSource || !audioEngine) return;
 
     let toastShown = false;
     let checksRemaining = 4;
 
-    // Start checking after launch animation (~2.5s), then every 1s.
+    // Start checking after launch animation (~2.5s), then every 1.5s.
     // Uses time-domain data (waveform) instead of frequency data because
     // getByteFrequencyData returns zeros for MediaStreamSource in setInterval contexts.
     silenceCheckRef.current = setInterval(() => {
@@ -237,7 +240,11 @@ function MainApp() {
       if (checksRemaining <= 0 && !toastShown) {
         toastShown = true;
         const toastKey =
-          capture.captureSource === 'mic' ? 'toasts.silenceDetectedMic' : 'toasts.silenceDetected';
+          audioSource === 'mic'
+            ? 'toasts.silenceDetectedMic'
+            : audioSource === 'local'
+              ? 'toasts.silenceDetectedLocal'
+              : 'toasts.silenceDetected';
         useToastStore.getState().show(i18n.t(toastKey, { ns: 'messages' }), {
           type: 'warning',
           durationMs: 8000,
@@ -257,7 +264,7 @@ function MainApp() {
         silenceCheckRef.current = null;
       }
     };
-  }, [isActive, capture.captureSource, audioEngine]);
+  }, [isActive, audioSource, audioEngine]);
 
   const handleToggleFullscreen = useCallback(() => {
     if (getFullscreenElement()) {

@@ -55,6 +55,7 @@ function createMockAudioContext() {
     createMediaStreamSource: vi.fn(() => ({ ...mockSource })),
     createMediaElementSource: vi.fn(() => ({ ...mockSource })),
     close: vi.fn(),
+    resume: vi.fn(() => Promise.resolve()),
   };
 
   return ctx;

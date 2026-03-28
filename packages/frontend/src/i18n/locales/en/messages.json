@@ -23,6 +23,7 @@
     "webglContextLostDesc": "Your device's graphics system was interrupted. This can happen when your device is under heavy load, the GPU is shared with other applications, or the display configuration changed. Reloading the page will restore the visualizer.",
     "renderingError": "A rendering error occurred, possibly a WebGL or Web Audio issue.",
     "playbackDecodeError": "Could not play \"{{filename}}\". This format may not be supported by your browser.",
+    "playbackBlocked": "Playback was blocked by your browser. Try tapping the play button in the control panel.",
     "unknownFile": "Unknown file",
     "fullscreenNotSupported": "Unfortunately, your device doesn't support fullscreen from the browser."
   },
@@ -64,7 +65,8 @@
     "blockedPresetsCleared": "Blocked presets cleared",
     "favoritePresetsCleared": "Favorite presets cleared",
     "silenceDetected": "No audio detected. Make sure audio is playing in the shared screen, window, or tab, and that you checked \"Share audio\" in the browser dialog.",
-    "silenceDetectedMic": "No audio detected from your microphone. Make sure your mic is not muted and is picking up sound."
+    "silenceDetectedMic": "No audio detected from your microphone. Make sure your mic is not muted and is picking up sound.",
+    "silenceDetectedLocal": "No audio detected. Make sure the file is a supported format and your device volume is up."
   },
 
   "playback": {

@@ -23,6 +23,7 @@
     "webglContextLostDesc": "기기의 그래픽 시스템이 중단되었습니다. 기기에 부하가 많거나, GPU를 다른 애플리케이션과 공유하고 있거나, 디스플레이 설정이 변경되었을 때 발생할 수 있습니다. 페이지를 새로고침하면 비주얼라이저가 복원됩니다.",
     "renderingError": "렌더링 오류가 발생했습니다. WebGL 또는 Web Audio 관련 문제일 수 있습니다.",
     "playbackDecodeError": "\"{{filename}}\"을(를) 재생할 수 없습니다. 브라우저에서 지원하지 않는 형식일 수 있습니다.",
+    "playbackBlocked": "브라우저에서 재생이 차단되었습니다. 컨트롤 패널의 재생 버튼을 눌러 보세요.",
     "unknownFile": "알 수 없는 파일",
     "fullscreenNotSupported": "안타깝게도 이 기기는 브라우저에서 전체 화면을 지원하지 않습니다."
   },
@@ -64,7 +65,8 @@
     "blockedPresetsCleared": "차단된 프리셋이 모두 해제됨",
     "favoritePresetsCleared": "즐겨찾기가 모두 해제됨",
     "silenceDetected": "오디오가 감지되지 않습니다. 공유한 화면, 창 또는 탭에서 오디오가 재생 중인지, 그리고 브라우저 대화상자에서 \"오디오 공유\"를 체크했는지 확인하세요.",
-    "silenceDetectedMic": "마이크에서 오디오가 감지되지 않습니다. 마이크가 음소거되지 않았는지, 소리를 잘 잡고 있는지 확인하세요."
+    "silenceDetectedMic": "마이크에서 오디오가 감지되지 않습니다. 마이크가 음소거되지 않았는지, 소리를 잘 잡고 있는지 확인하세요.",
+    "silenceDetectedLocal": "오디오가 감지되지 않습니다. 파일이 지원되는 형식인지, 기기 볼륨이 켜져 있는지 확인하세요."
   },
 
   "playback": {

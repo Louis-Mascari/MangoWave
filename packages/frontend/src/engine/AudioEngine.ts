@@ -103,12 +103,16 @@ export class AudioEngine {
     this.audioContext = new AudioContext();
     this.sourceNode = this.audioContext.createMediaStreamSource(stream);
     this.buildPipeline(this.sourceNode, false);
+    // Mobile browsers start AudioContext in 'suspended' state — resume within the
+    // user-gesture call chain so FFT data flows immediately.
+    this.audioContext.resume();
   }
 
   initFromMediaElement(audioElement: HTMLAudioElement): void {
     this.audioContext = new AudioContext();
     this.sourceNode = this.audioContext.createMediaElementSource(audioElement);
     this.buildPipeline(this.sourceNode, true);
+    this.audioContext.resume();
   }
 
   async initFromMicrophone(): Promise<void> {
@@ -125,6 +129,7 @@ export class AudioEngine {
     this.audioContext = new AudioContext();
     this.sourceNode = this.audioContext.createMediaStreamSource(stream);
     this.buildPipeline(this.sourceNode, false);
+    this.audioContext.resume();
   }
 
   setPreAmpGain(value: number): void {

@@ -28,3 +28,7 @@ declare const butterchurn: {
 };
 
 export default butterchurn;
+
+export declare const butterchurnExtraImages: {
+  getImages(): Record<string, { data: string; width: number; height: number }>;
+};

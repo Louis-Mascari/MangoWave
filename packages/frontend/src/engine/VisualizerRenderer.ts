@@ -1,4 +1,4 @@
-import butterchurn from 'butterchurn';
+import butterchurn, { butterchurnExtraImages } from 'butterchurn';
 import {
   presetsMinimal,
   presetsNonMinimal,
@@ -81,6 +81,9 @@ export class VisualizerRenderer {
 
     this.presetKeys = Object.keys(this.presets);
 
+    // Load built-in extra textures (cells, fire, etc.) so presets referencing sampler_<name> render correctly
+    this.loadExtraImages(butterchurnExtraImages.getImages());
+
     // Load a random initial preset, filtering out excluded presets
     if (this.presetKeys.length > 0) {
       const excluded = opts?.excludedPresets;
@@ -108,6 +111,14 @@ export class VisualizerRenderer {
   setOutputAA(useAA: boolean): void {
     if (this.visualizer) {
       this.visualizer.setOutputAA(useAA);
+    }
+  }
+
+  loadExtraImages(
+    imageData: Record<string, { data: string; width: number; height: number }>,
+  ): void {
+    if (this.visualizer) {
+      this.visualizer.loadExtraImages(imageData);
     }
   }
 

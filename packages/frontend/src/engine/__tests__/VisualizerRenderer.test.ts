@@ -7,9 +7,16 @@ vi.mock('butterchurn', () => ({
     createVisualizer: vi.fn(() => ({
       connectAudio: vi.fn(),
       loadPreset: vi.fn(),
+      loadExtraImages: vi.fn(),
       setRendererSize: vi.fn(),
       render: vi.fn(),
     })),
+  },
+}));
+
+vi.mock('butterchurn/lib/butterchurnExtraImages.min', () => ({
+  default: {
+    getImages: () => ({ cells: { data: 'data:image/png;base64,abc', width: 256, height: 256 } }),
   },
 }));
 

@@ -38,6 +38,7 @@ export function useIdleTimer(
 
   const resume = useCallback(() => {
     pausedRef.current = false;
+    setIsIdle(false);
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }

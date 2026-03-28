@@ -36,9 +36,8 @@ interface ControlBarProps {
 }
 
 export function ControlBar(props: ControlBarProps) {
-  return (
-    <>
-      <DesktopControlBar {...props} />
+  if (isMobileDevice) {
+    return (
       <MobileControlBar
         onNextPreset={props.onNextPreset}
         onPreviousPreset={props.onPreviousPreset}
@@ -62,8 +61,10 @@ export function ControlBar(props: ControlBarProps) {
         forceIdle={props.forceIdle}
         resetIdle={props.resetIdle}
       />
-    </>
-  );
+    );
+  }
+
+  return <DesktopControlBar {...props} />;
 }
 
 function DesktopControlBar({
@@ -99,7 +100,7 @@ function DesktopControlBar({
     <div
       onMouseEnter={onPauseIdle}
       onMouseLeave={onResumeIdle}
-      className={`fixed inset-x-0 bottom-0 z-50 hidden transition-opacity duration-500 md:block ${
+      className={`fixed inset-x-0 bottom-0 z-50 transition-opacity duration-500 ${
         isIdle && activePanel === 'none' ? 'pointer-events-none opacity-0' : 'opacity-100'
       }`}
     >

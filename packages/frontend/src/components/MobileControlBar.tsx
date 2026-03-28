@@ -243,7 +243,7 @@ export function MobileControlBar({
   ];
 
   return (
-    <div className="md:hidden">
+    <div>
       {/* Transparent overlay — toggles controls on tap.
           Always present (except when modal open) to intercept taps before they reach buttons.
           When idle: tap reveals controls (with justRevealed guard preventing accidental button clicks).

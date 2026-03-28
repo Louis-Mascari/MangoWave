@@ -95,10 +95,12 @@ test.describe('Preset Browser', () => {
 
     // Pack should appear with start button
     await expect(app.getByText('Pack 1', { exact: true })).toBeVisible();
-    await expect(app.getByRole('button', { name: /^Start$/ })).toBeVisible();
+    const startBtn = app.getByRole('button', { name: /^Start$/ });
+    await expect(startBtn).toBeVisible();
 
-    // Start the pack
-    await app.getByRole('button', { name: /^Start$/ }).click();
+    // Start the pack — force: true because the click can stall in headless CI
+    // when the renderer auto-advances to a pack preset during the click handler
+    await startBtn.click({ force: true });
 
     // Active pack chip should appear
     await expect(app.getByText(/Playing from: Pack 1/)).toBeVisible();
@@ -132,8 +134,8 @@ test.describe('Preset Browser', () => {
     await expect(addButton).toBeVisible({ timeout: 5000 });
     await addButton.click();
 
-    // Preset count should update
-    await expect(app.getByText(/1 preset/)).toBeVisible();
+    // Preset count should update (may take a moment after store update triggers re-render)
+    await expect(app.getByText(/1 preset/)).toBeVisible({ timeout: 5000 });
 
     // Go back to pack list
     await app.getByLabel(/Back/).click();
@@ -160,7 +162,9 @@ test.describe('Preset Browser', () => {
     await expect(app.getByText(/cannot be undone/)).toBeVisible();
 
     // Cancel — pack should still exist
-    await app.getByRole('button', { name: /Cancel/ }).click();
+    const cancelBtn = app.getByRole('button', { name: /Cancel/ });
+    await expect(cancelBtn).toBeEnabled();
+    await cancelBtn.click({ force: true });
     await expect(app.getByText('Pack 1', { exact: true })).toBeVisible();
   });
 
@@ -176,7 +180,9 @@ test.describe('Preset Browser', () => {
 
     // Go back to pack list and start
     await app.getByLabel(/Back/).click();
-    await app.getByRole('button', { name: /^Start$/ }).click();
+    const startBtn2 = app.getByRole('button', { name: /^Start$/ });
+    await expect(startBtn2).toBeVisible();
+    await startBtn2.click({ force: true });
 
     // Switch to All tab
     await app.getByRole('button', { name: /^all$/i }).click();

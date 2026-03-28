@@ -300,7 +300,7 @@ export function MobileControlBar({
           return (
             <div
               key={item.label}
-              className={`absolute z-[56] flex flex-col items-center transition-all ${
+              className={`absolute z-[56] flex flex-col items-center transition-[transform,opacity] ${
                 menuOpen
                   ? 'pointer-events-auto scale-100 opacity-100'
                   : 'pointer-events-none scale-50 opacity-0'
@@ -316,18 +316,18 @@ export function MobileControlBar({
                 onClick={item.action}
                 disabled={item.disabled}
                 aria-label={item.label}
-                className={`flex h-11 w-11 items-center justify-center rounded-full border-none text-sm shadow-[0_0_10px_rgba(0,0,0,0.7)] backdrop-blur-md ${
+                className={`flex h-11 w-11 items-center justify-center rounded-full border-none text-sm shadow-[0_0_10px_rgba(0,0,0,0.7)] ${
                   item.disabled
-                    ? 'cursor-not-allowed bg-white/5 text-white/20'
+                    ? 'cursor-not-allowed bg-black/80 text-white/20'
                     : item.active
                       ? `cursor-pointer ${
                           item.activeColor === 'yellow'
-                            ? 'bg-yellow-500/30 text-yellow-400'
+                            ? 'bg-yellow-900/80 text-yellow-400'
                             : item.activeColor === 'red'
-                              ? 'bg-red-500/30 text-red-400'
+                              ? 'bg-red-900/80 text-red-400'
                               : 'bg-orange-500 text-white'
                         }`
-                      : 'cursor-pointer bg-white/15 text-white/80'
+                      : 'cursor-pointer bg-black/80 text-white/80'
                 }`}
               >
                 {item.icon}

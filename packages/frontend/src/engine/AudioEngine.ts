@@ -112,7 +112,15 @@ export class AudioEngine {
   }
 
   async initFromMicrophone(): Promise<void> {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        // Disable voice-call DSP — these filters suppress ambient music on mobile devices,
+        // causing the visualizer to show no reactivity when playing music nearby.
+        autoGainControl: false,
+        noiseSuppression: false,
+        echoCancellation: false,
+      },
+    });
     this.stream = stream;
     this.audioContext = new AudioContext();
     this.sourceNode = this.audioContext.createMediaStreamSource(stream);

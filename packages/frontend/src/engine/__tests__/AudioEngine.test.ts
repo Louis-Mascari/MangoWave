@@ -221,7 +221,13 @@ describe('AudioEngine', () => {
 
       await engine.initFromMicrophone();
 
-      expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledWith({ audio: true });
+      expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledWith({
+        audio: {
+          autoGainControl: false,
+          noiseSuppression: false,
+          echoCancellation: false,
+        },
+      });
       expect(mockCtx.createMediaStreamSource).toHaveBeenCalledWith(mockStream);
       expect(engine.isActive).toBe(true);
 

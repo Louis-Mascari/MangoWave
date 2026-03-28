@@ -5,6 +5,7 @@ import type {
   AutopilotSettings,
   CustomPack,
   ImportedPresetMeta,
+  ImportedTextureMeta,
 } from '../store/useSettingsStore.ts';
 
 const CHANNEL_NAME = 'mangowave-sync';
@@ -28,6 +29,7 @@ export interface SyncableSettings {
   customPacks?: CustomPack[];
   activeCustomPackId?: string | null;
   importedPresets?: ImportedPresetMeta[];
+  importedTextures?: ImportedTextureMeta[];
 }
 
 interface SyncMessageBase {

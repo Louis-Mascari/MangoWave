@@ -7,6 +7,7 @@ import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { usePresetHistoryStore } from '../store/usePresetHistoryStore.ts';
 import { usePresetBrowserStore } from '../store/usePresetBrowserStore.ts';
 import { useImportedPresetsStore } from '../store/useImportedPresetsStore.ts';
+import { useImportedTexturesStore } from '../store/useImportedTexturesStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import { useConfirmStore } from '../store/useConfirmStore.ts';
 import { quarantinedSet, mobileBlockedSet } from '../data/excludedPresets.ts';
@@ -17,8 +18,13 @@ import {
   parsePackImportFile,
 } from '../utils/settingsPortability.ts';
 import { readMilkFile } from '../engine/milkdropConverter.ts';
+import { readTextureFile, validateTextureFile } from '../engine/textureLoader.ts';
 import { PACK_ORDER } from '../engine/VisualizerRenderer.ts';
-import type { CustomPack, ImportedPresetMeta } from '../store/useSettingsStore.ts';
+import type {
+  CustomPack,
+  ImportedPresetMeta,
+  ImportedTextureMeta,
+} from '../store/useSettingsStore.ts';
 
 interface PresetBrowserProps {
   presetList: string[];
@@ -372,6 +378,10 @@ export function PresetBrowser({
   const addImportedPresetMeta = useSettingsStore((s) => s.addImportedPresetMeta);
   const removeImportedPresetMeta = useSettingsStore((s) => s.removeImportedPresetMeta);
   const clearImportedPresetsMeta = useSettingsStore((s) => s.clearImportedPresetsMeta);
+  const importedTextures = useSettingsStore((s) => s.importedTextures);
+  const addImportedTextureMeta = useSettingsStore((s) => s.addImportedTextureMeta);
+  const removeImportedTextureMeta = useSettingsStore((s) => s.removeImportedTextureMeta);
+  const clearImportedTexturesMeta = useSettingsStore((s) => s.clearImportedTexturesMeta);
 
   const activePackName = useMemo(
     () => customPacks.find((p) => p.id === activeCustomPackId)?.name ?? null,
@@ -1017,6 +1027,117 @@ export function PresetBrowser({
     });
   }, [t, importedPresets.length, clearImportedPresetsMeta]);
 
+  const importedTextureNameSet = useMemo(
+    () => new Set(importedTextures.map((t) => t.name)),
+    [importedTextures],
+  );
+
+  const handleImportTextures = useCallback(async () => {
+    // Quick IDB availability check
+    try {
+      const { set, del } = await import('idb-keyval');
+      await set('__mw_idb_test', '1');
+      await del('__mw_idb_test');
+    } catch {
+      useToastStore.getState().show(t('importedTextures.idbUnavailable'));
+      return;
+    }
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/jpeg,image/png,image/webp';
+    input.multiple = true;
+    input.onchange = async () => {
+      const files = input.files;
+      if (!files || files.length === 0) return;
+
+      let success = 0;
+      let failed = 0;
+      const errors: string[] = [];
+      const store = useImportedTexturesStore.getState();
+      const existingNames = new Set(importedTextureNameSet);
+
+      for (const file of Array.from(files)) {
+        try {
+          // Pre-validation
+          const preError = validateTextureFile(file);
+          if (preError) {
+            throw new Error(preError);
+          }
+
+          const result = await readTextureFile(file);
+
+          // Deduplicate
+          if (existingNames.has(result.name)) {
+            throw new Error('duplicateName');
+          }
+
+          await store.addTexture(result.name, {
+            data: result.dataUri,
+            width: result.width,
+            height: result.height,
+          });
+          addImportedTextureMeta({
+            name: result.name,
+            fileName: file.name,
+            width: result.width,
+            height: result.height,
+            sizeBytes: result.sizeBytes,
+            addedAt: Date.now(),
+          });
+          existingNames.add(result.name);
+          success++;
+        } catch (err) {
+          failed++;
+          const code = err instanceof Error ? err.message : 'unknown';
+          const errorKey = `importedTextures.${code}` as const;
+          const msg = t(errorKey, { name: file.name, defaultValue: code });
+          errors.push(`${file.name}: ${msg}`);
+        }
+      }
+
+      const toast = useToastStore.getState();
+      if (success > 0 && failed === 0) {
+        toast.show(t('importedTextures.importSuccess', { count: success }));
+      } else if (success > 0 && failed > 0) {
+        toast.show(
+          t('importedTextures.importPartial', { success, total: success + failed, failed }),
+        );
+      } else {
+        toast.show(t('importedTextures.importAllFailed', { count: failed }));
+      }
+    };
+    input.click();
+  }, [t, importedTextureNameSet, addImportedTextureMeta]);
+
+  const handleDeleteTexture = useCallback(
+    (texture: ImportedTextureMeta) => {
+      useConfirmStore.getState().show({
+        title: t('importedTextures.deleteTexture'),
+        message: t('importedTextures.deleteConfirm', { name: texture.name }),
+        destructive: true,
+        onConfirm: async () => {
+          await useImportedTexturesStore.getState().removeTexture(texture.name);
+          removeImportedTextureMeta(texture.name);
+        },
+      });
+    },
+    [t, removeImportedTextureMeta],
+  );
+
+  const handleClearAllTextures = useCallback(() => {
+    useConfirmStore.getState().show({
+      title: t('importedTextures.clearAll'),
+      message: t('importedTextures.clearAllConfirm', { count: importedTextures.length }),
+      destructive: true,
+      onConfirm: async () => {
+        await useImportedTexturesStore.getState().removeAllTextures();
+        clearImportedTexturesMeta();
+        useToastStore.getState().show(t('importedTextures.cleared'));
+      },
+    });
+  }, [t, importedTextures.length, clearImportedTexturesMeta]);
+
   const handleCreatePack = useCallback(() => {
     if (customPacks.length >= 50) {
       useToastStore.getState().show(t('customPacks.maxPacksReached'));
@@ -1286,7 +1407,62 @@ export function PresetBrowser({
           >
             {t('importedPresets.importMilk')}
           </button>
+          <button
+            onClick={handleImportTextures}
+            className="cursor-pointer rounded border border-orange-500/30 bg-orange-500/10 px-2 py-1 text-[10px] font-medium text-orange-400/80 hover:bg-orange-500/20"
+          >
+            {t('importedTextures.importTextures')}
+          </button>
         </div>
+
+        {importedTextures.length > 0 && (
+          <>
+            <div className="border-t border-white/10" />
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-orange-400">
+                  {t('importedTextures.importTextures')} ({importedTextures.length})
+                </span>
+                <button
+                  onClick={handleClearAllTextures}
+                  className="cursor-pointer rounded border-none bg-red-500/20 px-1.5 py-0.5 text-[8px] text-red-400/70 hover:bg-red-500/30 hover:text-red-400"
+                >
+                  {t('importedTextures.clearAll')}
+                </button>
+              </div>
+              <p className="text-[9px] text-white/30">{t('importedTextures.gpuNote')}</p>
+              <div className="flex max-h-32 flex-col gap-0.5 overflow-y-auto">
+                {importedTextures.map((tex) => (
+                  <div
+                    key={tex.name}
+                    className="flex items-center justify-between rounded bg-white/5 px-2 py-1"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <span className="block truncate text-xs text-white/70">{tex.name}</span>
+                      <span className="text-[9px] text-white/30">
+                        {tex.width}×{tex.height} · {(tex.sizeBytes / 1024).toFixed(0)}KB
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteTexture(tex)}
+                      className="ml-1 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-red-500/20 hover:text-red-400"
+                      title={t('importedTextures.deleteTexture')}
+                      aria-label={t('importedTextures.deleteTexture')}
+                    >
+                      <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
+                        <path
+                          fillRule="evenodd"
+                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
 
         <div className="border-t border-white/10" />
 

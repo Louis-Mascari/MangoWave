@@ -29,8 +29,9 @@ describe('useSettingsStore', () => {
       // Clear custom packs
       result.current.setActiveCustomPackId(null);
       result.current.customPacks.forEach((p) => result.current.deleteCustomPack(p.id));
-      // Clear imported presets
+      // Clear imported presets and textures
       result.current.clearImportedPresetsMeta();
+      result.current.clearImportedTexturesMeta();
     });
   });
 
@@ -749,6 +750,89 @@ describe('useSettingsStore', () => {
       const metas = [{ name: 'Imported', fileName: 'Imported.milk', addedAt: 100 }];
       act(() => result.current.importSettings({ importedPresets: metas }));
       expect(result.current.importedPresets).toEqual(metas);
+    });
+  });
+
+  describe('importedTextures', () => {
+    it('defaults to empty array', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      expect(result.current.importedTextures).toEqual([]);
+    });
+
+    it('adds imported texture metadata', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      const meta = {
+        name: 'cells',
+        fileName: 'cells.png',
+        width: 256,
+        height: 256,
+        sizeBytes: 5000,
+        addedAt: 1000,
+      };
+      act(() => result.current.addImportedTextureMeta(meta));
+      expect(result.current.importedTextures).toHaveLength(1);
+      expect(result.current.importedTextures[0]).toEqual(meta);
+    });
+
+    it('removes imported texture metadata by name', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => {
+        result.current.addImportedTextureMeta({
+          name: 'a',
+          fileName: 'a.png',
+          width: 64,
+          height: 64,
+          sizeBytes: 100,
+          addedAt: 1,
+        });
+        result.current.addImportedTextureMeta({
+          name: 'b',
+          fileName: 'b.png',
+          width: 128,
+          height: 128,
+          sizeBytes: 200,
+          addedAt: 2,
+        });
+      });
+      expect(result.current.importedTextures).toHaveLength(2);
+
+      act(() => result.current.removeImportedTextureMeta('a'));
+      expect(result.current.importedTextures).toHaveLength(1);
+      expect(result.current.importedTextures[0].name).toBe('b');
+    });
+
+    it('clears all imported texture metadata', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => {
+        result.current.addImportedTextureMeta({
+          name: 'x',
+          fileName: 'x.png',
+          width: 64,
+          height: 64,
+          sizeBytes: 100,
+          addedAt: 1,
+        });
+      });
+      expect(result.current.importedTextures).toHaveLength(1);
+
+      act(() => result.current.clearImportedTexturesMeta());
+      expect(result.current.importedTextures).toEqual([]);
+    });
+
+    it('is importable via importSettings', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      const metas = [
+        {
+          name: 'fire',
+          fileName: 'fire.jpg',
+          width: 512,
+          height: 512,
+          sizeBytes: 50000,
+          addedAt: 100,
+        },
+      ];
+      act(() => result.current.importSettings({ importedTextures: metas }));
+      expect(result.current.importedTextures).toEqual(metas);
     });
   });
 });

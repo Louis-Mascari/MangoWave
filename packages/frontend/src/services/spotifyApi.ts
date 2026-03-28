@@ -278,6 +278,14 @@ export interface CloudSettings {
   customPacks?: { id: string; name: string; presets: string[]; createdAt: number }[];
   activeCustomPackId?: string | null;
   importedPresets?: { name: string; fileName: string; addedAt: number }[];
+  importedTextures?: {
+    name: string;
+    fileName: string;
+    width: number;
+    height: number;
+    sizeBytes: number;
+    addedAt: number;
+  }[];
 }
 
 export async function saveSettings(sessionId: string, settings: CloudSettings): Promise<void> {

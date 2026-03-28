@@ -172,6 +172,26 @@
     "imported": "가져옴"
   },
 
+  "importedTextures": {
+    "importTextures": "텍스처 가져오기",
+    "importSuccess": "{{count}}개의 텍스처를 가져왔습니다",
+    "importPartial": "{{total}}개 중 {{success}}개의 텍스처를 가져왔습니다. {{failed}}개 실패.",
+    "importAllFailed": "{{count}}개의 텍스처 모두 가져오기 실패",
+    "fileTooLarge": "\"{{name}}\"이(가) 너무 큽니다 (최대 2MB)",
+    "invalidFileType": "\"{{name}}\"은(는) 지원되는 이미지 파일이 아닙니다 (JPEG, PNG 또는 WebP)",
+    "dimensionsTooLarge": "\"{{name}}\"이(가) 최대 크기를 초과합니다 (2048×2048)",
+    "readFailed": "\"{{name}}\" 읽기 실패",
+    "decodeFailed": "\"{{name}}\" 디코딩 실패",
+    "deleteTexture": "가져온 텍스처 삭제",
+    "deleteConfirm": "\"{{name}}\"을(를) 삭제하시겠습니까? 이미지 파일을 다시 가져와야 합니다. 이미 로드된 프리셋은 페이지를 새로고침할 때까지 계속 사용합니다.",
+    "clearAll": "모든 텍스처 삭제",
+    "clearAllConfirm": "가져온 텍스처 {{count}}개를 모두 삭제하시겠습니까? 이미지 파일을 다시 가져와야 합니다.",
+    "cleared": "가져온 텍스처가 모두 삭제되었습니다",
+    "gpuNote": "GPU에 로드된 텍스처는 페이지를 새로고침할 때까지 유지됩니다.",
+    "idbUnavailable": "가져온 텍스처에는 저장소 접근이 필요하며, 시크릿 모드에서는 사용할 수 없습니다.",
+    "duplicateName": "\"{{name}}\"이(가) 이미 존재합니다"
+  },
+
   "customPacks": {
     "tabs": {
       "packs": "팩"

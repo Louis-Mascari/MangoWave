@@ -58,6 +58,7 @@ export const EXPORT_CATEGORIES: ExportCategory[] = [
       'customPacks',
       'activeCustomPackId',
       'importedPresets',
+      'importedTextures',
     ],
   },
   {
@@ -294,6 +295,23 @@ const SANITIZERS: Record<string, (val: unknown) => unknown> = {
       .map((p) => ({
         name: (p.name as string).slice(0, 200),
         fileName: typeof p.fileName === 'string' ? (p.fileName as string).slice(0, 200) : '',
+        addedAt: typeof p.addedAt === 'number' ? p.addedAt : Date.now(),
+      }));
+  },
+  importedTextures: (v) => {
+    if (!Array.isArray(v)) return undefined;
+    return v
+      .filter(
+        (p): p is Record<string, unknown> =>
+          !!p && typeof p === 'object' && !Array.isArray(p) && typeof p.name === 'string',
+      )
+      .map((p) => ({
+        name: (p.name as string).slice(0, 200),
+        fileName: typeof p.fileName === 'string' ? (p.fileName as string).slice(0, 200) : '',
+        width: typeof p.width === 'number' && isFinite(p.width as number) ? p.width : 0,
+        height: typeof p.height === 'number' && isFinite(p.height as number) ? p.height : 0,
+        sizeBytes:
+          typeof p.sizeBytes === 'number' && isFinite(p.sizeBytes as number) ? p.sizeBytes : 0,
         addedAt: typeof p.addedAt === 'number' ? p.addedAt : Date.now(),
       }));
   },

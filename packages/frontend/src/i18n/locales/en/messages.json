@@ -181,6 +181,26 @@
     "imported": "Imported"
   },
 
+  "importedTextures": {
+    "importTextures": "Import Textures",
+    "importSuccess": "Imported {{count}} texture(s)",
+    "importPartial": "Imported {{success}} of {{total}} textures. {{failed}} failed.",
+    "importAllFailed": "All {{count}} texture(s) failed to import",
+    "fileTooLarge": "\"{{name}}\" is too large (max 2MB)",
+    "invalidFileType": "\"{{name}}\" is not a supported image file (JPEG, PNG, or WebP)",
+    "dimensionsTooLarge": "\"{{name}}\" exceeds the maximum dimensions (2048×2048)",
+    "readFailed": "Failed to read \"{{name}}\"",
+    "decodeFailed": "Failed to decode \"{{name}}\"",
+    "deleteTexture": "Delete imported texture",
+    "deleteConfirm": "Delete \"{{name}}\"? The image file will need to be re-imported. Already-loaded presets will keep using it until the page is reloaded.",
+    "clearAll": "Clear All Textures",
+    "clearAllConfirm": "Delete all {{count}} imported textures? The image files will need to be re-imported.",
+    "cleared": "All imported textures cleared",
+    "gpuNote": "Textures loaded on the GPU persist until the page is reloaded.",
+    "idbUnavailable": "Imported textures require storage access, which is unavailable in private browsing mode.",
+    "duplicateName": "\"{{name}}\" already exists"
+  },
+
   "customPacks": {
     "tabs": {
       "packs": "packs"

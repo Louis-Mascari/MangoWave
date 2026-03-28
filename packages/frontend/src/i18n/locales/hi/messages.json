@@ -172,6 +172,26 @@
     "imported": "आयातित"
   },
 
+  "importedTextures": {
+    "importTextures": "टेक्सचर आयात करें",
+    "importSuccess": "{{count}} टेक्सचर आयात किए गए",
+    "importPartial": "{{total}} में से {{success}} टेक्सचर आयात किए गए। {{failed}} विफल।",
+    "importAllFailed": "सभी {{count}} टेक्सचर आयात करने में विफल",
+    "fileTooLarge": "\"{{name}}\" बहुत बड़ा है (अधिकतम 2MB)",
+    "invalidFileType": "\"{{name}}\" एक समर्थित छवि फ़ाइल नहीं है (JPEG, PNG या WebP)",
+    "dimensionsTooLarge": "\"{{name}}\" अधिकतम आयामों से अधिक है (2048×2048)",
+    "readFailed": "\"{{name}}\" पढ़ने में विफल",
+    "decodeFailed": "\"{{name}}\" डीकोड करने में विफल",
+    "deleteTexture": "आयातित टेक्सचर हटाएं",
+    "deleteConfirm": "\"{{name}}\" हटाएं? छवि फ़ाइल को फिर से आयात करना होगा। पहले से लोड किए गए प्रीसेट पेज रीलोड होने तक इसका उपयोग करते रहेंगे।",
+    "clearAll": "सभी टेक्सचर हटाएं",
+    "clearAllConfirm": "सभी {{count}} आयातित टेक्सचर हटाएं? छवि फ़ाइलों को फिर से आयात करना होगा।",
+    "cleared": "सभी आयातित टेक्सचर हटा दिए गए",
+    "gpuNote": "GPU पर लोड किए गए टेक्सचर पेज रीलोड होने तक बने रहते हैं।",
+    "idbUnavailable": "आयातित टेक्सचर के लिए स्टोरेज एक्सेस आवश्यक है, जो प्राइवेट ब्राउज़िंग मोड में उपलब्ध नहीं है।",
+    "duplicateName": "\"{{name}}\" पहले से मौजूद है"
+  },
+
   "customPacks": {
     "tabs": {
       "packs": "पैक"

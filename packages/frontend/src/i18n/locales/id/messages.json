@@ -172,6 +172,26 @@
     "imported": "Diimpor"
   },
 
+  "importedTextures": {
+    "importTextures": "Impor Tekstur",
+    "importSuccess": "{{count}} tekstur berhasil diimpor",
+    "importPartial": "{{success}} dari {{total}} tekstur berhasil diimpor. {{failed}} gagal.",
+    "importAllFailed": "Semua {{count}} tekstur gagal diimpor",
+    "fileTooLarge": "\"{{name}}\" terlalu besar (maks 2MB)",
+    "invalidFileType": "\"{{name}}\" bukan file gambar yang didukung (JPEG, PNG, atau WebP)",
+    "dimensionsTooLarge": "\"{{name}}\" melebihi dimensi maksimum (2048×2048)",
+    "readFailed": "Gagal membaca \"{{name}}\"",
+    "decodeFailed": "Gagal mendekode \"{{name}}\"",
+    "deleteTexture": "Hapus tekstur yang diimpor",
+    "deleteConfirm": "Hapus \"{{name}}\"? File gambar perlu diimpor ulang. Preset yang sudah dimuat akan terus menggunakannya hingga halaman dimuat ulang.",
+    "clearAll": "Hapus Semua Tekstur",
+    "clearAllConfirm": "Hapus semua {{count}} tekstur yang diimpor? File gambar perlu diimpor ulang.",
+    "cleared": "Semua tekstur yang diimpor telah dihapus",
+    "gpuNote": "Tekstur yang dimuat di GPU tetap ada hingga halaman dimuat ulang.",
+    "idbUnavailable": "Tekstur yang diimpor memerlukan akses penyimpanan, yang tidak tersedia dalam mode penjelajahan pribadi.",
+    "duplicateName": "\"{{name}}\" sudah ada"
+  },
+
   "customPacks": {
     "tabs": {
       "packs": "paket"

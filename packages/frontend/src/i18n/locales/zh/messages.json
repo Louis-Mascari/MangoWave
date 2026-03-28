@@ -172,6 +172,26 @@
     "imported": "已导入"
   },
 
+  "importedTextures": {
+    "importTextures": "导入纹理",
+    "importSuccess": "已导入 {{count}} 个纹理",
+    "importPartial": "已导入 {{success}}/{{total}} 个纹理，{{failed}} 个失败。",
+    "importAllFailed": "全部 {{count}} 个纹理导入失败",
+    "fileTooLarge": "\"{{name}}\" 太大（最大 2MB）",
+    "invalidFileType": "\"{{name}}\" 不是支持的图像文件（JPEG、PNG 或 WebP）",
+    "dimensionsTooLarge": "\"{{name}}\" 超过最大尺寸（2048×2048）",
+    "readFailed": "无法读取 \"{{name}}\"",
+    "decodeFailed": "无法解码 \"{{name}}\"",
+    "deleteTexture": "删除导入的纹理",
+    "deleteConfirm": "删除 \"{{name}}\"？图像文件需要重新导入。已加载的预设将继续使用它，直到页面重新加载。",
+    "clearAll": "清除所有纹理",
+    "clearAllConfirm": "删除全部 {{count}} 个导入的纹理？图像文件需要重新导入。",
+    "cleared": "已清除所有导入的纹理",
+    "gpuNote": "加载到 GPU 的纹理在页面重新加载之前会一直保留。",
+    "idbUnavailable": "导入纹理需要存储访问权限，在隐私浏览模式下不可用。",
+    "duplicateName": "\"{{name}}\" 已存在"
+  },
+
   "customPacks": {
     "tabs": {
       "packs": "合集"

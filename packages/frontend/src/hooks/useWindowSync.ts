@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useImportedPresetsStore } from '../store/useImportedPresetsStore.ts';
+import { useImportedTexturesStore } from '../store/useImportedTexturesStore.ts';
 import { useWindowSyncStatusStore } from '../store/useWindowSyncStatusStore.ts';
 import { WindowSyncService } from '../services/WindowSyncService.ts';
 import type { SyncableSettings } from '../services/WindowSyncService.ts';
@@ -27,6 +28,7 @@ function getSettingsSnapshot(): SyncableSettings {
     customPacks,
     activeCustomPackId,
     importedPresets,
+    importedTextures,
   } = useSettingsStore.getState();
   return {
     ...(syncPerformance && { performance: { ...performance } }),
@@ -45,6 +47,7 @@ function getSettingsSnapshot(): SyncableSettings {
     customPacks: customPacks.map((p) => ({ ...p, presets: [...p.presets] })),
     activeCustomPackId,
     importedPresets: importedPresets.map((p) => ({ ...p })),
+    importedTextures: importedTextures.map((t) => ({ ...t })),
   };
 }
 
@@ -87,11 +90,17 @@ function applyInboundSettings(settings: SyncableSettings): void {
     ...(settings.importedPresets && {
       importedPresets: settings.importedPresets.map((p) => ({ ...p })),
     }),
+    ...(settings.importedTextures && {
+      importedTextures: settings.importedTextures.map((t) => ({ ...t })),
+    }),
   });
 
-  // All windows share same-origin IDB — reload to pick up any new imported presets
+  // All windows share same-origin IDB — reload to pick up any new imported presets/textures
   if (settings.importedPresets) {
     useImportedPresetsStore.getState().loadFromIdb();
+  }
+  if (settings.importedTextures) {
+    useImportedTexturesStore.getState().loadFromIdb();
   }
 }
 

@@ -36,6 +36,15 @@ export interface ImportedPresetMeta {
   addedAt: number; // Date.now()
 }
 
+export interface ImportedTextureMeta {
+  name: string; // texture name (lowercased filename stem)
+  fileName: string; // original filename
+  width: number;
+  height: number;
+  sizeBytes: number;
+  addedAt: number; // Date.now()
+}
+
 export type AutopilotMode = 'all' | 'favorites';
 
 export interface AutopilotSettings {
@@ -126,6 +135,12 @@ export interface SettingsState {
   removeImportedPresetMeta: (name: string) => void;
   clearImportedPresetsMeta: () => void;
 
+  // Imported textures (metadata only — raw image data lives in IDB)
+  importedTextures: ImportedTextureMeta[];
+  addImportedTextureMeta: (meta: ImportedTextureMeta) => void;
+  removeImportedTextureMeta: (name: string) => void;
+  clearImportedTexturesMeta: () => void;
+
   // Volume (persisted for local file playback)
   volume: number; // 0.0 to 1.0
   setVolume: (volume: number) => void;
@@ -180,6 +195,7 @@ const IMPORTABLE_KEYS: (keyof SettingsState)[] = [
   'customPacks',
   'activeCustomPackId',
   'importedPresets',
+  'importedTextures',
   'windowSyncEnabled',
   'syncPerformance',
 ];
@@ -410,6 +426,18 @@ export const useSettingsStore = create<SettingsState>()(
         })),
       clearImportedPresetsMeta: () => set({ importedPresets: [] }),
 
+      // Imported textures
+      importedTextures: [],
+      addImportedTextureMeta: (meta) =>
+        set((state) => ({
+          importedTextures: [...state.importedTextures, meta],
+        })),
+      removeImportedTextureMeta: (name) =>
+        set((state) => ({
+          importedTextures: state.importedTextures.filter((t) => t.name !== name),
+        })),
+      clearImportedTexturesMeta: () => set({ importedTextures: [] }),
+
       // Volume
       volume: 0.5,
       setVolume: (volume) => set({ volume }),
@@ -530,9 +558,13 @@ export const useSettingsStore = create<SettingsState>()(
         if ((version ?? 0) < 9) {
           state.importedPresets = state.importedPresets ?? [];
         }
+        // v9 → v10: Add imported textures metadata
+        if ((version ?? 0) < 10) {
+          state.importedTextures = state.importedTextures ?? [];
+        }
         return state as unknown as SettingsState;
       },
-      version: 9,
+      version: 10,
     },
   ),
 );

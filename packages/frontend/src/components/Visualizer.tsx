@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { VisualizerRenderer } from '../engine/VisualizerRenderer.ts';
 import type { AudioEngine } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
+import { useImportedTexturesStore } from '../store/useImportedTexturesStore.ts';
 import quarantinedData from '../data/quarantined-presets.json';
 import mobileBlockedData from '../data/mobile-blocked-presets.json';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
@@ -78,6 +79,12 @@ export function Visualizer({
     const { importedPresets: importedMeta } = useSettingsStore.getState();
     if (importedMeta.length > 0) {
       renderer.registerImportedPresetNames(importedMeta.map((p) => p.name));
+    }
+
+    // Load user-imported textures (built-in textures already loaded during init)
+    const textureStore = useImportedTexturesStore.getState();
+    if (textureStore.loaded && textureStore.textures.size > 0) {
+      renderer.loadExtraImages(textureStore.getAllTextures());
     }
 
     renderer.start();

@@ -115,6 +115,41 @@ export class VisualizerRenderer {
     this.fpsInterval = fps > 0 ? 1000 / fps : 0;
   }
 
+  /** Register imported preset names into the preset list and pack map (without preset objects). */
+  registerImportedPresetNames(names: string[]): void {
+    for (const name of names) {
+      if (!this._presetPackMap.has(name)) {
+        this._presetPackMap.set(name, 'Imported');
+        if (!this.presetKeys.includes(name)) {
+          this.presetKeys.push(name);
+        }
+      }
+    }
+  }
+
+  /** Register a single converted imported preset object (called before loadPreset). */
+  registerImportedPreset(name: string, preset: object): void {
+    this.presets[name] = preset;
+    if (!this._presetPackMap.has(name)) {
+      this._presetPackMap.set(name, 'Imported');
+    }
+    if (!this.presetKeys.includes(name)) {
+      this.presetKeys.push(name);
+    }
+  }
+
+  /** Unregister an imported preset (on delete). */
+  unregisterImportedPreset(name: string): void {
+    delete this.presets[name];
+    this._presetPackMap.delete(name);
+    this.presetKeys = this.presetKeys.filter((k) => k !== name);
+  }
+
+  /** Check if a preset name is registered as imported but not yet converted. */
+  isImportedAndUnloaded(name: string): boolean {
+    return this._presetPackMap.get(name) === 'Imported' && !this.presets[name];
+  }
+
   loadPreset(name: string, blendTime = 2.0): void {
     if (!this.visualizer) return;
     if (this.presets[name]) {

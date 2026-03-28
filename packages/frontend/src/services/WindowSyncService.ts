@@ -4,6 +4,7 @@ import type {
   AudioSettings,
   AutopilotSettings,
   CustomPack,
+  ImportedPresetMeta,
 } from '../store/useSettingsStore.ts';
 
 const CHANNEL_NAME = 'mangowave-sync';
@@ -26,6 +27,7 @@ export interface SyncableSettings {
   syncPerformance?: boolean;
   customPacks?: CustomPack[];
   activeCustomPackId?: string | null;
+  importedPresets?: ImportedPresetMeta[];
 }
 
 interface SyncMessageBase {

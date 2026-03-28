@@ -150,6 +150,28 @@
     "addedToPack": "\"{{pack}}\"에 추가됨",
     "createPackFirst": "먼저 커스텀 팩을 만드세요"
   },
+
+  "importedPresets": {
+    "importMilk": ".milk 가져오기",
+    "importingPresets": "프리셋 가져오는 중...",
+    "importSuccess": "{{count}}개의 프리셋을 가져왔습니다",
+    "importPartial": "{{total}}개 중 {{success}}개의 프리셋을 가져왔습니다. {{failed}}개 실패.",
+    "importAllFailed": "{{count}}개의 프리셋을 모두 가져오지 못했습니다",
+    "fileTooLarge": "\"{{name}}\"이(가) 너무 큽니다 (최대 500KB)",
+    "invalidFileType": "\"{{name}}\"은(는) .milk 또는 .milk2 파일이 아닙니다",
+    "emptyFile": "\"{{name}}\"이(가) 비어 있습니다",
+    "duplicateName": "\"{{name}}\"이(가) 이미 존재합니다",
+    "conversionFailed": "프리셋 \"{{name}}\" 변환에 실패했습니다. 건너뜁니다.",
+    "securityBlocked": "\"{{name}}\"에 차단된 콘텐츠가 포함되어 있습니다",
+    "deletePreset": "가져온 프리셋 삭제",
+    "deleteConfirm": "\"{{name}}\"을(를) 삭제하시겠습니까? .milk 파일을 다시 가져와야 합니다.",
+    "clearAll": "모두 삭제",
+    "clearAllConfirm": "가져온 프리셋 {{count}}개를 모두 삭제하시겠습니까? .milk 파일을 다시 가져와야 합니다.",
+    "cleared": "가져온 모든 프리셋이 삭제되었습니다",
+    "idbUnavailable": "가져온 프리셋은 저장소 접근이 필요하며, 시크릿 모드에서는 사용할 수 없습니다.",
+    "imported": "가져옴"
+  },
+
   "customPacks": {
     "tabs": {
       "packs": "팩"

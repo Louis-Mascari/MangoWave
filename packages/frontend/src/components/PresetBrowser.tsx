@@ -6,6 +6,7 @@ import { GroupedVirtuoso, Virtuoso, type GroupedVirtuosoHandle } from 'react-vir
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { usePresetHistoryStore } from '../store/usePresetHistoryStore.ts';
 import { usePresetBrowserStore } from '../store/usePresetBrowserStore.ts';
+import { useImportedPresetsStore } from '../store/useImportedPresetsStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import { useConfirmStore } from '../store/useConfirmStore.ts';
 import { quarantinedSet, mobileBlockedSet } from '../data/excludedPresets.ts';
@@ -15,8 +16,9 @@ import {
   downloadPackExport,
   parsePackImportFile,
 } from '../utils/settingsPortability.ts';
+import { readMilkFile } from '../engine/milkdropConverter.ts';
 import { PACK_ORDER } from '../engine/VisualizerRenderer.ts';
-import type { CustomPack } from '../store/useSettingsStore.ts';
+import type { CustomPack, ImportedPresetMeta } from '../store/useSettingsStore.ts';
 
 interface PresetBrowserProps {
   presetList: string[];
@@ -366,6 +368,10 @@ export function PresetBrowser({
   const deleteCustomPack = useSettingsStore((s) => s.deleteCustomPack);
   const removePresetFromCustomPack = useSettingsStore((s) => s.removePresetFromCustomPack);
   const setActiveCustomPackId = useSettingsStore((s) => s.setActiveCustomPackId);
+  const importedPresets = useSettingsStore((s) => s.importedPresets);
+  const addImportedPresetMeta = useSettingsStore((s) => s.addImportedPresetMeta);
+  const removeImportedPresetMeta = useSettingsStore((s) => s.removeImportedPresetMeta);
+  const clearImportedPresetsMeta = useSettingsStore((s) => s.clearImportedPresetsMeta);
 
   const activePackName = useMemo(
     () => customPacks.find((p) => p.id === activeCustomPackId)?.name ?? null,
@@ -388,7 +394,10 @@ export function PresetBrowser({
   const favoriteSet = useMemo(() => new Set(favoritePresets), [favoritePresets]);
   const overrideSet = useMemo(() => new Set(excludedOverrides), [excludedOverrides]);
 
-  const allPacks = PACK_ORDER;
+  const allPacks = useMemo(
+    () => (importedPresets.length > 0 ? [...PACK_ORDER, 'Imported'] : PACK_ORDER),
+    [importedPresets.length],
+  );
 
   // Initialize enabledPacks on first load (only if never set before).
   const didInitPacks = useRef(false);
@@ -696,24 +705,61 @@ export function PresetBrowser({
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-orange-400">
                   {isCollapsed ? '▶' : '▼'} {packName}
                 </span>
-                <span className="text-[10px] text-white/40">{countStr}</span>
+                <span className="flex items-center gap-1.5">
+                  {packName === 'Imported' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleClearAllImported();
+                      }}
+                      className="cursor-pointer rounded border-none bg-red-500/20 px-1.5 py-0.5 text-[8px] text-red-400/70 hover:bg-red-500/30 hover:text-red-400"
+                    >
+                      {t('importedPresets.clearAll')}
+                    </button>
+                  )}
+                  <span className="text-[10px] text-white/40">{countStr}</span>
+                </span>
               </div>
             );
           }}
           itemContent={(index) => {
             const name = flatPresets[index];
             if (!name) return <div style={{ height: 1 }} />;
+            const isImported = importedNameSet.has(name);
             return (
-              <PresetRow
-                name={name}
-                isCurrent={name === currentPreset}
-                isFavorite={favoriteSet.has(name)}
-                isBlocked={blockedSet.has(name)}
-                onSelect={() => handleSelectPreset(name)}
-                onToggleFavorite={() => handleToggleFavorite(name)}
-                onToggleBlock={() => handleToggleBlock(name)}
-                customPacks={customPacks}
-              />
+              <div className="flex items-center">
+                <div className="min-w-0 flex-1">
+                  <PresetRow
+                    name={name}
+                    isCurrent={name === currentPreset}
+                    isFavorite={favoriteSet.has(name)}
+                    isBlocked={blockedSet.has(name)}
+                    onSelect={() => handleSelectPreset(name)}
+                    onToggleFavorite={() => handleToggleFavorite(name)}
+                    onToggleBlock={() => handleToggleBlock(name)}
+                    customPacks={customPacks}
+                  />
+                </div>
+                {isImported && (
+                  <button
+                    onClick={() => {
+                      const meta = importedPresets.find((p) => p.name === name);
+                      if (meta) handleDeleteImportedPreset(meta);
+                    }}
+                    className="ml-0.5 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-red-500/20 hover:text-red-400"
+                    title={t('importedPresets.deletePreset')}
+                    aria-label={t('importedPresets.deletePreset')}
+                  >
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
+                      <path
+                        fillRule="evenodd"
+                        d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
             );
           }}
         />
@@ -862,6 +908,114 @@ export function PresetBrowser({
       return true;
     });
   }, [selectedPack, presetList, deferredPackSearch]);
+
+  // --- Imported presets ---
+
+  const importedNameSet = useMemo(
+    () => new Set(importedPresets.map((p) => p.name)),
+    [importedPresets],
+  );
+
+  const deduplicateName = useCallback(
+    (baseName: string): string => {
+      const allNames = new Set(presetList);
+      // Also include imported names not yet registered with the renderer
+      for (const n of importedNameSet) allNames.add(n);
+      if (!allNames.has(baseName)) return baseName;
+      let i = 2;
+      while (allNames.has(`${baseName} (${i})`)) i++;
+      return `${baseName} (${i})`;
+    },
+    [presetList, importedNameSet],
+  );
+
+  const handleImportMilk = useCallback(async () => {
+    // Quick IDB availability check (fails in some private browsing modes)
+    try {
+      const { set, del } = await import('idb-keyval');
+      await set('__mw_idb_test', '1');
+      await del('__mw_idb_test');
+    } catch {
+      useToastStore.getState().show(t('importedPresets.idbUnavailable'));
+      return;
+    }
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.milk,.milk2';
+    input.multiple = true;
+    input.onchange = async () => {
+      const files = input.files;
+      if (!files || files.length === 0) return;
+
+      let success = 0;
+      let failed = 0;
+      const errors: string[] = [];
+      const store = useImportedPresetsStore.getState();
+      // Track names used within this batch to avoid collisions between files
+      const batchNames = new Set<string>();
+
+      for (const file of Array.from(files)) {
+        try {
+          const { name: rawName, text } = await readMilkFile(file);
+          let name = deduplicateName(rawName);
+          // If this batch already used the deduplicated name, bump further
+          while (batchNames.has(name)) {
+            name = deduplicateName(name);
+          }
+          batchNames.add(name);
+
+          await store.addPreset(name, text);
+          addImportedPresetMeta({ name, fileName: file.name, addedAt: Date.now() });
+          success++;
+        } catch (err) {
+          failed++;
+          const msg = err instanceof Error ? err.message : String(err);
+          errors.push(`${file.name}: ${msg}`);
+        }
+      }
+
+      const toast = useToastStore.getState();
+      if (success > 0 && failed === 0) {
+        toast.show(t('importedPresets.importSuccess', { count: success }));
+      } else if (success > 0 && failed > 0) {
+        toast.show(
+          t('importedPresets.importPartial', { success, total: success + failed, failed }),
+        );
+      } else {
+        toast.show(t('importedPresets.importAllFailed', { count: failed }));
+      }
+    };
+    input.click();
+  }, [t, deduplicateName, addImportedPresetMeta]);
+
+  const handleDeleteImportedPreset = useCallback(
+    (preset: ImportedPresetMeta) => {
+      useConfirmStore.getState().show({
+        title: t('importedPresets.deletePreset'),
+        message: t('importedPresets.deleteConfirm', { name: preset.name }),
+        destructive: true,
+        onConfirm: async () => {
+          await useImportedPresetsStore.getState().removePreset(preset.name);
+          removeImportedPresetMeta(preset.name);
+        },
+      });
+    },
+    [t, removeImportedPresetMeta],
+  );
+
+  const handleClearAllImported = useCallback(() => {
+    useConfirmStore.getState().show({
+      title: t('importedPresets.clearAll'),
+      message: t('importedPresets.clearAllConfirm', { count: importedPresets.length }),
+      destructive: true,
+      onConfirm: async () => {
+        await useImportedPresetsStore.getState().removeAllPresets();
+        clearImportedPresetsMeta();
+        useToastStore.getState().show(t('importedPresets.cleared'));
+      },
+    });
+  }, [t, importedPresets.length, clearImportedPresetsMeta]);
 
   const handleCreatePack = useCallback(() => {
     if (customPacks.length >= 50) {
@@ -1125,6 +1279,12 @@ export function PresetBrowser({
             className="cursor-pointer rounded border border-white/10 bg-white/10 px-2 py-1 text-[10px] font-medium text-white/60 hover:bg-white/20"
           >
             {t('customPacks.importPack')}
+          </button>
+          <button
+            onClick={handleImportMilk}
+            className="cursor-pointer rounded border border-orange-500/30 bg-orange-500/10 px-2 py-1 text-[10px] font-medium text-orange-400/80 hover:bg-orange-500/20"
+          >
+            {t('importedPresets.importMilk')}
           </button>
         </div>
 

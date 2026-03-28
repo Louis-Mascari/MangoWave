@@ -52,7 +52,13 @@ export const EXPORT_CATEGORIES: ExportCategory[] = [
   {
     key: 'packs',
     labelKey: 'data.categoryPacks',
-    fields: ['enabledPacks', 'excludedOverrides', 'customPacks', 'activeCustomPackId'],
+    fields: [
+      'enabledPacks',
+      'excludedOverrides',
+      'customPacks',
+      'activeCustomPackId',
+      'importedPresets',
+    ],
   },
   {
     key: 'sync',
@@ -278,6 +284,19 @@ const SANITIZERS: Record<string, (val: unknown) => unknown> = {
       }));
   },
   activeCustomPackId: (v) => (typeof v === 'string' || v === null ? v : null),
+  importedPresets: (v) => {
+    if (!Array.isArray(v)) return undefined;
+    return v
+      .filter(
+        (p): p is Record<string, unknown> =>
+          !!p && typeof p === 'object' && !Array.isArray(p) && typeof p.name === 'string',
+      )
+      .map((p) => ({
+        name: (p.name as string).slice(0, 200),
+        fileName: typeof p.fileName === 'string' ? (p.fileName as string).slice(0, 200) : '',
+        addedAt: typeof p.addedAt === 'number' ? p.addedAt : Date.now(),
+      }));
+  },
   windowSyncEnabled: (v) => (typeof v === 'boolean' ? v : false),
   syncPerformance: (v) => (typeof v === 'boolean' ? v : true),
 };

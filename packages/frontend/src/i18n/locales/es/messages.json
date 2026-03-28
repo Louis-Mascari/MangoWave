@@ -150,6 +150,28 @@
     "addedToPack": "Añadido a \"{{pack}}\"",
     "createPackFirst": "Crea primero un pack personalizado"
   },
+
+  "importedPresets": {
+    "importMilk": "Importar .milk",
+    "importingPresets": "Importando presets...",
+    "importSuccess": "{{count}} preset(s) importado(s)",
+    "importPartial": "Importados {{success}} de {{total}} presets. {{failed}} fallaron.",
+    "importAllFailed": "Los {{count}} preset(s) fallaron al importar",
+    "fileTooLarge": "\"{{name}}\" es demasiado grande (máx. 500KB)",
+    "invalidFileType": "\"{{name}}\" no es un archivo .milk o .milk2",
+    "emptyFile": "\"{{name}}\" está vacío",
+    "duplicateName": "\"{{name}}\" ya existe",
+    "conversionFailed": "Error al convertir el preset \"{{name}}\". Omitiendo.",
+    "securityBlocked": "\"{{name}}\" contiene contenido bloqueado",
+    "deletePreset": "Eliminar preset importado",
+    "deleteConfirm": "¿Eliminar \"{{name}}\"? El archivo .milk deberá reimportarse.",
+    "clearAll": "Eliminar todo",
+    "clearAllConfirm": "¿Eliminar los {{count}} presets importados? Los archivos .milk deberán reimportarse.",
+    "cleared": "Todos los presets importados eliminados",
+    "idbUnavailable": "Los presets importados requieren acceso de almacenamiento, no disponible en modo de navegación privada.",
+    "imported": "Importados"
+  },
+
   "customPacks": {
     "tabs": {
       "packs": "packs"

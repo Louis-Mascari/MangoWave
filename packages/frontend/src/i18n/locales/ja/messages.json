@@ -150,6 +150,28 @@
     "addedToPack": "「{{pack}}」に追加しました",
     "createPackFirst": "まずカスタムパックを作成してください"
   },
+
+  "importedPresets": {
+    "importMilk": ".milk をインポート",
+    "importingPresets": "プリセットをインポート中...",
+    "importSuccess": "{{count}} 件のプリセットをインポートしました",
+    "importPartial": "{{total}} 件中 {{success}} 件をインポートしました。{{failed}} 件が失敗しました。",
+    "importAllFailed": "{{count}} 件すべてのプリセットのインポートに失敗しました",
+    "fileTooLarge": "\"{{name}}\" が大きすぎます（最大 500KB）",
+    "invalidFileType": "\"{{name}}\" は .milk または .milk2 ファイルではありません",
+    "emptyFile": "\"{{name}}\" は空です",
+    "duplicateName": "\"{{name}}\" は既に存在します",
+    "conversionFailed": "プリセット \"{{name}}\" の変換に失敗しました。スキップします。",
+    "securityBlocked": "\"{{name}}\" にブロックされたコンテンツが含まれています",
+    "deletePreset": "インポートしたプリセットを削除",
+    "deleteConfirm": "\"{{name}}\" を削除しますか？.milk ファイルを再インポートする必要があります。",
+    "clearAll": "すべて削除",
+    "clearAllConfirm": "インポートした {{count}} 件のプリセットをすべて削除しますか？.milk ファイルを再インポートする必要があります。",
+    "cleared": "インポートしたすべてのプリセットを削除しました",
+    "idbUnavailable": "インポートしたプリセットにはストレージアクセスが必要ですが、プライベートブラウジングモードでは利用できません。",
+    "imported": "インポート済み"
+  },
+
   "customPacks": {
     "tabs": {
       "packs": "パック"

@@ -71,6 +71,15 @@ export function Visualizer({
       fxaa: performance.fxaa,
       excludedPresets,
     });
+
+    // Register imported preset names from persisted metadata (synchronously available).
+    // The actual .milk text in IDB loads asynchronously, but names are sufficient for
+    // pool building. Lazy conversion in usePresetNavigation handles the rest.
+    const { importedPresets: importedMeta } = useSettingsStore.getState();
+    if (importedMeta.length > 0) {
+      renderer.registerImportedPresetNames(importedMeta.map((p) => p.name));
+    }
+
     renderer.start();
     onPresetsLoaded(renderer.presetList, renderer.presetPackMap);
 

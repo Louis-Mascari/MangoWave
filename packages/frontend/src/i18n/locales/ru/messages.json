@@ -150,6 +150,28 @@
     "addedToPack": "Добавлено в «{{pack}}»",
     "createPackFirst": "Сначала создайте пользовательский пак"
   },
+
+  "importedPresets": {
+    "importMilk": "Импорт .milk",
+    "importingPresets": "Импорт пресетов...",
+    "importSuccess": "Импортировано пресетов: {{count}}",
+    "importPartial": "Импортировано {{success}} из {{total}} пресетов. {{failed}} не удалось.",
+    "importAllFailed": "Не удалось импортировать все {{count}} пресет(ов)",
+    "fileTooLarge": "\"{{name}}\" слишком большой (макс. 500КБ)",
+    "invalidFileType": "\"{{name}}\" — не файл .milk или .milk2",
+    "emptyFile": "\"{{name}}\" пустой",
+    "duplicateName": "\"{{name}}\" уже существует",
+    "conversionFailed": "Не удалось конвертировать пресет \"{{name}}\". Пропуск.",
+    "securityBlocked": "\"{{name}}\" содержит заблокированный контент",
+    "deletePreset": "Удалить импортированный пресет",
+    "deleteConfirm": "Удалить \"{{name}}\"? Файл .milk нужно будет импортировать заново.",
+    "clearAll": "Удалить все",
+    "clearAllConfirm": "Удалить все {{count}} импортированных пресетов? Файлы .milk нужно будет импортировать заново.",
+    "cleared": "Все импортированные пресеты удалены",
+    "idbUnavailable": "Импортированные пресеты требуют доступа к хранилищу, недоступного в режиме приватного просмотра.",
+    "imported": "Импортированные"
+  },
+
   "customPacks": {
     "tabs": {
       "packs": "паки"

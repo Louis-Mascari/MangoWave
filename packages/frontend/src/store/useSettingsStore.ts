@@ -30,6 +30,12 @@ export interface CustomPack {
   createdAt: number; // Date.now()
 }
 
+export interface ImportedPresetMeta {
+  name: string; // display name (de-duplicated at import time)
+  fileName: string; // original filename
+  addedAt: number; // Date.now()
+}
+
 export type AutopilotMode = 'all' | 'favorites';
 
 export interface AutopilotSettings {
@@ -114,6 +120,12 @@ export interface SettingsState {
   syncPerformance: boolean;
   setSyncPerformance: (enabled: boolean) => void;
 
+  // Imported presets (metadata only — raw .milk text lives in IDB)
+  importedPresets: ImportedPresetMeta[];
+  addImportedPresetMeta: (meta: ImportedPresetMeta) => void;
+  removeImportedPresetMeta: (name: string) => void;
+  clearImportedPresetsMeta: () => void;
+
   // Volume (persisted for local file playback)
   volume: number; // 0.0 to 1.0
   setVolume: (volume: number) => void;
@@ -167,6 +179,7 @@ const IMPORTABLE_KEYS: (keyof SettingsState)[] = [
   'volume',
   'customPacks',
   'activeCustomPackId',
+  'importedPresets',
   'windowSyncEnabled',
   'syncPerformance',
 ];
@@ -385,6 +398,18 @@ export const useSettingsStore = create<SettingsState>()(
       syncPerformance: true,
       setSyncPerformance: (enabled) => set({ syncPerformance: enabled }),
 
+      // Imported presets
+      importedPresets: [],
+      addImportedPresetMeta: (meta) =>
+        set((state) => ({
+          importedPresets: [...state.importedPresets, meta],
+        })),
+      removeImportedPresetMeta: (name) =>
+        set((state) => ({
+          importedPresets: state.importedPresets.filter((p) => p.name !== name),
+        })),
+      clearImportedPresetsMeta: () => set({ importedPresets: [] }),
+
       // Volume
       volume: 0.5,
       setVolume: (volume) => set({ volume }),
@@ -501,9 +526,13 @@ export const useSettingsStore = create<SettingsState>()(
           state.customPacks = state.customPacks ?? [];
           state.activeCustomPackId = state.activeCustomPackId ?? null;
         }
+        // v8 → v9: Add imported presets metadata
+        if ((version ?? 0) < 9) {
+          state.importedPresets = state.importedPresets ?? [];
+        }
         return state as unknown as SettingsState;
       },
-      version: 8,
+      version: 9,
     },
   ),
 );

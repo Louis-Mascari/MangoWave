@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { usePresetHistoryStore } from '../store/usePresetHistoryStore.ts';
+import { useImportedPresetsStore } from '../store/useImportedPresetsStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import { pickPreset } from '../utils/pickPreset.ts';
 import { quarantinedSet, mobileBlockedSet } from '../data/excludedPresets.ts';
@@ -90,6 +91,33 @@ export function usePresetNavigation({
     return pack ? new Set(pack.presets) : null;
   }, [activeCustomPackId, customPacks]);
 
+  /**
+   * Lazily convert an imported preset (if needed), register it with the renderer,
+   * then load it. Falls back to next preset on failure.
+   */
+  const loadPresetWithLazyConvert = useCallback(
+    async (
+      renderer: VisualizerRenderer,
+      name: string,
+      blendTime: number,
+      fallbackToNext?: () => void,
+    ) => {
+      if (renderer.isImportedAndUnloaded(name)) {
+        const preset = await useImportedPresetsStore.getState().getConvertedPreset(name);
+        if (!preset) {
+          useToastStore
+            .getState()
+            .show(i18n.t('importedPresets.conversionFailed', { name, ns: 'messages' }));
+          fallbackToNext?.();
+          return;
+        }
+        renderer.registerImportedPreset(name, preset);
+      }
+      renderer.loadPreset(name, blendTime);
+    },
+    [],
+  );
+
   // Shared shuffle pick: used by both manual next and autopilot
   const pickNextPreset = useCallback(() => {
     const renderer = rendererRef.current;
@@ -130,7 +158,10 @@ export function usePresetNavigation({
 
     if (result.roundReset) historyStore.resetRound();
     historyStore.markPlayed(result.pick);
-    renderer.loadPreset(result.pick, transitionTime);
+    loadPresetWithLazyConvert(renderer, result.pick, transitionTime, () => {
+      // On conversion failure, fall back to a random built-in preset
+      renderer.nextPreset(mergedBlockedSet, transitionTime);
+    });
   }, [
     rendererRef,
     mergedBlockedSet,
@@ -142,6 +173,7 @@ export function usePresetNavigation({
     autopilotMode,
     autopilotFavoriteWeight,
     transitionTime,
+    loadPresetWithLazyConvert,
   ]);
 
   const handleNextPreset = useCallback(() => {
@@ -161,18 +193,24 @@ export function usePresetNavigation({
     }
     if (name) {
       historyStore.markPlayed(name);
-      rendererRef.current?.loadPreset(name, transitionTime);
+      const renderer = rendererRef.current;
+      if (renderer) {
+        loadPresetWithLazyConvert(renderer, name, transitionTime);
+      }
       resetAutopilotRef.current();
     }
-  }, [rendererRef, transitionTime, resetAutopilotRef]);
+  }, [rendererRef, transitionTime, resetAutopilotRef, loadPresetWithLazyConvert]);
 
   const handleSelectPreset = useCallback(
     (name: string) => {
       usePresetHistoryStore.getState().markPlayed(name);
-      rendererRef.current?.loadPreset(name, transitionTime);
+      const renderer = rendererRef.current;
+      if (renderer) {
+        loadPresetWithLazyConvert(renderer, name, transitionTime);
+      }
       resetAutopilotRef.current();
     },
-    [rendererRef, transitionTime, resetAutopilotRef],
+    [rendererRef, transitionTime, resetAutopilotRef, loadPresetWithLazyConvert],
   );
 
   const handleToggleFavorite = useCallback(() => {

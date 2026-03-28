@@ -164,6 +164,63 @@ describe('VisualizerRenderer', () => {
     });
   });
 
+  describe('imported presets', () => {
+    it('registers imported preset names without objects', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+
+      renderer.registerImportedPresetNames(['Import A', 'Import B']);
+
+      expect(renderer.presetList).toContain('Import A');
+      expect(renderer.presetList).toContain('Import B');
+      expect(renderer.presetPackMap.get('Import A')).toBe('Imported');
+      expect(renderer.presetPackMap.get('Import B')).toBe('Imported');
+    });
+
+    it('marks imported preset as unloaded if no object registered', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+
+      renderer.registerImportedPresetNames(['Lazy Preset']);
+      expect(renderer.isImportedAndUnloaded('Lazy Preset')).toBe(true);
+      expect(renderer.isImportedAndUnloaded('Preset A')).toBe(false);
+    });
+
+    it('registers a converted imported preset object', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+
+      renderer.registerImportedPresetNames(['My Import']);
+      expect(renderer.isImportedAndUnloaded('My Import')).toBe(true);
+
+      renderer.registerImportedPreset('My Import', { code: 'imported' });
+      expect(renderer.isImportedAndUnloaded('My Import')).toBe(false);
+    });
+
+    it('unregisters an imported preset', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+
+      renderer.registerImportedPresetNames(['To Remove']);
+      expect(renderer.presetList).toContain('To Remove');
+
+      renderer.unregisterImportedPreset('To Remove');
+      expect(renderer.presetList).not.toContain('To Remove');
+      expect(renderer.presetPackMap.has('To Remove')).toBe(false);
+    });
+
+    it('does not duplicate names when registering twice', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+
+      renderer.registerImportedPresetNames(['Dup']);
+      renderer.registerImportedPresetNames(['Dup']);
+
+      const count = renderer.presetList.filter((n) => n === 'Dup').length;
+      expect(count).toBe(1);
+    });
+  });
+
   describe('destroy', () => {
     it('cleans up all state', () => {
       const mockCaf = vi.spyOn(globalThis, 'cancelAnimationFrame').mockImplementation(() => {});

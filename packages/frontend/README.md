@@ -44,7 +44,7 @@ src/
 │                  #     PresetBrowser, MediaPlaylist, NowPlaying, PlaybackPanel, StartScreen,
 │                  #     OnboardingOverlay (first-time tips), etc.
 ├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (butterchurn),
-│                  # isWebGL2Supported
+│                  # milkdropConverter (.milk → butterchurn JSON), isWebGL2Supported
 ├── data/          # quarantined-presets.json, mobile-blocked-presets.json, excludedPresets.ts (shared Sets)
 ├── constants/     # shortcuts.ts (keyboard/mouse shortcut definitions)
 ├── i18n/          # i18next config + 9 locale dirs (en, es, zh, hi, ja, ko, ru, id, pt-BR)
@@ -58,8 +58,8 @@ src/
 ├── services/      # Spotify Web API client (owner-mode OAuth + PKCE utilities for self-hosters),
 │                  # WindowSyncService (BroadcastChannel-based multi-window sync)
 ├── store/         # Zustand stores: useSettingsStore, useSpotifyStore, useMediaPlayerStore,
-│                  #     usePresetHistoryStore, usePresetBrowserStore, useToastStore, useConfirmStore,
-│                  #     useWindowSyncStatusStore
+│                  #     usePresetHistoryStore, usePresetBrowserStore, useImportedPresetsStore,
+│                  #     useToastStore, useConfirmStore, useWindowSyncStatusStore
 ├── utils/         # Shared utilities (isMobileDevice, browserInfo, settingsPortability, audioFileValidation)
 ├── types/         # music-metadata.d.ts, getDisplayMedia.d.ts (type declarations for untyped APIs)
 └── test/          # Vitest global setup
@@ -89,6 +89,7 @@ Zustand with `localStorage` persistence. Key sections:
 | `customPacks`        | `CustomPack[]` (`id`, `name`, `presets[]`, `createdAt`)                        | []                          |
 | `activeCustomPackId` | `string \| null`                                                               | null                        |
 | `excludedOverrides`  | string[]                                                                       | []                          |
+| `importedPresets`    | `ImportedPresetMeta[]` (`name`, `fileName`, `addedAt`)                         | []                          |
 | `windowSyncEnabled`  | boolean                                                                        | false                       |
 | `syncPerformance`    | boolean                                                                        | true                        |
 | `onboardingShown`    | boolean                                                                        | false                       |

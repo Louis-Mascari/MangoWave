@@ -150,6 +150,28 @@
     "addedToPack": "Ditambahkan ke \"{{pack}}\"",
     "createPackFirst": "Buat paket kustom terlebih dahulu"
   },
+
+  "importedPresets": {
+    "importMilk": "Impor .milk",
+    "importingPresets": "Mengimpor preset...",
+    "importSuccess": "{{count}} preset berhasil diimpor",
+    "importPartial": "{{success}} dari {{total}} preset berhasil diimpor. {{failed}} gagal.",
+    "importAllFailed": "Semua {{count}} preset gagal diimpor",
+    "fileTooLarge": "\"{{name}}\" terlalu besar (maks. 500KB)",
+    "invalidFileType": "\"{{name}}\" bukan file .milk atau .milk2",
+    "emptyFile": "\"{{name}}\" kosong",
+    "duplicateName": "\"{{name}}\" sudah ada",
+    "conversionFailed": "Gagal mengonversi preset \"{{name}}\". Dilewati.",
+    "securityBlocked": "\"{{name}}\" mengandung konten yang diblokir",
+    "deletePreset": "Hapus preset impor",
+    "deleteConfirm": "Hapus \"{{name}}\"? File .milk perlu diimpor ulang.",
+    "clearAll": "Hapus Semua",
+    "clearAllConfirm": "Hapus semua {{count}} preset impor? File .milk perlu diimpor ulang.",
+    "cleared": "Semua preset impor dihapus",
+    "idbUnavailable": "Preset impor memerlukan akses penyimpanan, yang tidak tersedia dalam mode penjelajahan pribadi.",
+    "imported": "Diimpor"
+  },
+
   "customPacks": {
     "tabs": {
       "packs": "paket"

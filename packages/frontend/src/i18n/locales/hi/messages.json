@@ -150,6 +150,28 @@
     "addedToPack": "\"{{pack}}\" में जोड़ा गया",
     "createPackFirst": "पहले एक कस्टम पैक बनाओ"
   },
+
+  "importedPresets": {
+    "importMilk": ".milk आयात करें",
+    "importingPresets": "प्रीसेट आयात हो रहे हैं...",
+    "importSuccess": "{{count}} प्रीसेट आयात किए गए",
+    "importPartial": "{{total}} में से {{success}} प्रीसेट आयात किए गए। {{failed}} विफल।",
+    "importAllFailed": "सभी {{count}} प्रीसेट आयात करने में विफल",
+    "fileTooLarge": "\"{{name}}\" बहुत बड़ा है (अधिकतम 500KB)",
+    "invalidFileType": "\"{{name}}\" एक .milk या .milk2 फ़ाइल नहीं है",
+    "emptyFile": "\"{{name}}\" खाली है",
+    "duplicateName": "\"{{name}}\" पहले से मौजूद है",
+    "conversionFailed": "प्रीसेट \"{{name}}\" को कनवर्ट करने में विफल। छोड़ा जा रहा है।",
+    "securityBlocked": "\"{{name}}\" में अवरुद्ध सामग्री है",
+    "deletePreset": "आयातित प्रीसेट हटाएं",
+    "deleteConfirm": "\"{{name}}\" हटाएं? .milk फ़ाइल को फिर से आयात करना होगा।",
+    "clearAll": "सब हटाएं",
+    "clearAllConfirm": "सभी {{count}} आयातित प्रीसेट हटाएं? .milk फ़ाइलों को फिर से आयात करना होगा।",
+    "cleared": "सभी आयातित प्रीसेट हटा दिए गए",
+    "idbUnavailable": "आयातित प्रीसेट के लिए स्टोरेज एक्सेस आवश्यक है, जो निजी ब्राउज़िंग मोड में उपलब्ध नहीं है।",
+    "imported": "आयातित"
+  },
+
   "customPacks": {
     "tabs": {
       "packs": "पैक"

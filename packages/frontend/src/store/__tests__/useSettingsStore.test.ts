@@ -29,6 +29,8 @@ describe('useSettingsStore', () => {
       // Clear custom packs
       result.current.setActiveCustomPackId(null);
       result.current.customPacks.forEach((p) => result.current.deleteCustomPack(p.id));
+      // Clear imported presets
+      result.current.clearImportedPresetsMeta();
     });
   });
 
@@ -684,6 +686,69 @@ describe('useSettingsStore', () => {
       );
       // Function should not be overwritten
       expect(result.current.setVolume).toBe(original);
+    });
+  });
+
+  describe('importedPresets', () => {
+    it('defaults to empty array', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      expect(result.current.importedPresets).toEqual([]);
+    });
+
+    it('adds imported preset metadata', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      const meta = { name: 'Cool Preset', fileName: 'Cool Preset.milk', addedAt: 1000 };
+      act(() => result.current.addImportedPresetMeta(meta));
+      expect(result.current.importedPresets).toHaveLength(1);
+      expect(result.current.importedPresets[0]).toEqual(meta);
+    });
+
+    it('removes imported preset metadata by name', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => {
+        result.current.addImportedPresetMeta({
+          name: 'A',
+          fileName: 'A.milk',
+          addedAt: 1,
+        });
+        result.current.addImportedPresetMeta({
+          name: 'B',
+          fileName: 'B.milk',
+          addedAt: 2,
+        });
+      });
+      expect(result.current.importedPresets).toHaveLength(2);
+
+      act(() => result.current.removeImportedPresetMeta('A'));
+      expect(result.current.importedPresets).toHaveLength(1);
+      expect(result.current.importedPresets[0].name).toBe('B');
+    });
+
+    it('clears all imported preset metadata', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => {
+        result.current.addImportedPresetMeta({
+          name: 'X',
+          fileName: 'X.milk',
+          addedAt: 1,
+        });
+        result.current.addImportedPresetMeta({
+          name: 'Y',
+          fileName: 'Y.milk',
+          addedAt: 2,
+        });
+      });
+      expect(result.current.importedPresets).toHaveLength(2);
+
+      act(() => result.current.clearImportedPresetsMeta());
+      expect(result.current.importedPresets).toEqual([]);
+    });
+
+    it('is importable via importSettings', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      const metas = [{ name: 'Imported', fileName: 'Imported.milk', addedAt: 100 }];
+      act(() => result.current.importSettings({ importedPresets: metas }));
+      expect(result.current.importedPresets).toEqual(metas);
     });
   });
 });

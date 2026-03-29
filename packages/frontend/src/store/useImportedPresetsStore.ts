@@ -12,6 +12,7 @@ export interface ImportedPresetsState {
 
   loadFromIdb: () => Promise<void>;
   addPreset: (name: string, milkText: string) => Promise<void>;
+  cacheConverted: (name: string, preset: object) => void;
   removePreset: (name: string) => Promise<void>;
   removeAllPresets: () => Promise<void>;
   getConvertedPreset: (name: string) => Promise<object | null>;
@@ -63,6 +64,13 @@ export const useImportedPresetsStore = create<ImportedPresetsState>()((set, get)
       texts.set(name, milkText);
       return { milkTexts: texts };
     });
+  },
+
+  cacheConverted: (name, preset) => {
+    const cache = new Map(get().convertedCache);
+    cache.set(name, preset);
+    touchLru(name, cache);
+    set({ convertedCache: cache });
   },
 
   removePreset: async (name) => {

@@ -17,7 +17,7 @@ import {
   downloadPackExport,
   parsePackImportFile,
 } from '../utils/settingsPortability.ts';
-import { readMilkFile } from '../engine/milkdropConverter.ts';
+import { readMilkFile, convertMilkText, validatePreset } from '../engine/milkdropConverter.ts';
 import { readTextureFile, validateTextureFile } from '../engine/textureLoader.ts';
 import { PACK_ORDER } from '../engine/VisualizerRenderer.ts';
 import type {
@@ -926,19 +926,6 @@ export function PresetBrowser({
     [importedPresets],
   );
 
-  const deduplicateName = useCallback(
-    (baseName: string): string => {
-      const allNames = new Set(presetList);
-      // Also include imported names not yet registered with the renderer
-      for (const n of importedNameSet) allNames.add(n);
-      if (!allNames.has(baseName)) return baseName;
-      let i = 2;
-      while (allNames.has(`${baseName} (${i})`)) i++;
-      return `${baseName} (${i})`;
-    },
-    [presetList, importedNameSet],
-  );
-
   const handleImportMilk = useCallback(async () => {
     // Quick IDB availability check (fails in some private browsing modes)
     try {
@@ -968,14 +955,20 @@ export function PresetBrowser({
       for (const file of Array.from(files)) {
         try {
           const { name: rawName, text } = await readMilkFile(file);
-          let name = deduplicateName(rawName);
-          // If this batch already used the deduplicated name, bump further
-          while (batchNames.has(name)) {
-            name = deduplicateName(name);
+          // Reject if this preset name already exists (imported or in batch)
+          if (importedNameSet.has(rawName) || batchNames.has(rawName)) {
+            throw new Error(t('importedPresets.duplicateName', { name: rawName }));
           }
-          batchNames.add(name);
+          const name = rawName;
 
+          // Convert + validate before persisting — reject broken presets at import time
+          const converted = await convertMilkText(text);
+          validatePreset(converted);
+
+          batchNames.add(name);
           await store.addPreset(name, text);
+          // Pre-warm the LRU cache so the first play is instant
+          store.cacheConverted(name, converted);
           addImportedPresetMeta({ name, fileName: file.name, addedAt: Date.now() });
           success++;
         } catch (err) {
@@ -989,15 +982,21 @@ export function PresetBrowser({
       if (success > 0 && failed === 0) {
         toast.show(t('importedPresets.importSuccess', { count: success }));
       } else if (success > 0 && failed > 0) {
+        const details = errors.join('\n');
         toast.show(
-          t('importedPresets.importPartial', { success, total: success + failed, failed }),
+          `${t('importedPresets.importPartial', { success, total: success + failed, failed })}\n${details}`,
+          { type: 'warning', durationMs: 4000 + errors.length * 2000 },
         );
       } else {
-        toast.show(t('importedPresets.importAllFailed', { count: failed }));
+        const details = errors.join('\n');
+        toast.show(`${t('importedPresets.importAllFailed', { count: failed })}\n${details}`, {
+          type: 'warning',
+          durationMs: 4000 + errors.length * 2000,
+        });
       }
     };
     input.click();
-  }, [t, deduplicateName, addImportedPresetMeta]);
+  }, [t, importedNameSet, addImportedPresetMeta]);
 
   const handleDeleteImportedPreset = useCallback(
     (preset: ImportedPresetMeta) => {

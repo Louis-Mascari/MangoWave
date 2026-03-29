@@ -26,9 +26,18 @@ let converterPromise: Promise<(text: string) => object> | null = null;
 /** Lazy-load milkdrop-preset-converter (zero main-bundle cost). */
 function getConverter(): Promise<(text: string) => object> {
   if (!converterPromise) {
-    converterPromise = import('milkdrop-preset-converter').then(
-      (mod) => unwrap(mod) as unknown as (text: string) => object,
-    );
+    converterPromise = import('milkdrop-preset-converter').then((mod) => {
+      const resolved = unwrap(mod);
+      // The module exports { convertPreset, convertShader, ... } — extract the function
+      const fn =
+        typeof resolved === 'function'
+          ? resolved
+          : (resolved as Record<string, unknown>).convertPreset;
+      if (typeof fn !== 'function') {
+        throw new Error('milkdrop-preset-converter: convertPreset not found');
+      }
+      return fn as (text: string) => object;
+    });
   }
   return converterPromise!;
 }

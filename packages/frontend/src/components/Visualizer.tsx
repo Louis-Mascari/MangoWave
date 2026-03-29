@@ -109,6 +109,30 @@ export function Visualizer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioEngine]);
 
+  // Re-register imported preset names when they change (add/remove) and propagate
+  // updated preset list to App so PresetBrowser sees them immediately.
+  const importedPresets = useSettingsStore((s) => s.importedPresets);
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    if (!renderer) return;
+
+    const names = importedPresets.map((p) => p.name);
+
+    // Unregister any names the renderer has that are no longer in the store
+    for (const key of renderer.presetList) {
+      if (renderer.presetPackMap.get(key) === 'Imported' && !names.includes(key)) {
+        renderer.unregisterImportedPreset(key);
+      }
+    }
+
+    // Register any new names
+    if (names.length > 0) {
+      renderer.registerImportedPresetNames(names);
+    }
+
+    onPresetsLoaded(renderer.presetList, renderer.presetPackMap);
+  }, [importedPresets, rendererRef, onPresetsLoaded]);
+
   // Sync performance settings to renderer
   useEffect(() => {
     const renderer = rendererRef.current;

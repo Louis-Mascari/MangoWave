@@ -11,25 +11,23 @@ async function revealControls(app: Page) {
   await app.waitForTimeout(500);
 }
 
-/** Get a locator scoped to the mobile control bar (md:hidden container). */
+/** Get a locator scoped to the mobile control circle. */
 function mobileButton(app: Page, label: string): Locator {
-  return app.locator('.md\\:hidden').getByLabel(label, { exact: true });
+  return app.locator('[data-testid="mobile-circle"]').getByLabel(label, { exact: true });
 }
 
 /** Check that mobile controls are visible (opacity-100 on container). */
 function expectControlsVisible(app: Page) {
-  return expect(app.locator('.md\\:hidden [data-testid="mobile-circle"]')).toHaveClass(
-    /opacity-100/,
-    { timeout: 5000 },
-  );
+  return expect(app.locator('[data-testid="mobile-circle"]')).toHaveClass(/opacity-100/, {
+    timeout: 5000,
+  });
 }
 
 /** Check that mobile controls are hidden (opacity-0 on container). */
 function expectControlsHidden(app: Page, timeout = 10000) {
-  return expect(app.locator('.md\\:hidden [data-testid="mobile-circle"]')).toHaveClass(
-    /opacity-0/,
-    { timeout },
-  );
+  return expect(app.locator('[data-testid="mobile-circle"]')).toHaveClass(/opacity-0/, {
+    timeout,
+  });
 }
 
 test.describe('Mobile UI', () => {
@@ -72,7 +70,7 @@ test.describe('Mobile UI', () => {
     await expect(async () => {
       // Re-reveal if controls have auto-hidden
       const isHidden = await app
-        .locator('.md\\:hidden [data-testid="mobile-circle"]')
+        .locator('[data-testid="mobile-circle"]')
         .evaluate((el) => el.classList.contains('opacity-0'));
       if (isHidden) await revealControls(app);
 

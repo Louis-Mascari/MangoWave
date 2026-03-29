@@ -48,17 +48,19 @@ export async function convertMilkText(text: string): Promise<object> {
   return convertPreset(text);
 }
 
-/** Read a .milk file, validate size/extension, return raw text + derived name. */
+/** Read a .milk file, validate size/extension, return raw text + derived name.
+ *  Throws short error codes ('invalidFileType', 'fileTooLarge', 'emptyFile')
+ *  for i18n resolution in the UI layer. */
 export async function readMilkFile(file: File): Promise<{ name: string; text: string }> {
   const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
   if (!VALID_EXTENSIONS.includes(ext)) {
-    throw new Error(`Invalid file type: ${ext}. Expected .milk`);
+    throw new Error('invalidFileType');
   }
   if (file.size > MAX_FILE_SIZE) {
-    throw new Error(`File too large (${Math.round(file.size / 1024)}KB). Maximum is 500KB.`);
+    throw new Error('fileTooLarge');
   }
   if (file.size === 0) {
-    throw new Error('File is empty');
+    throw new Error('emptyFile');
   }
 
   const text = await file.text();
@@ -67,11 +69,11 @@ export async function readMilkFile(file: File): Promise<{ name: string; text: st
 }
 
 /** Scan EEL equation strings in a preset for blocked identifiers. Throws on suspicious content. */
-function scanEelStrings(obj: Record<string, unknown>, path: string): void {
+function scanEelStrings(obj: Record<string, unknown>): void {
   for (const field of EEL_FIELDS) {
     const val = obj[field];
     if (typeof val === 'string' && BLOCKED_IDENTIFIERS.test(val)) {
-      throw new Error(`Blocked identifier found in ${path}.${field}`);
+      throw new Error('securityBlocked');
     }
   }
 }
@@ -84,7 +86,7 @@ export function validatePreset(preset: object): void {
   const p = preset as Record<string, unknown>;
 
   // Scan top-level EEL fields
-  scanEelStrings(p, 'preset');
+  scanEelStrings(p);
 
   // Scan nested shapes and waves arrays
   for (const container of ['shapes', 'waves']) {
@@ -92,7 +94,7 @@ export function validatePreset(preset: object): void {
     if (Array.isArray(arr)) {
       for (let i = 0; i < arr.length; i++) {
         if (arr[i] && typeof arr[i] === 'object') {
-          scanEelStrings(arr[i] as Record<string, unknown>, `preset.${container}[${i}]`);
+          scanEelStrings(arr[i] as Record<string, unknown>);
         }
       }
     }

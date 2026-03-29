@@ -957,7 +957,7 @@ export function PresetBrowser({
           const { name: rawName, text } = await readMilkFile(file);
           // Reject if this preset name already exists (imported or in batch)
           if (importedNameSet.has(rawName) || batchNames.has(rawName)) {
-            throw new Error(t('importedPresets.duplicateName', { name: rawName }));
+            throw new Error('duplicateName');
           }
           const name = rawName;
 
@@ -973,7 +973,9 @@ export function PresetBrowser({
           success++;
         } catch (err) {
           failed++;
-          const msg = err instanceof Error ? err.message : String(err);
+          const code = err instanceof Error ? err.message : 'unknown';
+          const errorKey = `importedPresets.${code}` as const;
+          const msg = t(errorKey, { name: file.name, defaultValue: code });
           errors.push(`${file.name}: ${msg}`);
         }
       }

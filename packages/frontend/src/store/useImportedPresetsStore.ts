@@ -100,8 +100,10 @@ export const useImportedPresetsStore = create<ImportedPresetsState>()((set, get)
 
     // Check LRU cache
     if (convertedCache.has(name)) {
-      touchLru(name, convertedCache);
-      return convertedCache.get(name)!;
+      const cache = new Map(convertedCache);
+      touchLru(name, cache);
+      set({ convertedCache: cache });
+      return cache.get(name)!;
     }
 
     // Get raw text

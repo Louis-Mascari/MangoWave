@@ -248,6 +248,9 @@
     "presets": "presets",
     "textures": "texturas",
     "idbUnavailable": "El almacenamiento no está disponible en modo de navegación privada.",
-    "batchTooLarge": "Demasiados archivos (máximo 200 por importación)"
+    "filterAll": "Todos",
+    "statusSuccess": "Importados",
+    "statusWarning": "Advertencias",
+    "statusFailed": "Fallidos"
   }
 }

@@ -248,6 +248,9 @@
     "presets": "प्रीसेट",
     "textures": "टेक्सचर",
     "idbUnavailable": "प्राइवेट ब्राउज़िंग मोड में स्टोरेज उपलब्ध नहीं है।",
-    "batchTooLarge": "बहुत ज़्यादा फ़ाइलें (अधिकतम 200 प्रति इम्पोर्ट)"
+    "filterAll": "सभी",
+    "statusSuccess": "इम्पोर्ट हुए",
+    "statusWarning": "चेतावनियाँ",
+    "statusFailed": "असफल"
   }
 }

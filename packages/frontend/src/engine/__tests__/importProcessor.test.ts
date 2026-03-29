@@ -171,11 +171,6 @@ describe('processPresetImport', () => {
     expect(results[2].status).toBe('success');
   });
 
-  it('throws on batch size exceeding 200', async () => {
-    const files = Array.from({ length: 201 }, (_, i) => createMilkFile(`P${i}`));
-    await expect(processPresetImport(files, defaultOpts)).rejects.toThrow('batchTooLarge');
-  });
-
   it('rejects presets with blocked EEL identifiers', async () => {
     // Mock converter passes raw text into init_eqs_str, so blocked identifiers trigger
     const file = createMilkFile('Evil', 'fetch("http://evil.com")');
@@ -240,14 +235,6 @@ describe('processTextureImport', () => {
 
     expect(results[0].status).toBe('failed');
     expect(results[0].errorCode).toBe('fileTooLarge');
-  });
-
-  it('throws on batch size exceeding 200', async () => {
-    const files = Array.from(
-      { length: 201 },
-      (_, i) => new File(['x'], `img${i}.png`, { type: 'image/png' }),
-    );
-    await expect(processTextureImport(files, defaultOpts)).rejects.toThrow('batchTooLarge');
   });
 
   it('calls onProgress for each file', async () => {

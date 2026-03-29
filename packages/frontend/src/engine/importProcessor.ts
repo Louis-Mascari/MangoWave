@@ -11,8 +11,6 @@ import { useImportedTexturesStore } from '../store/useImportedTexturesStore.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { set as idbSet, del as idbDel } from 'idb-keyval';
 
-const MAX_BATCH_SIZE = 200;
-
 export interface ImportResult {
   fileName: string;
   presetName?: string;
@@ -36,10 +34,6 @@ export async function processPresetImport(
     onProgress: (result: ImportResult, current: number, total: number) => void;
   },
 ): Promise<ImportResult[]> {
-  if (files.length > MAX_BATCH_SIZE) {
-    throw new Error('batchTooLarge');
-  }
-
   await checkIdbAvailability();
 
   const results: ImportResult[] = [];
@@ -116,10 +110,6 @@ export async function processTextureImport(
     onProgress: (result: ImportResult, current: number, total: number) => void;
   },
 ): Promise<ImportResult[]> {
-  if (files.length > MAX_BATCH_SIZE) {
-    throw new Error('batchTooLarge');
-  }
-
   await checkIdbAvailability();
 
   const results: ImportResult[] = [];

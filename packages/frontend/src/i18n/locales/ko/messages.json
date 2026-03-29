@@ -248,6 +248,9 @@
     "presets": "프리셋",
     "textures": "텍스처",
     "idbUnavailable": "개인정보 보호 모드에서는 저장소를 사용할 수 없습니다.",
-    "batchTooLarge": "파일이 너무 많습니다 (한 번에 최대 200개)"
+    "filterAll": "전체",
+    "statusSuccess": "가져옴",
+    "statusWarning": "경고",
+    "statusFailed": "실패"
   }
 }

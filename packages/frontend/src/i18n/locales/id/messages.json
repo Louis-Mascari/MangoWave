@@ -248,6 +248,9 @@
     "presets": "preset",
     "textures": "tekstur",
     "idbUnavailable": "Penyimpanan tidak tersedia dalam mode penjelajahan pribadi.",
-    "batchTooLarge": "Terlalu banyak file (maksimum 200 per impor)"
+    "filterAll": "Semua",
+    "statusSuccess": "Berhasil",
+    "statusWarning": "Peringatan",
+    "statusFailed": "Gagal"
   }
 }

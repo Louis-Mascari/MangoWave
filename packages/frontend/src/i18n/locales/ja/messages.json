@@ -248,6 +248,9 @@
     "presets": "プリセット",
     "textures": "テクスチャ",
     "idbUnavailable": "プライベートブラウジングモードではストレージにアクセスできません。",
-    "batchTooLarge": "ファイルが多すぎます（1回のインポートにつき最大200件）"
+    "filterAll": "すべて",
+    "statusSuccess": "インポート済み",
+    "statusWarning": "警告あり",
+    "statusFailed": "失敗"
   }
 }

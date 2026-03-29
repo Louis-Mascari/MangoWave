@@ -257,6 +257,9 @@
     "presets": "presets",
     "textures": "textures",
     "idbUnavailable": "Storage access is unavailable in private browsing mode.",
-    "batchTooLarge": "Too many files (maximum 200 per import)"
+    "filterAll": "All",
+    "statusSuccess": "Imported",
+    "statusWarning": "Warnings",
+    "statusFailed": "Failed"
   }
 }

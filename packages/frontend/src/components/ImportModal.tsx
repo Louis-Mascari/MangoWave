@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Virtuoso } from 'react-virtuoso';
 import { useImportModalStore } from '../store/useImportModalStore.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useFocusTrap } from '../hooks/useFocusTrap.ts';
@@ -7,6 +8,7 @@ import { processPresetImport, processTextureImport } from '../engine/importProce
 import type { ImportResult } from '../engine/importProcessor.ts';
 
 type Phase = 'select' | 'processing' | 'results';
+type ResultFilter = 'all' | 'success' | 'warning' | 'failed';
 
 /** Outer gate — renders nothing when closed, fresh-mounts inner on each open. */
 export function ImportModal() {
@@ -24,23 +26,20 @@ function ImportModalInner() {
   const close = useImportModalStore((s) => s.close);
 
   const [phase, setPhase] = useState<Phase>('select');
-  const [results, setResults] = useState<ImportResult[]>([]);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [isDragOver, setIsDragOver] = useState(false);
   const [idbError, setIdbError] = useState(false);
+  const [resultFilter, setResultFilter] = useState<ResultFilter>('all');
   const dragCounterRef = useRef(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const resultListRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  useFocusTrap(dialogRef, true);
+  // Mutable results array — avoids O(n²) array copies from [...prev, result].
+  // resultCount state triggers re-renders; Virtuoso reads from the ref.
+  const resultsRef = useRef<ImportResult[]>([]);
+  const [resultCount, setResultCount] = useState(0);
 
-  // Auto-scroll result list as results arrive
-  useEffect(() => {
-    if (resultListRef.current) {
-      resultListRef.current.scrollTop = resultListRef.current.scrollHeight;
-    }
-  }, [results.length]);
+  useFocusTrap(dialogRef, true);
 
   // Escape key closes (but not during processing)
   useEffect(() => {
@@ -63,17 +62,57 @@ function ImportModalInner() {
     [importedTextures],
   );
 
+  // Derive summary stats from the ref, recomputed only when resultCount changes.
+  const { successCount, warningCount, failedCount, hasTextureWarnings } = useMemo(() => {
+    let success = 0;
+    let warning = 0;
+    let failed = 0;
+    let texWarn = false;
+    for (const r of resultsRef.current) {
+      if (r.status === 'success') success++;
+      else if (r.status === 'warning') warning++;
+      else if (r.status === 'failed') failed++;
+      if (r.warnings.length > 0) texWarn = true;
+    }
+    return {
+      successCount: success,
+      warningCount: warning,
+      failedCount: failed,
+      hasTextureWarnings: mode === 'preset' && texWarn,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resultCount, mode]);
+
+  // Filtered result indices for the active tab — avoids copying the array.
+  const filteredIndices = useMemo(() => {
+    if (resultFilter === 'all') return null; // null = show all (Virtuoso uses resultCount directly)
+    const indices: number[] = [];
+    for (let i = 0; i < resultsRef.current.length; i++) {
+      const r = resultsRef.current[i];
+      if (resultFilter === 'success' && r.status === 'success') indices.push(i);
+      else if (resultFilter === 'warning' && r.status === 'warning') indices.push(i);
+      else if (resultFilter === 'failed' && r.status === 'failed') indices.push(i);
+    }
+    return indices;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resultFilter, resultCount]);
+
+  const visibleCount = filteredIndices ? filteredIndices.length : resultCount;
+
   const handleFiles = useCallback(
     async (files: File[]) => {
       if (files.length === 0) return;
 
       setPhase('processing');
       setProgress({ current: 0, total: files.length });
-      setResults([]);
+      resultsRef.current = [];
+      setResultCount(0);
       setIdbError(false);
+      setResultFilter('all');
 
       const onProgress = (result: ImportResult, current: number, total: number) => {
-        setResults((prev) => [...prev, result]);
+        resultsRef.current.push(result);
+        setResultCount(resultsRef.current.length);
         setProgress({ current, total });
       };
 
@@ -91,14 +130,9 @@ function ImportModalInner() {
             onProgress,
           });
         }
-      } catch (err) {
-        if (err instanceof Error && err.message === 'batchTooLarge') {
-          setResults([
-            { fileName: '', status: 'failed', errorCode: 'batchTooLarge', warnings: [] },
-          ]);
-        } else {
-          setIdbError(true);
-        }
+      } catch {
+        // IDB unavailable
+        setIdbError(true);
       }
 
       setPhase('results');
@@ -160,10 +194,12 @@ function ImportModalInner() {
   );
 
   const handleImportMore = useCallback(() => {
+    resultsRef.current = [];
+    setResultCount(0);
     setPhase('select');
-    setResults([]);
     setProgress({ current: 0, total: 0 });
     setIdbError(false);
+    setResultFilter('all');
   }, []);
 
   const handleUploadTextures = useCallback(() => {
@@ -175,12 +211,19 @@ function ImportModalInner() {
     if (phase !== 'processing') close();
   }, [phase, close]);
 
-  const successCount = results.filter((r) => r.status === 'success').length;
-  const warningCount = results.filter((r) => r.status === 'warning').length;
-  const failedCount = results.filter((r) => r.status === 'failed').length;
-  const hasTextureWarnings = mode === 'preset' && results.some((r) => r.warnings.length > 0);
   const title = mode === 'preset' ? t('importModal.titlePresets') : t('importModal.titleTextures');
   const typeLabel = mode === 'preset' ? t('importModal.presets') : t('importModal.textures');
+
+  const renderResultItem = useCallback(
+    (index: number) => {
+      const actualIndex = filteredIndices ? filteredIndices[index] : index;
+      const result = resultsRef.current[actualIndex];
+      if (!result) return <div />;
+      return <ResultRow result={result} mode={mode} />;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [filteredIndices, mode, resultCount],
+  );
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
@@ -268,16 +311,13 @@ function ImportModalInner() {
               aria-valuemax={progress.total}
               className="h-2 w-full appearance-none overflow-hidden rounded-full [&::-moz-progress-bar]:bg-orange-500 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-white/10 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-orange-500"
             />
-            <div
-              ref={resultListRef}
-              role="log"
-              aria-live="polite"
-              className="max-h-[40vh] overflow-y-auto"
-            >
-              {results.map((r, i) => (
-                <ResultRow key={i} result={r} mode={mode} />
-              ))}
-            </div>
+            <Virtuoso
+              totalCount={resultCount}
+              itemContent={renderResultItem}
+              followOutput="smooth"
+              style={{ height: Math.min(resultCount * 36, 300) }}
+              className="overflow-y-auto"
+            />
           </div>
         )}
 
@@ -286,29 +326,64 @@ function ImportModalInner() {
           <div className="flex flex-col gap-3">
             {idbError && <p className="text-xs text-red-400">{t('importModal.idbUnavailable')}</p>}
 
-            {!idbError && results.length > 0 && (
-              <p className="text-xs text-white/70">
-                <SummaryText
-                  successCount={successCount + warningCount}
-                  failedCount={failedCount}
-                  warningCount={warningCount}
-                  total={results.length}
-                  typeLabel={typeLabel}
-                />
-              </p>
-            )}
+            {!idbError && resultCount > 0 && (
+              <>
+                <p className="text-xs text-white/70">
+                  <SummaryText
+                    successCount={successCount + warningCount}
+                    failedCount={failedCount}
+                    warningCount={warningCount}
+                    total={resultCount}
+                    typeLabel={typeLabel}
+                  />
+                </p>
 
-            {results.length > 0 && !idbError && (
-              <div
-                ref={resultListRef}
-                role="log"
-                aria-live="polite"
-                className="max-h-[50vh] overflow-y-auto"
-              >
-                {results.map((r, i) => (
-                  <ResultRow key={i} result={r} mode={mode} />
-                ))}
-              </div>
+                {/* Filter tabs — only shown when there are mixed statuses */}
+                {(failedCount > 0 || warningCount > 0) && successCount + warningCount > 0 && (
+                  <div className="flex gap-1">
+                    <FilterTab
+                      label={t('importModal.filterAll')}
+                      count={resultCount}
+                      active={resultFilter === 'all'}
+                      onClick={() => setResultFilter('all')}
+                    />
+                    {successCount > 0 && (
+                      <FilterTab
+                        label={t('importModal.statusSuccess')}
+                        count={successCount}
+                        active={resultFilter === 'success'}
+                        onClick={() => setResultFilter('success')}
+                        color="text-green-400"
+                      />
+                    )}
+                    {warningCount > 0 && (
+                      <FilterTab
+                        label={t('importModal.statusWarning')}
+                        count={warningCount}
+                        active={resultFilter === 'warning'}
+                        onClick={() => setResultFilter('warning')}
+                        color="text-amber-400"
+                      />
+                    )}
+                    {failedCount > 0 && (
+                      <FilterTab
+                        label={t('importModal.statusFailed')}
+                        count={failedCount}
+                        active={resultFilter === 'failed'}
+                        onClick={() => setResultFilter('failed')}
+                        color="text-red-400"
+                      />
+                    )}
+                  </div>
+                )}
+
+                <Virtuoso
+                  totalCount={visibleCount}
+                  itemContent={renderResultItem}
+                  style={{ height: Math.min(visibleCount * 36, 350) }}
+                  className="overflow-y-auto"
+                />
+              </>
             )}
 
             <div className="flex flex-wrap justify-end gap-2">
@@ -339,6 +414,31 @@ function ImportModalInner() {
         )}
       </div>
     </div>
+  );
+}
+
+function FilterTab({
+  label,
+  count,
+  active,
+  onClick,
+  color,
+}: {
+  label: string;
+  count: number;
+  active: boolean;
+  onClick: () => void;
+  color?: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`cursor-pointer rounded border-none px-2 py-0.5 text-[10px] transition-colors ${
+        active ? 'bg-white/15 text-white' : 'bg-white/5 text-white/50 hover:bg-white/10'
+      }`}
+    >
+      <span className={color}>{label}</span> <span className="text-white/40">{count}</span>
+    </button>
   );
 }
 
@@ -417,12 +517,10 @@ function ResultRow({ result, mode }: { result: ImportResult; mode: 'preset' | 't
         <p className="truncate text-xs text-white/80">{displayName}</p>
         {result.status === 'failed' && result.errorCode && (
           <p className="text-[10px] text-red-400/80">
-            {result.errorCode === 'batchTooLarge'
-              ? t('importModal.batchTooLarge')
-              : t(`${errorNs}.${result.errorCode}`, {
-                  name: result.fileName,
-                  defaultValue: result.errorCode,
-                })}
+            {t(`${errorNs}.${result.errorCode}`, {
+              name: result.fileName,
+              defaultValue: result.errorCode,
+            })}
           </p>
         )}
         {result.warnings.length > 0 && (

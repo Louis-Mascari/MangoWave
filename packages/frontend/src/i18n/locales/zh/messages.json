@@ -248,6 +248,9 @@
     "presets": "预设",
     "textures": "纹理",
     "idbUnavailable": "隐私浏览模式下存储不可用。",
-    "batchTooLarge": "文件过多（每次最多导入 200 个）"
+    "filterAll": "全部",
+    "statusSuccess": "已导入",
+    "statusWarning": "警告",
+    "statusFailed": "失败"
   }
 }

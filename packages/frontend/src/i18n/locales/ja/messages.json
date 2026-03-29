@@ -165,7 +165,7 @@
     "securityBlocked": "\"{{name}}\" にブロックされたコンテンツが含まれています",
     "nativeNameCollision": "\"{{name}}\" は組み込みプリセットに既に存在します",
     "ps3Unsupported": "\"{{name}}\" はサポートされていない Pixel Shader 3 を使用しています",
-    "missingTextures": "見つからないテクスチャを参照しています: {{textures}}",
+    "missingTextures": "不足しているテクスチャ（アップロードされるまでノイズとして表示されます）: {{textures}}",
     "deletePreset": "インポートしたプリセットを削除",
     "deleteConfirm": "\"{{name}}\" を削除しますか？.milk ファイルを再インポートする必要があります。",
     "clearAll": "すべて削除",
@@ -236,6 +236,8 @@
   "importModal": {
     "titlePresets": "プリセットをインポート",
     "titleTextures": "テクスチャをインポート",
+    "descriptionPresets": "コミュニティの MilkDrop プリセット（.milk ファイル）を追加します。一部のプリセットにはカスタムテクスチャが必要です — インポート後に不足しているテクスチャが通知されます。インポートしたプリセットは意図どおりにレンダリングされない場合があるため、インポート後に確認してください。",
+    "descriptionTextures": "インポートしたプリセットで使用されるテクスチャ画像（JPEG、PNG、または WebP）をアップロードします。プリセットは名前でテクスチャを参照します — 例えば、sampler_fire を使用するプリセットには \"fire\" という名前のテクスチャが必要です。",
     "dropZonePresets": ".milkファイルをここにドロップするか、クリックして参照",
     "dropZoneTextures": "画像ファイルをここにドロップするか、クリックして参照",
     "browseFiles": "ファイルを参照",

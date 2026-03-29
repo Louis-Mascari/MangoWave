@@ -165,7 +165,7 @@
     "securityBlocked": "\"{{name}}\" contém conteúdo bloqueado",
     "nativeNameCollision": "\"{{name}}\" já existe nos presets integrados",
     "ps3Unsupported": "\"{{name}}\" usa Pixel Shader 3, que não é compatível",
-    "missingTextures": "Referencia texturas ausentes: {{textures}}",
+    "missingTextures": "Texturas ausentes (serão exibidas como ruído até serem enviadas): {{textures}}",
     "deletePreset": "Excluir preset importado",
     "deleteConfirm": "Excluir \"{{name}}\"? O arquivo .milk precisará ser reimportado.",
     "clearAll": "Excluir tudo",
@@ -236,6 +236,8 @@
   "importModal": {
     "titlePresets": "Importar presets",
     "titleTextures": "Importar texturas",
+    "descriptionPresets": "Adicione presets MilkDrop da comunidade (arquivos .milk). Alguns presets requerem texturas personalizadas — você será notificado sobre texturas ausentes após a importação. Presets importados podem não renderizar exatamente como esperado e devem ser verificados.",
+    "descriptionTextures": "Envie imagens de textura (JPEG, PNG ou WebP) usadas por presets importados. Presets referenciam texturas pelo nome — por exemplo, um preset que usa sampler_fire precisa de uma textura chamada \"fire\".",
     "dropZonePresets": "Arraste arquivos .milk aqui ou clique para procurar",
     "dropZoneTextures": "Arraste arquivos de imagem aqui ou clique para procurar",
     "browseFiles": "Procurar arquivos",

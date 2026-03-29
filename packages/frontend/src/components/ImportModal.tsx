@@ -239,11 +239,16 @@ function ImportModalInner() {
         className="flex w-full max-w-lg flex-col rounded-lg bg-gray-900/95 p-5 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="mb-3 text-sm font-semibold text-white">{title}</h3>
+        <h3 className="mb-1 text-sm font-semibold text-white">{title}</h3>
 
         {/* Select phase */}
         {phase === 'select' && (
           <>
+            <p className="mb-3 text-xs leading-relaxed text-white/50">
+              {mode === 'preset'
+                ? t('importModal.descriptionPresets')
+                : t('importModal.descriptionTextures')}
+            </p>
             <div
               role="button"
               tabIndex={0}

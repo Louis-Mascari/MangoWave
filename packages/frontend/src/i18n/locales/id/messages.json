@@ -165,7 +165,7 @@
     "securityBlocked": "\"{{name}}\" mengandung konten yang diblokir",
     "nativeNameCollision": "\"{{name}}\" sudah ada di preset bawaan",
     "ps3Unsupported": "\"{{name}}\" menggunakan Pixel Shader 3 yang tidak didukung",
-    "missingTextures": "Mereferensikan tekstur yang tidak ditemukan: {{textures}}",
+    "missingTextures": "Tekstur tidak ditemukan (akan ditampilkan sebagai noise sampai diunggah): {{textures}}",
     "deletePreset": "Hapus preset impor",
     "deleteConfirm": "Hapus \"{{name}}\"? File .milk perlu diimpor ulang.",
     "clearAll": "Hapus Semua",
@@ -236,6 +236,8 @@
   "importModal": {
     "titlePresets": "Impor Preset",
     "titleTextures": "Impor Tekstur",
+    "descriptionPresets": "Tambahkan preset MilkDrop komunitas (file .milk). Beberapa preset memerlukan tekstur khusus — Anda akan diberitahu tentang tekstur yang hilang setelah impor. Preset yang diimpor mungkin tidak ditampilkan persis seperti yang diharapkan dan harus diverifikasi.",
+    "descriptionTextures": "Unggah gambar tekstur (JPEG, PNG, atau WebP) yang digunakan oleh preset impor. Preset mereferensikan tekstur berdasarkan nama — misalnya, preset yang menggunakan sampler_fire memerlukan tekstur bernama \"fire\".",
     "dropZonePresets": "Seret file .milk ke sini atau klik untuk memilih",
     "dropZoneTextures": "Seret file gambar ke sini atau klik untuk memilih",
     "browseFiles": "Pilih File",

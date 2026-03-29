@@ -165,7 +165,7 @@
     "securityBlocked": "\"{{name}}\" 包含被阻止的内容",
     "nativeNameCollision": "\"{{name}}\" 已存在于内置预设中",
     "ps3Unsupported": "\"{{name}}\" 使用了不受支持的 Pixel Shader 3",
-    "missingTextures": "引用了缺失的纹理：{{textures}}",
+    "missingTextures": "缺失的纹理（上传前将显示为噪点）：{{textures}}",
     "deletePreset": "删除导入的预设",
     "deleteConfirm": "删除 \"{{name}}\"？需要重新导入 .milk 文件。",
     "clearAll": "全部清除",
@@ -236,6 +236,8 @@
   "importModal": {
     "titlePresets": "导入预设",
     "titleTextures": "导入纹理",
+    "descriptionPresets": "添加社区 MilkDrop 预设（.milk 文件）。部分预设需要自定义纹理——导入后会提示缺失的纹理。导入的预设可能无法完全按预期渲染，请在导入后检查效果。",
+    "descriptionTextures": "上传导入预设所使用的纹理图片（JPEG、PNG 或 WebP）。预设按名称引用纹理——例如，使用 sampler_fire 的预设需要一个名为 \"fire\" 的纹理。",
     "dropZonePresets": "将 .milk 文件拖到此处或点击浏览",
     "dropZoneTextures": "将图片文件拖到此处或点击浏览",
     "browseFiles": "浏览文件",

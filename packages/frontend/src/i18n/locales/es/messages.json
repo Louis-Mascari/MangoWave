@@ -231,5 +231,23 @@
     "deactivatePack": "Parar pack",
     "packOverridesFilters": "Estos filtros no aplican mientras un pack personalizado está activo",
     "favoritesAutoSwitch": "Cambiado de favoritos al modo todo"
+  },
+
+  "importModal": {
+    "titlePresets": "Importar presets",
+    "titleTextures": "Importar texturas",
+    "dropZonePresets": "Arrastra archivos .milk aquí o haz clic para buscar",
+    "dropZoneTextures": "Arrastra archivos de imagen aquí o haz clic para buscar",
+    "browseFiles": "Buscar archivos",
+    "importingProgress": "Importando {{current}} de {{total}}...",
+    "summaryAllSuccess": "Se importaron {{count}} {{type}} correctamente",
+    "summaryPartial": "Se importaron {{success}} de {{total}} {{type}}. {{failed}} fallaron, {{warnings}} con advertencias.",
+    "summaryAllFailed": "Todos los {{count}} {{type}} fallaron al importar",
+    "uploadMissingTextures": "Subir texturas faltantes",
+    "importMore": "Importar más",
+    "presets": "presets",
+    "textures": "texturas",
+    "idbUnavailable": "El almacenamiento no está disponible en modo de navegación privada.",
+    "batchTooLarge": "Demasiados archivos (máximo 200 por importación)"
   }
 }

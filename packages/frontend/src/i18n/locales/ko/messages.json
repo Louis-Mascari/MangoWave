@@ -231,5 +231,23 @@
     "deactivatePack": "팩 중지",
     "packOverridesFilters": "커스텀 팩이 활성화된 동안에는 이 필터가 적용되지 않습니다",
     "favoritesAutoSwitch": "즐겨찾기 모드에서 전체 모드로 전환됨"
+  },
+
+  "importModal": {
+    "titlePresets": "프리셋 가져오기",
+    "titleTextures": "텍스처 가져오기",
+    "dropZonePresets": ".milk 파일을 여기에 끌어다 놓거나 클릭하여 찾아보기",
+    "dropZoneTextures": "이미지 파일을 여기에 끌어다 놓거나 클릭하여 찾아보기",
+    "browseFiles": "파일 찾아보기",
+    "importingProgress": "{{total}}개 중 {{current}}개 가져오는 중...",
+    "summaryAllSuccess": "{{count}}개의 {{type}}을(를) 성공적으로 가져왔습니다",
+    "summaryPartial": "{{total}}개의 {{type}} 중 {{success}}개를 가져왔습니다. {{failed}}개 실패, {{warnings}}개 경고.",
+    "summaryAllFailed": "{{count}}개의 {{type}} 모두 가져오기 실패",
+    "uploadMissingTextures": "누락된 텍스처 업로드",
+    "importMore": "더 가져오기",
+    "presets": "프리셋",
+    "textures": "텍스처",
+    "idbUnavailable": "개인정보 보호 모드에서는 저장소를 사용할 수 없습니다.",
+    "batchTooLarge": "파일이 너무 많습니다 (한 번에 최대 200개)"
   }
 }

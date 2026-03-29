@@ -233,5 +233,23 @@
     "deactivatePack": "Остановить пак",
     "packOverridesFilters": "Эти фильтры не применяются, пока активен пользовательский пак",
     "favoritesAutoSwitch": "Переключено с избранного на режим «Все»"
+  },
+
+  "importModal": {
+    "titlePresets": "Импорт пресетов",
+    "titleTextures": "Импорт текстур",
+    "dropZonePresets": "Перетащите файлы .milk сюда или нажмите для выбора",
+    "dropZoneTextures": "Перетащите изображения сюда или нажмите для выбора",
+    "browseFiles": "Выбрать файлы",
+    "importingProgress": "Импорт {{current}} из {{total}}...",
+    "summaryAllSuccess": "Успешно импортировано {{count}} {{type}}",
+    "summaryPartial": "Импортировано {{success}} из {{total}} {{type}}. {{failed}} с ошибкой, {{warnings}} с предупреждениями.",
+    "summaryAllFailed": "Все {{count}} {{type}} не удалось импортировать",
+    "uploadMissingTextures": "Загрузить недостающие текстуры",
+    "importMore": "Импортировать ещё",
+    "presets": "пресетов",
+    "textures": "текстур",
+    "idbUnavailable": "Хранилище недоступно в режиме приватного просмотра.",
+    "batchTooLarge": "Слишком много файлов (максимум 200 за один импорт)"
   }
 }

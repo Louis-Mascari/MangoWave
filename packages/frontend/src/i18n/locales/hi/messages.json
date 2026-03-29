@@ -231,5 +231,23 @@
     "deactivatePack": "पैक रोकें",
     "packOverridesFilters": "जब कस्टम पैक सक्रिय है तो ये फ़िल्टर लागू नहीं होते",
     "favoritesAutoSwitch": "फ़ेवरिट से ऑल मोड पर स्विच हो गया"
+  },
+
+  "importModal": {
+    "titlePresets": "प्रीसेट इम्पोर्ट करें",
+    "titleTextures": "टेक्सचर इम्पोर्ट करें",
+    "dropZonePresets": ".milk फ़ाइलें यहाँ ड्रॉप करें या ब्राउज़ करने के लिए क्लिक करें",
+    "dropZoneTextures": "इमेज फ़ाइलें यहाँ ड्रॉप करें या ब्राउज़ करने के लिए क्लिक करें",
+    "browseFiles": "फ़ाइलें ब्राउज़ करें",
+    "importingProgress": "{{total}} में से {{current}} इम्पोर्ट हो रहा है...",
+    "summaryAllSuccess": "{{count}} {{type}} सफलतापूर्वक इम्पोर्ट हुए",
+    "summaryPartial": "{{total}} {{type}} में से {{success}} इम्पोर्ट हुए। {{failed}} असफल, {{warnings}} चेतावनी के साथ।",
+    "summaryAllFailed": "सभी {{count}} {{type}} इम्पोर्ट करने में असफल",
+    "uploadMissingTextures": "अनुपलब्ध टेक्सचर अपलोड करें",
+    "importMore": "और इम्पोर्ट करें",
+    "presets": "प्रीसेट",
+    "textures": "टेक्सचर",
+    "idbUnavailable": "प्राइवेट ब्राउज़िंग मोड में स्टोरेज उपलब्ध नहीं है।",
+    "batchTooLarge": "बहुत ज़्यादा फ़ाइलें (अधिकतम 200 प्रति इम्पोर्ट)"
   }
 }

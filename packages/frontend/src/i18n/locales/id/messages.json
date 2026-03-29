@@ -231,5 +231,23 @@
     "deactivatePack": "Hentikan paket",
     "packOverridesFilters": "Filter ini tidak berlaku selama paket kustom aktif",
     "favoritesAutoSwitch": "Beralih dari favorit ke mode semua"
+  },
+
+  "importModal": {
+    "titlePresets": "Impor Preset",
+    "titleTextures": "Impor Tekstur",
+    "dropZonePresets": "Seret file .milk ke sini atau klik untuk memilih",
+    "dropZoneTextures": "Seret file gambar ke sini atau klik untuk memilih",
+    "browseFiles": "Pilih File",
+    "importingProgress": "Mengimpor {{current}} dari {{total}}...",
+    "summaryAllSuccess": "Berhasil mengimpor {{count}} {{type}}",
+    "summaryPartial": "Berhasil mengimpor {{success}} dari {{total}} {{type}}. {{failed}} gagal, {{warnings}} dengan peringatan.",
+    "summaryAllFailed": "Semua {{count}} {{type}} gagal diimpor",
+    "uploadMissingTextures": "Unggah Tekstur yang Hilang",
+    "importMore": "Impor Lagi",
+    "presets": "preset",
+    "textures": "tekstur",
+    "idbUnavailable": "Penyimpanan tidak tersedia dalam mode penjelajahan pribadi.",
+    "batchTooLarge": "Terlalu banyak file (maksimum 200 per impor)"
   }
 }

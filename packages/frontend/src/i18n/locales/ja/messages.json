@@ -231,5 +231,23 @@
     "deactivatePack": "パック停止",
     "packOverridesFilters": "カスタムパックが有効な間、これらのフィルターは適用されません",
     "favoritesAutoSwitch": "お気に入りモードからすべてモードに切り替えました"
+  },
+
+  "importModal": {
+    "titlePresets": "プリセットをインポート",
+    "titleTextures": "テクスチャをインポート",
+    "dropZonePresets": ".milkファイルをここにドロップするか、クリックして参照",
+    "dropZoneTextures": "画像ファイルをここにドロップするか、クリックして参照",
+    "browseFiles": "ファイルを参照",
+    "importingProgress": "{{total}}件中{{current}}件をインポート中...",
+    "summaryAllSuccess": "{{count}}件の{{type}}を正常にインポートしました",
+    "summaryPartial": "{{total}}件の{{type}}中{{success}}件をインポートしました。{{failed}}件が失敗、{{warnings}}件に警告があります。",
+    "summaryAllFailed": "{{count}}件の{{type}}すべてのインポートに失敗しました",
+    "uploadMissingTextures": "不足しているテクスチャをアップロード",
+    "importMore": "さらにインポート",
+    "presets": "プリセット",
+    "textures": "テクスチャ",
+    "idbUnavailable": "プライベートブラウジングモードではストレージにアクセスできません。",
+    "batchTooLarge": "ファイルが多すぎます（1回のインポートにつき最大200件）"
   }
 }

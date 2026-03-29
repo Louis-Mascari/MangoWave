@@ -29,6 +29,7 @@ import { LaunchAnimation } from './components/LaunchAnimation.tsx';
 import { RateLimitToast } from './components/RateLimitToast.tsx';
 import { ActionToast } from './components/ActionToast.tsx';
 import { ConfirmDialog } from './components/ConfirmDialog.tsx';
+import { ImportModal } from './components/ImportModal.tsx';
 import { OnboardingOverlay } from './components/OnboardingOverlay.tsx';
 import { useUnlockCheck } from './hooks/useUnlockCheck.ts';
 import { useSettingsStore } from './store/useSettingsStore.ts';
@@ -520,6 +521,7 @@ function MainApp() {
           )}
           <ActionToast />
           <ConfirmDialog />
+          <ImportModal />
           <ShortcutOverlay visible={showShortcutOverlay} onClose={toggleShortcutOverlay} />
         </>
       ) : (

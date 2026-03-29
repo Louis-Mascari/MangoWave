@@ -240,5 +240,23 @@
     "deactivatePack": "Stop pack",
     "packOverridesFilters": "These filters don't apply while a custom pack is active",
     "favoritesAutoSwitch": "Switched from favorites to all mode"
+  },
+
+  "importModal": {
+    "titlePresets": "Import Presets",
+    "titleTextures": "Import Textures",
+    "dropZonePresets": "Drop .milk files here or click to browse",
+    "dropZoneTextures": "Drop image files here or click to browse",
+    "browseFiles": "Browse Files",
+    "importingProgress": "Importing {{current}} of {{total}}...",
+    "summaryAllSuccess": "Successfully imported {{count}} {{type}}",
+    "summaryPartial": "Imported {{success}} of {{total}} {{type}}. {{failed}} failed, {{warnings}} with warnings.",
+    "summaryAllFailed": "All {{count}} {{type}} failed to import",
+    "uploadMissingTextures": "Upload Missing Textures",
+    "importMore": "Import More",
+    "presets": "presets",
+    "textures": "textures",
+    "idbUnavailable": "Storage access is unavailable in private browsing mode.",
+    "batchTooLarge": "Too many files (maximum 200 per import)"
   }
 }

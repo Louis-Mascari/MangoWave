@@ -17,15 +17,8 @@ import {
   downloadPackExport,
   parsePackImportFile,
 } from '../utils/settingsPortability.ts';
-import {
-  readMilkFile,
-  convertMilkText,
-  validatePreset,
-  parsePsVersion,
-  findMissingTextures,
-} from '../engine/milkdropConverter.ts';
-import { readTextureFile, validateTextureFile } from '../engine/textureLoader.ts';
 import { PACK_ORDER } from '../engine/VisualizerRenderer.ts';
+import { useImportModalStore } from '../store/useImportModalStore.ts';
 import type {
   CustomPack,
   ImportedPresetMeta,
@@ -381,11 +374,9 @@ export function PresetBrowser({
   const removePresetFromCustomPack = useSettingsStore((s) => s.removePresetFromCustomPack);
   const setActiveCustomPackId = useSettingsStore((s) => s.setActiveCustomPackId);
   const importedPresets = useSettingsStore((s) => s.importedPresets);
-  const addImportedPresetMeta = useSettingsStore((s) => s.addImportedPresetMeta);
   const removeImportedPresetMeta = useSettingsStore((s) => s.removeImportedPresetMeta);
   const clearImportedPresetsMeta = useSettingsStore((s) => s.clearImportedPresetsMeta);
   const importedTextures = useSettingsStore((s) => s.importedTextures);
-  const addImportedTextureMeta = useSettingsStore((s) => s.addImportedTextureMeta);
   const removeImportedTextureMeta = useSettingsStore((s) => s.removeImportedTextureMeta);
   const clearImportedTexturesMeta = useSettingsStore((s) => s.clearImportedTexturesMeta);
 
@@ -409,6 +400,10 @@ export function PresetBrowser({
   const blockedSet = useMemo(() => new Set(blockedPresets), [blockedPresets]);
   const favoriteSet = useMemo(() => new Set(favoritePresets), [favoritePresets]);
   const overrideSet = useMemo(() => new Set(excludedOverrides), [excludedOverrides]);
+  const importedNameSet = useMemo(
+    () => new Set(importedPresets.map((p) => p.name)),
+    [importedPresets],
+  );
 
   const allPacks = useMemo(
     () => (importedPresets.length > 0 ? [...PACK_ORDER, 'Imported'] : PACK_ORDER),
@@ -927,127 +922,9 @@ export function PresetBrowser({
 
   // --- Imported presets ---
 
-  const importedNameSet = useMemo(
-    () => new Set(importedPresets.map((p) => p.name)),
-    [importedPresets],
-  );
-
-  const importedTextureNameSet = useMemo(
-    () => new Set(importedTextures.map((t) => t.name)),
-    [importedTextures],
-  );
-
-  const handleImportMilk = useCallback(async () => {
-    // Quick IDB availability check (fails in some private browsing modes)
-    try {
-      const { set, del } = await import('idb-keyval');
-      await set('__mw_idb_test', '1');
-      await del('__mw_idb_test');
-    } catch {
-      useToastStore.getState().show(t('importedPresets.idbUnavailable'));
-      return;
-    }
-
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.milk';
-    input.multiple = true;
-    input.onchange = async () => {
-      const files = input.files;
-      if (!files || files.length === 0) return;
-
-      let success = 0;
-      let failed = 0;
-      const errors: string[] = [];
-      const warnings: string[] = [];
-      const store = useImportedPresetsStore.getState();
-      // Track names used within this batch to avoid collisions between files
-      const batchNames = new Set<string>();
-
-      for (const file of Array.from(files)) {
-        try {
-          const { name: rawName, text } = await readMilkFile(file);
-          // Reject if this preset name already exists (imported or in batch)
-          if (importedNameSet.has(rawName) || batchNames.has(rawName)) {
-            throw new Error('duplicateName');
-          }
-          // Reject if the name collides with a native/bundled preset
-          if (presetPackMap.has(rawName)) {
-            throw new Error('nativeNameCollision');
-          }
-          const name = rawName;
-
-          // Collect warnings (non-blocking) before conversion
-          const fileWarnings: string[] = [];
-
-          // Reject PS3 presets — hlslparser-js doesn't support PS3 HLSL features
-          const psVersion = parsePsVersion(text);
-          if (psVersion >= 3) {
-            throw new Error('ps3Unsupported');
-          }
-
-          // Convert + validate before persisting — reject broken presets at import time
-          const converted = await convertMilkText(text);
-          validatePreset(converted);
-
-          // Warn on missing texture dependencies
-          const missing = findMissingTextures(converted, importedTextureNameSet);
-          if (missing.length > 0) {
-            fileWarnings.push(
-              t('importedPresets.missingTextures', {
-                textures: missing.join(', '),
-                defaultValue: `References missing textures: ${missing.join(', ')}`,
-              }),
-            );
-          }
-
-          batchNames.add(name);
-          await store.addPreset(name, text);
-          // Pre-warm the LRU cache so the first play is instant
-          store.cacheConverted(name, converted);
-          addImportedPresetMeta({ name, fileName: file.name, addedAt: Date.now() });
-          success++;
-
-          if (fileWarnings.length > 0) {
-            warnings.push(`${file.name}: ${fileWarnings.join('; ')}`);
-          }
-        } catch (err) {
-          failed++;
-          const code = err instanceof Error ? err.message : 'unknown';
-          const errorKey = `importedPresets.${code}` as const;
-          const msg = t(errorKey, { name: file.name, defaultValue: code });
-          errors.push(`${file.name}: ${msg}`);
-        }
-      }
-
-      const toast = useToastStore.getState();
-      const warningText = warnings.length > 0 ? `\n${warnings.join('\n')}` : '';
-      if (success > 0 && failed === 0) {
-        const msg = t('importedPresets.importSuccess', { count: success });
-        if (warnings.length > 0) {
-          toast.show(`${msg}${warningText}`, {
-            type: 'warning',
-            durationMs: 4000 + warnings.length * 2000,
-          });
-        } else {
-          toast.show(msg);
-        }
-      } else if (success > 0 && failed > 0) {
-        const details = errors.join('\n');
-        toast.show(
-          `${t('importedPresets.importPartial', { success, total: success + failed, failed })}\n${details}${warningText}`,
-          { type: 'warning', durationMs: 4000 + (errors.length + warnings.length) * 2000 },
-        );
-      } else {
-        const details = errors.join('\n');
-        toast.show(`${t('importedPresets.importAllFailed', { count: failed })}\n${details}`, {
-          type: 'warning',
-          durationMs: 4000 + errors.length * 2000,
-        });
-      }
-    };
-    input.click();
-  }, [t, importedNameSet, importedTextureNameSet, presetPackMap, addImportedPresetMeta]);
+  const handleImportMilk = useCallback(() => {
+    useImportModalStore.getState().open('preset', presetPackMap);
+  }, [presetPackMap]);
 
   const handleDeleteImportedPreset = useCallback(
     (preset: ImportedPresetMeta) => {
@@ -1077,83 +954,9 @@ export function PresetBrowser({
     });
   }, [t, importedPresets.length, clearImportedPresetsMeta]);
 
-  const handleImportTextures = useCallback(async () => {
-    // Quick IDB availability check
-    try {
-      const { set, del } = await import('idb-keyval');
-      await set('__mw_idb_test', '1');
-      await del('__mw_idb_test');
-    } catch {
-      useToastStore.getState().show(t('importedTextures.idbUnavailable'));
-      return;
-    }
-
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/jpeg,image/png,image/webp';
-    input.multiple = true;
-    input.onchange = async () => {
-      const files = input.files;
-      if (!files || files.length === 0) return;
-
-      let success = 0;
-      let failed = 0;
-      const errors: string[] = [];
-      const store = useImportedTexturesStore.getState();
-      const existingNames = new Set(importedTextureNameSet);
-
-      for (const file of Array.from(files)) {
-        try {
-          // Pre-validation
-          const preError = validateTextureFile(file);
-          if (preError) {
-            throw new Error(preError);
-          }
-
-          const result = await readTextureFile(file);
-
-          // Deduplicate
-          if (existingNames.has(result.name)) {
-            throw new Error('duplicateName');
-          }
-
-          await store.addTexture(result.name, {
-            data: result.dataUri,
-            width: result.width,
-            height: result.height,
-          });
-          addImportedTextureMeta({
-            name: result.name,
-            fileName: file.name,
-            width: result.width,
-            height: result.height,
-            sizeBytes: result.sizeBytes,
-            addedAt: Date.now(),
-          });
-          existingNames.add(result.name);
-          success++;
-        } catch (err) {
-          failed++;
-          const code = err instanceof Error ? err.message : 'unknown';
-          const errorKey = `importedTextures.${code}` as const;
-          const msg = t(errorKey, { name: file.name, defaultValue: code });
-          errors.push(`${file.name}: ${msg}`);
-        }
-      }
-
-      const toast = useToastStore.getState();
-      if (success > 0 && failed === 0) {
-        toast.show(t('importedTextures.importSuccess', { count: success }));
-      } else if (success > 0 && failed > 0) {
-        toast.show(
-          t('importedTextures.importPartial', { success, total: success + failed, failed }),
-        );
-      } else {
-        toast.show(t('importedTextures.importAllFailed', { count: failed }));
-      }
-    };
-    input.click();
-  }, [t, importedTextureNameSet, addImportedTextureMeta]);
+  const handleImportTextures = useCallback(() => {
+    useImportModalStore.getState().open('texture');
+  }, []);
 
   const handleDeleteTexture = useCallback(
     (texture: ImportedTextureMeta) => {

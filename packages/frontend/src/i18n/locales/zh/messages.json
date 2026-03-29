@@ -231,5 +231,23 @@
     "deactivatePack": "停止播放包",
     "packOverridesFilters": "自定义合集激活时，这些筛选不生效",
     "favoritesAutoSwitch": "已从收藏模式切换到全部模式"
+  },
+
+  "importModal": {
+    "titlePresets": "导入预设",
+    "titleTextures": "导入纹理",
+    "dropZonePresets": "将 .milk 文件拖到此处或点击浏览",
+    "dropZoneTextures": "将图片文件拖到此处或点击浏览",
+    "browseFiles": "浏览文件",
+    "importingProgress": "正在导入第 {{current}} 个，共 {{total}} 个...",
+    "summaryAllSuccess": "成功导入 {{count}} 个{{type}}",
+    "summaryPartial": "已导入 {{total}} 个{{type}}中的 {{success}} 个。{{failed}} 个失败，{{warnings}} 个有警告。",
+    "summaryAllFailed": "全部 {{count}} 个{{type}}导入失败",
+    "uploadMissingTextures": "上传缺失的纹理",
+    "importMore": "导入更多",
+    "presets": "预设",
+    "textures": "纹理",
+    "idbUnavailable": "隐私浏览模式下存储不可用。",
+    "batchTooLarge": "文件过多（每次最多导入 200 个）"
   }
 }

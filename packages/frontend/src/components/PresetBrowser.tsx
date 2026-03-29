@@ -980,14 +980,10 @@ export function PresetBrowser({
           // Collect warnings (non-blocking) before conversion
           const fileWarnings: string[] = [];
 
-          // Warn on PS3 presets — shader translation is unreliable
+          // Reject PS3 presets — hlslparser-js doesn't support PS3 HLSL features
           const psVersion = parsePsVersion(text);
           if (psVersion >= 3) {
-            fileWarnings.push(
-              t('importedPresets.ps3Warning', {
-                defaultValue: 'Uses Pixel Shader 3 — may not render correctly',
-              }),
-            );
+            throw new Error('ps3Unsupported');
           }
 
           // Convert + validate before persisting — reject broken presets at import time

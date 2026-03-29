@@ -164,7 +164,7 @@
     "conversionFailed": "Error al convertir el preset \"{{name}}\". Omitiendo.",
     "securityBlocked": "\"{{name}}\" contiene contenido bloqueado",
     "nativeNameCollision": "\"{{name}}\" ya existe en los presets integrados",
-    "ps3Warning": "Usa Pixel Shader 3 — puede que no se renderice correctamente",
+    "ps3Unsupported": "\"{{name}}\" usa Pixel Shader 3, que no es compatible",
     "missingTextures": "Hace referencia a texturas faltantes: {{textures}}",
     "deletePreset": "Eliminar preset importado",
     "deleteConfirm": "¿Eliminar \"{{name}}\"? El archivo .milk deberá reimportarse.",

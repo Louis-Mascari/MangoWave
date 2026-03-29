@@ -164,7 +164,7 @@
     "conversionFailed": "プリセット \"{{name}}\" の変換に失敗しました。スキップします。",
     "securityBlocked": "\"{{name}}\" にブロックされたコンテンツが含まれています",
     "nativeNameCollision": "\"{{name}}\" は組み込みプリセットに既に存在します",
-    "ps3Warning": "Pixel Shader 3 を使用 — 正しくレンダリングされない可能性があります",
+    "ps3Unsupported": "\"{{name}}\" はサポートされていない Pixel Shader 3 を使用しています",
     "missingTextures": "見つからないテクスチャを参照しています: {{textures}}",
     "deletePreset": "インポートしたプリセットを削除",
     "deleteConfirm": "\"{{name}}\" を削除しますか？.milk ファイルを再インポートする必要があります。",

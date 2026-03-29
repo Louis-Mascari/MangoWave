@@ -173,7 +173,7 @@
     "conversionFailed": "Failed to convert preset \"{{name}}\". Skipping.",
     "securityBlocked": "\"{{name}}\" contains blocked content",
     "nativeNameCollision": "\"{{name}}\" already exists in the built-in presets",
-    "ps3Warning": "Uses Pixel Shader 3 — may not render correctly",
+    "ps3Unsupported": "\"{{name}}\" uses Pixel Shader 3 which is not supported",
     "missingTextures": "References missing textures: {{textures}}",
     "deletePreset": "Delete imported preset",
     "deleteConfirm": "Delete \"{{name}}\"? The .milk file will need to be re-imported.",

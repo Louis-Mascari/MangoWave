@@ -17,7 +17,13 @@ import {
   downloadPackExport,
   parsePackImportFile,
 } from '../utils/settingsPortability.ts';
-import { readMilkFile, convertMilkText, validatePreset } from '../engine/milkdropConverter.ts';
+import {
+  readMilkFile,
+  convertMilkText,
+  validatePreset,
+  parsePsVersion,
+  findMissingTextures,
+} from '../engine/milkdropConverter.ts';
 import { readTextureFile, validateTextureFile } from '../engine/textureLoader.ts';
 import { PACK_ORDER } from '../engine/VisualizerRenderer.ts';
 import type {
@@ -926,6 +932,11 @@ export function PresetBrowser({
     [importedPresets],
   );
 
+  const importedTextureNameSet = useMemo(
+    () => new Set(importedTextures.map((t) => t.name)),
+    [importedTextures],
+  );
+
   const handleImportMilk = useCallback(async () => {
     // Quick IDB availability check (fails in some private browsing modes)
     try {
@@ -948,6 +959,7 @@ export function PresetBrowser({
       let success = 0;
       let failed = 0;
       const errors: string[] = [];
+      const warnings: string[] = [];
       const store = useImportedPresetsStore.getState();
       // Track names used within this batch to avoid collisions between files
       const batchNames = new Set<string>();
@@ -959,11 +971,39 @@ export function PresetBrowser({
           if (importedNameSet.has(rawName) || batchNames.has(rawName)) {
             throw new Error('duplicateName');
           }
+          // Reject if the name collides with a native/bundled preset
+          if (presetPackMap.has(rawName)) {
+            throw new Error('nativeNameCollision');
+          }
           const name = rawName;
+
+          // Collect warnings (non-blocking) before conversion
+          const fileWarnings: string[] = [];
+
+          // Warn on PS3 presets — shader translation is unreliable
+          const psVersion = parsePsVersion(text);
+          if (psVersion >= 3) {
+            fileWarnings.push(
+              t('importedPresets.ps3Warning', {
+                defaultValue: 'Uses Pixel Shader 3 — may not render correctly',
+              }),
+            );
+          }
 
           // Convert + validate before persisting — reject broken presets at import time
           const converted = await convertMilkText(text);
           validatePreset(converted);
+
+          // Warn on missing texture dependencies
+          const missing = findMissingTextures(converted, importedTextureNameSet);
+          if (missing.length > 0) {
+            fileWarnings.push(
+              t('importedPresets.missingTextures', {
+                textures: missing.join(', '),
+                defaultValue: `References missing textures: ${missing.join(', ')}`,
+              }),
+            );
+          }
 
           batchNames.add(name);
           await store.addPreset(name, text);
@@ -971,6 +1011,10 @@ export function PresetBrowser({
           store.cacheConverted(name, converted);
           addImportedPresetMeta({ name, fileName: file.name, addedAt: Date.now() });
           success++;
+
+          if (fileWarnings.length > 0) {
+            warnings.push(`${file.name}: ${fileWarnings.join('; ')}`);
+          }
         } catch (err) {
           failed++;
           const code = err instanceof Error ? err.message : 'unknown';
@@ -981,13 +1025,22 @@ export function PresetBrowser({
       }
 
       const toast = useToastStore.getState();
+      const warningText = warnings.length > 0 ? `\n${warnings.join('\n')}` : '';
       if (success > 0 && failed === 0) {
-        toast.show(t('importedPresets.importSuccess', { count: success }));
+        const msg = t('importedPresets.importSuccess', { count: success });
+        if (warnings.length > 0) {
+          toast.show(`${msg}${warningText}`, {
+            type: 'warning',
+            durationMs: 4000 + warnings.length * 2000,
+          });
+        } else {
+          toast.show(msg);
+        }
       } else if (success > 0 && failed > 0) {
         const details = errors.join('\n');
         toast.show(
-          `${t('importedPresets.importPartial', { success, total: success + failed, failed })}\n${details}`,
-          { type: 'warning', durationMs: 4000 + errors.length * 2000 },
+          `${t('importedPresets.importPartial', { success, total: success + failed, failed })}\n${details}${warningText}`,
+          { type: 'warning', durationMs: 4000 + (errors.length + warnings.length) * 2000 },
         );
       } else {
         const details = errors.join('\n');
@@ -998,7 +1051,7 @@ export function PresetBrowser({
       }
     };
     input.click();
-  }, [t, importedNameSet, addImportedPresetMeta]);
+  }, [t, importedNameSet, importedTextureNameSet, presetPackMap, addImportedPresetMeta]);
 
   const handleDeleteImportedPreset = useCallback(
     (preset: ImportedPresetMeta) => {
@@ -1027,11 +1080,6 @@ export function PresetBrowser({
       },
     });
   }, [t, importedPresets.length, clearImportedPresetsMeta]);
-
-  const importedTextureNameSet = useMemo(
-    () => new Set(importedTextures.map((t) => t.name)),
-    [importedTextures],
-  );
 
   const handleImportTextures = useCallback(async () => {
     // Quick IDB availability check

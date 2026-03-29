@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { readMilkFile, validatePreset } from '../milkdropConverter.ts';
+import {
+  readMilkFile,
+  validatePreset,
+  parsePsVersion,
+  findMissingTextures,
+} from '../milkdropConverter.ts';
 
 describe('readMilkFile', () => {
   it('reads a valid .milk file and strips the extension from the name', async () => {
@@ -109,5 +114,52 @@ describe('validatePreset', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+});
+
+describe('parsePsVersion', () => {
+  it('returns 0 when no PSVERSION is present', () => {
+    expect(parsePsVersion('[preset00]\nfoo=bar')).toBe(0);
+  });
+
+  it('returns global PSVERSION', () => {
+    expect(parsePsVersion('PSVERSION=2\n[preset00]')).toBe(2);
+  });
+
+  it('returns max of warp/comp versions', () => {
+    const text = 'PSVERSION=2\nPSVERSION_WARP=3\nPSVERSION_COMP=2\n[preset00]';
+    expect(parsePsVersion(text)).toBe(3);
+  });
+
+  it('handles PS3 presets', () => {
+    expect(parsePsVersion('PSVERSION=3\nPSVERSION_WARP=3\nPSVERSION_COMP=3')).toBe(3);
+  });
+});
+
+describe('findMissingTextures', () => {
+  it('returns empty for presets using only built-in samplers', () => {
+    const preset = { warp: 'sampler_main sampler_noise_lq', comp: 'sampler_fw_main' };
+    expect(findMissingTextures(preset, new Set())).toEqual([]);
+  });
+
+  it('returns empty for built-in extra images', () => {
+    const preset = { warp: 'sampler_lichen sampler_cells sampler_mage' };
+    expect(findMissingTextures(preset, new Set())).toEqual([]);
+  });
+
+  it('detects missing custom textures', () => {
+    const preset = { warp: 'sampler_main sampler_worms sampler_manyfish' };
+    expect(findMissingTextures(preset, new Set())).toEqual(['manyfish', 'worms']);
+  });
+
+  it('excludes textures that are in the loaded set', () => {
+    const preset = { warp: 'sampler_worms sampler_fire' };
+    const loaded = new Set(['worms']);
+    expect(findMissingTextures(preset, loaded)).toEqual(['fire']);
+  });
+
+  it('handles presets with no sampler references', () => {
+    const preset = { init_eqs_str: 'x = sin(y);' };
+    expect(findMissingTextures(preset, new Set())).toEqual([]);
   });
 });

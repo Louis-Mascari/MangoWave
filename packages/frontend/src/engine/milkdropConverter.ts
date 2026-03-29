@@ -78,6 +78,72 @@ function scanEelStrings(obj: Record<string, unknown>): void {
   }
 }
 
+// Built-in sampler names that butterchurn always provides (no user texture needed)
+const BUILTIN_SAMPLERS = new Set([
+  'main',
+  'fw_main',
+  'fc_main',
+  'pw_main',
+  'pc_main',
+  'noise_lq',
+  'noise_lq_lite',
+  'noise_mq',
+  'noise_hq',
+  'noisevol_lq',
+  'noisevol_hq',
+  'pw_noise_lq',
+  'blur',
+  'blur1',
+  'blur2',
+  'blur3',
+]);
+
+// Extra images bundled with butterchurnExtraImages
+const BUILTIN_EXTRA_IMAGES = new Set([
+  'cells',
+  'lichen',
+  'mage',
+  'prayerwheel',
+  'seaweed',
+  'smalltiled_lizard_scales',
+]);
+
+/** Parse PSVERSION from raw .milk text. Returns the max of warp/comp/global versions, or 0 if absent. */
+export function parsePsVersion(milkText: string): number {
+  let max = 0;
+  const re = /^PSVERSION(?:_WARP|_COMP)?=(\d+)/gm;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(milkText)) !== null) {
+    const v = parseInt(m[1], 10);
+    if (v > max) max = v;
+  }
+  return max;
+}
+
+/** Extract custom texture names from a converted preset object's shader code.
+ *  Returns texture names that aren't built-in and aren't in the provided loaded set. */
+export function findMissingTextures(preset: object, loadedTextures: ReadonlySet<string>): string[] {
+  const content = JSON.stringify(preset);
+  const refs = new Set<string>();
+  const re = /sampler_(\w+)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(content)) !== null) {
+    refs.add(m[1]);
+  }
+
+  const missing: string[] = [];
+  for (const name of refs) {
+    if (
+      !BUILTIN_SAMPLERS.has(name) &&
+      !BUILTIN_EXTRA_IMAGES.has(name) &&
+      !loadedTextures.has(name)
+    ) {
+      missing.push(name);
+    }
+  }
+  return missing.sort();
+}
+
 /** Security scan of a converted preset object. Throws on suspicious content. */
 export function validatePreset(preset: object): void {
   // Run secure-json-parse scan for prototype pollution

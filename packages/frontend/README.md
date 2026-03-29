@@ -42,10 +42,11 @@ Key details:
 src/
 ├── components/    # UI: ControlBar, SettingsPanel (tabbed: EQ/Rendering/Presets/Shortcuts/Data/Sync/Spotify),
 │                  #     PresetBrowser, MediaPlaylist, NowPlaying, PlaybackPanel, StartScreen,
+│                  #     ImportModal (drag-and-drop import with progress/results),
 │                  #     OnboardingOverlay (first-time tips), etc.
 ├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (butterchurn),
 │                  # milkdropConverter (.milk → butterchurn JSON), textureLoader (image validation),
-│                  # isWebGL2Supported
+│                  # importProcessor (batch import with progress callbacks), isWebGL2Supported
 ├── data/          # quarantined-presets.json, mobile-blocked-presets.json, excludedPresets.ts (shared Sets)
 ├── constants/     # shortcuts.ts (keyboard/mouse shortcut definitions)
 ├── i18n/          # i18next config + 9 locale dirs (en, es, zh, hi, ja, ko, ru, id, pt-BR)
@@ -60,7 +61,8 @@ src/
 │                  # WindowSyncService (BroadcastChannel-based multi-window sync)
 ├── store/         # Zustand stores: useSettingsStore, useSpotifyStore, useMediaPlayerStore,
 │                  #     usePresetHistoryStore, usePresetBrowserStore, useImportedPresetsStore,
-│                  #     useImportedTexturesStore, useToastStore, useConfirmStore, useWindowSyncStatusStore
+│                  #     useImportedTexturesStore, useToastStore, useConfirmStore, useImportModalStore,
+│                  #     useWindowSyncStatusStore
 ├── utils/         # Shared utilities (isMobileDevice, browserInfo, settingsPortability, audioFileValidation)
 ├── types/         # music-metadata.d.ts, getDisplayMedia.d.ts (type declarations for untyped APIs)
 └── test/          # Vitest global setup
@@ -111,6 +113,8 @@ On mobile, 27 GPU-heavy presets (identified via Pixel 10 Pro testing) are filter
 **Language preference** is persisted separately by `i18next-browser-languagedetector` to `localStorage` key `mangowave-language` (not Zustand). This allows i18n to resolve synchronously at module load before React mounts.
 
 `useConfirmStore` drives the reusable `ConfirmDialog` component. API: `show({ title, message, onConfirm, confirmLabel?, destructive? })`. Supports destructive (red) and normal (orange) confirm buttons.
+
+`useImportModalStore` drives the `ImportModal` component for .milk preset and texture imports. API: `open(mode, presetPackMap?)` / `close()`. Processing logic lives in `importProcessor.ts` (not the component) — the modal only manages UI state (phase, results, progress). Supports drag-and-drop and file browser, 200-file batch cap, per-file result log with texture warnings, and "Upload Missing Textures" flow.
 
 `useToastStore` drives single-message action toasts with typed variants (`info`, `error`, `warning`). API: `show(message, { type?, durationMs? })` — info auto-clears at 3.5s, error/warning at 6s. `durationMs` stored in state and drives both the JS cleanup timer and the CSS `toast-fade` animation duration (set dynamically via inline style).
 

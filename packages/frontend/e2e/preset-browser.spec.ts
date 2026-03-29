@@ -1,5 +1,19 @@
+import { type Page } from '@playwright/test';
 import { test, expect } from './fixtures/base';
 import { installAudioMocks } from './fixtures/audio-mock';
+
+/** Open the Presets panel and switch to the Packs tab, waiting for each transition. */
+async function openPacksTab(app: Page) {
+  await app.getByRole('button', { name: /Presets/ }).click();
+  // Wait for panel to render before clicking tab
+  const packsTab = app.getByRole('button', { name: /packs/i });
+  await expect(packsTab).toBeVisible({ timeout: 5000 });
+  await packsTab.click();
+  // Wait for packs content to render
+  await expect(app.getByRole('button', { name: /Create Custom Pack/ })).toBeVisible({
+    timeout: 5000,
+  });
+}
 
 test.describe('Preset Browser', () => {
   test.beforeEach(async ({ app }) => {
@@ -76,11 +90,11 @@ test.describe('Preset Browser', () => {
     await expect(app.locator('input[placeholder*="Search"]')).toBeVisible();
   });
 
-  test('Packs tab: create, activate, and deactivate a custom pack', async ({ app }) => {
-    await app.getByRole('button', { name: /Presets/ }).click();
-
-    // Switch to Packs tab
-    await app.getByRole('button', { name: /packs/i }).click();
+  test('Packs tab: create, activate, and deactivate a custom pack', async ({ app }, testInfo) => {
+    // This test has the most steps (create → add → back → start → verify → stop → verify)
+    // and needs extra headroom on slow CI runners
+    testInfo.setTimeout(60000);
+    await openPacksTab(app);
 
     // Create a pack (auto-enters edit view)
     await app.getByRole('button', { name: /Create Custom Pack/ }).click();
@@ -113,8 +127,7 @@ test.describe('Preset Browser', () => {
   });
 
   test('Packs tab: edit pack name and add presets', async ({ app }) => {
-    await app.getByRole('button', { name: /Presets/ }).click();
-    await app.getByRole('button', { name: /packs/i }).click();
+    await openPacksTab(app);
 
     // Create a pack (auto-enters edit view)
     await app.getByRole('button', { name: /Create Custom Pack/ }).click();
@@ -145,8 +158,7 @@ test.describe('Preset Browser', () => {
   });
 
   test('Packs tab: delete pack shows confirmation dialog', async ({ app }) => {
-    await app.getByRole('button', { name: /Presets/ }).click();
-    await app.getByRole('button', { name: /packs/i }).click();
+    await openPacksTab(app);
 
     // Create a pack (auto-enters edit view)
     await app.getByRole('button', { name: /Create Custom Pack/ }).click();
@@ -169,8 +181,7 @@ test.describe('Preset Browser', () => {
   });
 
   test('active pack dims All tab filters with override notice', async ({ app }) => {
-    await app.getByRole('button', { name: /Presets/ }).click();
-    await app.getByRole('button', { name: /packs/i }).click();
+    await openPacksTab(app);
 
     // Create a pack (auto-enters edit view) and add a preset
     await app.getByRole('button', { name: /Create Custom Pack/ }).click();

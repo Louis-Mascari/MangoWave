@@ -17,9 +17,9 @@ function mobileButton(app: Page, label: string): Locator {
 }
 
 /** Check that mobile controls are visible (opacity-100 on container). */
-function expectControlsVisible(app: Page) {
+function expectControlsVisible(app: Page, timeout = 15000) {
   return expect(app.locator('[data-testid="mobile-circle"]')).toHaveClass(/opacity-100/, {
-    timeout: 5000,
+    timeout,
   });
 }
 
@@ -38,20 +38,25 @@ test.describe('Mobile UI', () => {
     await app.getByRole('button', { name: /Use Microphone/ }).click();
     await app.getByRole('button', { name: /Start Microphone/ }).click();
 
-    // Wait for visualizer + launch animation to complete.
-    // Controls appear after launch animation calls resumeIdle.
+    // Wait for visualizer canvas + controls to appear.
+    // Controls become visible after launch animation (~2.5s) calls resumeIdle.
     await app.waitForSelector('canvas', { timeout: 15000 });
-    await app.waitForTimeout(3000);
     await expectControlsVisible(app);
   });
 
   test('controls are visible after launch', async ({ app }) => {
+    // Re-reveal to ensure fresh idle timer — beforeEach may have consumed it
+    await revealControls(app);
     await expect(mobileButton(app, 'Presets')).toBeVisible();
     await expect(mobileButton(app, 'Settings')).toBeVisible();
     await expect(mobileButton(app, 'Next')).toBeVisible();
   });
 
   test('controls hide after idle timeout', async ({ app }) => {
+    // Re-reveal to reset the 5s idle timer with a known start time —
+    // beforeEach may have consumed part of the timer already.
+    await revealControls(app);
+    await expectControlsVisible(app, 3000);
     // Idle timer is 5s — controls should fade out
     await expectControlsHidden(app);
   });
@@ -80,11 +85,15 @@ test.describe('Mobile UI', () => {
   });
 
   test('Presets button opens modal panel', async ({ app }) => {
+    // Re-reveal in case idle timer fired during beforeEach
+    await revealControls(app);
     await mobileButton(app, 'Presets').dispatchEvent('click');
     await expect(app.locator('[role="dialog"]').first()).toBeVisible({ timeout: 5000 });
   });
 
   test('Settings button opens modal panel', async ({ app }) => {
+    // Re-reveal in case idle timer fired during beforeEach
+    await revealControls(app);
     await mobileButton(app, 'Settings').dispatchEvent('click');
     await expect(app.locator('[role="dialog"]').first()).toBeVisible({ timeout: 5000 });
   });

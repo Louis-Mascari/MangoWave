@@ -1,6 +1,7 @@
 {
   "name": "butterchurn-presets",
   "version": "2.4.7",
+  "private": true,
   "description": "MilkDrop preset packs (vendored from jberg/butterchurn-presets)",
   "license": "MIT",
   "type": "module",

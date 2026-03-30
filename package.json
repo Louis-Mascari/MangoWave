@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
+    "packages/butterchurn",
+    "packages/butterchurn-presets",
     "packages/frontend",
     "packages/backend",
     "infrastructure"

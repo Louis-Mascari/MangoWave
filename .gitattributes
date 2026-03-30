@@ -1,0 +1,3 @@
+# Vendored build artifacts — suppress diff noise and language stats
+packages/butterchurn/lib/*.js linguist-generated binary
+packages/butterchurn-presets/lib/*.js linguist-generated binary

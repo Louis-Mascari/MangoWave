@@ -67,6 +67,7 @@ describe('auth-callback handler', () => {
   });
 
   it('returns 500 on spotify API failure', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.mocked(exchangeCodeForTokens).mockRejectedValue(new Error('bad code'));
 
     const result = await invoke({ code: 'bad' });

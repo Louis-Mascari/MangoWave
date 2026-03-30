@@ -65,6 +65,7 @@ describe('auth-refresh handler', () => {
   });
 
   it('returns 500 on refresh failure', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.mocked(getSession).mockResolvedValue({
       spotifyUserId: 'user1',
       refreshToken: 'rt_old',

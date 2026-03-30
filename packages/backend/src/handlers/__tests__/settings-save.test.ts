@@ -96,6 +96,7 @@ describe('settings-save handler', () => {
   });
 
   it('returns 500 on dynamo failure', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.mocked(getSession).mockRejectedValue(new Error('DynamoDB error'));
     const result = await invoke({ sessionId: 'sess_1', settings: mockSettings });
     expect(result.statusCode).toBe(500);

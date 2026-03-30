@@ -11,6 +11,14 @@ async function revealControls(app: Page) {
   await app.waitForTimeout(500);
 }
 
+/** Ensure controls are visible — reveal them if they've auto-hidden. */
+async function ensureControlsVisible(app: Page) {
+  const isHidden = await app
+    .locator('[data-testid="mobile-circle"]')
+    .evaluate((el) => el.classList.contains('opacity-0'));
+  if (isHidden) await revealControls(app);
+}
+
 /** Get a locator scoped to the mobile control circle. */
 function mobileButton(app: Page, label: string): Locator {
   return app.locator('[data-testid="mobile-circle"]').getByLabel(label, { exact: true });
@@ -45,23 +53,20 @@ test.describe('Mobile UI', () => {
   });
 
   test('controls are visible after launch', async ({ app }) => {
-    // Re-reveal to ensure fresh idle timer — beforeEach may have consumed it
-    await revealControls(app);
+    await ensureControlsVisible(app);
     await expect(mobileButton(app, 'Presets')).toBeVisible();
     await expect(mobileButton(app, 'Settings')).toBeVisible();
     await expect(mobileButton(app, 'Next')).toBeVisible();
   });
 
   test('controls hide after idle timeout', async ({ app }) => {
-    // Re-reveal to reset the 5s idle timer with a known start time —
-    // beforeEach may have consumed part of the timer already.
-    await revealControls(app);
-    await expectControlsVisible(app, 3000);
-    // Idle timer is 5s — controls should fade out
+    // beforeEach confirmed controls are visible. The 5s idle timer is already
+    // running — just wait for controls to fade out (10s timeout is generous).
     await expectControlsHidden(app);
   });
 
   test('tap hides visible controls', async ({ app }) => {
+    await ensureControlsVisible(app);
     // Tap the overlay to trigger forceIdle → controls fade out
     await app.locator('div[role="presentation"]').dispatchEvent('click');
     await expectControlsHidden(app, 3000);
@@ -73,27 +78,20 @@ test.describe('Mobile UI', () => {
     const initial = await presetName.textContent();
 
     await expect(async () => {
-      // Re-reveal if controls have auto-hidden
-      const isHidden = await app
-        .locator('[data-testid="mobile-circle"]')
-        .evaluate((el) => el.classList.contains('opacity-0'));
-      if (isHidden) await revealControls(app);
-
+      await ensureControlsVisible(app);
       await mobileButton(app, 'Next').dispatchEvent('click');
       await expect(presetName).not.toHaveText(initial ?? '', { timeout: 2000 });
     }).toPass({ timeout: 20000 });
   });
 
   test('Presets button opens modal panel', async ({ app }) => {
-    // Re-reveal in case idle timer fired during beforeEach
-    await revealControls(app);
+    await ensureControlsVisible(app);
     await mobileButton(app, 'Presets').dispatchEvent('click');
     await expect(app.locator('[role="dialog"]').first()).toBeVisible({ timeout: 5000 });
   });
 
   test('Settings button opens modal panel', async ({ app }) => {
-    // Re-reveal in case idle timer fired during beforeEach
-    await revealControls(app);
+    await ensureControlsVisible(app);
     await mobileButton(app, 'Settings').dispatchEvent('click');
     await expect(app.locator('[role="dialog"]').first()).toBeVisible({ timeout: 5000 });
   });

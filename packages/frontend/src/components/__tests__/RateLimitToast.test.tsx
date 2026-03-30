@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { RateLimitToast } from '../RateLimitToast.tsx';
 import { useSpotifyStore } from '../../store/useSpotifyStore.ts';
 
@@ -47,7 +47,9 @@ describe('RateLimitToast', () => {
     const { rerender } = render(<RateLimitToast />);
     expect(screen.getByText(/Spotify rate limited/)).toBeInTheDocument();
 
-    useSpotifyStore.setState({ isRateLimited: false, rateLimitResetsAt: null });
+    act(() => {
+      useSpotifyStore.setState({ isRateLimited: false, rateLimitResetsAt: null });
+    });
     rerender(<RateLimitToast />);
     expect(screen.queryByText(/Spotify rate limited/)).toBeNull();
   });

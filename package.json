@@ -29,6 +29,12 @@
     "infrastructure/**/*.ts": [
       "prettier --write"
     ],
+    "packages/butterchurn/src/**/*.{js,ts}": [
+      "prettier --write"
+    ],
+    "packages/butterchurn-presets/src/**/*.{js,ts}": [
+      "prettier --write"
+    ],
     "*.{json,md,yml,yaml}": [
       "prettier --write"
     ]

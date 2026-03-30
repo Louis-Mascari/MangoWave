@@ -1,9 +1,7 @@
 export interface VisualizerInstance {
   connectAudio(audioNode: AudioNode): void;
   loadPreset(preset: object, blendTime: number): void;
-  loadExtraImages(
-    imageData: Record<string, { data: string; width: number; height: number }>,
-  ): void;
+  loadExtraImages(imageData: Record<string, { data: string; width: number; height: number }>): void;
   setRendererSize(
     width: number,
     height: number,

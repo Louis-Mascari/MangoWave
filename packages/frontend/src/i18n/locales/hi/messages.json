@@ -168,7 +168,6 @@
     "conversionFailed": "प्रीसेट \"{{name}}\" को कनवर्ट करने में विफल। छोड़ा जा रहा है।",
     "securityBlocked": "\"{{name}}\" में अवरुद्ध सामग्री है",
     "nativeNameCollision": "\"{{name}}\" बिल्ट-इन प्रीसेट में पहले से मौजूद है",
-    "ps3Unsupported": "\"{{name}}\" Pixel Shader 3 का उपयोग करता है जो समर्थित नहीं है",
     "missingTextures": "अनुपलब्ध टेक्सचर (अपलोड होने तक शोर के रूप में दिखेंगे): {{textures}}",
     "deletePreset": "आयातित प्रीसेट हटाएं",
     "deleteConfirm": "\"{{name}}\" हटाएं? .milk फ़ाइल को फिर से आयात करना होगा।",

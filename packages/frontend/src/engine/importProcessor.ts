@@ -2,7 +2,6 @@ import {
   readMilkFile,
   convertMilkText,
   validatePreset,
-  parsePsVersion,
   findMissingTextures,
 } from './milkdropConverter.ts';
 import { readTextureFile, validateTextureFile } from './textureLoader.ts';
@@ -53,11 +52,6 @@ export async function processPresetImport(
       }
       if (opts.presetPackMap.has(name)) {
         throw new Error('nativeNameCollision');
-      }
-
-      const psVersion = parsePsVersion(text);
-      if (psVersion >= 3) {
-        throw new Error('ps3Unsupported');
       }
 
       const converted = await convertMilkText(text);

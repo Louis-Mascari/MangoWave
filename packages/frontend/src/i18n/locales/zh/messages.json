@@ -168,7 +168,6 @@
     "conversionFailed": "预设 \"{{name}}\" 转换失败，已跳过。",
     "securityBlocked": "\"{{name}}\" 包含被阻止的内容",
     "nativeNameCollision": "\"{{name}}\" 已存在于内置预设中",
-    "ps3Unsupported": "\"{{name}}\" 使用了不受支持的 Pixel Shader 3",
     "missingTextures": "缺失的纹理（上传前将显示为噪点）：{{textures}}",
     "deletePreset": "删除导入的预设",
     "deleteConfirm": "删除 \"{{name}}\"？需要重新导入 .milk 文件。",

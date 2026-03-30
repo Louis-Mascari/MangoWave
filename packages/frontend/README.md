@@ -45,8 +45,9 @@ src/
 │                  #     ImportModal (drag-and-drop import with progress/results),
 │                  #     OnboardingOverlay (first-time tips), etc.
 ├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (butterchurn),
-│                  # milkdropConverter (.milk → butterchurn JSON), textureLoader (image validation),
-│                  # importProcessor (batch import with progress callbacks), isWebGL2Supported
+│                  # milkdropConverter (.milk → butterchurn JSON via workspace milkdrop-preset-converter),
+│                  # textureLoader (image validation), importProcessor (batch import with progress callbacks),
+│                  # isWebGL2Supported
 ├── data/          # quarantined-presets.json, mobile-blocked-presets.json, excludedPresets.ts (shared Sets)
 ├── constants/     # shortcuts.ts (keyboard/mouse shortcut definitions)
 ├── i18n/          # i18next config + 9 locale dirs (en, es, zh, hi, ja, ko, ru, id, pt-BR)

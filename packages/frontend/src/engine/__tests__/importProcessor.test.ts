@@ -140,13 +140,13 @@ describe('processPresetImport', () => {
     expect(results[0].errorCode).toBe('nativeNameCollision');
   });
 
-  it('rejects PS3 presets', async () => {
-    const ps3Content = 'PSVERSION=3\nPSVERSION_WARP=3\nPSVERSION_COMP=3\n[preset00]';
+  it('imports PS3 presets successfully', async () => {
+    const ps3Content = 'PSVERSION=3\nPSVERSION_WARP=3\nPSVERSION_COMP=3\n[preset00]\nfoo=bar';
     const file = new File([ps3Content], 'ps3.milk');
     const results = await processPresetImport([file], defaultOpts);
 
-    expect(results[0].status).toBe('failed');
-    expect(results[0].errorCode).toBe('ps3Unsupported');
+    expect(results[0].status).toBe('success');
+    expect(results[0].presetName).toBe('ps3');
   });
 
   it('reports missing textures as warnings (not failures)', async () => {

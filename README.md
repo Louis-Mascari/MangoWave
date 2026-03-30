@@ -23,7 +23,7 @@
 ## Features
 
 - **400+ MilkDrop presets** from 5 butterchurn packs, organized by source pack with virtualized browsing
-- **Import .milk presets** — add community MilkDrop presets from the thousands available online. Raw files stored in IndexedDB, converted lazily on-demand via `milkdrop-preset-converter`
+- **Import .milk presets** — add community MilkDrop presets (PS1, PS2, and PS3) from the thousands available online. Raw files stored in IndexedDB, converted lazily on-demand via a forked `milkdrop-preset-converter` with GLSL ES 3.0 shader support
 - **Import custom textures** — upload JPEG/PNG/WebP images for MilkDrop presets that reference `sampler_<name>`. Built-in textures (cells, etc.) loaded automatically from butterchurn
 - **Custom packs** — create, edit, import/export preset collections; start a pack to lock autopilot and navigation to its presets only
 - **Pack filtering** — enable/disable built-in packs to control which presets appear and which autopilot draws from
@@ -95,16 +95,18 @@ NPM workspaces monorepo. Node >= 20 required.
 
 ```
 MangoWave/
-├── packages/frontend/          # React 19 + Vite 8 + TypeScript — the visualizer app
-├── packages/butterchurn/       # Vendored butterchurn with ESM wrapper + types
-├── packages/butterchurn-presets/ # Vendored preset packs with ESM wrapper + types
-├── packages/backend/           # Lambda handlers for Spotify OAuth & settings sync
-├── packages/landing/           # Static landing page (HTML + CSS, no JS)
-├── infrastructure/             # AWS CDK v2 — DynamoDB, Lambda, API Gateway, S3, CloudFront, CloudWatch
-├── .github/                # CI, deploy, dependabot, issue templates, PR template, CODEOWNERS, SECURITY
-├── SELF-HOSTING.md        # Guide for deploying your own instance
-├── knip.json              # Knip config (unused code detection)
-└── LICENSE                # AGPL-3.0
+├── packages/frontend/                  # React 19 + Vite 8 + TypeScript — the visualizer app
+├── packages/butterchurn/               # Vendored butterchurn with ESM wrapper + types
+├── packages/butterchurn-presets/       # Vendored preset packs with ESM wrapper + types
+├── packages/milkdrop-preset-converter/ # Forked .milk → butterchurn JSON converter (ES 3.0 shaders via hlslparser-wasm)
+├── packages/hlslparser-wasm/           # HLSL → GLSL ES 3.0 compiler (projectM fork, Emscripten WASM)
+├── packages/backend/                   # Lambda handlers for Spotify OAuth & settings sync
+├── packages/landing/                   # Static landing page (HTML + CSS, no JS)
+├── infrastructure/                     # AWS CDK v2 — DynamoDB, Lambda, API Gateway, S3, CloudFront, CloudWatch
+├── .github/                            # CI, deploy, dependabot, issue templates, PR template, CODEOWNERS, SECURITY
+├── SELF-HOSTING.md                     # Guide for deploying your own instance
+├── knip.json                           # Knip config (unused code detection)
+└── LICENSE                             # AGPL-3.0
 ```
 
 See each package's README for details.
@@ -196,6 +198,7 @@ See **[SELF-HOSTING.md](SELF-HOSTING.md)** for full instructions.
 ## Acknowledgments
 
 - [butterchurn](https://github.com/jberg/butterchurn) — WebGL 2 implementation of the MilkDrop visualizer
+- [projectM](https://github.com/projectM-visualizer/projectm) — hlslparser fork (GLSL ES 3.0 + PS3 support), vendored in `packages/hlslparser-wasm`
 - [MilkDrop](https://en.wikipedia.org/wiki/MilkDrop) — original visualizer by Ryan Geiss
 - [Winamp](https://en.wikipedia.org/wiki/Winamp) — created by Nullsoft
 

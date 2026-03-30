@@ -168,7 +168,6 @@
     "conversionFailed": "Gagal mengonversi preset \"{{name}}\". Dilewati.",
     "securityBlocked": "\"{{name}}\" mengandung konten yang diblokir",
     "nativeNameCollision": "\"{{name}}\" sudah ada di preset bawaan",
-    "ps3Unsupported": "\"{{name}}\" menggunakan Pixel Shader 3 yang tidak didukung",
     "missingTextures": "Tekstur tidak ditemukan (akan ditampilkan sebagai noise sampai diunggah): {{textures}}",
     "deletePreset": "Hapus preset impor",
     "deleteConfirm": "Hapus \"{{name}}\"? File .milk perlu diimpor ulang.",

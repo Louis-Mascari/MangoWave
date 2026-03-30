@@ -93,9 +93,9 @@ jobs:
         run: npx playwright install --with-deps
         working-directory: packages/frontend
 
-      - name: Install Playwright system deps (cache hit)
+      - name: Verify Playwright browsers (cache hit)
         if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps
+        run: npx playwright install
         working-directory: packages/frontend
 
       - name: Save Playwright browser cache

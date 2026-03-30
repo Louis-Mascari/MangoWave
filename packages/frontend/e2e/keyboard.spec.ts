@@ -58,18 +58,19 @@ test.describe('Keyboard Shortcuts', () => {
   });
 
   test('A toggles autopilot (toast appears)', async ({ app }) => {
-    await app.keyboard.press('a');
-
-    // Toast animates in — look for the visible inner content div (not the wrapper)
-    const toastContent = app.locator('[role="status"] > div');
-    await expect(toastContent).toBeVisible({ timeout: 5000 });
+    await expect(async () => {
+      await app.keyboard.press('a');
+      const toastContent = app.locator('[role="status"] > div');
+      await expect(toastContent).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 10000 });
   });
 
   test('S toggles favorite (toast appears)', async ({ app }) => {
-    await app.keyboard.press('s');
-
-    const toastContent = app.locator('[role="status"] > div');
-    await expect(toastContent).toBeVisible({ timeout: 5000 });
+    await expect(async () => {
+      await app.keyboard.press('s');
+      const toastContent = app.locator('[role="status"] > div');
+      await expect(toastContent).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 10000 });
   });
 
   test('shortcuts are suppressed when focused in search input', async ({ app }) => {

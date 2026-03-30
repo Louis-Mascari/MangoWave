@@ -127,7 +127,8 @@
       "favorites": "favoritos",
       "blocked": "bloqueados",
       "excluded": "excluídos",
-      "history": "histórico"
+      "history": "histórico",
+      "import": "importar"
     },
     "noPacksSelected": "Nenhum pacote selecionado. Piloto automático pausado",
     "packsActive": "{{active}}/{{total}} pacotes ativos",
@@ -152,6 +153,9 @@
   },
 
   "importedPresets": {
+    "sectionTitle": "Presets Importados",
+    "description": "Adicione presets comunitários do MilkDrop (.milk) e as texturas que eles referenciam.",
+    "emptyState": "Nenhum preset importado. Use \"Import .milk\" para adicionar presets comunitários do MilkDrop.",
     "importMilk": "Importar .milk",
     "importingPresets": "Importando presets...",
     "importSuccess": "{{count}} preset(s) importado(s)",
@@ -199,6 +203,7 @@
     "tabs": {
       "packs": "pacotes"
     },
+    "description": "Crie coleções personalizadas com qualquer preset — incluídos ou importados.",
     "createPack": "Criar Pacote Personalizado",
     "importPack": "Importar Pacote",
     "exportPack": "Exportar Pacote",
@@ -236,8 +241,10 @@
   "importModal": {
     "titlePresets": "Importar presets",
     "titleTextures": "Importar texturas",
-    "descriptionPresets": "Adicione presets MilkDrop da comunidade (arquivos .milk). Alguns presets requerem texturas personalizadas — você será notificado sobre texturas ausentes após a importação. Presets importados podem não renderizar exatamente como esperado e devem ser verificados.",
-    "descriptionTextures": "Envie imagens de textura (JPEG, PNG ou WebP) usadas por presets importados. Presets referenciam texturas pelo nome — por exemplo, um preset que usa sampler_fire precisa de uma textura chamada \"fire\".",
+    "descriptionPresets": "Adicione presets comunitários do MilkDrop (arquivos .milk).\nAlguns presets requerem texturas personalizadas — você será notificado sobre texturas faltantes após a importação.\nPresets importados podem não renderizar exatamente como esperado e devem ser verificados.",
+    "descriptionTextures": "Envie imagens de textura (JPEG, PNG ou WebP) usadas pelos presets importados.\nPresets referenciam texturas pelo nome — por exemplo, um preset usando sampler_fire precisa de uma textura chamada \"fire\".",
+    "storageNotePresets": "Os presets são armazenados no seu navegador. Limpar os dados do site os removerá, então guarde seus arquivos .milk originais.",
+    "storageNoteTextures": "As texturas são armazenadas no seu navegador. Limpar os dados do site as removerá, então guarde seus arquivos de imagem originais.",
     "dropZonePresets": "Arraste arquivos .milk aqui ou clique para procurar",
     "dropZoneTextures": "Arraste arquivos de imagem aqui ou clique para procurar",
     "browseFiles": "Procurar arquivos",

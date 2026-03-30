@@ -127,7 +127,8 @@
       "favorites": "favorit",
       "blocked": "diblokir",
       "excluded": "dikecualikan",
-      "history": "riwayat"
+      "history": "riwayat",
+      "import": "impor"
     },
     "noPacksSelected": "Tidak ada paket dipilih. Autopilot dijeda",
     "packsActive": "{{active}}/{{total}} paket aktif",
@@ -152,6 +153,9 @@
   },
 
   "importedPresets": {
+    "sectionTitle": "Preset yang Diimpor",
+    "description": "Tambahkan preset MilkDrop komunitas (.milk) dan tekstur yang direferensikan.",
+    "emptyState": "Belum ada preset yang diimpor. Gunakan \"Import .milk\" untuk menambahkan preset MilkDrop komunitas.",
     "importMilk": "Impor .milk",
     "importingPresets": "Mengimpor preset...",
     "importSuccess": "{{count}} preset berhasil diimpor",
@@ -199,6 +203,7 @@
     "tabs": {
       "packs": "paket"
     },
+    "description": "Buat koleksi kustom dari preset apa pun — bawaan atau yang diimpor.",
     "createPack": "Buat Paket Kustom",
     "importPack": "Impor Paket",
     "exportPack": "Ekspor Paket",
@@ -236,8 +241,10 @@
   "importModal": {
     "titlePresets": "Impor Preset",
     "titleTextures": "Impor Tekstur",
-    "descriptionPresets": "Tambahkan preset MilkDrop komunitas (file .milk). Beberapa preset memerlukan tekstur khusus — Anda akan diberitahu tentang tekstur yang hilang setelah impor. Preset yang diimpor mungkin tidak ditampilkan persis seperti yang diharapkan dan harus diverifikasi.",
-    "descriptionTextures": "Unggah gambar tekstur (JPEG, PNG, atau WebP) yang digunakan oleh preset impor. Preset mereferensikan tekstur berdasarkan nama — misalnya, preset yang menggunakan sampler_fire memerlukan tekstur bernama \"fire\".",
+    "descriptionPresets": "Tambahkan preset MilkDrop komunitas (file .milk).\nBeberapa preset memerlukan tekstur kustom — Anda akan diberi tahu tentang tekstur yang hilang setelah impor.\nPreset yang diimpor mungkin tidak ditampilkan persis seperti yang diharapkan dan harus diverifikasi.",
+    "descriptionTextures": "Unggah gambar tekstur (JPEG, PNG, atau WebP) yang digunakan oleh preset yang diimpor.\nPreset mereferensikan tekstur berdasarkan nama — misalnya, preset yang menggunakan sampler_fire memerlukan tekstur bernama \"fire\".",
+    "storageNotePresets": "Preset disimpan di browser Anda. Menghapus data situs akan menghapusnya, jadi simpan file .milk asli Anda.",
+    "storageNoteTextures": "Tekstur disimpan di browser Anda. Menghapus data situs akan menghapusnya, jadi simpan file gambar asli Anda.",
     "dropZonePresets": "Seret file .milk ke sini atau klik untuk memilih",
     "dropZoneTextures": "Seret file gambar ke sini atau klik untuk memilih",
     "browseFiles": "Pilih File",

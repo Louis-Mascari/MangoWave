@@ -891,7 +891,7 @@ function DataTab() {
             <p className="text-xs text-white/50">{t('data.loadFileDescription')}</p>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-fit cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
+              className="w-fit cursor-pointer rounded border-none bg-orange-500/20 px-3 py-1 text-xs text-orange-400 hover:bg-orange-500/30"
             >
               {t('data.importSettings')}
             </button>

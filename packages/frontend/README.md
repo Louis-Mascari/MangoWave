@@ -108,7 +108,7 @@ On mobile, 27 GPU-heavy presets (identified via Pixel 10 Pro testing) are filter
 
 `usePresetHistoryStore` tracks preset navigation history (max 100 entries, cursor-based) for previous/next preset navigation. Also tracks `playedSet` for shuffle-style autopilot rounds. Not persisted.
 
-`usePresetBrowserStore` holds preset browser panel UI state (active filter tab including "packs", search term, collapsed packs, selected pack for editing, scroll position). Session-scoped (not persisted) — survives panel open/close but resets on page refresh.
+`usePresetBrowserStore` holds preset browser panel UI state (active filter tab including "packs" and "import", search term, collapsed packs, selected pack for editing, scroll position). Session-scoped (not persisted) — survives panel open/close but resets on page refresh.
 
 **Language preference** is persisted separately by `i18next-browser-languagedetector` to `localStorage` key `mangowave-language` (not Zustand). This allows i18n to resolve synchronously at module load before React mounts.
 

@@ -244,11 +244,23 @@ function ImportModalInner() {
         {/* Select phase */}
         {phase === 'select' && (
           <>
-            <p className="mb-3 text-xs leading-relaxed text-white/50">
-              {mode === 'preset'
+            <ul className="mb-3 flex list-outside list-disc flex-col gap-1 pl-4 text-xs leading-relaxed text-white/50">
+              {(mode === 'preset'
                 ? t('importModal.descriptionPresets')
-                : t('importModal.descriptionTextures')}
-            </p>
+                : t('importModal.descriptionTextures')
+              )
+                .split('\n')
+                .map((line, i) => (
+                  <li key={i}>{line}</li>
+                ))}
+            </ul>
+            <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2">
+              <p className="text-xs text-amber-300/70">
+                {mode === 'preset'
+                  ? t('importModal.storageNotePresets')
+                  : t('importModal.storageNoteTextures')}
+              </p>
+            </div>
             <div
               role="button"
               tabIndex={0}

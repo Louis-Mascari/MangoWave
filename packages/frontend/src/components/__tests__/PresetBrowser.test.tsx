@@ -37,6 +37,7 @@ describe('PresetBrowser', () => {
     expect(screen.getByText('favorites')).toBeInTheDocument();
     expect(screen.getByText('blocked')).toBeInTheDocument();
     expect(screen.getByText('history')).toBeInTheDocument();
+    expect(screen.getByText('import')).toBeInTheDocument();
   });
 
   it('renders search input', () => {
@@ -122,6 +123,30 @@ describe('PresetBrowser', () => {
     // Pack filter buttons come from PACK_ORDER (all 5 packs shown)
     expect(screen.getByText('Minimal')).toBeInTheDocument();
     expect(screen.getByText('Extra')).toBeInTheDocument();
+  });
+
+  it('shows import tab with buttons and empty state', async () => {
+    const user = userEvent.setup();
+    render(
+      <PresetBrowser
+        presetList={PRESETS}
+        presetPackMap={PACK_MAP}
+        currentPreset=""
+        onSelectPreset={vi.fn()}
+        onNextPreset={vi.fn()}
+      />,
+    );
+
+    await user.click(screen.getByText('import'));
+    expect(screen.getByText('Import .milk')).toBeInTheDocument();
+    expect(screen.getByText('Import Textures')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'No imported presets. Use "Import .milk" to add community MilkDrop presets.',
+      ),
+    ).toBeInTheDocument();
+    // Search bar should be hidden on import tab
+    expect(screen.queryByPlaceholderText('Search presets...')).not.toBeInTheDocument();
   });
 
   it('shows history tab', async () => {

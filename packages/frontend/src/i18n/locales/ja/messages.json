@@ -127,7 +127,8 @@
       "favorites": "お気に入り",
       "blocked": "ブロック済み",
       "excluded": "除外",
-      "history": "履歴"
+      "history": "履歴",
+      "import": "インポート"
     },
     "noPacksSelected": "パックが選択されていません。オートパイロットを一時停止しました",
     "packsActive": "{{active}}/{{total}}パック有効",
@@ -152,6 +153,9 @@
   },
 
   "importedPresets": {
+    "sectionTitle": "インポート済みプリセット",
+    "description": "コミュニティのMilkDropプリセット（.milk）と参照するテクスチャを追加します。",
+    "emptyState": "インポート済みのプリセットはありません。「Import .milk」でコミュニティのMilkDropプリセットを追加できます。",
     "importMilk": ".milk をインポート",
     "importingPresets": "プリセットをインポート中...",
     "importSuccess": "{{count}} 件のプリセットをインポートしました",
@@ -199,6 +203,7 @@
     "tabs": {
       "packs": "パック"
     },
+    "description": "バンドルまたはインポートされたプリセットからカスタムコレクションを作成します。",
     "createPack": "カスタムパックを作成",
     "importPack": "パックをインポート",
     "exportPack": "パックをエクスポート",
@@ -236,8 +241,10 @@
   "importModal": {
     "titlePresets": "プリセットをインポート",
     "titleTextures": "テクスチャをインポート",
-    "descriptionPresets": "コミュニティの MilkDrop プリセット（.milk ファイル）を追加します。一部のプリセットにはカスタムテクスチャが必要です — インポート後に不足しているテクスチャが通知されます。インポートしたプリセットは意図どおりにレンダリングされない場合があるため、インポート後に確認してください。",
-    "descriptionTextures": "インポートしたプリセットで使用されるテクスチャ画像（JPEG、PNG、または WebP）をアップロードします。プリセットは名前でテクスチャを参照します — 例えば、sampler_fire を使用するプリセットには \"fire\" という名前のテクスチャが必要です。",
+    "descriptionPresets": "コミュニティのMilkDropプリセット（.milkファイル）を追加します。\nカスタムテクスチャが必要なプリセットもあります。インポート後に不足しているテクスチャが通知されます。\nインポートされたプリセットは意図どおりにレンダリングされない場合があります。確認してください。",
+    "descriptionTextures": "インポートされたプリセットで使用されるテクスチャ画像（JPEG、PNG、WebP）をアップロードします。\nプリセットは名前でテクスチャを参照します。例えば、sampler_fireを使用するプリセットには「fire」という名前のテクスチャが必要です。",
+    "storageNotePresets": "プリセットはブラウザに保存されます。サイトデータを消去すると削除されるため、元の.milkファイルを保管してください。",
+    "storageNoteTextures": "テクスチャはブラウザに保存されます。サイトデータを消去すると削除されるため、元の画像ファイルを保管してください。",
     "dropZonePresets": ".milkファイルをここにドロップするか、クリックして参照",
     "dropZoneTextures": "画像ファイルをここにドロップするか、クリックして参照",
     "browseFiles": "ファイルを参照",

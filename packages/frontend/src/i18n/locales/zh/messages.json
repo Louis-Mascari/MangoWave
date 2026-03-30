@@ -127,7 +127,8 @@
       "favorites": "收藏",
       "blocked": "已屏蔽",
       "excluded": "已排除",
-      "history": "历史"
+      "history": "历史",
+      "import": "导入"
     },
     "noPacksSelected": "未选择预设包。自动播放已暂停",
     "packsActive": "{{active}}/{{total}} 个预设包已启用",
@@ -152,6 +153,9 @@
   },
 
   "importedPresets": {
+    "sectionTitle": "已导入预设",
+    "description": "添加社区 MilkDrop 预设（.milk）及其引用的纹理。",
+    "emptyState": "没有已导入的预设。使用「导入 .milk」添加社区 MilkDrop 预设。",
     "importMilk": "导入 .milk",
     "importingPresets": "正在导入预设...",
     "importSuccess": "已导入 {{count}} 个预设",
@@ -199,6 +203,7 @@
     "tabs": {
       "packs": "合集"
     },
+    "description": "从任何预设创建自定义集合——内置或导入的。",
     "createPack": "创建自定义合集",
     "importPack": "导入合集",
     "exportPack": "导出合集",
@@ -236,8 +241,10 @@
   "importModal": {
     "titlePresets": "导入预设",
     "titleTextures": "导入纹理",
-    "descriptionPresets": "添加社区 MilkDrop 预设（.milk 文件）。部分预设需要自定义纹理——导入后会提示缺失的纹理。导入的预设可能无法完全按预期渲染，请在导入后检查效果。",
-    "descriptionTextures": "上传导入预设所使用的纹理图片（JPEG、PNG 或 WebP）。预设按名称引用纹理——例如，使用 sampler_fire 的预设需要一个名为 \"fire\" 的纹理。",
+    "descriptionPresets": "添加社区 MilkDrop 预设（.milk 文件）。\n某些预设需要自定义纹理——导入后会通知您缺少哪些纹理。\n导入的预设可能无法完全按预期渲染，请自行验证。",
+    "descriptionTextures": "上传导入预设使用的纹理图像（JPEG、PNG 或 WebP）。\n预设按名称引用纹理——例如，使用 sampler_fire 的预设需要名为「fire」的纹理。",
+    "storageNotePresets": "预设存储在浏览器中。清除站点数据会将其删除，请保留原始 .milk 文件。",
+    "storageNoteTextures": "纹理存储在浏览器中。清除站点数据会将其删除，请保留原始图像文件。",
     "dropZonePresets": "将 .milk 文件拖到此处或点击浏览",
     "dropZoneTextures": "将图片文件拖到此处或点击浏览",
     "browseFiles": "浏览文件",

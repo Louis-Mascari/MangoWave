@@ -639,7 +639,7 @@ export function PresetBrowser({
     <>
       {/* Pack filter checkboxes */}
       {activeCustomPackId && (
-        <p className="mb-1 text-[9px] text-orange-400/50">
+        <p className="mb-1 text-[10px] text-orange-400/50">
           {t('customPacks.packOverridesFilters')}
         </p>
       )}
@@ -647,7 +647,7 @@ export function PresetBrowser({
         className={`mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 ${activeCustomPackId ? 'pointer-events-none opacity-40' : ''}`}
       >
         {allPacks.map((pack) => (
-          <label key={pack} className="flex cursor-pointer items-center gap-1 text-[10px]">
+          <label key={pack} className="flex cursor-pointer items-center gap-1 text-xs">
             <input
               type="checkbox"
               checked={enabledPackSet.has(pack)}
@@ -666,17 +666,17 @@ export function PresetBrowser({
       >
         <button
           onClick={handleSelectAll}
-          className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
+          className="cursor-pointer border-none bg-transparent p-0 text-xs text-white/40 underline hover:text-orange-400"
         >
           {tc('selectAll')}
         </button>
         <button
           onClick={handleDeselectAll}
-          className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
+          className="cursor-pointer border-none bg-transparent p-0 text-xs text-white/40 underline hover:text-orange-400"
         >
           {tc('deselectAll')}
         </button>
-        <span className="text-[9px] text-white/25">
+        <span className="text-[10px] text-white/25">
           {enabledPacks.length === 0
             ? t('presetBrowser.noPacksSelected')
             : t('presetBrowser.packsActive', {
@@ -713,7 +713,7 @@ export function PresetBrowser({
                 }}
                 className="sticky top-0 z-[1] flex cursor-pointer items-center justify-between bg-black/80 px-2 py-1 backdrop-blur-sm"
               >
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-orange-400">
+                <span className="text-xs font-semibold uppercase tracking-wider text-orange-400">
                   {isCollapsed ? '▶' : '▼'} {packName}
                 </span>
                 <span className="flex items-center gap-1.5">
@@ -723,12 +723,12 @@ export function PresetBrowser({
                         e.stopPropagation();
                         handleClearAllImported();
                       }}
-                      className="cursor-pointer rounded border-none bg-red-500/20 px-1.5 py-0.5 text-[8px] text-red-400/70 hover:bg-red-500/30 hover:text-red-400"
+                      className="cursor-pointer rounded border-none bg-red-500/20 px-1.5 py-0.5 text-[9px] text-red-400/70 hover:bg-red-500/30 hover:text-red-400"
                     >
                       {t('importedPresets.clearAll')}
                     </button>
                   )}
-                  <span className="text-[10px] text-white/40">{countStr}</span>
+                  <span className="text-xs text-white/40">{countStr}</span>
                 </span>
               </div>
             );
@@ -848,7 +848,7 @@ export function PresetBrowser({
   // Render excluded tab (quarantined + mobile-blocked)
   const renderExcluded = () => (
     <div className="flex flex-col gap-0.5 overflow-y-auto max-md:min-h-0 max-md:flex-1 md:max-h-[400px]">
-      <p className="mb-1 text-[10px] leading-snug text-white/40">
+      <p className="mb-1 text-xs leading-snug text-white/40">
         {t('presetBrowser.excludedDescription')}
       </p>
       {excludedPresets.map(({ name, reason }) => (
@@ -867,7 +867,7 @@ export function PresetBrowser({
           className="flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs text-white/70 hover:bg-white/10"
         >
           <span className="min-w-0 flex-1 truncate text-left">
-            <span className={`mr-1.5 text-[10px] font-medium ${reason.color}`}>
+            <span className={`mr-1.5 text-xs font-medium ${reason.color}`}>
               {t(reason.labelKey)}
             </span>
             {name}
@@ -902,6 +902,16 @@ export function PresetBrowser({
   // Pack detail search state
   const [packSearch, setPackSearch] = useState('');
   const deferredPackSearch = useDeferredValue(packSearch);
+
+  // Import tab search state
+  const [importSearch, setImportSearch] = useState('');
+  const deferredImportSearch = useDeferredValue(importSearch);
+
+  const filteredImportedPresets = useMemo(() => {
+    if (!deferredImportSearch) return importedPresets;
+    const q = deferredImportSearch.toLowerCase();
+    return importedPresets.filter((p) => p.name.toLowerCase().includes(q));
+  }, [importedPresets, deferredImportSearch]);
 
   const selectedPack = useMemo(
     () => customPacks.find((p) => p.id === selectedPackId) ?? null,
@@ -1104,7 +1114,7 @@ export function PresetBrowser({
               name={selectedPack.name}
               onRename={renameCustomPack}
             />
-            <span className="shrink-0 text-[10px] text-white/40">
+            <span className="shrink-0 text-xs text-white/40">
               {t('customPacks.presetCount', { count: selectedPack.presets.length })}
             </span>
           </div>
@@ -1138,17 +1148,17 @@ export function PresetBrowser({
                     <span className="flex min-w-0 flex-1 items-center gap-1.5 text-left">
                       <span className="truncate">{name}</span>
                       {isBlocked && (
-                        <span className="shrink-0 rounded bg-red-500/20 px-1 py-px text-[8px] text-red-400/80">
+                        <span className="shrink-0 rounded bg-red-500/20 px-1 py-px text-[9px] text-red-400/80">
                           {t('customPacks.tagBlocked')}
                         </span>
                       )}
                       {isExcluded && (
-                        <span className="shrink-0 rounded bg-yellow-500/20 px-1 py-px text-[8px] text-yellow-400/80">
+                        <span className="shrink-0 rounded bg-yellow-500/20 px-1 py-px text-[9px] text-yellow-400/80">
                           {t('customPacks.tagExcluded')}
                         </span>
                       )}
                       {isMobileSkipped && (
-                        <span className="shrink-0 rounded bg-blue-500/20 px-1 py-px text-[8px] text-blue-400/80">
+                        <span className="shrink-0 rounded bg-blue-500/20 px-1 py-px text-[9px] text-blue-400/80">
                           {t('customPacks.tagMobileSkipped')}
                         </span>
                       )}
@@ -1174,7 +1184,7 @@ export function PresetBrowser({
 
           {/* Add presets — header + search stay pinned, list scrolls */}
           <div className="flex min-h-0 flex-[1.5] flex-col border-t border-white/10 pt-2">
-            <p className="mb-1 text-[10px] font-semibold text-white/50">
+            <p className="mb-1 text-xs font-semibold text-white/50">
               {t('customPacks.addPresets')}
             </p>
             <input
@@ -1185,7 +1195,7 @@ export function PresetBrowser({
               className="mb-1 w-full rounded border-none bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
             />
             {addablePresets.length === 0 ? (
-              <p className="py-1 text-center text-[10px] text-white/30">
+              <p className="py-1 text-center text-xs text-white/30">
                 {t('customPacks.allPresetsAdded')}
               </p>
             ) : (
@@ -1236,81 +1246,21 @@ export function PresetBrowser({
     return (
       <div className="flex flex-col gap-2 max-md:min-h-0 max-md:flex-1">
         <div className="border-t border-white/10" />
+        <p className="text-xs text-white/40">{t('customPacks.description')}</p>
         <div className="flex gap-2">
           <button
             onClick={handleCreatePack}
-            className="cursor-pointer rounded border border-white/10 bg-white/10 px-2 py-1 text-[10px] font-medium text-white/60 hover:bg-white/20"
+            className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
           >
             {t('customPacks.createPack')}
           </button>
           <button
             onClick={handleImportPack}
-            className="cursor-pointer rounded border border-white/10 bg-white/10 px-2 py-1 text-[10px] font-medium text-white/60 hover:bg-white/20"
+            className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
           >
             {t('customPacks.importPack')}
           </button>
-          <button
-            onClick={handleImportMilk}
-            className="cursor-pointer rounded border border-orange-500/30 bg-orange-500/10 px-2 py-1 text-[10px] font-medium text-orange-400/80 hover:bg-orange-500/20"
-          >
-            {t('importedPresets.importMilk')}
-          </button>
-          <button
-            onClick={handleImportTextures}
-            className="cursor-pointer rounded border border-orange-500/30 bg-orange-500/10 px-2 py-1 text-[10px] font-medium text-orange-400/80 hover:bg-orange-500/20"
-          >
-            {t('importedTextures.importTextures')}
-          </button>
         </div>
-
-        {importedTextures.length > 0 && (
-          <>
-            <div className="border-t border-white/10" />
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-orange-400">
-                  {t('importedTextures.importTextures')} ({importedTextures.length})
-                </span>
-                <button
-                  onClick={handleClearAllTextures}
-                  className="cursor-pointer rounded border-none bg-red-500/20 px-1.5 py-0.5 text-[8px] text-red-400/70 hover:bg-red-500/30 hover:text-red-400"
-                >
-                  {t('importedTextures.clearAll')}
-                </button>
-              </div>
-              <p className="text-[9px] text-white/30">{t('importedTextures.gpuNote')}</p>
-              <div className="flex max-h-32 flex-col gap-0.5 overflow-y-auto">
-                {importedTextures.map((tex) => (
-                  <div
-                    key={tex.name}
-                    className="flex items-center justify-between rounded bg-white/5 px-2 py-1"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <span className="block truncate text-xs text-white/70">{tex.name}</span>
-                      <span className="text-[9px] text-white/30">
-                        {tex.width}×{tex.height} · {(tex.sizeBytes / 1024).toFixed(0)}KB
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => handleDeleteTexture(tex)}
-                      className="ml-1 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-red-500/20 hover:text-red-400"
-                      title={t('importedTextures.deleteTexture')}
-                      aria-label={t('importedTextures.deleteTexture')}
-                    >
-                      <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
-                        <path
-                          fillRule="evenodd"
-                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
 
         <div className="border-t border-white/10" />
 
@@ -1336,7 +1286,7 @@ export function PresetBrowser({
                     >
                       {pack.name}
                     </span>
-                    <span className="text-[9px] text-white/30">
+                    <span className="text-[10px] text-white/30">
                       {t('customPacks.presetCount', { count: pack.presets.length })}
                     </span>
                   </div>
@@ -1346,7 +1296,7 @@ export function PresetBrowser({
                   {(isActive || pack.presets.length > 0) && (
                     <button
                       onClick={() => handleActivatePack(isActive ? null : pack.id)}
-                      className={`cursor-pointer rounded border-none px-1.5 py-0.5 text-[9px] ${
+                      className={`cursor-pointer rounded border-none px-1.5 py-0.5 text-[10px] ${
                         isActive
                           ? 'bg-orange-500/30 text-orange-300 hover:bg-orange-500/40'
                           : 'bg-white/10 text-white/50 hover:bg-white/20'
@@ -1357,13 +1307,13 @@ export function PresetBrowser({
                   )}
                   <button
                     onClick={() => setSelectedPackId(pack.id)}
-                    className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[9px] text-white/50 hover:bg-white/20"
+                    className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[10px] text-white/50 hover:bg-white/20"
                   >
                     {t('customPacks.edit')}
                   </button>
                   <button
                     onClick={() => handleExportPack(pack)}
-                    className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[9px] text-white/50 hover:bg-white/20"
+                    className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[10px] text-white/50 hover:bg-white/20"
                     title={t('customPacks.exportPack')}
                   >
                     <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
@@ -1376,7 +1326,7 @@ export function PresetBrowser({
                   </button>
                   <button
                     onClick={() => handleDeletePack(pack)}
-                    className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[9px] text-red-400/60 hover:bg-red-500/20 hover:text-red-400"
+                    className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[10px] text-red-400/60 hover:bg-red-500/20 hover:text-red-400"
                     title={t('customPacks.deletePack')}
                   >
                     <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
@@ -1396,6 +1346,138 @@ export function PresetBrowser({
     );
   };
 
+  // Render import tab
+  const renderImport = () => (
+    <div className="flex flex-col gap-2 max-md:min-h-0 max-md:flex-1">
+      <p className="text-xs text-white/40">{t('importedPresets.description')}</p>
+      <div className="flex gap-2">
+        <button
+          onClick={handleImportMilk}
+          className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
+        >
+          {t('importedPresets.importMilk')}
+        </button>
+        <button
+          onClick={handleImportTextures}
+          className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
+        >
+          {t('importedTextures.importTextures')}
+        </button>
+      </div>
+
+      {/* Imported presets section */}
+      <div className="border-t border-white/10" />
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold uppercase tracking-wider text-orange-400">
+            {t('importedPresets.sectionTitle')} ({importedPresets.length})
+          </span>
+          {importedPresets.length > 0 && (
+            <button
+              onClick={handleClearAllImported}
+              className="cursor-pointer rounded border-none bg-red-500/20 px-1.5 py-0.5 text-[9px] text-red-400/70 hover:bg-red-500/30 hover:text-red-400"
+            >
+              {t('importedPresets.clearAll')}
+            </button>
+          )}
+        </div>
+        {importedPresets.length > 0 && (
+          <input
+            type="text"
+            placeholder={t('presetBrowser.searchPlaceholder')}
+            aria-label={t('presetBrowser.searchPlaceholder')}
+            value={importSearch}
+            onChange={(e) => setImportSearch(e.target.value)}
+            className="w-full rounded border-none bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
+          />
+        )}
+        {importedPresets.length === 0 ? (
+          <p className="py-2 text-center text-xs text-white/30">
+            {t('importedPresets.emptyState')}
+          </p>
+        ) : (
+          <div className="min-h-0 flex-1">
+            <Virtuoso
+              data={filteredImportedPresets}
+              style={{ height: Math.min(filteredImportedPresets.length * 32, 192) }}
+              itemContent={(_index, preset) => (
+                <div className="flex items-center justify-between rounded bg-white/5 px-2 py-1">
+                  <span className="min-w-0 flex-1 truncate text-xs text-white/70">
+                    {preset.name}
+                  </span>
+                  <button
+                    onClick={() => handleDeleteImportedPreset(preset)}
+                    className="ml-1 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-red-500/20 hover:text-red-400"
+                    title={t('importedPresets.deletePreset')}
+                    aria-label={t('importedPresets.deletePreset')}
+                  >
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
+                      <path
+                        fillRule="evenodd"
+                        d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Imported textures section */}
+      {importedTextures.length > 0 && (
+        <>
+          <div className="border-t border-white/10" />
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-orange-400">
+                {t('importedTextures.importTextures')} ({importedTextures.length})
+              </span>
+              <button
+                onClick={handleClearAllTextures}
+                className="cursor-pointer rounded border-none bg-red-500/20 px-1.5 py-0.5 text-[9px] text-red-400/70 hover:bg-red-500/30 hover:text-red-400"
+              >
+                {t('importedTextures.clearAll')}
+              </button>
+            </div>
+            <p className="text-[10px] text-white/30">{t('importedTextures.gpuNote')}</p>
+            <div className="flex max-h-32 flex-col gap-0.5 overflow-y-auto">
+              {importedTextures.map((tex) => (
+                <div
+                  key={tex.name}
+                  className="flex items-center justify-between rounded bg-white/5 px-2 py-1"
+                >
+                  <div className="min-w-0 flex-1">
+                    <span className="block truncate text-xs text-white/70">{tex.name}</span>
+                    <span className="text-[10px] text-white/30">
+                      {tex.width}×{tex.height} · {(tex.sizeBytes / 1024).toFixed(0)}KB
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteTexture(tex)}
+                    className="ml-1 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-red-500/20 hover:text-red-400"
+                    title={t('importedTextures.deleteTexture')}
+                    aria-label={t('importedTextures.deleteTexture')}
+                  >
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
+                      <path
+                        fillRule="evenodd"
+                        d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
   return (
     <div
       className={`relative flex flex-col gap-3 overflow-hidden rounded-lg bg-black/60 p-4 backdrop-blur-sm max-md:min-h-0 max-md:flex-1 ${selectedPack ? 'md:h-[36rem]' : 'md:max-h-[32rem]'}`}
@@ -1406,12 +1488,12 @@ export function PresetBrowser({
             <h3 className="text-sm font-semibold text-white">{tc('presets')}</h3>
             {activePackName && (
               <div className="mt-1 inline-flex w-fit items-center gap-1.5 rounded bg-orange-500/15 px-2 py-0.5 ring-1 ring-orange-500/30">
-                <p className="min-w-0 truncate text-[10px] text-orange-400" data-ph-mask>
+                <p className="min-w-0 truncate text-xs text-orange-400" data-ph-mask>
                   {t('customPacks.packActive', { name: activePackName })}
                 </p>
                 <button
                   onClick={() => handleActivatePack(null)}
-                  className="shrink-0 cursor-pointer rounded-full border-none bg-red-500/80 px-2 py-0.5 text-[9px] font-semibold text-white hover:bg-red-500"
+                  className="shrink-0 cursor-pointer rounded-full border-none bg-red-500/80 px-2 py-0.5 text-[10px] font-semibold text-white hover:bg-red-500"
                   aria-label={t('customPacks.deactivatePack')}
                   title={t('customPacks.deactivatePack')}
                 >
@@ -1422,26 +1504,28 @@ export function PresetBrowser({
           </div>
         )}
         <div className="flex flex-wrap gap-1.5">
-          {(['all', 'favorites', 'blocked', 'excluded', 'history', 'packs'] as const).map((f) => (
-            <button
-              key={f}
-              onClick={() => {
-                setFilter(f);
-                if (f !== 'packs') setSelectedPackId(null);
-              }}
-              className={`cursor-pointer rounded border-none px-2 py-0.5 text-[10px] capitalize ${
-                filter === f
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-white/10 text-white/60 hover:bg-white/20'
-              }`}
-            >
-              {f === 'packs' ? t('customPacks.tabs.packs') : t(`presetBrowser.tabs.${f}`)}
-            </button>
-          ))}
+          {(['all', 'favorites', 'blocked', 'excluded', 'history', 'packs', 'import'] as const).map(
+            (f) => (
+              <button
+                key={f}
+                onClick={() => {
+                  setFilter(f);
+                  if (f !== 'packs') setSelectedPackId(null);
+                }}
+                className={`cursor-pointer rounded border-none px-2 py-0.5 text-xs capitalize ${
+                  filter === f
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-white/10 text-white/60 hover:bg-white/20'
+                }`}
+              >
+                {f === 'packs' ? t('customPacks.tabs.packs') : t(`presetBrowser.tabs.${f}`)}
+              </button>
+            ),
+          )}
         </div>
       </div>
 
-      {filter !== 'packs' && (
+      {filter !== 'packs' && filter !== 'import' && (
         <div className="relative">
           <input
             type="text"
@@ -1471,6 +1555,7 @@ export function PresetBrowser({
       {filter === 'excluded' && renderExcluded()}
       {filter === 'history' && renderHistory()}
       {filter === 'packs' && <div className="flex min-h-0 flex-1 flex-col">{renderPacks()}</div>}
+      {filter === 'import' && <div className="flex min-h-0 flex-1 flex-col">{renderImport()}</div>}
       {(filter === 'favorites' || filter === 'blocked' || (deferredSearch && filter === 'all')) &&
         renderFlatList()}
     </div>

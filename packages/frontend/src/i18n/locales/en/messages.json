@@ -136,7 +136,8 @@
       "favorites": "favorites",
       "blocked": "blocked",
       "excluded": "excluded",
-      "history": "history"
+      "history": "history",
+      "import": "import"
     },
     "noPacksSelected": "No packs selected. Autopilot paused",
     "packsActive": "{{active}}/{{total}} packs active",
@@ -161,6 +162,9 @@
   },
 
   "importedPresets": {
+    "sectionTitle": "Imported Presets",
+    "description": "Add community MilkDrop presets (.milk) and the textures they reference.",
+    "emptyState": "No imported presets. Use \"Import .milk\" to add community MilkDrop presets.",
     "importMilk": "Import .milk",
     "importingPresets": "Importing presets...",
     "importSuccess": "Imported {{count}} preset(s)",
@@ -208,6 +212,7 @@
     "tabs": {
       "packs": "packs"
     },
+    "description": "Build custom collections from any presets \u2014 bundled or imported.",
     "createPack": "Create Custom Pack",
     "importPack": "Import Pack",
     "exportPack": "Export Pack",
@@ -245,8 +250,10 @@
   "importModal": {
     "titlePresets": "Import Presets",
     "titleTextures": "Import Textures",
-    "descriptionPresets": "Add community MilkDrop presets (.milk files). Some presets require custom textures — you'll be notified of any missing textures after import. Imported presets may not render exactly as intended and should be verified.",
-    "descriptionTextures": "Upload texture images (JPEG, PNG, or WebP) used by imported presets. Presets reference textures by name — for example, a preset using sampler_fire needs a texture named \"fire\".",
+    "descriptionPresets": "Add community MilkDrop presets (.milk files).\nSome presets require custom textures — you'll be notified of any missing textures after import.\nImported presets may not render exactly as intended and should be verified.",
+    "descriptionTextures": "Upload texture images (JPEG, PNG, or WebP) used by imported presets.\nPresets reference textures by name — for example, a preset using sampler_fire needs a texture named \"fire\".",
+    "storageNotePresets": "Presets are stored in your browser. Clearing site data will remove them, so keep your original .milk files.",
+    "storageNoteTextures": "Textures are stored in your browser. Clearing site data will remove them, so keep your original image files.",
     "dropZonePresets": "Drop .milk files here or click to browse",
     "dropZoneTextures": "Drop image files here or click to browse",
     "browseFiles": "Browse Files",

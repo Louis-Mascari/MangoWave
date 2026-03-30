@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 
-export type FilterTab = 'all' | 'favorites' | 'blocked' | 'excluded' | 'history' | 'packs';
+export type FilterTab =
+  | 'all'
+  | 'favorites'
+  | 'blocked'
+  | 'excluded'
+  | 'history'
+  | 'packs'
+  | 'import';
 
 interface PresetBrowserState {
   filter: FilterTab;

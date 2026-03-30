@@ -16,8 +16,8 @@
   },
   "dependencies": {
     "@sentry/react": "^10.45.0",
-    "butterchurn": "^2.6.7",
-    "butterchurn-presets": "^2.4.7",
+    "butterchurn": "*",
+    "butterchurn-presets": "*",
     "i18next": "^25.10.5",
     "i18next-browser-languagedetector": "^8.2.1",
     "music-metadata": "^11.12.3",

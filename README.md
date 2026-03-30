@@ -93,10 +93,12 @@ NPM workspaces monorepo. Node >= 20 required.
 
 ```
 MangoWave/
-├── packages/frontend/     # React 19 + Vite 8 + TypeScript — the visualizer app
-├── packages/backend/      # Lambda handlers for Spotify OAuth & settings sync
-├── packages/landing/      # Static landing page (HTML + CSS, no JS)
-├── infrastructure/        # AWS CDK v2 — DynamoDB, Lambda, API Gateway, S3, CloudFront, CloudWatch
+├── packages/frontend/          # React 19 + Vite 8 + TypeScript — the visualizer app
+├── packages/butterchurn/       # Vendored butterchurn with ESM wrapper + types
+├── packages/butterchurn-presets/ # Vendored preset packs with ESM wrapper + types
+├── packages/backend/           # Lambda handlers for Spotify OAuth & settings sync
+├── packages/landing/           # Static landing page (HTML + CSS, no JS)
+├── infrastructure/             # AWS CDK v2 — DynamoDB, Lambda, API Gateway, S3, CloudFront, CloudWatch
 ├── .github/                # CI, deploy, dependabot, issue templates, PR template, CODEOWNERS, SECURITY
 ├── SELF-HOSTING.md        # Guide for deploying your own instance
 ├── knip.json              # Knip config (unused code detection)

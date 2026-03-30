@@ -1,26 +1,18 @@
-import _butterchurn from 'butterchurn';
-import _butterchurnPresetsExtra from 'butterchurn-presets/lib/butterchurnPresetsExtra.min';
-import _butterchurnPresetsExtra2 from 'butterchurn-presets/lib/butterchurnPresetsExtra2.min';
-import _butterchurnPresetsMD1 from 'butterchurn-presets/lib/butterchurnPresetsMD1.min';
-import _butterchurnPresetsNonMinimal from 'butterchurn-presets/lib/butterchurnPresetsNonMinimal.min';
-import _butterchurnPresetsMinimal from 'butterchurn-presets/lib/butterchurnPresetsMinimal.min';
-
-// Vite 8 changed CJS interop — default export may be nested under .default
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const unwrap = <T>(mod: T): T => (mod as any).default ?? mod;
-const butterchurn = unwrap(_butterchurn);
-const butterchurnPresetsExtra = unwrap(_butterchurnPresetsExtra);
-const butterchurnPresetsExtra2 = unwrap(_butterchurnPresetsExtra2);
-const butterchurnPresetsMD1 = unwrap(_butterchurnPresetsMD1);
-const butterchurnPresetsNonMinimal = unwrap(_butterchurnPresetsNonMinimal);
-const butterchurnPresetsMinimal = unwrap(_butterchurnPresetsMinimal);
+import butterchurn from 'butterchurn';
+import {
+  presetsMinimal,
+  presetsNonMinimal,
+  presetsExtra,
+  presetsExtra2,
+  presetsMD1,
+} from 'butterchurn-presets';
 
 const PACK_SOURCES = [
-  { label: 'Minimal', getPresets: () => butterchurnPresetsMinimal.getPresets() },
-  { label: 'Non-Minimal', getPresets: () => butterchurnPresetsNonMinimal.getPresets() },
-  { label: 'Extra', getPresets: () => butterchurnPresetsExtra.getPresets() },
-  { label: 'Extra 2', getPresets: () => butterchurnPresetsExtra2.getPresets() },
-  { label: 'MD1', getPresets: () => butterchurnPresetsMD1.getPresets() },
+  { label: 'Minimal', getPresets: () => presetsMinimal.getPresets() },
+  { label: 'Non-Minimal', getPresets: () => presetsNonMinimal.getPresets() },
+  { label: 'Extra', getPresets: () => presetsExtra.getPresets() },
+  { label: 'Extra 2', getPresets: () => presetsExtra2.getPresets() },
+  { label: 'MD1', getPresets: () => presetsMD1.getPresets() },
 ] as const;
 
 /** Authoritative pack display order — derived from PACK_SOURCES load sequence. */

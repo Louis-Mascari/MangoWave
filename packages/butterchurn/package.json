@@ -1,0 +1,10 @@
+{
+  "name": "butterchurn",
+  "version": "2.6.7",
+  "private": true,
+  "description": "WebGL MilkDrop visualizer (vendored from jberg/butterchurn)",
+  "license": "MIT",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "src/index.d.ts"
+}

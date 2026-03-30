@@ -14,26 +14,18 @@ vi.mock('butterchurn', () => ({
 }));
 
 // Mock butterchurn-presets (Minimal pack provides test presets; others empty)
-vi.mock('butterchurn-presets/lib/butterchurnPresetsMinimal.min', () => ({
-  default: {
+vi.mock('butterchurn-presets', () => ({
+  presetsMinimal: {
     getPresets: vi.fn(() => ({
       'Preset A': { code: 'a' },
       'Preset B': { code: 'b' },
       'Preset C': { code: 'c' },
     })),
   },
-}));
-vi.mock('butterchurn-presets/lib/butterchurnPresetsNonMinimal.min', () => ({
-  default: { getPresets: () => ({}) },
-}));
-vi.mock('butterchurn-presets/lib/butterchurnPresetsExtra.min', () => ({
-  default: { getPresets: () => ({}) },
-}));
-vi.mock('butterchurn-presets/lib/butterchurnPresetsExtra2.min', () => ({
-  default: { getPresets: () => ({}) },
-}));
-vi.mock('butterchurn-presets/lib/butterchurnPresetsMD1.min', () => ({
-  default: { getPresets: () => ({}) },
+  presetsNonMinimal: { getPresets: () => ({}) },
+  presetsExtra: { getPresets: () => ({}) },
+  presetsExtra2: { getPresets: () => ({}) },
+  presetsMD1: { getPresets: () => ({}) },
 }));
 
 describe('VisualizerRenderer', () => {

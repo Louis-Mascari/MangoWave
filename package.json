@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
+    "packages/butterchurn",
+    "packages/butterchurn-presets",
     "packages/frontend",
     "packages/backend",
     "infrastructure"
@@ -25,6 +27,12 @@
       "prettier --write"
     ],
     "infrastructure/**/*.ts": [
+      "prettier --write"
+    ],
+    "packages/butterchurn/src/**/*.{js,ts}": [
+      "prettier --write"
+    ],
+    "packages/butterchurn-presets/src/**/*.{js,ts}": [
       "prettier --write"
     ],
     "*.{json,md,yml,yaml}": [

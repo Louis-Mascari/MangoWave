@@ -61,7 +61,7 @@ src/
 │                  #     usePresetHistoryStore, usePresetBrowserStore, useToastStore, useConfirmStore,
 │                  #     useWindowSyncStatusStore
 ├── utils/         # Shared utilities (isMobileDevice, browserInfo, settingsPortability, audioFileValidation)
-├── types/         # butterchurn.d.ts, music-metadata.d.ts (type declarations for untyped packages)
+├── types/         # music-metadata.d.ts, getDisplayMedia.d.ts (type declarations for untyped APIs)
 └── test/          # Vitest global setup
 
 e2e/                 # Playwright E2E tests (separate from Vitest, own tsconfig)
@@ -153,7 +153,7 @@ Floating panel (`components/PlaybackPanel.tsx`) rendered by App.tsx when local p
 ## Key Technical Notes
 
 - **WebGL 2 required.** `isWebGL2Supported()` checks on mount and shows a fallback if unavailable.
-- **butterchurn is untyped** — type declarations live in `src/types/butterchurn.d.ts`.
+- **butterchurn is untyped** — vendored as workspace packages (`packages/butterchurn`, `packages/butterchurn-presets`) with ESM wrappers and `.d.ts` declarations.
 - **`vite.config.ts`** imports `defineConfig` from `vitest/config` (not `vite`) to support the `test` property.
 - **400+ presets** loaded from 5 butterchurn packs, organized by source pack with virtualized browsing (`react-virtuoso`).
 - **`secure-json-parse`** used for prototype pollution protection on settings import.

@@ -81,29 +81,15 @@ jobs:
 
       - name: Restore Playwright browser cache
         id: playwright-cache
-        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ steps.playwright-version.outputs.version }}-${{ github.run_id }}
-          restore-keys: playwright-${{ steps.playwright-version.outputs.version }}-
+          key: playwright-${{ steps.playwright-version.outputs.version }}
 
       - name: Install Playwright browsers
-        id: playwright-install
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps
         working-directory: packages/frontend
-
-      - name: Verify Playwright browsers (cache hit)
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install
-        working-directory: packages/frontend
-
-      - name: Save Playwright browser cache
-        if: steps.playwright-install.outcome == 'success'
-        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ steps.playwright-version.outputs.version }}-${{ github.run_id }}
 
       - name: Run E2E tests
         run: npx playwright test

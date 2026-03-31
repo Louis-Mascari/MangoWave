@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "husky": "^9.1.7",
-    "knip": "^5.87.0",
+    "knip": "^6.1.1",
     "lint-staged": "^16.4.0"
   }
 }

@@ -1,14 +1,15 @@
 version: 2
 
 updates:
-  # GitHub Actions
+  # GitHub Actions — group everything, CI validates
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
     groups:
-      actions-minor-patch:
+      actions-all:
         update-types:
+          - major
           - minor
           - patch
 
@@ -18,9 +19,20 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
     groups:
-      npm-root-minor-patch:
+      # Dev tooling — CI catches breakage, review as a batch
+      npm-dev-major:
+        dependency-type: development
+        update-types:
+          - major
+      # Runtime majors — review breaking changes together
+      npm-prod-major:
+        dependency-type: production
+        update-types:
+          - major
+      # Everything else — low-risk, one PR
+      npm-minor-patch:
         update-types:
           - minor
           - patch

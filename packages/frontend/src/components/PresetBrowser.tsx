@@ -761,7 +761,8 @@ export function PresetBrowser({
     return (
       <Virtuoso
         data={filteredPresets}
-        className="max-md:min-h-0 max-md:flex-1 md:max-h-[400px]"
+        className="max-md:min-h-0 max-md:flex-1"
+        style={isMobileDevice ? undefined : { height: 400 }}
         itemContent={(_index, name) => row(name)}
       />
     );

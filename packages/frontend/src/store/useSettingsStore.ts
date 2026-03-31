@@ -423,8 +423,22 @@ export const useSettingsStore = create<SettingsState>()(
       removeImportedPresetMeta: (name) =>
         set((state) => ({
           importedPresets: state.importedPresets.filter((p) => p.name !== name),
+          customPacks: state.customPacks.map((pack) => ({
+            ...pack,
+            presets: pack.presets.filter((n) => n !== name),
+          })),
         })),
-      clearImportedPresetsMeta: () => set({ importedPresets: [] }),
+      clearImportedPresetsMeta: () =>
+        set((state) => {
+          const importedNames = new Set(state.importedPresets.map((p) => p.name));
+          return {
+            importedPresets: [],
+            customPacks: state.customPacks.map((pack) => ({
+              ...pack,
+              presets: pack.presets.filter((n) => !importedNames.has(n)),
+            })),
+          };
+        }),
 
       // Imported textures
       importedTextures: [],

@@ -945,10 +945,11 @@ export function PresetBrowser({
         onConfirm: async () => {
           await useImportedPresetsStore.getState().removePreset(preset.name);
           removeImportedPresetMeta(preset.name);
+          if (preset.name === currentPreset) onNextPreset();
         },
       });
     },
-    [t, removeImportedPresetMeta],
+    [t, removeImportedPresetMeta, currentPreset, onNextPreset],
   );
 
   const handleClearAllImported = useCallback(() => {
@@ -957,12 +958,15 @@ export function PresetBrowser({
       message: t('importedPresets.clearAllConfirm', { count: importedPresets.length }),
       destructive: true,
       onConfirm: async () => {
+        const importedNames = new Set(importedPresets.map((p) => p.name));
+        const shouldAdvance = importedNames.has(currentPreset);
         await useImportedPresetsStore.getState().removeAllPresets();
         clearImportedPresetsMeta();
+        if (shouldAdvance) onNextPreset();
         useToastStore.getState().show(t('importedPresets.cleared'));
       },
     });
-  }, [t, importedPresets.length, clearImportedPresetsMeta]);
+  }, [t, importedPresets, clearImportedPresetsMeta, currentPreset, onNextPreset]);
 
   const handleImportTextures = useCallback(() => {
     useImportModalStore.getState().open('texture');

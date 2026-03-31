@@ -91,6 +91,11 @@ jobs:
         run: npx playwright install --with-deps
         working-directory: packages/frontend
 
+      - name: Install Playwright system deps (cache hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps
+        working-directory: packages/frontend
+
       - name: Run E2E tests
         run: npx playwright test
         working-directory: packages/frontend

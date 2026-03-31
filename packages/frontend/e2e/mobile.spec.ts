@@ -24,13 +24,6 @@ function mobileButton(app: Page, label: string): Locator {
   return app.locator('[data-testid="mobile-circle"]').getByLabel(label, { exact: true });
 }
 
-/** Check that mobile controls are visible (opacity-100 on container). */
-function expectControlsVisible(app: Page, timeout = 15000) {
-  return expect(app.locator('[data-testid="mobile-circle"]')).toHaveClass(/opacity-100/, {
-    timeout,
-  });
-}
-
 /** Check that mobile controls are hidden (opacity-0 on container). */
 function expectControlsHidden(app: Page, timeout = 10000) {
   return expect(app.locator('[data-testid="mobile-circle"]')).toHaveClass(/opacity-0/, {
@@ -46,10 +39,12 @@ test.describe('Mobile UI', () => {
     await app.getByRole('button', { name: /Use Microphone/ }).click();
     await app.getByRole('button', { name: /Start Microphone/ }).click();
 
-    // Wait for visualizer canvas + controls to appear.
-    // Controls become visible after launch animation (~2.5s) calls resumeIdle.
+    // Wait for visualizer canvas to appear.
     await app.waitForSelector('canvas', { timeout: 15000 });
-    await expectControlsVisible(app);
+    // Controls become visible after launch animation (~2.5s) calls resumeIdle,
+    // then auto-hide after 5s idle. If the idle timer fires before we check,
+    // tap to reveal so tests start with controls visible.
+    await ensureControlsVisible(app);
   });
 
   test('controls are visible after launch', async ({ app }) => {

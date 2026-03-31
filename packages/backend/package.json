@@ -10,11 +10,11 @@
     "@types/aws-lambda": "^8.10.161",
     "@types/node": "^25.5.0",
     "typescript": "^6.0.2",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.2"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.1015.0",
-    "@aws-sdk/client-ssm": "^3.1015.0",
-    "@aws-sdk/lib-dynamodb": "^3.1015.0"
+    "@aws-sdk/client-dynamodb": "^3.1020.0",
+    "@aws-sdk/client-ssm": "^3.1020.0",
+    "@aws-sdk/lib-dynamodb": "^3.1020.0"
   }
 }

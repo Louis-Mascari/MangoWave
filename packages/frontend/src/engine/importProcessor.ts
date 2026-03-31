@@ -3,6 +3,7 @@ import {
   convertMilkText,
   validatePreset,
   findMissingTextures,
+  BUILTIN_EXTRA_IMAGES,
 } from './milkdropConverter.ts';
 import { readTextureFile, validateTextureFile } from './textureLoader.ts';
 import { useImportedPresetsStore } from '../store/useImportedPresetsStore.ts';
@@ -120,11 +121,16 @@ export async function processTextureImport(
         throw new Error(preError);
       }
 
-      const textureResult = await readTextureFile(file);
-
-      if (existingNames.has(textureResult.name)) {
+      // Derive name early for cheap pre-read checks
+      const derivedName = file.name.replace(/\.[^.]+$/, '').toLowerCase();
+      if (BUILTIN_EXTRA_IMAGES.has(derivedName)) {
+        throw new Error('builtinTextureShadow');
+      }
+      if (existingNames.has(derivedName)) {
         throw new Error('duplicateName');
       }
+
+      const textureResult = await readTextureFile(file);
 
       await store.addTexture(textureResult.name, {
         data: textureResult.dataUri,

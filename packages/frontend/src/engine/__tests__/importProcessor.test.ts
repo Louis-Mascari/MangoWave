@@ -237,6 +237,15 @@ describe('processTextureImport', () => {
     expect(results[0].errorCode).toBe('fileTooLarge');
   });
 
+  it('rejects textures that shadow built-in names', async () => {
+    // lichen is a built-in butterchurn extra image
+    const file = new File(['x'], 'lichen.png', { type: 'image/png' });
+    const results = await processTextureImport([file], defaultOpts);
+
+    expect(results[0].status).toBe('failed');
+    expect(results[0].errorCode).toBe('builtinTextureShadow');
+  });
+
   it('calls onProgress for each file', async () => {
     const onProgress = vi.fn();
     const files = [

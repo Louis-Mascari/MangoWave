@@ -185,7 +185,7 @@
     "importAllFailed": "सभी {{count}} टेक्सचर आयात करने में विफल",
     "fileTooLarge": "\"{{name}}\" बहुत बड़ा है (अधिकतम 2MB)",
     "invalidFileType": "\"{{name}}\" एक समर्थित छवि फ़ाइल नहीं है (JPEG, PNG या WebP)",
-    "dimensionsTooLarge": "\"{{name}}\" अधिकतम आयामों से अधिक है (2048×2048)",
+    "builtinTextureShadow": "\"{{name}}\" एक अंतर्निहित टेक्सचर है और इसे बदला नहीं जा सकता",
     "readFailed": "\"{{name}}\" पढ़ने में विफल",
     "decodeFailed": "\"{{name}}\" डीकोड करने में विफल",
     "deleteTexture": "आयातित टेक्सचर हटाएं",

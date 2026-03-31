@@ -185,7 +185,7 @@
     "importAllFailed": "Semua {{count}} tekstur gagal diimpor",
     "fileTooLarge": "\"{{name}}\" terlalu besar (maks 2MB)",
     "invalidFileType": "\"{{name}}\" bukan file gambar yang didukung (JPEG, PNG, atau WebP)",
-    "dimensionsTooLarge": "\"{{name}}\" melebihi dimensi maksimum (2048×2048)",
+    "builtinTextureShadow": "\"{{name}}\" adalah tekstur bawaan dan tidak dapat diganti",
     "readFailed": "Gagal membaca \"{{name}}\"",
     "decodeFailed": "Gagal mendekode \"{{name}}\"",
     "deleteTexture": "Hapus tekstur yang diimpor",

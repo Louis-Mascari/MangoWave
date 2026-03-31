@@ -194,7 +194,7 @@
     "importAllFailed": "All {{count}} texture(s) failed to import",
     "fileTooLarge": "\"{{name}}\" is too large (max 2MB)",
     "invalidFileType": "\"{{name}}\" is not a supported image file (JPEG, PNG, or WebP)",
-    "dimensionsTooLarge": "\"{{name}}\" exceeds the maximum dimensions (2048×2048)",
+    "builtinTextureShadow": "\"{{name}}\" is a built-in texture and cannot be replaced",
     "readFailed": "Failed to read \"{{name}}\"",
     "decodeFailed": "Failed to decode \"{{name}}\"",
     "deleteTexture": "Delete imported texture",

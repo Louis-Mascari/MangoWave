@@ -185,7 +185,7 @@
     "importAllFailed": "{{count}}개의 텍스처 모두 가져오기 실패",
     "fileTooLarge": "\"{{name}}\"이(가) 너무 큽니다 (최대 2MB)",
     "invalidFileType": "\"{{name}}\"은(는) 지원되는 이미지 파일이 아닙니다 (JPEG, PNG 또는 WebP)",
-    "dimensionsTooLarge": "\"{{name}}\"이(가) 최대 크기를 초과합니다 (2048×2048)",
+    "builtinTextureShadow": "\"{{name}}\"은(는) 기본 제공 텍스처이므로 교체할 수 없습니다",
     "readFailed": "\"{{name}}\" 읽기 실패",
     "decodeFailed": "\"{{name}}\" 디코딩 실패",
     "deleteTexture": "가져온 텍스처 삭제",

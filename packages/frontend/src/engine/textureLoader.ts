@@ -1,5 +1,4 @@
 const MAX_FILE_SIZE = 2_097_152; // 2MB
-const MAX_DIMENSION = 2048;
 const ACCEPTED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
 export interface TextureFileResult {
@@ -43,10 +42,6 @@ export async function readTextureFile(file: File): Promise<TextureFileResult> {
       img.src = dataUri;
     },
   );
-
-  if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-    throw new Error('dimensionsTooLarge');
-  }
 
   return {
     name: deriveTextureName(file.name),

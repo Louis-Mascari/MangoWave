@@ -112,6 +112,21 @@ describe('validatePreset', () => {
     expect(() => validatePreset(preset)).not.toThrow();
   });
 
+  it('catches blocked identifier in arbitrary field names (e.g., per_frame_1)', () => {
+    const preset = {
+      per_frame_1: 'eval',
+      per_frame_2: 'x = sin(y);',
+    };
+    expect(() => validatePreset(preset)).toThrow('securityBlocked');
+  });
+
+  it('catches blocked identifier in deeply nested objects', () => {
+    const preset = {
+      shapes: [{ nested: { deep: 'window.location' } }],
+    };
+    expect(() => validatePreset(preset)).toThrow('securityBlocked');
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
   });

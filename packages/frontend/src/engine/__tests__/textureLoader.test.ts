@@ -103,8 +103,7 @@ describe('readTextureFile', () => {
     await expect(readTextureFile(file)).rejects.toThrow('fileTooLarge');
   });
 
-  it('throws for oversized dimensions', async () => {
-    // Override MockImage to return oversized dimensions
+  it('accepts large dimension images (no dimension cap)', async () => {
     vi.stubGlobal(
       'Image',
       class extends MockImage {
@@ -114,6 +113,8 @@ describe('readTextureFile', () => {
     );
 
     const file = createMockFile('big.png', 1000, 'image/png');
-    await expect(readTextureFile(file)).rejects.toThrow('dimensionsTooLarge');
+    const result = await readTextureFile(file);
+    expect(result.width).toBe(4096);
+    expect(result.height).toBe(4096);
   });
 });

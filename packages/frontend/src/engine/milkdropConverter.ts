@@ -7,16 +7,6 @@ const VALID_EXTENSIONS = ['.milk'];
 const BLOCKED_IDENTIFIERS =
   /\b(fetch|eval|Function|WebSocket|localStorage|sessionStorage|indexedDB|XMLHttpRequest|importScripts|document|window|globalThis|self|top|parent|frames)\b/;
 
-// EEL equation fields to scan (top-level + nested shapes/waves)
-const EEL_FIELDS = [
-  'init_eqs_str',
-  'frame_eqs_str',
-  'pixel_eqs_str',
-  'per_frame_init_eqs_str',
-  'per_frame_eqs_str',
-  'per_pixel_eqs_str',
-];
-
 // Vite 8 CJS interop — same pattern as VisualizerRenderer.ts
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const unwrap = <T>(mod: T): T => (mod as any).default ?? mod;
@@ -68,13 +58,20 @@ export async function readMilkFile(file: File): Promise<{ name: string; text: st
   return { name, text };
 }
 
-/** Scan EEL equation strings in a preset for blocked identifiers. Throws on suspicious content. */
-function scanEelStrings(obj: Record<string, unknown>): void {
-  for (const field of EEL_FIELDS) {
-    const val = obj[field];
-    if (typeof val === 'string' && BLOCKED_IDENTIFIERS.test(val)) {
+/** Recursively scan all string values in an object for blocked identifiers. Throws on suspicious content. */
+function scanAllStrings(obj: unknown): void {
+  if (typeof obj === 'string') {
+    if (BLOCKED_IDENTIFIERS.test(obj)) {
       throw new Error('securityBlocked');
     }
+    return;
+  }
+  if (Array.isArray(obj)) {
+    for (const item of obj) scanAllStrings(item);
+    return;
+  }
+  if (obj && typeof obj === 'object') {
+    for (const val of Object.values(obj)) scanAllStrings(val);
   }
 }
 
@@ -99,7 +96,7 @@ const BUILTIN_SAMPLERS = new Set([
 ]);
 
 // Extra images bundled with butterchurnExtraImages
-const BUILTIN_EXTRA_IMAGES = new Set([
+export const BUILTIN_EXTRA_IMAGES = new Set([
   'cells',
   'lichen',
   'mage',
@@ -149,20 +146,6 @@ export function validatePreset(preset: object): void {
   // Run secure-json-parse scan for prototype pollution
   sjson.scan(preset);
 
-  const p = preset as Record<string, unknown>;
-
-  // Scan top-level EEL fields
-  scanEelStrings(p);
-
-  // Scan nested shapes and waves arrays
-  for (const container of ['shapes', 'waves']) {
-    const arr = p[container];
-    if (Array.isArray(arr)) {
-      for (let i = 0; i < arr.length; i++) {
-        if (arr[i] && typeof arr[i] === 'object') {
-          scanEelStrings(arr[i] as Record<string, unknown>);
-        }
-      }
-    }
-  }
+  // Recursively scan all string values for blocked identifiers
+  scanAllStrings(preset);
 }

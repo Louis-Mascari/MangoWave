@@ -185,7 +185,7 @@
     "importAllFailed": "{{count}}個のテクスチャすべてのインポートに失敗しました",
     "fileTooLarge": "\"{{name}}\" が大きすぎます（最大2MB）",
     "invalidFileType": "\"{{name}}\" はサポートされている画像ファイルではありません（JPEG、PNG、またはWebP）",
-    "dimensionsTooLarge": "\"{{name}}\" が最大サイズを超えています（2048×2048）",
+    "builtinTextureShadow": "\"{{name}}\" はビルトインテクスチャのため置き換えできません",
     "readFailed": "\"{{name}}\" の読み込みに失敗しました",
     "decodeFailed": "\"{{name}}\" のデコードに失敗しました",
     "deleteTexture": "インポートしたテクスチャを削除",

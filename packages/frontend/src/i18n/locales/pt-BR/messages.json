@@ -185,7 +185,7 @@
     "importAllFailed": "Todas as {{count}} textura(s) falharam ao importar",
     "fileTooLarge": "\"{{name}}\" é muito grande (máx. 2MB)",
     "invalidFileType": "\"{{name}}\" não é um arquivo de imagem compatível (JPEG, PNG ou WebP)",
-    "dimensionsTooLarge": "\"{{name}}\" excede as dimensões máximas (2048×2048)",
+    "builtinTextureShadow": "\"{{name}}\" é uma textura integrada e não pode ser substituída",
     "readFailed": "Falha ao ler \"{{name}}\"",
     "decodeFailed": "Falha ao decodificar \"{{name}}\"",
     "deleteTexture": "Excluir textura importada",

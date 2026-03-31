@@ -185,7 +185,7 @@
     "importAllFailed": "全部 {{count}} 个纹理导入失败",
     "fileTooLarge": "\"{{name}}\" 太大（最大 2MB）",
     "invalidFileType": "\"{{name}}\" 不是支持的图像文件（JPEG、PNG 或 WebP）",
-    "dimensionsTooLarge": "\"{{name}}\" 超过最大尺寸（2048×2048）",
+    "builtinTextureShadow": "\"{{name}}\" 是内置纹理，无法替换",
     "readFailed": "无法读取 \"{{name}}\"",
     "decodeFailed": "无法解码 \"{{name}}\"",
     "deleteTexture": "删除导入的纹理",

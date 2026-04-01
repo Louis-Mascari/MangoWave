@@ -12,8 +12,10 @@ vi.mock('idb-keyval', () => ({
 // Mock milkdrop-preset-converter — passes raw text into init_eqs_str
 // so that validatePreset's EEL scanner can still detect blocked identifiers.
 // Sampler references in the raw text will also be detected by findMissingTextures.
+const mockConvert = (text: string) => ({ init_eqs_str: text });
 vi.mock('milkdrop-preset-converter', () => ({
-  default: (text: string) => ({ init_eqs_str: text }),
+  default: mockConvert,
+  convertPreset: mockConvert,
 }));
 
 // Mock useImportedPresetsStore

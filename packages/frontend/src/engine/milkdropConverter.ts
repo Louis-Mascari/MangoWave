@@ -7,27 +7,14 @@ const VALID_EXTENSIONS = ['.milk'];
 const BLOCKED_IDENTIFIERS =
   /\b(fetch|eval|Function|WebSocket|localStorage|sessionStorage|indexedDB|XMLHttpRequest|importScripts|document|window|globalThis|self|top|parent|frames)\b/;
 
-// Vite 8 CJS interop — same pattern as VisualizerRenderer.ts
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const unwrap = <T>(mod: T): T => (mod as any).default ?? mod;
-
 let converterPromise: Promise<(text: string) => object> | null = null;
 
 /** Lazy-load milkdrop-preset-converter (zero main-bundle cost). */
 function getConverter(): Promise<(text: string) => object> {
   if (!converterPromise) {
-    converterPromise = import('milkdrop-preset-converter').then((mod) => {
-      const resolved = unwrap(mod);
-      // The module exports { convertPreset, convertShader, ... } — extract the function
-      const fn =
-        typeof resolved === 'function'
-          ? resolved
-          : (resolved as Record<string, unknown>).convertPreset;
-      if (typeof fn !== 'function') {
-        throw new Error('milkdrop-preset-converter: convertPreset not found');
-      }
-      return fn as (text: string) => object;
-    });
+    converterPromise = import('milkdrop-preset-converter').then(
+      (mod) => mod.convertPreset ?? mod.default,
+    );
   }
   return converterPromise!;
 }

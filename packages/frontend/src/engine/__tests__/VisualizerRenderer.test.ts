@@ -12,10 +12,7 @@ vi.mock('butterchurn', () => ({
       render: vi.fn(),
     })),
   },
-}));
-
-vi.mock('butterchurn/lib/butterchurnExtraImages.min', () => ({
-  default: {
+  butterchurnExtraImages: {
     getImages: () => ({ cells: { data: 'data:image/png;base64,abc', width: 256, height: 256 } }),
   },
 }));

@@ -5,6 +5,7 @@
   "license": "MIT",
   "type": "module",
   "main": "src/index.js",
+  "types": "src/index.d.ts",
   "dependencies": {
     "hlslparser-wasm": "*",
     "lodash": "^4.17.21",

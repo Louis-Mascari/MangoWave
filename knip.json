@@ -9,9 +9,7 @@
       "ignore": ["src/types/**/*.d.ts"],
       "ignoreDependencies": ["tailwindcss"]
     },
-    "packages/butterchurn": {
-      "ignore": ["lib/butterchurnExtraImages.min.js"]
-    },
+    "packages/butterchurn": {},
     "packages/butterchurn-presets": {},
     "packages/backend": {},
     "infrastructure": {

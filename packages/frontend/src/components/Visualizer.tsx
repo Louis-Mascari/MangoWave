@@ -133,6 +133,17 @@ export function Visualizer({
     onPresetsLoaded(renderer.presetList, renderer.presetPackMap);
   }, [importedPresets, rendererRef, onPresetsLoaded]);
 
+  // Hot-load imported textures when they change after init
+  const textureCount = useImportedTexturesStore((s) => s.textures.size);
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    if (!renderer) return;
+    const store = useImportedTexturesStore.getState();
+    if (store.textures.size > 0) {
+      renderer.loadExtraImages(store.getAllTextures());
+    }
+  }, [textureCount, rendererRef]);
+
   // Sync performance settings to renderer
   useEffect(() => {
     const renderer = rendererRef.current;

@@ -9,7 +9,7 @@
   "dependencies": {
     "hlslparser-wasm": "*",
     "lodash": "^4.17.21",
-    "milkdrop-eel-parser": "^0.0.1",
+    "milkdrop-eel-parser": "*",
     "milkdrop-preset-utils": "^0.1.0"
   }
 }

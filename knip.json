@@ -11,6 +11,7 @@
     },
     "packages/butterchurn": {},
     "packages/butterchurn-presets": {},
+    "packages/milkdrop-eel-parser": {},
     "packages/backend": {},
     "infrastructure": {
       "entry": ["bin/mangowave.ts"],

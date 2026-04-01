@@ -2,6 +2,7 @@ import {
   readMilkFile,
   convertMilkText,
   validatePreset,
+  scanRawMilkText,
   findMissingTextures,
   BUILTIN_EXTRA_IMAGES,
 } from './milkdropConverter.ts';
@@ -55,6 +56,7 @@ export async function processPresetImport(
         throw new Error('nativeNameCollision');
       }
 
+      scanRawMilkText(text);
       const converted = await convertMilkText(text);
       validatePreset(converted);
 

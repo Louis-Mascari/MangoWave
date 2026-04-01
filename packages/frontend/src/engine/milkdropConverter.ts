@@ -58,6 +58,14 @@ export async function readMilkFile(file: File): Promise<{ name: string; text: st
   return { name, text };
 }
 
+/** Scan raw .milk text for blocked identifiers before conversion.
+ *  The converter may transform variable names, so scanning raw text is the primary defence. */
+export function scanRawMilkText(text: string): void {
+  if (BLOCKED_IDENTIFIERS.test(text)) {
+    throw new Error('securityBlocked');
+  }
+}
+
 /** Recursively scan all string values in an object for blocked identifiers. Throws on suspicious content. */
 function scanAllStrings(obj: unknown): void {
   if (typeof obj === 'string') {

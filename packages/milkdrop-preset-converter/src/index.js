@@ -21,6 +21,38 @@ const MILKDROP_GLSL_MACROS = [
   '#define saturate(x) clamp(x, 0.0, 1.0)',
 ].join('\n');
 
+/** Expand HLSL mul(a, b) → GLSL ((a) * (b)). Handles nested parens in args. */
+function expandHlslMul(text) {
+  const pattern = /\bmul\s*\(/;
+  let result = text;
+  let safety = 0;
+  let match;
+  while ((match = pattern.exec(result)) !== null && safety++ < 500) {
+    const start = match.index;
+    const argStart = start + match[0].length;
+    // Find the comma separating args (respecting nesting)
+    let depth = 1;
+    let i = argStart;
+    let commaIdx = -1;
+    while (i < result.length && depth > 0) {
+      if (result[i] === '(') depth++;
+      else if (result[i] === ')') {
+        depth--;
+        if (depth === 0) break;
+      } else if (result[i] === ',' && depth === 1 && commaIdx === -1) {
+        commaIdx = i;
+      }
+      i++;
+    }
+    if (depth !== 0 || commaIdx === -1) break;
+    const arg1 = result.substring(argStart, commaIdx).trim();
+    const arg2 = result.substring(commaIdx + 1, i).trim();
+    const expanded = '((' + arg1 + ') * (' + arg2 + '))';
+    result = result.substring(0, start) + expanded + result.substring(i + 1);
+  }
+  return result;
+}
+
 /** Text-level HLSL→GLSL fallback for shaders hlslparser-wasm can't parse.
  *  Handles PS2 MilkDrop shaders via regex replacements — types, intrinsics,
  *  int→float promotion (GLSL ES 3.0), and MilkDrop built-in macros. */
@@ -29,10 +61,11 @@ function convertShaderTextLevel(shader) {
     return '';
   }
 
-  // HLSL type/function → GLSL equivalents
+  // HLSL type/function → GLSL ES 3.0 equivalents
+  // NOTE: texture2D/texture3D are GLSL ES 1.0; ES 3.0 uses unified `texture`
   let result = shader
-    .replace(/\btex2D\b/g, 'texture2D')
-    .replace(/\btex3D\b/g, 'texture3D')
+    .replace(/\btex2D\b/g, 'texture')
+    .replace(/\btex3D\b/g, 'texture')
     .replace(/\bfloat2\b/g, 'vec2')
     .replace(/\bfloat3\b/g, 'vec3')
     .replace(/\bfloat4\b/g, 'vec4')
@@ -47,6 +80,9 @@ function convertShaderTextLevel(shader) {
     .replace(/\bddy\b/g, 'dFdy')
     .replace(/\batan2\b/g, 'atan')
     .replace(/\bfmod\b/g, 'mod');
+
+  // HLSL mul(a, b) → GLSL ((a) * (b))
+  result = expandHlslMul(result);
 
   // GLSL ES 3.0 has no implicit int→float promotion. Convert bare integer
   // literals in the shader body to float (avoids touching sampler_blur1, vec2, etc.)
@@ -263,6 +299,30 @@ function deepPreprocessEel(val) {
   return val;
 }
 
+/** Fix missing semicolons in milkdrop-eel-parser JS output.
+ *  The parser doesn't emit semicolons after non-assignment expression statements
+ *  (e.g., bare `ob_bob_b+ob_b*sin(...)` with no `=`). This produces invalid JS
+ *  like `...(a['time']*1.73))))) a['ob_g']=...` when the next statement follows.
+ *  Fix: insert `;` where `)` is followed by `a[` (start of next statement). */
+function fixParserOutput(jsCode) {
+  if (typeof jsCode !== 'string' || jsCode.length === 0) return jsCode;
+  return jsCode.replace(/\)\s+a\[/g, ');\na[');
+}
+
+/** Recursively fix parser output in all string values of an object/array. */
+function deepFixParserOutput(val) {
+  if (typeof val === 'string') return fixParserOutput(val);
+  if (Array.isArray(val)) return val.map(deepFixParserOutput);
+  if (val && typeof val === 'object') {
+    const result = {};
+    for (const [k, v] of Object.entries(val)) {
+      result[k] = deepFixParserOutput(v);
+    }
+    return result;
+  }
+  return val;
+}
+
 /** Convert HLSL shader to GLSL ES 3.0.
  *  Primary: hlslparser-wasm with manual macro expansion (handles type coercions,
  *  implicit float4→float2 truncation, etc.). Fallback: text-level regex conversion
@@ -302,7 +362,7 @@ export async function convertPreset(text) {
   const presetParts = splitPreset(mainPresetText);
 
   // Preprocess EEL equations: insert implicit operators + strip unary +
-  const parsedPreset = milkdropParser.convert_preset_wave_and_shape(
+  const rawParsed = milkdropParser.convert_preset_wave_and_shape(
     presetParts.presetVersion,
     preprocessEel(presetParts.presetInit),
     preprocessEel(presetParts.perFrame),
@@ -310,6 +370,9 @@ export async function convertPreset(text) {
     deepPreprocessEel(presetParts.shapes),
     deepPreprocessEel(presetParts.waves),
   );
+
+  // Fix missing semicolons in parser JS output (bare expression statements)
+  const parsedPreset = deepFixParserOutput(rawParsed);
 
   const [presetMap, warpShader, compShader] = await Promise.all([
     createBasePresetFuns(parsedPreset, presetParts.shapes, presetParts.waves),
@@ -333,9 +396,9 @@ export function convertPresetEquations(presetVersion, initEQs, frameEQs, pixelEQ
     pixelEQs,
   );
   return {
-    init_eqs_str: parsedPreset.perFrameInitEQs ? parsedPreset.perFrameInitEQs.trim() : '',
-    frame_eqs_str: parsedPreset.perFrameEQs ? parsedPreset.perFrameEQs.trim() : '',
-    pixel_eqs_str: parsedPreset.perPixelEQs ? parsedPreset.perPixelEQs.trim() : '',
+    init_eqs_str: fixParserOutput(parsedPreset.perFrameInitEQs?.trim() ?? ''),
+    frame_eqs_str: fixParserOutput(parsedPreset.perFrameEQs?.trim() ?? ''),
+    pixel_eqs_str: fixParserOutput(parsedPreset.perPixelEQs?.trim() ?? ''),
   };
 }
 
@@ -346,9 +409,9 @@ export function convertWaveEquations(presetVersion, initEQs, frameEQs, pointEQs)
     point_eqs_str: pointEQs,
   });
   return {
-    init_eqs_str: parsedPreset.perFrameInitEQs ? parsedPreset.perFrameInitEQs.trim() : '',
-    frame_eqs_str: parsedPreset.perFrameEQs ? parsedPreset.perFrameEQs.trim() : '',
-    point_eqs_str: parsedPreset.perPointEQs ? parsedPreset.perPointEQs.trim() : '',
+    init_eqs_str: fixParserOutput(parsedPreset.perFrameInitEQs?.trim() ?? ''),
+    frame_eqs_str: fixParserOutput(parsedPreset.perFrameEQs?.trim() ?? ''),
+    point_eqs_str: fixParserOutput(parsedPreset.perPointEQs?.trim() ?? ''),
   };
 }
 
@@ -358,7 +421,7 @@ export function convertShapeEquations(presetVersion, initEQs, frameEQs) {
     frame_eqs_str: frameEQs,
   });
   return {
-    init_eqs_str: parsedPreset.perFrameInitEQs ? parsedPreset.perFrameInitEQs.trim() : '',
-    frame_eqs_str: parsedPreset.perFrameEQs ? parsedPreset.perFrameEQs.trim() : '',
+    init_eqs_str: fixParserOutput(parsedPreset.perFrameInitEQs?.trim() ?? ''),
+    frame_eqs_str: fixParserOutput(parsedPreset.perFrameEQs?.trim() ?? ''),
   };
 }

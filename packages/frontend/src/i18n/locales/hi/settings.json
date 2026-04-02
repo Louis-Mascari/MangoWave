@@ -82,7 +82,10 @@
     "categoryFavorites": "फ़ेवरिट",
     "categoryBlocked": "ब्लॉक किए गए प्रीसेट",
     "categoryPacks": "पैक, कस्टम पैक और एक्सक्लूज़न",
-    "categorySync": "विंडो सिंक"
+    "categorySync": "विंडो सिंक",
+    "includeImported": "आयातित प्रीसेट और टेक्सचर शामिल करें",
+    "includeImportedHint": "क्रॉस-डिवाइस ट्रांसफर के लिए प्रीसेट और टेक्सचर डेटा एम्बेड करता है",
+    "estimatedSize": "~{{size}} आयातित डेटा के साथ"
   },
 
   "spotifyTab": {

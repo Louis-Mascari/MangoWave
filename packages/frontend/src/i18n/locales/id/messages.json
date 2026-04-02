@@ -39,7 +39,8 @@
     "invalidFile": "File pengaturan tidak valid",
     "fieldNotApplied": "\"{{field}}\" tidak dapat diterapkan",
     "importedWithWarnings": "Pengaturan diimpor. Beberapa pengaturan tidak dapat diterapkan karena perubahan aplikasi",
-    "importedSuccess": "Pengaturan berhasil diimpor"
+    "importedSuccess": "Pengaturan berhasil diimpor",
+    "importedDataRestored": "Preset dan tekstur yang diimpor telah dipulihkan"
   },
   "spotify": {
     "connectingToSpotify": "Menghubungkan ke Spotify...",
@@ -130,8 +131,9 @@
       "history": "riwayat",
       "import": "impor"
     },
-    "noPacksSelected": "Tidak ada paket dipilih. Autopilot dijeda",
+    "noPacksSelected": "Tidak ada paket dipilih",
     "packsActive": "{{active}}/{{total}} paket aktif",
+    "packsHint": "Paket yang dipilih menentukan kumpulan untuk autopilot dan preset berikutnya",
     "searchPlaceholder": "Cari preset...",
     "clearSearch": "Hapus pencarian",
     "noPresetsVisible": "Tidak ada preset terlihat",
@@ -161,13 +163,13 @@
     "importSuccess": "{{count}} preset berhasil diimpor",
     "importPartial": "{{success}} dari {{total}} preset berhasil diimpor. {{failed}} gagal.",
     "importAllFailed": "Semua {{count}} preset gagal diimpor",
-    "fileTooLarge": "\"{{name}}\" terlalu besar (maks. 500KB)",
-    "invalidFileType": "\"{{name}}\" bukan file .milk",
-    "emptyFile": "\"{{name}}\" kosong",
-    "duplicateName": "\"{{name}}\" sudah ada",
-    "conversionFailed": "Gagal mengonversi preset \"{{name}}\". Dilewati.",
-    "securityBlocked": "\"{{name}}\" mengandung konten yang diblokir",
-    "nativeNameCollision": "\"{{name}}\" sudah ada di preset bawaan",
+    "fileTooLarge": "Terlalu besar (maks. 500KB)",
+    "invalidFileType": "Bukan file .milk",
+    "emptyFile": "File kosong",
+    "duplicateName": "Sudah ada",
+    "conversionFailed": "Konversi gagal",
+    "securityBlocked": "Mengandung konten yang diblokir",
+    "nativeNameCollision": "Sudah ada di preset bawaan",
     "missingTextures": "Tekstur tidak ditemukan (akan ditampilkan sebagai noise sampai diunggah): {{textures}}",
     "deletePreset": "Hapus preset impor",
     "deleteConfirm": "Hapus \"{{name}}\"? File .milk perlu diimpor ulang.",
@@ -179,15 +181,16 @@
   },
 
   "importedTextures": {
+    "sectionTitle": "Tekstur yang Diimpor",
     "importTextures": "Impor Tekstur",
     "importSuccess": "{{count}} tekstur berhasil diimpor",
     "importPartial": "{{success}} dari {{total}} tekstur berhasil diimpor. {{failed}} gagal.",
     "importAllFailed": "Semua {{count}} tekstur gagal diimpor",
-    "fileTooLarge": "\"{{name}}\" terlalu besar (maks 2MB)",
-    "invalidFileType": "\"{{name}}\" bukan file gambar yang didukung (JPEG, PNG, atau WebP)",
-    "builtinTextureShadow": "\"{{name}}\" adalah tekstur bawaan dan tidak dapat diganti",
-    "readFailed": "Gagal membaca \"{{name}}\"",
-    "decodeFailed": "Gagal mendekode \"{{name}}\"",
+    "fileTooLarge": "Terlalu besar (maks. 2MB)",
+    "invalidFileType": "Bukan gambar yang didukung (JPEG, PNG, atau WebP)",
+    "builtinTextureShadow": "Tekstur bawaan, tidak dapat diganti",
+    "readFailed": "Gagal membaca file",
+    "decodeFailed": "Gagal mendekode gambar",
     "deleteTexture": "Hapus tekstur yang diimpor",
     "deleteConfirm": "Hapus \"{{name}}\"? File gambar perlu diimpor ulang. Preset yang sudah dimuat akan terus menggunakannya hingga halaman dimuat ulang.",
     "clearAll": "Hapus Semua Tekstur",
@@ -195,7 +198,8 @@
     "cleared": "Semua tekstur yang diimpor telah dihapus",
     "gpuNote": "Tekstur yang dimuat di GPU tetap ada hingga halaman dimuat ulang.",
     "idbUnavailable": "Tekstur yang diimpor memerlukan akses penyimpanan, yang tidak tersedia dalam mode penjelajahan pribadi.",
-    "duplicateName": "\"{{name}}\" sudah ada"
+    "duplicateName": "Sudah ada",
+    "emptyStateTextures": "Belum ada tekstur yang diimpor. Gunakan \"Impor Tekstur\" untuk menambahkan gambar tekstur."
   },
 
   "customPacks": {

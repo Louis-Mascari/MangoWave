@@ -39,7 +39,8 @@
     "invalidFile": "无效的设置文件",
     "fieldNotApplied": "「{{field}}」无法应用",
     "importedWithWarnings": "设置已导入。由于应用变更，部分设置无法应用",
-    "importedSuccess": "设置导入成功"
+    "importedSuccess": "设置导入成功",
+    "importedDataRestored": "已恢复导入的预设和纹理"
   },
   "spotify": {
     "connectingToSpotify": "正在连接 Spotify...",
@@ -130,8 +131,9 @@
       "history": "历史",
       "import": "导入"
     },
-    "noPacksSelected": "未选择预设包。自动播放已暂停",
+    "noPacksSelected": "未选择预设包",
     "packsActive": "{{active}}/{{total}} 个预设包已启用",
+    "packsHint": "已选预设包决定自动播放和下一个预设的范围",
     "searchPlaceholder": "搜索预设...",
     "clearSearch": "清除搜索",
     "noPresetsVisible": "没有可见的预设",
@@ -161,13 +163,13 @@
     "importSuccess": "已导入 {{count}} 个预设",
     "importPartial": "已导入 {{success}}/{{total}} 个预设，{{failed}} 个失败。",
     "importAllFailed": "全部 {{count}} 个预设导入失败",
-    "fileTooLarge": "\"{{name}}\" 文件过大（最大 500KB）",
-    "invalidFileType": "\"{{name}}\" 不是 .milk 文件",
-    "emptyFile": "\"{{name}}\" 是空文件",
-    "duplicateName": "\"{{name}}\" 已存在",
-    "conversionFailed": "预设 \"{{name}}\" 转换失败，已跳过。",
-    "securityBlocked": "\"{{name}}\" 包含被阻止的内容",
-    "nativeNameCollision": "\"{{name}}\" 已存在于内置预设中",
+    "fileTooLarge": "文件过大（最大 500KB）",
+    "invalidFileType": "不是 .milk 文件",
+    "emptyFile": "文件为空",
+    "duplicateName": "已存在",
+    "conversionFailed": "转换失败",
+    "securityBlocked": "包含被阻止的内容",
+    "nativeNameCollision": "已存在于内置预设中",
     "missingTextures": "缺失的纹理（上传前将显示为噪点）：{{textures}}",
     "deletePreset": "删除导入的预设",
     "deleteConfirm": "删除 \"{{name}}\"？需要重新导入 .milk 文件。",
@@ -179,15 +181,16 @@
   },
 
   "importedTextures": {
+    "sectionTitle": "已导入的纹理",
     "importTextures": "导入纹理",
     "importSuccess": "已导入 {{count}} 个纹理",
     "importPartial": "已导入 {{success}}/{{total}} 个纹理，{{failed}} 个失败。",
     "importAllFailed": "全部 {{count}} 个纹理导入失败",
-    "fileTooLarge": "\"{{name}}\" 太大（最大 2MB）",
-    "invalidFileType": "\"{{name}}\" 不是支持的图像文件（JPEG、PNG 或 WebP）",
-    "builtinTextureShadow": "\"{{name}}\" 是内置纹理，无法替换",
-    "readFailed": "无法读取 \"{{name}}\"",
-    "decodeFailed": "无法解码 \"{{name}}\"",
+    "fileTooLarge": "文件过大（最大 2MB）",
+    "invalidFileType": "不是支持的图像格式（JPEG、PNG 或 WebP）",
+    "builtinTextureShadow": "内置纹理，无法替换",
+    "readFailed": "文件读取失败",
+    "decodeFailed": "图像解码失败",
     "deleteTexture": "删除导入的纹理",
     "deleteConfirm": "删除 \"{{name}}\"？图像文件需要重新导入。已加载的预设将继续使用它，直到页面重新加载。",
     "clearAll": "清除所有纹理",
@@ -195,7 +198,8 @@
     "cleared": "已清除所有导入的纹理",
     "gpuNote": "加载到 GPU 的纹理在页面重新加载之前会一直保留。",
     "idbUnavailable": "导入纹理需要存储访问权限，在隐私浏览模式下不可用。",
-    "duplicateName": "\"{{name}}\" 已存在"
+    "duplicateName": "已存在",
+    "emptyStateTextures": "没有导入的纹理。使用\"导入纹理\"添加自定义纹理图像。"
   },
 
   "customPacks": {

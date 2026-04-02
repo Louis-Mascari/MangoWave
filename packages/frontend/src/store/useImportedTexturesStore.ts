@@ -31,9 +31,14 @@ export const useImportedTexturesStore = create<ImportedTexturesState>()((set, ge
       const texKeys = (allKeys as string[]).filter((k) => k.startsWith(IDB_PREFIX));
 
       const textures = new Map<string, TextureData>();
-      for (const key of texKeys) {
-        const name = key.slice(IDB_PREFIX.length);
-        const data = await idbGet<TextureData>(key);
+      const entries = await Promise.all(
+        texKeys.map(async (key) => {
+          const name = key.slice(IDB_PREFIX.length);
+          const data = await idbGet<TextureData>(key);
+          return [name, data] as const;
+        }),
+      );
+      for (const [name, data] of entries) {
         if (data) textures.set(name, data);
       }
 
@@ -64,9 +69,7 @@ export const useImportedTexturesStore = create<ImportedTexturesState>()((set, ge
 
   removeAllTextures: async () => {
     const { textures } = get();
-    for (const name of textures.keys()) {
-      await idbDel(`${IDB_PREFIX}${name}`);
-    }
+    await Promise.all([...textures.keys()].map((name) => idbDel(`${IDB_PREFIX}${name}`)));
     set({ textures: new Map() });
   },
 

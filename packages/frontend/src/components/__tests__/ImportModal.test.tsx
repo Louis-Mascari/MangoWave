@@ -9,6 +9,11 @@ vi.mock('../../engine/importProcessor.ts', () => ({
   processTextureImport: vi.fn().mockResolvedValue([]),
 }));
 
+// Mock conversionWorkerManager (imported by ImportModal for warmUpWorker)
+vi.mock('../../engine/conversionWorkerManager.ts', () => ({
+  warmUpWorker: vi.fn(),
+}));
+
 // Mock idb-keyval
 vi.mock('idb-keyval', () => ({
   set: vi.fn().mockResolvedValue(undefined),

@@ -3,6 +3,8 @@
   "reset": "Reset",
   "cancel": "Cancel",
   "apply": "Apply",
+  "exporting": "Exporting...",
+  "importing": "Importing...",
   "on": "On",
   "off": "Off",
   "back": "Back",

@@ -8,24 +8,6 @@ const VALID_EXTENSIONS = ['.milk'];
 const BLOCKED_IDENTIFIERS =
   /\b(fetch|eval|Function|WebSocket|localStorage|sessionStorage|indexedDB|XMLHttpRequest|importScripts|document|window|globalThis|self|top|parent|frames)\b/;
 
-let converterPromise: Promise<(text: string) => object> | null = null;
-
-/** Lazy-load milkdrop-preset-converter (zero main-bundle cost). */
-function getConverter(): Promise<(text: string) => object> {
-  if (!converterPromise) {
-    converterPromise = import('milkdrop-preset-converter').then(
-      (mod) => mod.convertPreset ?? mod.default,
-    );
-  }
-  return converterPromise!;
-}
-
-/** Convert raw .milk text to a butterchurn preset object. */
-export async function convertMilkText(text: string): Promise<object> {
-  const convertPreset = await getConverter();
-  return convertPreset(text);
-}
-
 /** Read a .milk file, validate size/extension, return raw text + derived name.
  *  Throws short error codes ('invalidFileType', 'fileTooLarge', 'emptyFile')
  *  for i18n resolution in the UI layer. */

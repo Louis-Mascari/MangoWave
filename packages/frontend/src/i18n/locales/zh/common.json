@@ -3,6 +3,8 @@
   "reset": "重置",
   "cancel": "取消",
   "apply": "应用",
+  "exporting": "导出中...",
+  "importing": "导入中...",
   "on": "开",
   "off": "关",
   "back": "返回",

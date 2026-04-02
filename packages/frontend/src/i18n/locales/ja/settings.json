@@ -82,7 +82,10 @@
     "categoryFavorites": "お気に入り",
     "categoryBlocked": "ブロック済みプリセット",
     "categoryPacks": "パック、カスタムパックと除外設定",
-    "categorySync": "ウィンドウ同期"
+    "categorySync": "ウィンドウ同期",
+    "includeImported": "インポートしたプリセットとテクスチャを含める",
+    "includeImportedHint": "デバイス間転送用にプリセットとテクスチャのデータを埋め込みます",
+    "estimatedSize": "約{{size}}（インポートデータ含む）"
   },
 
   "spotifyTab": {

@@ -82,7 +82,10 @@
     "categoryFavorites": "Favoritos",
     "categoryBlocked": "Presets Bloqueados",
     "categoryPacks": "Pacotes, Pacotes Personalizados e Exclusões",
-    "categorySync": "Sincronização de Janelas"
+    "categorySync": "Sincronização de Janelas",
+    "includeImported": "Incluir presets e texturas importados",
+    "includeImportedHint": "Incorpora dados de presets e texturas para transferência entre dispositivos",
+    "estimatedSize": "~{{size}} com dados importados"
   },
 
   "spotifyTab": {

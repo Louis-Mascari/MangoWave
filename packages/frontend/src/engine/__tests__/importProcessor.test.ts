@@ -9,23 +9,19 @@ vi.mock('idb-keyval', () => ({
   keys: vi.fn().mockResolvedValue([]),
 }));
 
-// Mock milkdrop-preset-converter — passes raw text into init_eqs_str
+// Mock conversionWorkerManager — passes raw text into init_eqs_str
 // so that validatePreset's EEL scanner can still detect blocked identifiers.
 // Sampler references in the raw text will also be detected by findMissingTextures.
-const mockConvert = (text: string) => ({ init_eqs_str: text });
-vi.mock('milkdrop-preset-converter', () => ({
-  default: mockConvert,
-  convertPreset: mockConvert,
+vi.mock('../conversionWorkerManager.ts', () => ({
+  convertInWorker: vi.fn((_name: string, text: string) => Promise.resolve({ init_eqs_str: text })),
 }));
 
 // Mock useImportedPresetsStore
 const mockAddPreset = vi.fn().mockResolvedValue(undefined);
-const mockCacheConverted = vi.fn();
 vi.mock('../../store/useImportedPresetsStore.ts', () => ({
   useImportedPresetsStore: {
     getState: () => ({
       addPreset: mockAddPreset,
-      cacheConverted: mockCacheConverted,
     }),
   },
 }));

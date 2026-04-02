@@ -82,7 +82,10 @@
     "categoryFavorites": "收藏",
     "categoryBlocked": "已屏蔽预设",
     "categoryPacks": "预设包、自定义合集与排除项",
-    "categorySync": "窗口同步"
+    "categorySync": "窗口同步",
+    "includeImported": "包含导入的预设和纹理",
+    "includeImportedHint": "嵌入原始预设和纹理数据，用于跨设备传输",
+    "estimatedSize": "约 {{size}}（含导入数据）"
   },
 
   "spotifyTab": {

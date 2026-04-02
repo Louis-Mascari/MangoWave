@@ -13,10 +13,12 @@ import { quarantinedSet, mobileBlockedSet } from '../data/excludedPresets.ts';
 import { SHORTCUTS } from '../constants/shortcuts.ts';
 import {
   EXPORT_CATEGORIES,
-  buildExport,
+  buildExportWithImportedData,
   downloadExport,
   parseImportFile,
   buildImportPayload,
+  restoreImportedData,
+  estimateImportedDataSize,
 } from '../utils/settingsPortability.ts';
 import type { ParseResult } from '../utils/settingsPortability.ts';
 
@@ -32,6 +34,12 @@ function rangeFillStyle(value: number, min: number, max: number) {
 function rangeFillVerticalStyle(value: number, min: number, max: number) {
   const pct = ((value - min) / (max - min)) * 100;
   return { '--fill-inv': `${100 - pct}%` } as React.CSSProperties;
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 const FPS_QUICK_PICKS = [30, 60, 120, 144, 240];
@@ -735,10 +743,18 @@ function DataTab() {
   const [exportSelected, setExportSelected] = useState<Set<string>>(
     () => new Set(categories.map((c) => c.key)),
   );
+  const [includeImported, setIncludeImported] = useState(false);
+  const [estimatedSize, setEstimatedSize] = useState<number | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
   const [importResult, setImportResult] = useState<(ParseResult & { ok: true }) | null>(null);
   const [importSelected, setImportSelected] = useState<Set<string>>(new Set());
+  const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const showToast = useToastStore((s) => s.show);
+
+  const importedPresets = useSettingsStore((s) => s.importedPresets);
+  const importedTextures = useSettingsStore((s) => s.importedTextures);
+  const hasImportedData = importedPresets.length > 0 || importedTextures.length > 0;
 
   const toggleExportCategory = (key: string) => {
     setExportSelected((prev) => {
@@ -749,10 +765,25 @@ function DataTab() {
     });
   };
 
-  const handleExport = () => {
-    const state = useSettingsStore.getState();
-    const data = buildExport(state, exportSelected);
-    downloadExport(data);
+  const handleToggleIncludeImported = async (checked: boolean) => {
+    setIncludeImported(checked);
+    if (checked) {
+      const size = await estimateImportedDataSize();
+      setEstimatedSize(size);
+    } else {
+      setEstimatedSize(null);
+    }
+  };
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const state = useSettingsStore.getState();
+      const data = await buildExportWithImportedData(state, exportSelected, includeImported);
+      downloadExport(data);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -770,21 +801,33 @@ function DataTab() {
     setImportSelected(new Set(result.categories));
   };
 
-  const handleApplyImport = () => {
+  const handleApplyImport = async () => {
     if (!importResult) return;
-    const { payload, warnings } = buildImportPayload(importResult.data, importSelected);
-    useSettingsStore.getState().importSettings(payload);
-    setImportResult(null);
-    const allWarnings = importResult.versionWarning
-      ? [importResult.versionWarning, ...warnings]
-      : warnings;
-    if (allWarnings.length > 0) {
-      showToast(tm('settingsImport.importedWithWarnings'), {
-        type: 'warning',
-        durationMs: 6000,
-      });
-    } else {
-      showToast(tm('settingsImport.importedSuccess'));
+    setIsImporting(true);
+    try {
+      const { payload, warnings } = buildImportPayload(importResult.data, importSelected);
+      useSettingsStore.getState().importSettings(payload);
+
+      // Restore embedded imported data if present
+      if ('_importedData' in importResult.data) {
+        await restoreImportedData(importResult.data, useSettingsStore.getState());
+        showToast(tm('settingsImport.importedDataRestored'));
+      }
+
+      setImportResult(null);
+      const allWarnings = importResult.versionWarning
+        ? [importResult.versionWarning, ...warnings]
+        : warnings;
+      if (allWarnings.length > 0) {
+        showToast(tm('settingsImport.importedWithWarnings'), {
+          type: 'warning',
+          durationMs: 6000,
+        });
+      } else {
+        showToast(tm('settingsImport.importedSuccess'));
+      }
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -833,12 +876,31 @@ function DataTab() {
             {tc('deselectAll')}
           </button>
         </div>
+        {hasImportedData && (
+          <div className="flex flex-col gap-1">
+            <label className="flex items-center gap-1.5 text-xs text-white/70">
+              <input
+                type="checkbox"
+                checked={includeImported}
+                onChange={(e) => handleToggleIncludeImported(e.target.checked)}
+                className="accent-orange-500"
+              />
+              {t('data.includeImported')}
+            </label>
+            <p className="pl-5 text-[10px] text-white/40">{t('data.includeImportedHint')}</p>
+            {includeImported && estimatedSize !== null && (
+              <p className="pl-5 text-[10px] text-white/40">
+                {t('data.estimatedSize', { size: formatBytes(estimatedSize) })}
+              </p>
+            )}
+          </div>
+        )}
         <button
           onClick={handleExport}
-          disabled={exportSelected.size === 0}
+          disabled={exportSelected.size === 0 || isExporting}
           className="w-fit cursor-pointer rounded border-none bg-orange-500/20 px-3 py-1 text-xs text-orange-400 hover:bg-orange-500/30 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {t('data.exportSettings')}
+          {isExporting ? tc('exporting') : t('data.exportSettings')}
         </button>
       </div>
 
@@ -873,10 +935,10 @@ function DataTab() {
             <div className="flex gap-2">
               <button
                 onClick={handleApplyImport}
-                disabled={importSelected.size === 0}
+                disabled={importSelected.size === 0 || isImporting}
                 className="cursor-pointer rounded border-none bg-orange-500/20 px-3 py-1 text-xs text-orange-400 hover:bg-orange-500/30 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {tc('apply')}
+                {isImporting ? tc('importing') : tc('apply')}
               </button>
               <button
                 onClick={() => setImportResult(null)}

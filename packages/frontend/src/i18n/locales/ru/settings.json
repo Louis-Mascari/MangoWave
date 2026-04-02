@@ -82,7 +82,10 @@
     "categoryFavorites": "Избранные",
     "categoryBlocked": "Заблокированные пресеты",
     "categoryPacks": "Паки, пользовательские паки и исключения",
-    "categorySync": "Синхронизация окон"
+    "categorySync": "Синхронизация окон",
+    "includeImported": "Включить импортированные пресеты и текстуры",
+    "includeImportedHint": "Встраивает данные пресетов и текстур для переноса между устройствами",
+    "estimatedSize": "~{{size}} с импортированными данными"
   },
 
   "spotifyTab": {

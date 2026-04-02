@@ -39,7 +39,8 @@
     "invalidFile": "अमान्य सेटिंग्स फ़ाइल",
     "fieldNotApplied": "\"{{field}}\" लागू नहीं हो सका",
     "importedWithWarnings": "सेटिंग्स इम्पोर्ट हो गईं। ऐप बदलावों के कारण कुछ सेटिंग्स लागू नहीं हो सकीं",
-    "importedSuccess": "सेटिंग्स सफलतापूर्वक इम्पोर्ट हो गईं"
+    "importedSuccess": "सेटिंग्स सफलतापूर्वक इम्पोर्ट हो गईं",
+    "importedDataRestored": "आयातित प्रीसेट और टेक्सचर पुनर्स्थापित"
   },
   "spotify": {
     "connectingToSpotify": "Spotify से कनेक्ट हो रहा है...",
@@ -130,8 +131,9 @@
       "history": "इतिहास",
       "import": "आयात"
     },
-    "noPacksSelected": "कोई पैक नहीं चुना। ऑटोपायलट रुका हुआ",
+    "noPacksSelected": "कोई पैक नहीं चुना",
     "packsActive": "{{active}}/{{total}} पैक सक्रिय",
+    "packsHint": "चयनित पैक ऑटोपायलट और अगले प्रीसेट का पूल तय करते हैं",
     "searchPlaceholder": "प्रीसेट खोजो...",
     "clearSearch": "खोज साफ़ करो",
     "noPresetsVisible": "कोई प्रीसेट दिख नहीं रहा",
@@ -161,13 +163,13 @@
     "importSuccess": "{{count}} प्रीसेट आयात किए गए",
     "importPartial": "{{total}} में से {{success}} प्रीसेट आयात किए गए। {{failed}} विफल।",
     "importAllFailed": "सभी {{count}} प्रीसेट आयात करने में विफल",
-    "fileTooLarge": "\"{{name}}\" बहुत बड़ा है (अधिकतम 500KB)",
-    "invalidFileType": "\"{{name}}\" एक .milk फ़ाइल नहीं है",
-    "emptyFile": "\"{{name}}\" खाली है",
-    "duplicateName": "\"{{name}}\" पहले से मौजूद है",
-    "conversionFailed": "प्रीसेट \"{{name}}\" को कनवर्ट करने में विफल। छोड़ा जा रहा है।",
-    "securityBlocked": "\"{{name}}\" में अवरुद्ध सामग्री है",
-    "nativeNameCollision": "\"{{name}}\" बिल्ट-इन प्रीसेट में पहले से मौजूद है",
+    "fileTooLarge": "बहुत बड़ा (अधिकतम 500KB)",
+    "invalidFileType": ".milk फ़ाइल नहीं है",
+    "emptyFile": "फ़ाइल खाली है",
+    "duplicateName": "पहले से मौजूद है",
+    "conversionFailed": "कनवर्शन विफल",
+    "securityBlocked": "अवरुद्ध सामग्री है",
+    "nativeNameCollision": "बिल्ट-इन प्रीसेट में पहले से मौजूद है",
     "missingTextures": "अनुपलब्ध टेक्सचर (अपलोड होने तक शोर के रूप में दिखेंगे): {{textures}}",
     "deletePreset": "आयातित प्रीसेट हटाएं",
     "deleteConfirm": "\"{{name}}\" हटाएं? .milk फ़ाइल को फिर से आयात करना होगा।",
@@ -179,15 +181,16 @@
   },
 
   "importedTextures": {
+    "sectionTitle": "आयातित टेक्सचर",
     "importTextures": "टेक्सचर आयात करें",
     "importSuccess": "{{count}} टेक्सचर आयात किए गए",
     "importPartial": "{{total}} में से {{success}} टेक्सचर आयात किए गए। {{failed}} विफल।",
     "importAllFailed": "सभी {{count}} टेक्सचर आयात करने में विफल",
-    "fileTooLarge": "\"{{name}}\" बहुत बड़ा है (अधिकतम 2MB)",
-    "invalidFileType": "\"{{name}}\" एक समर्थित छवि फ़ाइल नहीं है (JPEG, PNG या WebP)",
-    "builtinTextureShadow": "\"{{name}}\" एक अंतर्निहित टेक्सचर है और इसे बदला नहीं जा सकता",
-    "readFailed": "\"{{name}}\" पढ़ने में विफल",
-    "decodeFailed": "\"{{name}}\" डीकोड करने में विफल",
+    "fileTooLarge": "बहुत बड़ा (अधिकतम 2MB)",
+    "invalidFileType": "समर्थित छवि नहीं है (JPEG, PNG या WebP)",
+    "builtinTextureShadow": "अंतर्निहित टेक्सचर, बदला नहीं जा सकता",
+    "readFailed": "फ़ाइल पढ़ने में विफल",
+    "decodeFailed": "छवि डीकोड करने में विफल",
     "deleteTexture": "आयातित टेक्सचर हटाएं",
     "deleteConfirm": "\"{{name}}\" हटाएं? छवि फ़ाइल को फिर से आयात करना होगा। पहले से लोड किए गए प्रीसेट पेज रीलोड होने तक इसका उपयोग करते रहेंगे।",
     "clearAll": "सभी टेक्सचर हटाएं",
@@ -195,7 +198,8 @@
     "cleared": "सभी आयातित टेक्सचर हटा दिए गए",
     "gpuNote": "GPU पर लोड किए गए टेक्सचर पेज रीलोड होने तक बने रहते हैं।",
     "idbUnavailable": "आयातित टेक्सचर के लिए स्टोरेज एक्सेस आवश्यक है, जो प्राइवेट ब्राउज़िंग मोड में उपलब्ध नहीं है।",
-    "duplicateName": "\"{{name}}\" पहले से मौजूद है"
+    "duplicateName": "पहले से मौजूद है",
+    "emptyStateTextures": "कोई आयातित टेक्सचर नहीं। कस्टम टेक्सचर जोड़ने के लिए \"टेक्सचर आयात करें\" का उपयोग करें।"
   },
 
   "customPacks": {

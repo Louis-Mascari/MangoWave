@@ -3,6 +3,8 @@
   "reset": "リセット",
   "cancel": "キャンセル",
   "apply": "適用",
+  "exporting": "エクスポート中...",
+  "importing": "インポート中...",
   "on": "オン",
   "off": "オフ",
   "back": "戻る",

@@ -17,6 +17,9 @@ export default defineConfig({
       'milkdrop-textures',
     ],
   },
+  worker: {
+    format: 'es',
+  },
   build: {
     sourcemap: 'hidden',
   },

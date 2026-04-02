@@ -39,7 +39,8 @@
     "invalidFile": "잘못된 설정 파일입니다",
     "fieldNotApplied": "\"{{field}}\"을(를) 적용할 수 없습니다",
     "importedWithWarnings": "설정을 가져왔습니다. 앱 변경으로 인해 일부 설정을 적용할 수 없었습니다",
-    "importedSuccess": "설정을 성공적으로 가져왔습니다"
+    "importedSuccess": "설정을 성공적으로 가져왔습니다",
+    "importedDataRestored": "가져온 프리셋 및 텍스처가 복원되었습니다"
   },
   "spotify": {
     "connectingToSpotify": "Spotify에 연결하는 중...",
@@ -130,8 +131,9 @@
       "history": "기록",
       "import": "가져오기"
     },
-    "noPacksSelected": "선택된 팩 없음. 자동 전환 일시정지됨",
+    "noPacksSelected": "선택된 팩 없음",
     "packsActive": "{{active}}/{{total}} 팩 활성",
+    "packsHint": "선택한 팩이 자동 전환 및 다음 프리셋 범위를 결정합니다",
     "searchPlaceholder": "프리셋 검색...",
     "clearSearch": "검색 지우기",
     "noPresetsVisible": "표시할 프리셋 없음",
@@ -161,13 +163,13 @@
     "importSuccess": "{{count}}개의 프리셋을 가져왔습니다",
     "importPartial": "{{total}}개 중 {{success}}개의 프리셋을 가져왔습니다. {{failed}}개 실패.",
     "importAllFailed": "{{count}}개의 프리셋을 모두 가져오지 못했습니다",
-    "fileTooLarge": "\"{{name}}\"이(가) 너무 큽니다 (최대 500KB)",
-    "invalidFileType": "\"{{name}}\"은(는) .milk 파일이 아닙니다",
-    "emptyFile": "\"{{name}}\"이(가) 비어 있습니다",
-    "duplicateName": "\"{{name}}\"이(가) 이미 존재합니다",
-    "conversionFailed": "프리셋 \"{{name}}\" 변환에 실패했습니다. 건너뜁니다.",
-    "securityBlocked": "\"{{name}}\"에 차단된 콘텐츠가 포함되어 있습니다",
-    "nativeNameCollision": "\"{{name}}\"은(는) 기본 제공 프리셋에 이미 존재합니다",
+    "fileTooLarge": "너무 큽니다 (최대 500KB)",
+    "invalidFileType": ".milk 파일이 아닙니다",
+    "emptyFile": "파일이 비어 있습니다",
+    "duplicateName": "이미 존재합니다",
+    "conversionFailed": "변환 실패",
+    "securityBlocked": "차단된 콘텐츠가 포함되어 있습니다",
+    "nativeNameCollision": "기본 제공 프리셋에 이미 존재합니다",
     "missingTextures": "누락된 텍스처 (업로드할 때까지 노이즈로 표시됩니다): {{textures}}",
     "deletePreset": "가져온 프리셋 삭제",
     "deleteConfirm": "\"{{name}}\"을(를) 삭제하시겠습니까? .milk 파일을 다시 가져와야 합니다.",
@@ -179,15 +181,16 @@
   },
 
   "importedTextures": {
+    "sectionTitle": "가져온 텍스처",
     "importTextures": "텍스처 가져오기",
     "importSuccess": "{{count}}개의 텍스처를 가져왔습니다",
     "importPartial": "{{total}}개 중 {{success}}개의 텍스처를 가져왔습니다. {{failed}}개 실패.",
     "importAllFailed": "{{count}}개의 텍스처 모두 가져오기 실패",
-    "fileTooLarge": "\"{{name}}\"이(가) 너무 큽니다 (최대 2MB)",
-    "invalidFileType": "\"{{name}}\"은(는) 지원되는 이미지 파일이 아닙니다 (JPEG, PNG 또는 WebP)",
-    "builtinTextureShadow": "\"{{name}}\"은(는) 기본 제공 텍스처이므로 교체할 수 없습니다",
-    "readFailed": "\"{{name}}\" 읽기 실패",
-    "decodeFailed": "\"{{name}}\" 디코딩 실패",
+    "fileTooLarge": "너무 큽니다 (최대 2MB)",
+    "invalidFileType": "지원되는 이미지가 아닙니다 (JPEG, PNG 또는 WebP)",
+    "builtinTextureShadow": "기본 제공 텍스처이므로 교체할 수 없습니다",
+    "readFailed": "파일 읽기 실패",
+    "decodeFailed": "이미지 디코딩 실패",
     "deleteTexture": "가져온 텍스처 삭제",
     "deleteConfirm": "\"{{name}}\"을(를) 삭제하시겠습니까? 이미지 파일을 다시 가져와야 합니다. 이미 로드된 프리셋은 페이지를 새로고침할 때까지 계속 사용합니다.",
     "clearAll": "모든 텍스처 삭제",
@@ -195,7 +198,8 @@
     "cleared": "가져온 텍스처가 모두 삭제되었습니다",
     "gpuNote": "GPU에 로드된 텍스처는 페이지를 새로고침할 때까지 유지됩니다.",
     "idbUnavailable": "가져온 텍스처에는 저장소 접근이 필요하며, 시크릿 모드에서는 사용할 수 없습니다.",
-    "duplicateName": "\"{{name}}\"이(가) 이미 존재합니다"
+    "duplicateName": "이미 존재합니다",
+    "emptyStateTextures": "가져온 텍스처가 없습니다. \"텍스처 가져오기\"를 사용하여 사용자 정의 텍스처 이미지를 추가하세요."
   },
 
   "customPacks": {

@@ -39,7 +39,8 @@
     "invalidFile": "Arquivo de configurações inválido",
     "fieldNotApplied": "\"{{field}}\" não pôde ser aplicado",
     "importedWithWarnings": "Configurações importadas. Algumas configurações não puderam ser aplicadas devido a mudanças no aplicativo",
-    "importedSuccess": "Configurações importadas com sucesso"
+    "importedSuccess": "Configurações importadas com sucesso",
+    "importedDataRestored": "Presets e texturas importados restaurados"
   },
   "spotify": {
     "connectingToSpotify": "Conectando ao Spotify...",
@@ -130,8 +131,9 @@
       "history": "histórico",
       "import": "importar"
     },
-    "noPacksSelected": "Nenhum pacote selecionado. Piloto automático pausado",
+    "noPacksSelected": "Nenhum pacote selecionado",
     "packsActive": "{{active}}/{{total}} pacotes ativos",
+    "packsHint": "Os pacotes selecionados definem o grupo para piloto automático e próximo preset",
     "searchPlaceholder": "Buscar presets...",
     "clearSearch": "Limpar busca",
     "noPresetsVisible": "Nenhum preset visível",
@@ -161,13 +163,13 @@
     "importSuccess": "{{count}} preset(s) importado(s)",
     "importPartial": "Importados {{success}} de {{total}} presets. {{failed}} falharam.",
     "importAllFailed": "Todos os {{count}} preset(s) falharam ao importar",
-    "fileTooLarge": "\"{{name}}\" é muito grande (máx. 500KB)",
-    "invalidFileType": "\"{{name}}\" não é um arquivo .milk",
-    "emptyFile": "\"{{name}}\" está vazio",
-    "duplicateName": "\"{{name}}\" já existe",
-    "conversionFailed": "Falha ao converter o preset \"{{name}}\". Pulando.",
-    "securityBlocked": "\"{{name}}\" contém conteúdo bloqueado",
-    "nativeNameCollision": "\"{{name}}\" já existe nos presets integrados",
+    "fileTooLarge": "Muito grande (máx. 500KB)",
+    "invalidFileType": "Não é um arquivo .milk",
+    "emptyFile": "Arquivo vazio",
+    "duplicateName": "Já existe",
+    "conversionFailed": "Falha na conversão",
+    "securityBlocked": "Contém conteúdo bloqueado",
+    "nativeNameCollision": "Já existe nos presets integrados",
     "missingTextures": "Texturas ausentes (serão exibidas como ruído até serem enviadas): {{textures}}",
     "deletePreset": "Excluir preset importado",
     "deleteConfirm": "Excluir \"{{name}}\"? O arquivo .milk precisará ser reimportado.",
@@ -179,15 +181,16 @@
   },
 
   "importedTextures": {
+    "sectionTitle": "Texturas importadas",
     "importTextures": "Importar texturas",
     "importSuccess": "{{count}} textura(s) importada(s)",
     "importPartial": "{{success}} de {{total}} texturas importadas. {{failed}} falharam.",
     "importAllFailed": "Todas as {{count}} textura(s) falharam ao importar",
-    "fileTooLarge": "\"{{name}}\" é muito grande (máx. 2MB)",
-    "invalidFileType": "\"{{name}}\" não é um arquivo de imagem compatível (JPEG, PNG ou WebP)",
-    "builtinTextureShadow": "\"{{name}}\" é uma textura integrada e não pode ser substituída",
-    "readFailed": "Falha ao ler \"{{name}}\"",
-    "decodeFailed": "Falha ao decodificar \"{{name}}\"",
+    "fileTooLarge": "Muito grande (máx. 2MB)",
+    "invalidFileType": "Não é uma imagem compatível (JPEG, PNG ou WebP)",
+    "builtinTextureShadow": "Textura integrada, não pode ser substituída",
+    "readFailed": "Falha ao ler o arquivo",
+    "decodeFailed": "Falha ao decodificar a imagem",
     "deleteTexture": "Excluir textura importada",
     "deleteConfirm": "Excluir \"{{name}}\"? O arquivo de imagem precisará ser reimportado. Presets já carregados continuarão usando até a página ser recarregada.",
     "clearAll": "Limpar todas as texturas",
@@ -195,7 +198,8 @@
     "cleared": "Todas as texturas importadas foram removidas",
     "gpuNote": "Texturas carregadas na GPU persistem até a página ser recarregada.",
     "idbUnavailable": "Texturas importadas requerem acesso ao armazenamento, que não está disponível no modo de navegação privada.",
-    "duplicateName": "\"{{name}}\" já existe"
+    "duplicateName": "Já existe",
+    "emptyStateTextures": "Nenhuma textura importada. Use \"Importar Texturas\" para adicionar imagens de texturas."
   },
 
   "customPacks": {

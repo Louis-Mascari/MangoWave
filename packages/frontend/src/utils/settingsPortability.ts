@@ -1,11 +1,12 @@
 import posthog from 'posthog-js';
 import * as Sentry from '@sentry/react';
 import sjson from 'secure-json-parse';
+import { get as idbGet, keys as idbKeys, set as idbSet } from 'idb-keyval';
 import type { SettingsState } from '../store/useSettingsStore.ts';
 import i18n from '../i18n/index.ts';
 
 const EXPORT_VERSION = 1;
-const MAX_IMPORT_SIZE = 1_000_000; // 1MB
+const MAX_IMPORT_SIZE = 50_000_000; // 50MB (accommodates exported texture data)
 
 export interface ExportCategory {
   key: string;
@@ -52,14 +53,7 @@ export const EXPORT_CATEGORIES: ExportCategory[] = [
   {
     key: 'packs',
     labelKey: 'data.categoryPacks',
-    fields: [
-      'enabledPacks',
-      'excludedOverrides',
-      'customPacks',
-      'activeCustomPackId',
-      'importedPresets',
-      'importedTextures',
-    ],
+    fields: ['enabledPacks', 'excludedOverrides', 'customPacks', 'activeCustomPackId'],
   },
   {
     key: 'sync',
@@ -94,6 +88,115 @@ export function buildExport(state: SettingsState, selectedCategories: Set<string
     },
     ...data,
   };
+}
+
+/**
+ * Build an export with optional embedded imported preset/texture data from IDB.
+ * When includeImported is true, raw .milk texts and texture data URIs are embedded
+ * alongside their metadata, enabling cross-device transfer.
+ */
+export async function buildExportWithImportedData(
+  state: SettingsState,
+  selectedCategories: Set<string>,
+  includeImported: boolean,
+): Promise<ExportData> {
+  const data = buildExport(state, selectedCategories);
+
+  if (!includeImported) return data;
+
+  const allIdbKeys = await idbKeys();
+  const presetData: Record<string, string> = {};
+  const textureData: Record<string, unknown> = {};
+
+  for (const key of allIdbKeys as string[]) {
+    if (key.startsWith('mw-milk:')) {
+      const name = key.slice(8);
+      const text = await idbGet<string>(key);
+      if (text) presetData[name] = text;
+    } else if (key.startsWith('mw-tex:')) {
+      const name = key.slice(7);
+      const val = await idbGet(key);
+      if (val) textureData[name] = val;
+    }
+  }
+
+  data.importedPresets = state.importedPresets;
+  data.importedTextures = state.importedTextures;
+  data._importedData = { presets: presetData, textures: textureData };
+
+  return data;
+}
+
+/** Estimate the byte size of all imported preset and texture data in IDB. */
+export async function estimateImportedDataSize(): Promise<number> {
+  const allIdbKeys = await idbKeys();
+  let total = 0;
+
+  for (const key of allIdbKeys as string[]) {
+    if (key.startsWith('mw-milk:')) {
+      const text = await idbGet<string>(key);
+      if (text) total += new Blob([text]).size;
+    } else if (key.startsWith('mw-tex:')) {
+      const val = await idbGet(key);
+      if (val) total += new Blob([JSON.stringify(val)]).size;
+    }
+  }
+
+  return total;
+}
+
+/**
+ * Restore imported preset and texture data from a settings export.
+ * Writes raw .milk texts to IDB, converts each via Worker, and restores texture data.
+ */
+export async function restoreImportedData(
+  data: Record<string, unknown>,
+  _state: SettingsState,
+): Promise<void> {
+  const imported = data._importedData as {
+    presets?: Record<string, string>;
+    textures?: Record<string, unknown>;
+  };
+  if (!imported) return;
+
+  const { convertInWorker } = await import('../engine/conversionWorkerManager.ts');
+
+  // Restore presets
+  if (imported.presets) {
+    for (const [name, text] of Object.entries(imported.presets)) {
+      if (typeof text !== 'string') continue;
+      await idbSet(`mw-milk:${name}`, text);
+      try {
+        const converted = await convertInWorker(name, text);
+        await idbSet(`mw-conv:${name}`, converted);
+      } catch {
+        // Conversion failure is non-fatal — user can trigger re-conversion on selection
+      }
+    }
+  }
+
+  // Restore textures
+  if (imported.textures) {
+    for (const [name, val] of Object.entries(imported.textures)) {
+      if (!val) continue;
+      await idbSet(`mw-tex:${name}`, val);
+    }
+  }
+
+  // Restore metadata to settings store
+  const { useSettingsStore } = await import('../store/useSettingsStore.ts');
+  const metaPayload: Record<string, unknown> = {};
+  if (data.importedPresets) {
+    const sanitized = SANITIZERS.importedPresets(data.importedPresets);
+    if (sanitized) metaPayload.importedPresets = sanitized;
+  }
+  if (data.importedTextures) {
+    const sanitized = SANITIZERS.importedTextures(data.importedTextures);
+    if (sanitized) metaPayload.importedTextures = sanitized;
+  }
+  if (Object.keys(metaPayload).length > 0) {
+    useSettingsStore.getState().importSettings(metaPayload as Partial<SettingsState>);
+  }
 }
 
 export function downloadExport(data: ExportData): void {
@@ -153,6 +256,10 @@ export function parseImportFile(file: File): Promise<ParseResult> {
         for (const category of EXPORT_CATEGORIES) {
           const hasAny = category.fields.some((field) => field in parsed);
           if (hasAny) detected.push(category.key);
+        }
+        // Detect embedded imported data (cross-device transfer)
+        if ('_importedData' in parsed) {
+          if (!detected.includes('packs')) detected.push('packs');
         }
 
         const versionWarning =

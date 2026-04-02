@@ -4,7 +4,7 @@ import { Virtuoso } from 'react-virtuoso';
 import { useImportModalStore } from '../store/useImportModalStore.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useFocusTrap } from '../hooks/useFocusTrap.ts';
-import { processPresetImport, processTextureImport } from '../engine/importProcessor.ts';
+import { warmUpWorker } from '../engine/conversionWorkerManager.ts';
 import type { ImportResult } from '../engine/importProcessor.ts';
 
 type Phase = 'select' | 'processing' | 'results';
@@ -40,6 +40,11 @@ function ImportModalInner() {
   const [resultCount, setResultCount] = useState(0);
 
   useFocusTrap(dialogRef, true);
+
+  // Pre-warm the conversion worker so WASM is loaded before the user drops files
+  useEffect(() => {
+    warmUpWorker();
+  }, []);
 
   // Escape key closes (but not during processing)
   useEffect(() => {
@@ -117,6 +122,8 @@ function ImportModalInner() {
       };
 
       try {
+        const { processPresetImport, processTextureImport } =
+          await import('../engine/importProcessor.ts');
         if (mode === 'preset') {
           await processPresetImport(files, {
             importedNameSet,

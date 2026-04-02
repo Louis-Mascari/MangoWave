@@ -424,6 +424,17 @@ export function PresetBrowser({
     }
   }, [allPacks, enabledPacks.length, setEnabledPacks]);
 
+  // Auto-add "Imported" to enabledPacks when user first imports presets.
+  // Uses a ref to avoid re-adding if the user deliberately unchecks "Imported" and imports more.
+  const prevImportedCount = useRef(importedPresets.length);
+  useEffect(() => {
+    const wasEmpty = prevImportedCount.current === 0;
+    prevImportedCount.current = importedPresets.length;
+    if (wasEmpty && importedPresets.length > 0 && !enabledPacks.includes('Imported')) {
+      setEnabledPacks([...enabledPacks, 'Imported']);
+    }
+  }, [importedPresets.length, enabledPacks, setEnabledPacks]);
+
   const enabledPackSet = useMemo(() => new Set(enabledPacks), [enabledPacks]);
 
   // Determine if preset is effectively excluded (quarantined and not overridden)
@@ -638,6 +649,7 @@ export function PresetBrowser({
   const renderGroupedAll = () => (
     <>
       {/* Pack filter checkboxes */}
+      <p className="mb-1 text-xs text-white/50">{t('presetBrowser.packsHint')}</p>
       {activeCustomPackId && (
         <p className="mb-1 text-[10px] text-orange-400/50">
           {t('customPacks.packOverridesFilters')}
@@ -903,7 +915,8 @@ export function PresetBrowser({
   const [packSearch, setPackSearch] = useState('');
   const deferredPackSearch = useDeferredValue(packSearch);
 
-  // Import tab search state
+  // Import tab state
+  const [importSubTab, setImportSubTab] = useState<'presets' | 'textures'>('presets');
   const [importSearch, setImportSearch] = useState('');
   const deferredImportSearch = useDeferredValue(importSearch);
 
@@ -1352,132 +1365,177 @@ export function PresetBrowser({
 
   // Render import tab
   const renderImport = () => (
-    <div className="flex flex-col gap-2 max-md:min-h-0 max-md:flex-1">
+    <div className="flex min-h-0 flex-1 flex-col gap-2 max-md:min-h-0">
       <p className="text-xs text-white/40">{t('importedPresets.description')}</p>
-      <div className="flex gap-2">
-        <button
-          onClick={handleImportMilk}
-          className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
-        >
-          {t('importedPresets.importMilk')}
-        </button>
-        <button
-          onClick={handleImportTextures}
-          className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
-        >
-          {t('importedTextures.importTextures')}
-        </button>
+
+      {/* Sub-tab radio buttons */}
+      <div className="flex gap-3">
+        <label className="flex cursor-pointer items-center gap-1 text-[11px] text-white/70">
+          <input
+            type="radio"
+            name="importSubTab"
+            checked={importSubTab === 'presets'}
+            onChange={() => setImportSubTab('presets')}
+            className="accent-orange-500"
+          />
+          {t('importedPresets.sectionTitle')} ({importedPresets.length})
+        </label>
+        <label className="flex cursor-pointer items-center gap-1 text-[11px] text-white/70">
+          <input
+            type="radio"
+            name="importSubTab"
+            checked={importSubTab === 'textures'}
+            onChange={() => setImportSubTab('textures')}
+            className="accent-orange-500"
+          />
+          {t('importedTextures.sectionTitle')} ({importedTextures.length})
+        </label>
       </div>
 
-      {/* Imported presets section */}
-      <div className="border-t border-white/10" />
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold uppercase tracking-wider text-orange-400">
-            {t('importedPresets.sectionTitle')} ({importedPresets.length})
-          </span>
-          {importedPresets.length > 0 && (
+      {/* Presets sub-tab */}
+      {importSubTab === 'presets' && (
+        <div className="flex min-h-0 flex-1 flex-col gap-1">
+          <div className="flex items-center justify-between">
             <button
-              onClick={handleClearAllImported}
-              className="cursor-pointer rounded border-none bg-red-500/20 px-1.5 py-0.5 text-[9px] text-red-400/70 hover:bg-red-500/30 hover:text-red-400"
+              onClick={handleImportMilk}
+              className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
             >
-              {t('importedPresets.clearAll')}
+              {t('importedPresets.importMilk')}
             </button>
+            {importedPresets.length > 0 && (
+              <button
+                onClick={handleClearAllImported}
+                className="cursor-pointer rounded border-none bg-red-500/20 px-1.5 py-0.5 text-[9px] text-red-400/70 hover:bg-red-500/30 hover:text-red-400"
+              >
+                {t('importedPresets.clearAll')}
+              </button>
+            )}
+          </div>
+          {importedPresets.length > 0 && (
+            <input
+              type="text"
+              placeholder={t('presetBrowser.searchPlaceholder')}
+              aria-label={t('presetBrowser.searchPlaceholder')}
+              value={importSearch}
+              onChange={(e) => setImportSearch(e.target.value)}
+              className="w-full rounded border-none bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
+            />
+          )}
+          {importedPresets.length === 0 ? (
+            <p className="py-2 text-center text-xs text-white/30">
+              {t('importedPresets.emptyState')}
+            </p>
+          ) : (
+            <div className="min-h-0 flex-1">
+              <Virtuoso
+                data={filteredImportedPresets}
+                style={{ height: Math.min(filteredImportedPresets.length * 32, 320) }}
+                itemContent={(_index, preset) => {
+                  const isCurrent = preset.name === currentPreset;
+                  return (
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => handleSelectPreset(preset.name)}
+                      onKeyDown={(e) => {
+                        if (e.currentTarget !== e.target) return;
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleSelectPreset(preset.name);
+                        }
+                      }}
+                      className={`flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs ${
+                        isCurrent
+                          ? 'bg-orange-500/30 text-white'
+                          : 'text-white/70 hover:bg-white/10'
+                      }`}
+                    >
+                      <span className="min-w-0 flex-1 truncate text-left">{preset.name}</span>
+                      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+                      <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => handleDeleteImportedPreset(preset)}
+                          className="flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-red-500/20 hover:text-red-400"
+                          title={t('importedPresets.deletePreset')}
+                          aria-label={t('importedPresets.deletePreset')}
+                        >
+                          <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
+                            <path
+                              fillRule="evenodd"
+                              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                }}
+              />
+            </div>
           )}
         </div>
-        {importedPresets.length > 0 && (
-          <input
-            type="text"
-            placeholder={t('presetBrowser.searchPlaceholder')}
-            aria-label={t('presetBrowser.searchPlaceholder')}
-            value={importSearch}
-            onChange={(e) => setImportSearch(e.target.value)}
-            className="w-full rounded border-none bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
-          />
-        )}
-        {importedPresets.length === 0 ? (
-          <p className="py-2 text-center text-xs text-white/30">
-            {t('importedPresets.emptyState')}
-          </p>
-        ) : (
-          <div className="min-h-0 flex-1">
-            <Virtuoso
-              data={filteredImportedPresets}
-              style={{ height: Math.min(filteredImportedPresets.length * 32, 192) }}
-              itemContent={(_index, preset) => (
-                <div className="flex items-center justify-between rounded bg-white/5 px-2 py-1">
-                  <span className="min-w-0 flex-1 truncate text-xs text-white/70">
-                    {preset.name}
-                  </span>
-                  <button
-                    onClick={() => handleDeleteImportedPreset(preset)}
-                    className="ml-1 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-red-500/20 hover:text-red-400"
-                    title={t('importedPresets.deletePreset')}
-                    aria-label={t('importedPresets.deletePreset')}
-                  >
-                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
-                      <path
-                        fillRule="evenodd"
-                        d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              )}
-            />
-          </div>
-        )}
-      </div>
+      )}
 
-      {/* Imported textures section */}
-      {importedTextures.length > 0 && (
-        <>
-          <div className="border-t border-white/10" />
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-orange-400">
-                {t('importedTextures.importTextures')} ({importedTextures.length})
-              </span>
+      {/* Textures sub-tab */}
+      {importSubTab === 'textures' && (
+        <div className="flex min-h-0 flex-1 flex-col gap-1">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleImportTextures}
+              className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
+            >
+              {t('importedTextures.importTextures')}
+            </button>
+            {importedTextures.length > 0 && (
               <button
                 onClick={handleClearAllTextures}
                 className="cursor-pointer rounded border-none bg-red-500/20 px-1.5 py-0.5 text-[9px] text-red-400/70 hover:bg-red-500/30 hover:text-red-400"
               >
                 {t('importedTextures.clearAll')}
               </button>
-            </div>
-            <p className="text-[10px] text-white/30">{t('importedTextures.gpuNote')}</p>
-            <div className="flex max-h-32 flex-col gap-0.5 overflow-y-auto">
-              {importedTextures.map((tex) => (
-                <div
-                  key={tex.name}
-                  className="flex items-center justify-between rounded bg-white/5 px-2 py-1"
-                >
-                  <div className="min-w-0 flex-1">
-                    <span className="block truncate text-xs text-white/70">{tex.name}</span>
-                    <span className="text-[10px] text-white/30">
-                      {tex.width}×{tex.height} · {(tex.sizeBytes / 1024).toFixed(0)}KB
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => handleDeleteTexture(tex)}
-                    className="ml-1 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-red-500/20 hover:text-red-400"
-                    title={t('importedTextures.deleteTexture')}
-                    aria-label={t('importedTextures.deleteTexture')}
-                  >
-                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
-                      <path
-                        fillRule="evenodd"
-                        d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              ))}
-            </div>
+            )}
           </div>
-        </>
+          {importedTextures.length > 0 && (
+            <p className="text-[10px] text-white/30">{t('importedTextures.gpuNote')}</p>
+          )}
+          {importedTextures.length === 0 ? (
+            <p className="py-2 text-center text-xs text-white/30">
+              {t('importedTextures.emptyStateTextures')}
+            </p>
+          ) : (
+            <div className="min-h-0 flex-1">
+              <Virtuoso
+                data={importedTextures}
+                style={{ height: Math.min(importedTextures.length * 40, 320) }}
+                itemContent={(_index, tex) => (
+                  <div className="flex items-center justify-between rounded bg-white/5 px-2 py-1">
+                    <div className="min-w-0 flex-1">
+                      <span className="block truncate text-xs text-white/70">{tex.name}</span>
+                      <span className="text-[10px] text-white/30">
+                        {tex.width}×{tex.height} · {(tex.sizeBytes / 1024).toFixed(0)}KB
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteTexture(tex)}
+                      className="ml-1 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-red-500/20 hover:text-red-400"
+                      title={t('importedTextures.deleteTexture')}
+                      aria-label={t('importedTextures.deleteTexture')}
+                    >
+                      <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
+                        <path
+                          fillRule="evenodd"
+                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+              />
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

@@ -138,13 +138,18 @@ describe('PresetBrowser', () => {
     );
 
     await user.click(screen.getByText('import'));
+    // Presets sub-tab is selected by default
     expect(screen.getByText('Import .milk')).toBeInTheDocument();
-    expect(screen.getByText('Import Textures')).toBeInTheDocument();
     expect(
       screen.getByText(
         'No imported presets. Use "Import .milk" to add community MilkDrop presets.',
       ),
     ).toBeInTheDocument();
+    // Import Textures button is in the textures sub-tab (not visible by default)
+    expect(screen.queryByText('Import Textures')).not.toBeInTheDocument();
+    // Switch to textures sub-tab
+    await user.click(screen.getByText(/Imported Textures/));
+    expect(screen.getByText('Import Textures')).toBeInTheDocument();
     // Search bar should be hidden on import tab
     expect(screen.queryByPlaceholderText('Search presets...')).not.toBeInTheDocument();
   });

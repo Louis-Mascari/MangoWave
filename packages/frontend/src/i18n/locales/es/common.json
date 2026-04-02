@@ -3,6 +3,8 @@
   "reset": "Restablecer",
   "cancel": "Cancelar",
   "apply": "Aplicar",
+  "exporting": "Exportando...",
+  "importing": "Importando...",
   "on": "Activado",
   "off": "Desactivado",
   "back": "Atrás",

@@ -82,7 +82,10 @@
     "categoryFavorites": "즐겨찾기",
     "categoryBlocked": "차단된 프리셋",
     "categoryPacks": "팩, 커스텀 팩 & 제외 항목",
-    "categorySync": "창 동기화"
+    "categorySync": "창 동기화",
+    "includeImported": "가져온 프리셋 및 텍스처 포함",
+    "includeImportedHint": "기기 간 전송을 위해 프리셋 및 텍스처 데이터를 포함합니다",
+    "estimatedSize": "~{{size}} (가져온 데이터 포함)"
   },
 
   "spotifyTab": {

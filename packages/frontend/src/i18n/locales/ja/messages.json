@@ -39,7 +39,8 @@
     "invalidFile": "無効な設定ファイルです",
     "fieldNotApplied": "「{{field}}」を適用できませんでした",
     "importedWithWarnings": "設定をインポートしました。アプリの変更により一部の設定を適用できませんでした",
-    "importedSuccess": "設定のインポートが完了しました"
+    "importedSuccess": "設定のインポートが完了しました",
+    "importedDataRestored": "インポートしたプリセットとテクスチャを復元しました"
   },
   "spotify": {
     "connectingToSpotify": "Spotifyに接続中...",
@@ -130,8 +131,9 @@
       "history": "履歴",
       "import": "インポート"
     },
-    "noPacksSelected": "パックが選択されていません。オートパイロットを一時停止しました",
+    "noPacksSelected": "パックが選択されていません",
     "packsActive": "{{active}}/{{total}}パック有効",
+    "packsHint": "選択したパックがオートパイロットと次のプリセットの対象になります",
     "searchPlaceholder": "プリセットを検索...",
     "clearSearch": "検索をクリア",
     "noPresetsVisible": "表示可能なプリセットがありません",
@@ -161,13 +163,13 @@
     "importSuccess": "{{count}} 件のプリセットをインポートしました",
     "importPartial": "{{total}} 件中 {{success}} 件をインポートしました。{{failed}} 件が失敗しました。",
     "importAllFailed": "{{count}} 件すべてのプリセットのインポートに失敗しました",
-    "fileTooLarge": "\"{{name}}\" が大きすぎます（最大 500KB）",
-    "invalidFileType": "\"{{name}}\" は .milk ファイルではありません",
-    "emptyFile": "\"{{name}}\" は空です",
-    "duplicateName": "\"{{name}}\" は既に存在します",
-    "conversionFailed": "プリセット \"{{name}}\" の変換に失敗しました。スキップします。",
-    "securityBlocked": "\"{{name}}\" にブロックされたコンテンツが含まれています",
-    "nativeNameCollision": "\"{{name}}\" は組み込みプリセットに既に存在します",
+    "fileTooLarge": "サイズが大きすぎます（最大 500KB）",
+    "invalidFileType": ".milk ファイルではありません",
+    "emptyFile": "ファイルが空です",
+    "duplicateName": "既に存在します",
+    "conversionFailed": "変換に失敗しました",
+    "securityBlocked": "ブロックされたコンテンツが含まれています",
+    "nativeNameCollision": "組み込みプリセットに既に存在します",
     "missingTextures": "不足しているテクスチャ（アップロードされるまでノイズとして表示されます）: {{textures}}",
     "deletePreset": "インポートしたプリセットを削除",
     "deleteConfirm": "\"{{name}}\" を削除しますか？.milk ファイルを再インポートする必要があります。",
@@ -179,15 +181,16 @@
   },
 
   "importedTextures": {
+    "sectionTitle": "インポート済みテクスチャ",
     "importTextures": "テクスチャをインポート",
     "importSuccess": "{{count}}個のテクスチャをインポートしました",
     "importPartial": "{{total}}個中{{success}}個のテクスチャをインポートしました。{{failed}}個失敗。",
     "importAllFailed": "{{count}}個のテクスチャすべてのインポートに失敗しました",
-    "fileTooLarge": "\"{{name}}\" が大きすぎます（最大2MB）",
-    "invalidFileType": "\"{{name}}\" はサポートされている画像ファイルではありません（JPEG、PNG、またはWebP）",
-    "builtinTextureShadow": "\"{{name}}\" はビルトインテクスチャのため置き換えできません",
-    "readFailed": "\"{{name}}\" の読み込みに失敗しました",
-    "decodeFailed": "\"{{name}}\" のデコードに失敗しました",
+    "fileTooLarge": "サイズが大きすぎます（最大2MB）",
+    "invalidFileType": "サポートされている画像ではありません（JPEG、PNG、またはWebP）",
+    "builtinTextureShadow": "ビルトインテクスチャのため置き換えできません",
+    "readFailed": "ファイルの読み込みに失敗しました",
+    "decodeFailed": "画像のデコードに失敗しました",
     "deleteTexture": "インポートしたテクスチャを削除",
     "deleteConfirm": "\"{{name}}\" を削除しますか？画像ファイルを再インポートする必要があります。既に読み込まれたプリセットはページをリロードするまで使用し続けます。",
     "clearAll": "すべてのテクスチャを削除",
@@ -195,7 +198,8 @@
     "cleared": "インポートしたテクスチャをすべて削除しました",
     "gpuNote": "GPUに読み込まれたテクスチャはページをリロードするまで保持されます。",
     "idbUnavailable": "インポートしたテクスチャにはストレージアクセスが必要ですが、プライベートブラウジングモードでは利用できません。",
-    "duplicateName": "\"{{name}}\" は既に存在します"
+    "duplicateName": "既に存在します",
+    "emptyStateTextures": "インポートされたテクスチャはありません。「テクスチャをインポート」でカスタムテクスチャ画像を追加できます。"
   },
 
   "customPacks": {

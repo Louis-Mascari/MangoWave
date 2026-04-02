@@ -82,7 +82,10 @@
     "categoryFavorites": "Favorit",
     "categoryBlocked": "Preset Diblokir",
     "categoryPacks": "Paket, Paket Kustom & Pengecualian",
-    "categorySync": "Sinkronisasi Jendela"
+    "categorySync": "Sinkronisasi Jendela",
+    "includeImported": "Sertakan preset dan tekstur yang diimpor",
+    "includeImportedHint": "Menyertakan data preset dan tekstur untuk transfer antar perangkat",
+    "estimatedSize": "~{{size}} dengan data impor"
   },
 
   "spotifyTab": {

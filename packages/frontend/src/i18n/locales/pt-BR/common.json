@@ -3,6 +3,8 @@
   "reset": "Redefinir",
   "cancel": "Cancelar",
   "apply": "Aplicar",
+  "exporting": "Exportando...",
+  "importing": "Importando...",
   "on": "Ligado",
   "off": "Desligado",
   "back": "Voltar",

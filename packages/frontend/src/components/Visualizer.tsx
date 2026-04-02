@@ -29,7 +29,8 @@ export function Visualizer({
   const eq = useSettingsStore((s) => s.eq);
   const audio = useSettingsStore((s) => s.audio);
 
-  // Initialize renderer
+  // Initialize renderer — deferred by one frame so the launch animation
+  // can start rendering before heavy WebGL init blocks the main thread.
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = audioEngine.context;
@@ -50,46 +51,6 @@ export function Visualizer({
 
     updateSize();
 
-    // Build excluded set for initial preset pick: blocked + effective quarantine + mobile-blocked
-    const { blockedPresets, excludedOverrides } = useSettingsStore.getState();
-    const overrideSet = new Set(excludedOverrides);
-    const excludedPresets = new Set<string>(blockedPresets);
-    for (const name of quarantinedData.presets as string[]) {
-      if (!overrideSet.has(name)) excludedPresets.add(name);
-    }
-
-    // On mobile, add blocked presets to the excluded set (unless user overrode)
-    if (isMobileDevice) {
-      for (const name of mobileBlockedData.presets as string[]) {
-        if (!overrideSet.has(name)) excludedPresets.add(name);
-      }
-    }
-
-    renderer.init(canvas, ctx, analyser, onPresetChange, {
-      meshWidth: performance.meshWidth,
-      meshHeight: performance.meshHeight,
-      textureRatio: performance.textureRatio,
-      fxaa: performance.fxaa,
-      excludedPresets,
-    });
-
-    // Register imported preset names from persisted metadata (synchronously available).
-    // The actual .milk text in IDB loads asynchronously, but names are sufficient for
-    // pool building. Lazy conversion in usePresetNavigation handles the rest.
-    const { importedPresets: importedMeta } = useSettingsStore.getState();
-    if (importedMeta.length > 0) {
-      renderer.registerImportedPresetNames(importedMeta.map((p) => p.name));
-    }
-
-    // Load user-imported textures (built-in textures already loaded during init)
-    const textureStore = useImportedTexturesStore.getState();
-    if (textureStore.loaded && textureStore.textures.size > 0) {
-      renderer.loadExtraImages(textureStore.getAllTextures());
-    }
-
-    renderer.start();
-    onPresetsLoaded(renderer.presetList, renderer.presetPackMap);
-
     const handleContextLost = (e: Event) => {
       e.preventDefault();
       renderer.stop();
@@ -99,7 +60,52 @@ export function Visualizer({
     canvas.addEventListener('webglcontextlost', handleContextLost);
     window.addEventListener('resize', updateSize);
 
+    // Defer heavy init (WebGL context, shader compilation, preset map building)
+    // so the launch animation's first frames paint smoothly.
+    const initId = requestAnimationFrame(() => {
+      // Build excluded set for initial preset pick: blocked + effective quarantine + mobile-blocked
+      const { blockedPresets, excludedOverrides } = useSettingsStore.getState();
+      const overrideSet = new Set(excludedOverrides);
+      const excludedPresets = new Set<string>(blockedPresets);
+      for (const name of quarantinedData.presets as string[]) {
+        if (!overrideSet.has(name)) excludedPresets.add(name);
+      }
+
+      // On mobile, add blocked presets to the excluded set (unless user overrode)
+      if (isMobileDevice) {
+        for (const name of mobileBlockedData.presets as string[]) {
+          if (!overrideSet.has(name)) excludedPresets.add(name);
+        }
+      }
+
+      renderer.init(canvas, ctx, analyser, onPresetChange, {
+        meshWidth: performance.meshWidth,
+        meshHeight: performance.meshHeight,
+        textureRatio: performance.textureRatio,
+        fxaa: performance.fxaa,
+        excludedPresets,
+      });
+
+      // Register imported preset names from persisted metadata (synchronously available).
+      // The actual .milk text in IDB loads asynchronously, but names are sufficient for
+      // pool building. Lazy conversion in usePresetNavigation handles the rest.
+      const { importedPresets: importedMeta } = useSettingsStore.getState();
+      if (importedMeta.length > 0) {
+        renderer.registerImportedPresetNames(importedMeta.map((p) => p.name));
+      }
+
+      // Load user-imported textures (built-in textures already loaded during init)
+      const textureStore = useImportedTexturesStore.getState();
+      if (textureStore.loaded && textureStore.textures.size > 0) {
+        renderer.loadExtraImages(textureStore.getAllTextures());
+      }
+
+      renderer.start();
+      onPresetsLoaded(renderer.presetList, renderer.presetPackMap);
+    });
+
     return () => {
+      cancelAnimationFrame(initId);
       canvas.removeEventListener('webglcontextlost', handleContextLost);
       window.removeEventListener('resize', updateSize);
       renderer.destroy();

@@ -48,6 +48,7 @@ export function usePresetNavigation({
   const toggleFavoritePreset = useSettingsStore((s) => s.toggleFavoritePreset);
   const toggleBlockPreset = useSettingsStore((s) => s.toggleBlockPreset);
   const autopilotMode = useSettingsStore((s) => s.autopilot.mode);
+  const autopilotEnabled = useSettingsStore((s) => s.autopilot.enabled);
   const autopilotFavoriteWeight = useSettingsStore((s) => s.autopilot.favoriteWeight);
 
   const canGoBack = usePresetHistoryStore((s) => s.cursor > 0);
@@ -248,6 +249,13 @@ export function usePresetNavigation({
     resetAutopilotRef.current();
     usePresetHistoryStore.getState().resetRound();
   }, [autopilotMode, enabledPacks, activeCustomPackId, resetAutopilotRef]);
+
+  // Auto-disable autopilot when no packs are selected (and no custom pack active)
+  useEffect(() => {
+    if (enabledPacks.length === 0 && !activeCustomPackId && autopilotEnabled) {
+      useSettingsStore.getState().setAutopilotEnabled(false);
+    }
+  }, [enabledPacks, activeCustomPackId, autopilotEnabled]);
 
   // If initial preset isn't in an enabled pack, pick one that is.
   // Only runs once — the renderer's init() already filters blocked/quarantined.

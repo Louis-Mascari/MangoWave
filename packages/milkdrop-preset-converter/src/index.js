@@ -604,16 +604,6 @@ function fixUniformAssignments(shaderBody) {
     { name: 'rand_preset', type: 'vec4' },
     { name: 'rand_frame', type: 'vec4' },
     { name: 'hue_shader', type: 'vec3' },
-    // butterchurn packs q1-q32 into _qa-_qh as uniform vec4;
-    // presets that assign to q-values get packed assignments like _qg.x = ...
-    { name: '_qa', type: 'vec4' },
-    { name: '_qb', type: 'vec4' },
-    { name: '_qc', type: 'vec4' },
-    { name: '_qd', type: 'vec4' },
-    { name: '_qe', type: 'vec4' },
-    { name: '_qf', type: 'vec4' },
-    { name: '_qg', type: 'vec4' },
-    { name: '_qh', type: 'vec4' },
   ];
 
   let result = shaderBody;
@@ -636,6 +626,42 @@ function fixUniformAssignments(shaderBody) {
       }
     }
   }
+
+  // butterchurn's preamble maps q1-q32 to packed vec4 uniforms via #define
+  // (e.g. `#define q25 _qg.x`). If the shader body assigns to any q-variable,
+  // it expands to an illegal uniform write. Fix: create mutable float locals.
+  const bodyIdx = result.indexOf('shader_body');
+  if (bodyIdx > -1) {
+    const braceIdx = result.indexOf('{', bodyIdx);
+    if (braceIdx > -1) {
+      const bodyContent = result.substring(braceIdx + 1);
+      const qAssigned = new Set();
+      const qAssignRe = /\b(q\d{1,2})\s*[+\-*/]?=/g;
+      let qm;
+      while ((qm = qAssignRe.exec(bodyContent)) !== null) {
+        const num = parseInt(qm[1].substring(1), 10);
+        if (num >= 1 && num <= 32) qAssigned.add(qm[1]);
+      }
+      if (qAssigned.size > 0) {
+        // Also find q-vars that are read (so we don't miss renaming reads)
+        const decls = [];
+        for (const qName of qAssigned) {
+          const localName = '_mw_' + qName;
+          const nameRe = new RegExp('\\b' + qName + '\\b', 'g');
+          result = result.replace(nameRe, localName);
+          decls.push('    float ' + localName + ' = ' + qName + ';');
+        }
+        // Re-find brace position (may have shifted from prior uniform fixes)
+        const bodyIdx2 = result.indexOf('shader_body');
+        const braceIdx2 = result.indexOf('{', bodyIdx2);
+        result =
+          result.substring(0, braceIdx2 + 1) +
+          '\n' + decls.join('\n') +
+          result.substring(braceIdx2 + 1);
+      }
+    }
+  }
+
   return result;
 }
 

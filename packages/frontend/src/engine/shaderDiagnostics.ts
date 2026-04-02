@@ -73,7 +73,21 @@ export function installShaderDiagnostics(): void {
       failures.push(entry);
       failedPresets.add(currentPreset);
 
+      const src = this.getShaderSource(shader) ?? '(no source)';
       console.error(`[MW-QA] ❌ SHADER COMPILE FAILED: "${currentPreset}" (${shaderType})\n${log}`);
+      // Dump lines around the error line number
+      const lineMatch = log.match(/0:(\d+):/);
+      if (lineMatch) {
+        const errLine = parseInt(lineMatch[1], 10);
+        const lines = src.split('\n');
+        const start = Math.max(0, errLine - 5);
+        const end = Math.min(lines.length, errLine + 5);
+        const snippet = lines
+          .slice(start, end)
+          .map((l, i) => `${start + i + 1}: ${l}`)
+          .join('\n');
+        console.log(`[MW-QA] SHADER LINES ${start + 1}-${end}:\n${snippet}`);
+      }
     }
   };
 

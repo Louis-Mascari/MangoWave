@@ -558,26 +558,29 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
   if (presetLocals) {
     const bodyDeclaredNames = new Set();
     const bodyDeclRe =
-      /(?:float|vec[234]|mat[234](?:x[234])?|int|bool)\s+([\w][\w\s,]*);/g;
+      /\b(?:float|vec[234]|mat[234](?:x[234])?|int|bool)\s+(\w+)/g;
     let bdm;
     while ((bdm = bodyDeclRe.exec(body)) !== null) {
-      for (const n of bdm[1].split(',')) {
-        const name = n.trim().split(/\s/)[0]; // handle `float dx = expr`
-        if (name) bodyDeclaredNames.add(name);
-      }
+      bodyDeclaredNames.add(bdm[1]);
     }
     if (bodyDeclaredNames.size > 0) {
-      // Filter out lines from presetLocals whose variables are all already in the body
+      // Remove variables from presetLocals that are already declared in the body.
+      // For multi-var lines like `float dx, dy;`, keep only non-conflicting names.
       presetLocals = presetLocals
         .split('\n')
-        .filter((line) => {
+        .map((line) => {
           const m = line.match(
-            /(?:float|vec[234]|mat[234](?:x[234])?|int|bool)\s+([\w][\w\s,]*);/,
+            /(\s*(?:float|vec[234]|mat[234](?:x[234])?|int|bool))\s+([\w][\w\s,]*);/,
           );
-          if (!m) return true; // keep non-declaration lines
-          const names = m[1].split(',').map((n) => n.trim().split(/\s/)[0]);
-          return !names.every((n) => bodyDeclaredNames.has(n));
+          if (!m) return line;
+          const type = m[1];
+          const names = m[2].split(',').map((n) => n.trim());
+          const kept = names.filter((n) => !bodyDeclaredNames.has(n));
+          if (kept.length === 0) return ''; // all conflicting — drop line
+          if (kept.length === names.length) return line; // no conflicts
+          return type + ' ' + kept.join(', ') + ';';
         })
+        .filter((line) => line.trim())
         .join('\n');
     }
     if (presetLocals.trim()) {
@@ -615,7 +618,7 @@ function fixUniformAssignments(shaderBody) {
 
   let result = shaderBody;
   for (const { name, type } of uniformsToFix) {
-    const assignPattern = new RegExp('\\b' + name + '\\s*=');
+    const assignPattern = new RegExp('\\b' + name + '(\\.[xyzw]+)?\\s*[+\\-*/]?=');
     if (!assignPattern.test(result)) continue;
 
     const localName = '_mw_' + name;

@@ -12,6 +12,9 @@ import { convertHLSLShader } from 'hlslparser-wasm';
 // butterchurn's shader template does NOT define GetPixel/GetMain/GetBlur/saturate —
 // they must appear in the shader header (before shader_body) so GLSL #define expands them.
 const MILKDROP_GLSL_MACROS = [
+  '#define M_PI 3.14159265359',
+  '#define M_PI_2 6.28318530718',
+  '#define M_INV_PI_2 0.159154943091895',
   '#define GetPixel(uv) (texture(sampler_main, uv).xyz)',
   '#define GetMain(uv) (texture(sampler_main, uv).xyz)',
   '#define GetBlur1(uv) (texture(sampler_blur1, uv).xyz * scale1 + bias1)',
@@ -102,6 +105,29 @@ function convertShaderTextLevel(shader) {
     result = MILKDROP_GLSL_MACROS + '\nshader_body\n{\n' + result + '\n}\n';
   }
 
+  // Make uv mutable if the shader body assigns to it (GLSL ES 3.0 in varyings are read-only)
+  const sbIdx2 = result.indexOf('shader_body');
+  if (sbIdx2 > -1) {
+    const braceIdx = result.indexOf('{', sbIdx2);
+    if (braceIdx > -1) {
+      // Find matching closing brace
+      let depth = 0;
+      let closeIdx = -1;
+      for (let i = braceIdx; i < result.length; i++) {
+        if (result[i] === '{') depth++;
+        else if (result[i] === '}') {
+          depth--;
+          if (depth === 0) { closeIdx = i; break; }
+        }
+      }
+      if (closeIdx > -1) {
+        let bodyContent = result.substring(braceIdx + 1, closeIdx);
+        bodyContent = makeUvMutable(bodyContent);
+        result = result.substring(0, braceIdx + 1) + bodyContent + result.substring(closeIdx);
+      }
+    }
+  }
+
   return result;
 }
 
@@ -148,6 +174,11 @@ function expandPrepareShaderMacros(hlsl) {
   result = expandFunctionMacro(result, 'GetBlur2', '(tex2D(sampler_blur2,$1).xyz*scale2 + bias2)');
   result = expandFunctionMacro(result, 'GetBlur3', '(tex2D(sampler_blur3,$1).xyz*scale3 + bias3)');
   result = expandFunctionMacro(result, 'lum', '(dot($1,float3(0.32,0.49,0.29)))');
+
+  // Expand math constants to literals (hlslparser can't handle #define)
+  result = result.replace(/\bM_INV_PI_2\b/g, '0.159154943091895');
+  result = result.replace(/\bM_PI_2\b/g, '6.28318530718');
+  result = result.replace(/\bM_PI\b/g, '3.14159265359');
 
   // Strip all #define lines (parser can't handle them)
   result = result.replace(/^[ \t]*#define\b[^\n]*$/gm, '');
@@ -323,6 +354,49 @@ function deepFixParserOutput(val) {
   return val;
 }
 
+// Variable names declared by butterchurn's preamble (prepareShader output) and hlslparser
+// boilerplate. These must NOT be re-declared when extracting preset-specific globals.
+const PREAMBLE_VARS = new Set([
+  'texsize_noise_lq', 'texsize_noise_mq', 'texsize_noise_hq', 'texsize_noise_lq_lite',
+  'texsize_noisevol_lq', 'texsize_noisevol_hq',
+  '_qa', '_qb', '_qc', '_qd', '_qe', '_qf', '_qg', '_qh',
+  ...Array.from({ length: 32 }, (_, i) => 'q' + (i + 1)),
+  'blur1_min', 'blur1_max', 'blur2_min', 'blur2_max', 'blur3_min', 'blur3_max',
+  'scale1', 'scale2', 'scale3', 'bias1', 'bias2', 'bias3',
+  'slow_roam_cos', 'roam_cos', 'slow_roam_sin', 'roam_sin',
+  'hue_shader', 'time', 'rand_preset', 'rand_frame', 'progress', 'frame', 'fps', 'decay',
+  'bass', 'mid', 'treb', 'vol', 'bass_att', 'mid_att', 'treb_att', 'vol_att',
+  'texsize', 'aspect', 'rad', 'ang', 'uv_orig',
+  // Samplers from butterchurn preamble
+  'sampler_main', 'sampler_fw_main', 'sampler_pw_main', 'sampler_fc_main', 'sampler_pc_main',
+  'sampler_noise_lq', 'sampler_noise_lq_lite', 'sampler_noise_mq', 'sampler_noise_hq',
+  'sampler_noisevol_lq', 'sampler_noisevol_hq', 'sampler_pw_noise_lq',
+  'sampler_blur1', 'sampler_blur2', 'sampler_blur3',
+]);
+
+/** Missing mult0 scalar↔vector overloads. hlslparser generates same-type pairs
+ *  (float,float), (vec2,vec2), etc., but HLSL allows scalar*vector which hlslparser
+ *  emits as mult0(float,vec3) etc. These delegate per-component to preserve NaN safety. */
+const MULT_MIXED_OVERLOADS = `
+vec2 mult0(float x, vec2 y) { return vec2(mult0(x, y.x), mult0(x, y.y)); }
+vec2 mult0(vec2 x, float y) { return vec2(mult0(x.x, y), mult0(x.y, y)); }
+vec3 mult0(float x, vec3 y) { return vec3(mult0(x, y.x), mult0(x, y.y), mult0(x, y.z)); }
+vec3 mult0(vec3 x, float y) { return vec3(mult0(x.x, y), mult0(x.y, y), mult0(x.z, y)); }
+vec4 mult0(float x, vec4 y) { return vec4(mult0(x, y.x), mult0(x, y.y), mult0(x, y.z), mult0(x, y.w)); }
+vec4 mult0(vec4 x, float y) { return vec4(mult0(x.x, y), mult0(x.y, y), mult0(x.z, y), mult0(x.w, y)); }
+`.trim();
+
+/** If the shader body assigns to `uv`, create a mutable local copy.
+ *  butterchurn declares `uv` as `in vec2` (read-only in GLSL ES 3.0).
+ *  Presets that write to uv (panning, zooming, distortion) need a mutable copy. */
+function makeUvMutable(body) {
+  if (/\buv\s*[+\-*\/]?=/.test(body)) {
+    body = body.replace(/\buv\b/g, '_mw_uv');
+    body = '    vec2 _mw_uv = uv;\n' + body;
+  }
+  return body;
+}
+
 /** Structure hlslparser GLSL output for butterchurn.
  *  hlslparser outputs: helper functions + main_shader_sentinel function.
  *  butterchurn expects: header (helper functions) + shader_body { body statements }.
@@ -379,6 +453,45 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
     .replace(/\b[iu]vec3\(/g, 'vec3(')
     .replace(/\b[iu]vec4\(/g, 'vec4(');
 
+  // Add missing mult0 scalar↔vector overloads if mult0 was generated
+  if (/\bfloat\s+mult0\s*\(/.test(header)) {
+    header += '\n' + MULT_MIXED_OVERLOADS;
+  }
+
+  // Extract preset-specific global variable declarations from the header.
+  // Presets declare variables outside shader_body (e.g. `float2 rs; float3 noise;`) which
+  // prepareShader keeps as globals. hlslparser outputs them as globals before the main
+  // function. We must preserve these as locals inside shader_body.
+  // Sampler declarations go in the header (GLSL requires uniform samplers; butterchurn
+  // scans the header to bind them).
+  const varDeclRe =
+    /^(?:(?:(?:uniform\s+)?sampler\w*|float|vec[234]|mat[234](?:x[234])?|int|bool)\s+[\w][\w\s,]*);/gm;
+  let presetLocals = '';
+  let presetSamplers = '';
+  let varMatch;
+  while ((varMatch = varDeclRe.exec(rawHeader)) !== null) {
+    const line = varMatch[0];
+    // Skip uniform/in/out declarations (butterchurn provides these)
+    if (/^\s*(?:uniform|in|out)\s/.test(line)) continue;
+    // Check if ALL declared names on this line are butterchurn preamble vars
+    const namesPart = line.replace(/^[^;]*?\s+/, '').replace(/;$/, '');
+    const names = namesPart.split(',').map((n) => n.trim());
+    const allPreamble = names.every((n) => PREAMBLE_VARS.has(n));
+    if (allPreamble) continue;
+
+    // Sampler declarations → header with uniform prefix (butterchurn scans for these)
+    if (/sampler\w*/.test(line)) {
+      const uniformLine = line.startsWith('uniform') ? line : 'uniform ' + line;
+      presetSamplers += uniformLine + '\n';
+    } else {
+      presetLocals += '    ' + line + '\n';
+    }
+  }
+
+  if (presetSamplers) {
+    header = (header ? header + '\n' : '') + presetSamplers.trim();
+  }
+
   // Find matching closing brace for the function
   let braceDepth = 0;
   let bodyStart = -1;
@@ -407,6 +520,14 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
   // Strip "return vec4(ret, ...);" — butterchurn's template provides fragColor assignment.
   // hlslparser may wrap in parens or add type casts, so match broadly.
   body = body.replace(/\s*return\s+vec4\s*\([^;]*\)\s*;\s*/g, '');
+
+  // Prepend preset-specific local variable declarations
+  if (presetLocals) {
+    body = presetLocals + body;
+  }
+
+  // Make uv mutable if the shader body assigns to it
+  body = makeUvMutable(body);
 
   return (header ? header + '\n' : '') + ' shader_body {\n' + body + '\n}';
 }

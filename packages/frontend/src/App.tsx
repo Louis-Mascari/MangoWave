@@ -47,6 +47,7 @@ import {
   supportsFullscreen,
 } from './utils/fullscreen.ts';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
+import { installShaderDiagnostics } from './engine/shaderDiagnostics.ts';
 
 /**
  * Minimal shell for OAuth popup callbacks.
@@ -60,6 +61,11 @@ function OAuthPopup() {
       {t('spotify.connectingToSpotify')}
     </div>
   );
+}
+
+// DEV-ONLY: shader diagnostics for QA — remove before merging to main
+if (import.meta.env.DEV) {
+  installShaderDiagnostics();
 }
 
 function App() {

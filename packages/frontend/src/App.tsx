@@ -63,7 +63,7 @@ function OAuthPopup() {
   );
 }
 
-// DEV-ONLY: shader diagnostics for QA — remove before merging to main
+// DEV-ONLY: shader diagnostics for QA (tree-shaken from production builds)
 if (import.meta.env.DEV) {
   installShaderDiagnostics();
 }

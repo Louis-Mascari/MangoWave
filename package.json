@@ -41,6 +41,12 @@
     "packages/milkdrop-eel-parser/src/**/*.{js,ts}": [
       "prettier --write"
     ],
+    "packages/milkdrop-preset-converter/src/**/*.{js,ts}": [
+      "prettier --write"
+    ],
+    "packages/hlslparser-wasm/src/**/*.{js,ts}": [
+      "prettier --write"
+    ],
     "*.{json,md,yml,yaml}": [
       "prettier --write"
     ]

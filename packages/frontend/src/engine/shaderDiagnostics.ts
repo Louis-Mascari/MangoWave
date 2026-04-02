@@ -4,14 +4,13 @@
  * Monkey-patches WebGL2RenderingContext to intercept compileShader / linkProgram
  * and log failures keyed to the current preset name.
  *
- * Usage:
- *   1. Import and call `installShaderDiagnostics()` once (e.g. in App.tsx, dev-only).
- *   2. Call `setDiagnosticPresetName(name)` on every preset change.
- *   3. Blast through presets (autopilot at 2-3s).
- *   4. Call `getShaderFailures()` in the console to get the full report,
- *      or just copy the console output.
+ * Gated behind `import.meta.env.DEV` — tree-shaken from production builds.
  *
- * Remove this file (and its callsites) before merging to main.
+ * Usage:
+ *   1. `installShaderDiagnostics()` is called in App.tsx (dev-only guard).
+ *   2. `setDiagnosticPresetName(name)` is called on every preset change.
+ *   3. Blast through presets (autopilot at 2-3s).
+ *   4. Call `__mwShaderQA.getFailures()` in the console to get the full report.
  */
 
 interface ShaderFailure {
@@ -29,6 +28,7 @@ let installed = false;
 let presetCount = 0;
 
 export function setDiagnosticPresetName(name: string): void {
+  if (!installed) return;
   currentPreset = name;
   presetCount++;
   console.log(`[MW-QA] #${presetCount} Loaded: "${name}"`);

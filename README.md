@@ -95,18 +95,19 @@ NPM workspaces monorepo. Node >= 20 required.
 
 ```
 MangoWave/
-├── packages/frontend/                  # React 19 + Vite 8 + TypeScript — the visualizer app
-├── packages/butterchurn/               # Vendored butterchurn with ESM wrapper + types
-├── packages/butterchurn-presets/       # Vendored preset packs with ESM wrapper + types
-├── packages/milkdrop-preset-converter/ # Forked .milk → butterchurn JSON converter (ES 3.0 shaders via hlslparser-wasm)
-├── packages/hlslparser-wasm/           # HLSL → GLSL ES 3.0 compiler (projectM fork, Emscripten WASM)
-├── packages/backend/                   # Lambda handlers for Spotify OAuth & settings sync
-├── packages/landing/                   # Static landing page (HTML + CSS, no JS)
-├── infrastructure/                     # AWS CDK v2 — DynamoDB, Lambda, API Gateway, S3, CloudFront, CloudWatch
-├── .github/                            # CI, deploy, dependabot, issue templates, PR template, CODEOWNERS, SECURITY
-├── SELF-HOSTING.md                     # Guide for deploying your own instance
-├── knip.json                           # Knip config (unused code detection)
-└── LICENSE                             # AGPL-3.0
+├── packages/frontend/                   # React 19 + Vite 8 + TypeScript — the visualizer app
+├── packages/butterchurn/                # Vendored butterchurn with ESM wrapper + types
+├── packages/butterchurn-presets/        # Vendored preset packs with ESM wrapper + types
+├── packages/milkdrop-preset-converter/  # Forked .milk → butterchurn JSON converter (hlslparser-wasm)
+├── packages/milkdrop-eel-parser/        # Vendored EEL2 equation parser (patched int() → Math.trunc)
+├── packages/hlslparser-wasm/            # HLSL → GLSL ES 3.0 compiler (projectM fork, WASM)
+├── packages/backend/                    # Lambda handlers for Spotify OAuth & settings sync
+├── packages/landing/                    # Static landing page (HTML + CSS, no JS)
+├── infrastructure/                      # AWS CDK v2 — DynamoDB, Lambda, API Gateway, S3, CloudFront
+├── .github/                             # CI, deploy, dependabot, issue templates, PR template
+├── SELF-HOSTING.md                      # Guide for deploying your own instance
+├── knip.json                            # Knip config (unused code detection)
+└── LICENSE                              # AGPL-3.0
 ```
 
 See each package's README for details.
@@ -197,8 +198,9 @@ See **[SELF-HOSTING.md](SELF-HOSTING.md)** for full instructions.
 
 ## Acknowledgments
 
-- [butterchurn](https://github.com/jberg/butterchurn) — WebGL 2 implementation of the MilkDrop visualizer
-- [projectM](https://github.com/projectM-visualizer/projectm) — hlslparser fork (GLSL ES 3.0 + PS3 support), vendored in `packages/hlslparser-wasm`
+- [butterchurn](https://github.com/jberg/butterchurn) — WebGL 2 implementation of the MilkDrop visualizer by Jordan Berg
+- [milkdrop-preset-converter](https://github.com/jberg/milkdrop-preset-converter), [milkdrop-eel-parser](https://github.com/jberg/milkdrop-eel-parser), [milkdrop-preset-utils](https://github.com/jberg/milkdrop-preset-utils) — MilkDrop toolchain by Jordan Berg
+- [projectM](https://github.com/projectM-visualizer/projectm) — open-source MilkDrop reimplementation; hlslparser fork (GLSL ES 3.0) vendored in `packages/hlslparser-wasm`
 - [MilkDrop](https://en.wikipedia.org/wiki/MilkDrop) — original visualizer by Ryan Geiss
 - [Winamp](https://en.wikipedia.org/wiki/Winamp) — created by Nullsoft
 

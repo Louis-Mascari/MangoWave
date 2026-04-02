@@ -214,6 +214,41 @@ function expandPrepareShaderMacros(hlsl) {
   // Strip all #define lines (parser can't handle them)
   result = result.replace(/^[ \t]*#define\b[^\n]*$/gm, '');
 
+  // Move global `const` array declarations inside the shader_body function.
+  // hlslparser handles const arrays correctly when they're local (generates proper
+  // `vec4[]( vec4(...), ... )` constructors) but generates broken flat initializers
+  // when they're global (puts `samples[4] = vec4[](-1, 0, 0, ...)` in void main()).
+  // MilkDrop presets sometimes declare `const float4 name[N] = { ... };` before
+  // shader_body — moving them inside fixes the code generation.
+  const constArrayRe = /^[ \t]*(const\s+\w+\s+\w+\s*\[\d+\]\s*=\s*\{[\s\S]*?\}\s*;)/gm;
+  let cam;
+  const constArrays = [];
+  while ((cam = constArrayRe.exec(result)) !== null) {
+    constArrays.push({ text: cam[1], index: cam.index, length: cam[0].length });
+  }
+  if (constArrays.length > 0) {
+    // Find the opening brace of shader_body
+    const sbMatch = result.match(/shader_body\s*\([^)]*\)\s*:\s*COLOR0\s*\{/);
+    if (sbMatch) {
+      const insertIdx = sbMatch.index + sbMatch[0].length;
+      // Remove const arrays from their original position and insert after shader_body {
+      let offset = 0;
+      const inserts = [];
+      for (const ca of constArrays) {
+        result =
+          result.substring(0, ca.index - offset) +
+          result.substring(ca.index - offset + ca.length);
+        inserts.push('\n    ' + ca.text);
+        offset += ca.length;
+      }
+      const adjustedInsertIdx = insertIdx - offset;
+      result =
+        result.substring(0, adjustedInsertIdx) +
+        inserts.join('') +
+        result.substring(adjustedInsertIdx);
+    }
+  }
+
   return result;
 }
 
@@ -497,8 +532,9 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
   // function. We must preserve these as locals inside shader_body.
   // Sampler declarations go in the header (GLSL requires uniform samplers; butterchurn
   // scans the header to bind them).
+  // Matches: `float x;`, `vec4 samples[4];`, `float dx, dy;`, `uniform sampler2D tex;`
   const varDeclRe =
-    /^(?:(?:(?:uniform\s+)?sampler\w*|float|vec[234]|mat[234](?:x[234])?|int|bool)\s+[\w][\w\s,]*);/gm;
+    /^(?:(?:(?:uniform\s+)?sampler\w*|float|vec[234]|mat[234](?:x[234])?|int|bool)\s+[\w][\w\s,[\]]*);/gm;
   let presetLocals = '';
   let presetSamplers = '';
   let varMatch;
@@ -508,7 +544,7 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
     if (/^\s*(?:uniform|in|out)\s/.test(line)) continue;
     // Check if ALL declared names on this line are butterchurn preamble vars
     const namesPart = line.replace(/^[^;]*?\s+/, '').replace(/;$/, '');
-    const names = namesPart.split(',').map((n) => n.trim());
+    const names = namesPart.split(',').map((n) => n.trim().replace(/\[.*\]$/, ''));
     const allPreamble = names.every((n) => PREAMBLE_VARS.has(n));
     if (allPreamble) continue;
 
@@ -553,6 +589,38 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
   // Strip "return vec4(ret, ...);" — butterchurn's template provides fragColor assignment.
   // hlslparser may wrap in parens or add type casts, so match broadly.
   body = body.replace(/\s*return\s+vec4\s*\([^;]*\)\s*;\s*/g, '');
+
+  // Fix flat array initializers: hlslparser may output `vec4[]( val, val, val, ... )` without
+  // per-element constructors when the HLSL used flat brace init `{ -1, 0, 0, 0.25, ... }`.
+  // GLSL ES 3.0 requires one expression per array element: `vec4[]( vec4(...), vec4(...) )`.
+  body = body.replace(
+    /\b(vec[234])\[(\d+)\]\s*=\s*\1\[\]\(\s*([^;]+)\)\s*;/g,
+    (match, type, count, args) => {
+      // Check if constructors are already present (e.g. vec4((...), ...))
+      if (new RegExp('\\b' + type + '\\s*\\(').test(args)) return match;
+      // Parse flat values and group into per-element constructors
+      const n = parseInt(count, 10);
+      const dim = parseInt(type[3], 10); // vec2=2, vec3=3, vec4=4
+      // Split args respecting nested parens
+      const values = [];
+      let depth = 0;
+      let start = 0;
+      for (let i = 0; i <= args.length; i++) {
+        if (i === args.length || (args[i] === ',' && depth === 0)) {
+          const val = args.substring(start, i).trim();
+          if (val) values.push(val);
+          start = i + 1;
+        } else if (args[i] === '(') depth++;
+        else if (args[i] === ')') depth--;
+      }
+      if (values.length !== n * dim) return match; // unexpected count, don't modify
+      const elements = [];
+      for (let i = 0; i < n; i++) {
+        elements.push(type + '(' + values.slice(i * dim, (i + 1) * dim).join(', ') + ')');
+      }
+      return type + '[' + count + '] = ' + type + '[]( ' + elements.join(', ') + ' );';
+    },
+  );
 
   // Prepend preset-specific local variable declarations, skipping any that are
   // already declared inside the function body (hlslparser may emit both a global

@@ -41,6 +41,9 @@ Thumbs.db
 coverage/
 .nyc_output/
 
+# Test output artifacts
+mw-import-errors.json
+
 # Playwright
 playwright-report/
 test-results/

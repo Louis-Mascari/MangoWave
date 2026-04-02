@@ -1,4 +1,5 @@
 import butterchurn, { butterchurnExtraImages } from 'butterchurn';
+import { setDiagnosticPresetName } from './shaderDiagnostics.ts';
 import {
   presetsMinimal,
   presetsNonMinimal,
@@ -93,6 +94,7 @@ export class VisualizerRenderer {
       const pool = candidates.length > 0 ? candidates : this.presetKeys;
       const presetName = pool[Math.floor(Math.random() * pool.length)];
       this.currentPresetIndex = this.presetKeys.indexOf(presetName);
+      setDiagnosticPresetName(presetName);
       this.visualizer.loadPreset(this.presets[presetName], 0);
       this.onPresetChange?.(presetName);
     }
@@ -164,6 +166,7 @@ export class VisualizerRenderer {
   loadPreset(name: string, blendTime = 2.0): void {
     if (!this.visualizer) return;
     if (this.presets[name]) {
+      setDiagnosticPresetName(name);
       this.visualizer.loadPreset(this.presets[name], blendTime);
       this.currentPresetIndex = this.presetKeys.indexOf(name);
       this.onPresetChange?.(name);

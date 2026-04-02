@@ -8,7 +8,8 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
-    "build:textures": "node scripts/build-texture-data.cjs"
+    "build:textures": "node scripts/build-texture-data.cjs",
+    "prepare": "node scripts/build-texture-data.cjs"
   },
   "devDependencies": {
     "image-size": "^2.0.2"

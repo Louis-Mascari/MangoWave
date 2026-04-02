@@ -421,7 +421,9 @@ vec4 mult0(vec4 x, float y) { return vec4(mult0(x.x, y), mult0(x.y, y), mult0(x.
  *  butterchurn declares `uv` as `in vec2` (read-only in GLSL ES 3.0).
  *  Presets that write to uv (panning, zooming, distortion) need a mutable copy. */
 function makeUvMutable(body) {
-  if (/\buv(\.[xyzw]+)?\s*[+\-*\/]?=/.test(body)) {
+  // Match uv assignments including hlslparser's parenthesized form: (uv).xy +=
+  if (/\(uv\)\s*\.[xyzw]+\s*[+\-*\/]?=/.test(body) ||
+      /\buv(\.[xyzw]+)?\s*[+\-*\/]?=/.test(body)) {
     body = body.replace(/\buv\b/g, '_mw_uv');
     body = '    vec2 _mw_uv = uv;\n' + body;
   }
@@ -564,24 +566,29 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
       bodyDeclaredNames.add(bdm[1]);
     }
     if (bodyDeclaredNames.size > 0) {
-      // Remove variables from presetLocals that are already declared in the body.
-      // For multi-var lines like `float dx, dy;`, keep only non-conflicting names.
-      presetLocals = presetLocals
-        .split('\n')
-        .map((line) => {
-          const m = line.match(
-            /(\s*(?:float|vec[234]|mat[234](?:x[234])?|int|bool))\s+([\w][\w\s,]*);/,
-          );
-          if (!m) return line;
-          const type = m[1];
-          const names = m[2].split(',').map((n) => n.trim());
-          const kept = names.filter((n) => !bodyDeclaredNames.has(n));
-          if (kept.length === 0) return ''; // all conflicting — drop line
-          if (kept.length === names.length) return line; // no conflicts
-          return type + ' ' + kept.join(', ') + ';';
-        })
-        .filter((line) => line.trim())
-        .join('\n');
+      // For variables in BOTH presetLocals and the body: keep the presetLocals
+      // declaration (appears first) and strip the body's redeclaration.
+      // hlslparser may emit `vec3 ret1 = vec3( ret1 );` at the end of a scope
+      // while the variable was already used above (from the global).
+      const presetLocalNames = new Set();
+      const plNameRe = /(?:float|vec[234]|mat[234](?:x[234])?|int|bool)\s+([\w][\w\s,]*);/g;
+      let plm;
+      while ((plm = plNameRe.exec(presetLocals)) !== null) {
+        for (const n of plm[1].split(',')) {
+          const name = n.trim();
+          if (name && !PREAMBLE_VARS.has(name)) presetLocalNames.add(name);
+        }
+      }
+      const overlap = [...presetLocalNames].filter((n) => bodyDeclaredNames.has(n));
+      for (const name of overlap) {
+        // Strip body redeclaration: `type name = expr;` or `type name;`
+        // Use a regex that matches the type + name + optional initializer + semicolon
+        const stripRe = new RegExp(
+          '\\b(?:float|vec[234]|mat[234](?:x[234])?|int|bool)\\s+' + name + '\\b[^;]*;',
+          'g',
+        );
+        body = body.replace(stripRe, '');
+      }
     }
     if (presetLocals.trim()) {
       body = presetLocals + body;

@@ -89,13 +89,26 @@ function convertShaderTextLevel(shader) {
 
   // GLSL ES 3.0 has no implicit int→float promotion. Convert bare integer
   // literals in the shader body to float (avoids touching sampler_blur1, vec2, etc.)
+  // Skip preprocessor lines (#if, #elif, etc.) — they require integer constants.
   const bodyIdx = result.indexOf('shader_body');
   if (bodyIdx > -1) {
     const header = result.substring(0, bodyIdx);
     const body = result.substring(bodyIdx);
-    const promotedBody = body.replace(/(?<![.\w])(\d+)(?!\.\d|\w)/g, '$1.0');
+    const promotedBody = body
+      .split('\n')
+      .map((line) =>
+        /^\s*#/.test(line) ? line : line.replace(/(?<![.\w])(\d+)(?!\.\d|\w)/g, '$1.0'),
+      )
+      .join('\n');
     result = header + promotedBody;
   }
+
+  // HLSL allows `float4 x = 0;` (implicit scalar broadcast), GLSL doesn't.
+  // After type/int promotion, these become `vec4 x = 0.0;` — wrap in constructor.
+  result = result.replace(
+    /\b(vec[234])\s+(\w+)\s*=\s*(-?[\d.]+)\s*;/g,
+    (m, type, name, val) => `${type} ${name} = ${type}(${val});`,
+  );
 
   // Prepend MilkDrop built-in macros to the header (before shader_body).
   const sbIdx = result.indexOf('shader_body');
@@ -179,6 +192,24 @@ function expandPrepareShaderMacros(hlsl) {
   result = result.replace(/\bM_INV_PI_2\b/g, '0.159154943091895');
   result = result.replace(/\bM_PI_2\b/g, '6.28318530718');
   result = result.replace(/\bM_PI\b/g, '3.14159265359');
+
+  // Expand custom simple-token #defines (e.g. `#define MyGet GetPixel`) before stripping.
+  // Preset authors define aliases like `#define sampler_pic sampler_cells` that hlslparser
+  // needs expanded since we're about to strip all #define lines.
+  const knownMacros = new Set([
+    'GetMain', 'GetPixel', 'GetBlur1', 'GetBlur2', 'GetBlur3', 'lum', 'saturate',
+    'tex2D', 'tex3D', 'tex2d', 'tex3d', 'M_PI', 'M_PI_2', 'M_INV_PI_2',
+  ]);
+  const customDefRe = /^[ \t]*#define\s+(\w+)\s+(\w[^\n]*?)\s*$/gm;
+  let cdm;
+  while ((cdm = customDefRe.exec(result)) !== null) {
+    const [, macroName, replacement] = cdm;
+    if (knownMacros.has(macroName)) continue; // already handled above
+    // Only expand simple token aliases (single word replacement, no parens)
+    if (/^\w+$/.test(replacement)) {
+      result = result.replace(new RegExp('\\b' + macroName + '\\b', 'g'), replacement);
+    }
+  }
 
   // Strip all #define lines (parser can't handle them)
   result = result.replace(/^[ \t]*#define\b[^\n]*$/gm, '');
@@ -390,7 +421,7 @@ vec4 mult0(vec4 x, float y) { return vec4(mult0(x.x, y), mult0(x.y, y), mult0(x.
  *  butterchurn declares `uv` as `in vec2` (read-only in GLSL ES 3.0).
  *  Presets that write to uv (panning, zooming, distortion) need a mutable copy. */
 function makeUvMutable(body) {
-  if (/\buv\s*[+\-*\/]?=/.test(body)) {
+  if (/\buv(\.[xyzw]+)?\s*[+\-*\/]?=/.test(body)) {
     body = body.replace(/\buv\b/g, '_mw_uv');
     body = '    vec2 _mw_uv = uv;\n' + body;
   }
@@ -521,9 +552,37 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
   // hlslparser may wrap in parens or add type casts, so match broadly.
   body = body.replace(/\s*return\s+vec4\s*\([^;]*\)\s*;\s*/g, '');
 
-  // Prepend preset-specific local variable declarations
+  // Prepend preset-specific local variable declarations, skipping any that are
+  // already declared inside the function body (hlslparser may emit both a global
+  // declaration and a local one — prepending both causes GLSL redefinition errors).
   if (presetLocals) {
-    body = presetLocals + body;
+    const bodyDeclaredNames = new Set();
+    const bodyDeclRe =
+      /(?:float|vec[234]|mat[234](?:x[234])?|int|bool)\s+([\w][\w\s,]*);/g;
+    let bdm;
+    while ((bdm = bodyDeclRe.exec(body)) !== null) {
+      for (const n of bdm[1].split(',')) {
+        const name = n.trim().split(/\s/)[0]; // handle `float dx = expr`
+        if (name) bodyDeclaredNames.add(name);
+      }
+    }
+    if (bodyDeclaredNames.size > 0) {
+      // Filter out lines from presetLocals whose variables are all already in the body
+      presetLocals = presetLocals
+        .split('\n')
+        .filter((line) => {
+          const m = line.match(
+            /(?:float|vec[234]|mat[234](?:x[234])?|int|bool)\s+([\w][\w\s,]*);/,
+          );
+          if (!m) return true; // keep non-declaration lines
+          const names = m[1].split(',').map((n) => n.trim().split(/\s/)[0]);
+          return !names.every((n) => bodyDeclaredNames.has(n));
+        })
+        .join('\n');
+    }
+    if (presetLocals.trim()) {
+      body = presetLocals + body;
+    }
   }
 
   // Make uv mutable if the shader body assigns to it
@@ -542,6 +601,16 @@ function fixUniformAssignments(shaderBody) {
     { name: 'rand_preset', type: 'vec4' },
     { name: 'rand_frame', type: 'vec4' },
     { name: 'hue_shader', type: 'vec3' },
+    // butterchurn packs q1-q32 into _qa-_qh as uniform vec4;
+    // presets that assign to q-values get packed assignments like _qg.x = ...
+    { name: '_qa', type: 'vec4' },
+    { name: '_qb', type: 'vec4' },
+    { name: '_qc', type: 'vec4' },
+    { name: '_qd', type: 'vec4' },
+    { name: '_qe', type: 'vec4' },
+    { name: '_qf', type: 'vec4' },
+    { name: '_qg', type: 'vec4' },
+    { name: '_qh', type: 'vec4' },
   ];
 
   let result = shaderBody;

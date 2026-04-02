@@ -161,7 +161,7 @@ Floating panel (`components/PlaybackPanel.tsx`) rendered by App.tsx when local p
 ## Key Technical Notes
 
 - **WebGL 2 required.** `isWebGL2Supported()` checks on mount and shows a fallback if unavailable.
-- **butterchurn is untyped** — vendored as workspace packages (`packages/butterchurn`, `packages/butterchurn-presets`) with ESM wrappers and `.d.ts` declarations.
+- **butterchurn is untyped** — vendored as workspace packages (`packages/butterchurn`, `packages/butterchurn-presets`) with ESM wrappers and `.d.ts` declarations. 66 standard MilkDrop textures bundled via `milkdrop-textures` workspace package (loaded at renderer init alongside butterchurn's 6 built-in textures).
 - **`vite.config.ts`** imports `defineConfig` from `vitest/config` (not `vite`) to support the `test` property.
 - **400+ presets** loaded from 5 butterchurn packs, organized by source pack with virtualized browsing (`react-virtuoso`).
 - **`secure-json-parse`** used for prototype pollution protection on settings import.

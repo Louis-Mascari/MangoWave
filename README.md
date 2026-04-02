@@ -24,7 +24,7 @@
 
 - **400+ MilkDrop presets** from 5 butterchurn packs, organized by source pack with virtualized browsing
 - **Import .milk presets** — add community MilkDrop presets (PS1, PS2, and PS3) from the thousands available online. Raw files stored in IndexedDB, converted lazily on-demand via a forked `milkdrop-preset-converter` with GLSL ES 3.0 shader support
-- **Import custom textures** — upload JPEG/PNG/WebP images for MilkDrop presets that reference `sampler_<name>`. Built-in textures (cells, etc.) loaded automatically from butterchurn
+- **Import custom textures** — upload JPEG/PNG/WebP images for MilkDrop presets that reference `sampler_<name>`. 66 standard MilkDrop textures bundled from the [projectM texture pack](https://github.com/projectM-visualizer/presets-milkdrop-texture-pack), plus 6 built-in butterchurn textures — covers all canonical presets. Additional author-specific textures can be uploaded manually
 - **Custom packs** — create, edit, import/export preset collections; start a pack to lock autopilot and navigation to its presets only
 - **Pack filtering** — enable/disable built-in packs to control which presets appear and which autopilot draws from
 - **Excluded presets** — quarantined presets (broken or inappropriate content) and mobile-blocked presets (27 GPU-heavy presets identified via device testing) collected in a unified Excluded tab with reason badges and per-preset overrides
@@ -100,6 +100,7 @@ MangoWave/
 ├── packages/butterchurn-presets/        # Vendored preset packs with ESM wrapper + types
 ├── packages/milkdrop-preset-converter/  # Forked .milk → butterchurn JSON converter (hlslparser-wasm)
 ├── packages/milkdrop-eel-parser/        # Vendored EEL2 equation parser (patched int() → Math.trunc)
+├── packages/milkdrop-textures/          # 66 standard MilkDrop textures (projectM texture pack)
 ├── packages/hlslparser-wasm/            # HLSL → GLSL ES 3.0 compiler (projectM fork, WASM)
 ├── packages/backend/                    # Lambda handlers for Spotify OAuth & settings sync
 ├── packages/landing/                    # Static landing page (HTML + CSS, no JS)
@@ -200,7 +201,7 @@ See **[SELF-HOSTING.md](SELF-HOSTING.md)** for full instructions.
 
 - [butterchurn](https://github.com/jberg/butterchurn) — WebGL 2 implementation of the MilkDrop visualizer by Jordan Berg
 - [milkdrop-preset-converter](https://github.com/jberg/milkdrop-preset-converter), [milkdrop-eel-parser](https://github.com/jberg/milkdrop-eel-parser), [milkdrop-preset-utils](https://github.com/jberg/milkdrop-preset-utils) — MilkDrop toolchain by Jordan Berg
-- [projectM](https://github.com/projectM-visualizer/projectm) — open-source MilkDrop reimplementation; hlslparser fork (GLSL ES 3.0) vendored in `packages/hlslparser-wasm`
+- [projectM](https://github.com/projectM-visualizer/projectm) — open-source MilkDrop reimplementation; hlslparser fork (GLSL ES 3.0) vendored in `packages/hlslparser-wasm`; [standard texture pack](https://github.com/projectM-visualizer/presets-milkdrop-texture-pack) bundled in `packages/milkdrop-textures`
 - [MilkDrop](https://en.wikipedia.org/wiki/MilkDrop) — original visualizer by Ryan Geiss
 - [Winamp](https://en.wikipedia.org/wiki/Winamp) — created by Nullsoft
 

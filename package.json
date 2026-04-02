@@ -8,6 +8,7 @@
     "packages/hlslparser-wasm",
     "packages/milkdrop-eel-parser",
     "packages/milkdrop-preset-converter",
+    "packages/milkdrop-textures",
     "packages/frontend",
     "packages/backend",
     "infrastructure"
@@ -45,6 +46,9 @@
       "prettier --write"
     ],
     "packages/hlslparser-wasm/src/**/*.{js,ts}": [
+      "prettier --write"
+    ],
+    "packages/milkdrop-textures/src/**/*.{js,ts}": [
       "prettier --write"
     ],
     "*.{json,md,yml,yaml}": [

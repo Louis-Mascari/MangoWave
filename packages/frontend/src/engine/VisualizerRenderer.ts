@@ -1,4 +1,5 @@
 import butterchurn, { butterchurnExtraImages } from 'butterchurn';
+import { getImages as getMilkdropTextures } from 'milkdrop-textures';
 import { setDiagnosticPresetName } from './shaderDiagnostics.ts';
 import {
   presetsMinimal,
@@ -84,6 +85,22 @@ export class VisualizerRenderer {
 
     // Load built-in extra textures (cells, fire, etc.) so presets referencing sampler_<name> render correctly
     this.loadExtraImages(butterchurnExtraImages.getImages());
+
+    // Load 66 standard MilkDrop textures from the projectM texture pack.
+    // butterchurn skips names already loaded (5 overlap with butterchurnExtraImages).
+    const milkdropTextures = getMilkdropTextures();
+    this.loadExtraImages(milkdropTextures);
+
+    // Register wrap/clamp variants (fw_/fc_/pw_/pc_) so sampler_fw_X etc. resolve
+    // to the correct image instead of the clouds2 fallback.
+    const variants: Record<string, { data: string; width: number; height: number }> = {};
+    for (const [name, data] of Object.entries(milkdropTextures)) {
+      for (const prefix of ['fw_', 'fc_', 'pw_', 'pc_']) {
+        const variantKey = prefix + name;
+        if (!(variantKey in milkdropTextures)) variants[variantKey] = data;
+      }
+    }
+    if (Object.keys(variants).length > 0) this.loadExtraImages(variants);
 
     // Load a random initial preset, filtering out excluded presets
     if (this.presetKeys.length > 0) {

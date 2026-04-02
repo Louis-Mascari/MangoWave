@@ -16,10 +16,11 @@ export function validateTextureFile(file: File): string | null {
   return null;
 }
 
-/** Derive texture name from filename: stem, lowercased. */
+/** Derive texture name from filename: stem with original case preserved.
+ *  butterchurn's getTexture() is case-sensitive — presets reference textures
+ *  by their original filename case. */
 function deriveTextureName(fileName: string): string {
-  const stem = fileName.replace(/\.[^.]+$/, '');
-  return stem.toLowerCase();
+  return fileName.replace(/\.[^.]+$/, '');
 }
 
 /** Read, validate, and convert an image file to a data URI with dimensions. */

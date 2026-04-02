@@ -1,0 +1,3 @@
+# Raw texture JPGs — source files for build-texture-data.cjs.
+# The generated textureData.json is committed instead (contains base64 data URIs).
+textures/

@@ -14,6 +14,7 @@ export default defineConfig({
       'milkdrop-preset-converter > milkdrop-preset-utils',
       'milkdrop-eel-parser',
       'milkdrop-preset-converter > lodash',
+      'milkdrop-textures',
     ],
   },
   build: {

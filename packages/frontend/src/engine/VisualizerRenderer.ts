@@ -29,6 +29,7 @@ export class VisualizerRenderer {
   private currentPresetIndex = 0;
   private fpsInterval = 0; // 0 = uncapped
   private lastFrameTime = 0;
+  private lastRenderTime = 0;
   private onPresetChange?: (name: string) => void;
   private _presetPackMap: Map<string, string> = new Map();
 
@@ -203,7 +204,9 @@ export class VisualizerRenderer {
 
   start(): void {
     if (this.animationFrameId !== null) return;
-    this.lastFrameTime = performance.now();
+    const now = performance.now();
+    this.lastFrameTime = now;
+    this.lastRenderTime = now;
     this.render();
   }
 
@@ -225,7 +228,9 @@ export class VisualizerRenderer {
     }
 
     if (this.visualizer) {
-      this.visualizer.render();
+      const dt = (now - this.lastRenderTime) / 1000;
+      this.lastRenderTime = now;
+      this.visualizer.render({ elapsedTime: dt });
     }
   };
 

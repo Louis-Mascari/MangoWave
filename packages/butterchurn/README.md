@@ -16,3 +16,7 @@ butterchurn is effectively unmaintained (last stable release 2018). Vendoring el
 - `lib/` — original minified bundles (`butterchurn.min.js`, `butterchurnExtraImages.min.js`)
 - `src/index.js` — ESM wrapper with CJS interop (`mod.default ?? mod`)
 - `src/index.d.ts` — TypeScript declarations
+
+## MangoWave Patches
+
+The minified bundle includes MangoWave-specific patches. See [PATCHES.md](PATCHES.md) for details, math, and re-application instructions.

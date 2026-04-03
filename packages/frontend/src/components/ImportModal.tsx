@@ -569,6 +569,9 @@ function ImportModalInner() {
 
                     {textureSectionExpanded && (
                       <div className="flex flex-col gap-2 border-t border-amber-500/10 px-3 pb-3 pt-2">
+                        <p className="text-[10px] leading-relaxed text-white/40">
+                          {t('importModal.missingTexturesHint')}
+                        </p>
                         {/* Missing texture list */}
                         <div className="flex max-h-24 flex-col gap-0.5 overflow-y-auto">
                           {[...missingTextureNames].map((name) => {

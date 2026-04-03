@@ -261,6 +261,7 @@
     "uploadMissingTextures": "누락된 텍스처 업로드",
     "missingTexturesSection": "누락된 텍스처 ({{remaining}}개 남음)",
     "missingTexturesAllResolved": "누락된 텍스처 모두 업로드 완료",
+    "missingTexturesHint": "텍스처가 누락된 프리셋은 텍스처 위치에 노이즈가 표시됩니다. 해당 이미지 파일을 업로드하면 해결됩니다.",
     "dropTexturesHere": "텍스처 이미지를 여기에 끌어다 놓거나 찾아보기 (JPEG, PNG, WebP)",
     "importMore": "더 가져오기",
     "presets": "프리셋",

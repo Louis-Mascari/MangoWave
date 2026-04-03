@@ -261,6 +261,7 @@
     "uploadMissingTextures": "Enviar texturas faltantes",
     "missingTexturesSection": "Texturas faltantes ({{remaining}} restantes)",
     "missingTexturesAllResolved": "Todas as texturas faltantes enviadas",
+    "missingTexturesHint": "Presets com texturas faltantes exibirão ruído visual onde a textura deveria aparecer. Envie os arquivos de imagem correspondentes para corrigir.",
     "dropTexturesHere": "Arraste imagens de textura aqui ou procure (JPEG, PNG, WebP)",
     "importMore": "Importar mais",
     "presets": "presets",

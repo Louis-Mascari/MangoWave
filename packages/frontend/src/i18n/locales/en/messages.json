@@ -270,6 +270,7 @@
     "uploadMissingTextures": "Upload Missing Textures",
     "missingTexturesSection": "Missing Textures ({{remaining}} remaining)",
     "missingTexturesAllResolved": "All missing textures uploaded",
+    "missingTexturesHint": "Presets with missing textures will render with visual noise where the texture should appear. Upload the matching image files to fix this.",
     "dropTexturesHere": "Drop texture images here or browse (JPEG, PNG, WebP)",
     "importMore": "Import More",
     "presets": "presets",

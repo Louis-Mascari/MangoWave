@@ -261,6 +261,7 @@
     "uploadMissingTextures": "Unggah Tekstur yang Hilang",
     "missingTexturesSection": "Tekstur yang Hilang ({{remaining}} tersisa)",
     "missingTexturesAllResolved": "Semua tekstur yang hilang telah diunggah",
+    "missingTexturesHint": "Preset dengan tekstur yang hilang akan menampilkan noise visual di tempat tekstur seharusnya muncul. Unggah file gambar yang sesuai untuk memperbaikinya.",
     "dropTexturesHere": "Seret gambar tekstur ke sini atau pilih (JPEG, PNG, WebP)",
     "importMore": "Impor Lagi",
     "presets": "preset",

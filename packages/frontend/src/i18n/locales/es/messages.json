@@ -261,6 +261,7 @@
     "uploadMissingTextures": "Subir texturas faltantes",
     "missingTexturesSection": "Texturas faltantes ({{remaining}} restantes)",
     "missingTexturesAllResolved": "Todas las texturas faltantes subidas",
+    "missingTexturesHint": "Los presets con texturas faltantes mostrarán ruido visual donde debería aparecer la textura. Sube los archivos de imagen correspondientes para corregirlo.",
     "dropTexturesHere": "Arrastra imágenes de textura aquí o busca (JPEG, PNG, WebP)",
     "importMore": "Importar más",
     "presets": "presets",

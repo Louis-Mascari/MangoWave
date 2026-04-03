@@ -261,6 +261,7 @@
     "uploadMissingTextures": "अनुपलब्ध टेक्सचर अपलोड करें",
     "missingTexturesSection": "अनुपलब्ध टेक्सचर ({{remaining}} शेष)",
     "missingTexturesAllResolved": "सभी अनुपलब्ध टेक्सचर अपलोड हो गए",
+    "missingTexturesHint": "अनुपलब्ध टेक्सचर वाले प्रीसेट में टेक्सचर की जगह विज़ुअल नॉइज़ दिखेगा। इसे ठीक करने के लिए सही इमेज फ़ाइलें अपलोड करें।",
     "dropTexturesHere": "टेक्सचर इमेज यहाँ ड्रॉप करें या ब्राउज़ करें (JPEG, PNG, WebP)",
     "importMore": "और इम्पोर्ट करें",
     "presets": "प्रीसेट",

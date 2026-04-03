@@ -261,6 +261,7 @@
     "uploadMissingTextures": "上传缺失的纹理",
     "missingTexturesSection": "缺失的纹理（还剩 {{remaining}} 个）",
     "missingTexturesAllResolved": "所有缺失的纹理已上传",
+    "missingTexturesHint": "缺少纹理的预设会在纹理位置显示噪点。上传对应的图片文件即可修复。",
     "dropTexturesHere": "将纹理图片拖到此处或浏览（JPEG、PNG、WebP）",
     "importMore": "导入更多",
     "presets": "预设",

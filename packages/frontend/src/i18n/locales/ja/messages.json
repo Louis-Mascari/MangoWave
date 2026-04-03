@@ -261,6 +261,7 @@
     "uploadMissingTextures": "不足しているテクスチャをアップロード",
     "missingTexturesSection": "不足テクスチャ（残り {{remaining}} 件）",
     "missingTexturesAllResolved": "不足テクスチャをすべてアップロードしました",
+    "missingTexturesHint": "テクスチャが不足しているプリセットは、テクスチャの部分にノイズが表示されます。対応する画像ファイルをアップロードすると修正できます。",
     "dropTexturesHere": "テクスチャ画像をここにドロップするか参照（JPEG、PNG、WebP）",
     "importMore": "さらにインポート",
     "presets": "プリセット",

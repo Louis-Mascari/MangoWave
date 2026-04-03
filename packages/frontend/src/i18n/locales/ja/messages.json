@@ -177,7 +177,8 @@
     "clearAllConfirm": "インポートした {{count}} 件のプリセットをすべて削除しますか？.milk ファイルを再インポートする必要があります。",
     "cleared": "インポートしたすべてのプリセットを削除しました",
     "idbUnavailable": "インポートしたプリセットにはストレージアクセスが必要ですが、プライベートブラウジングモードでは利用できません。",
-    "imported": "インポート済み"
+    "imported": "インポート済み",
+    "importInProgress": "インポート中...{{count}}件のプリセットを処理済み"
   },
 
   "importedTextures": {
@@ -237,7 +238,7 @@
     "maxPacksReached": "カスタムパックの上限（50個）に達しました",
     "packActive": "再生中：{{name}}",
     "deactivatePack": "パック停止",
-    "packOverridesFilters": "カスタムパックが有効な間、これらのフィルターは適用されません",
+    "packOverridesFilters": "オートパイロットと次のプリセットはアクティブなパックを使用します。フィルターはこのリストにのみ影響します。",
     "favoritesAutoSwitch": "お気に入りモードからすべてモードに切り替えました"
   },
 

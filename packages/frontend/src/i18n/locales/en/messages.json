@@ -186,7 +186,8 @@
     "clearAllConfirm": "Delete all {{count}} imported presets? The .milk files will need to be re-imported.",
     "cleared": "All imported presets cleared",
     "idbUnavailable": "Imported presets require storage access, which is unavailable in private browsing mode.",
-    "imported": "Imported"
+    "imported": "Imported",
+    "importInProgress": "Importing... {{count}} preset(s) so far"
   },
 
   "importedTextures": {
@@ -246,7 +247,7 @@
     "maxPacksReached": "Maximum of 50 custom packs reached",
     "packActive": "Playing from: {{name}}",
     "deactivatePack": "Stop pack",
-    "packOverridesFilters": "These filters don't apply while a custom pack is active",
+    "packOverridesFilters": "Autopilot and next preset use the active pack. Filters only affect this list.",
     "favoritesAutoSwitch": "Switched from favorites to all mode"
   },
 

@@ -177,7 +177,8 @@
     "clearAllConfirm": "删除全部 {{count}} 个导入的预设？需要重新导入 .milk 文件。",
     "cleared": "已清除所有导入的预设",
     "idbUnavailable": "导入预设需要存储访问权限，在隐私浏览模式下不可用。",
-    "imported": "已导入"
+    "imported": "已导入",
+    "importInProgress": "导入中...已完成 {{count}} 个预设"
   },
 
   "importedTextures": {
@@ -237,7 +238,7 @@
     "maxPacksReached": "最多只能创建 50 个自定义合集",
     "packActive": "播放自：{{name}}",
     "deactivatePack": "停止播放包",
-    "packOverridesFilters": "自定义合集激活时，这些筛选不生效",
+    "packOverridesFilters": "自动切换和下一个预设使用当前合集。筛选仅影响此列表。",
     "favoritesAutoSwitch": "已从收藏模式切换到全部模式"
   },
 

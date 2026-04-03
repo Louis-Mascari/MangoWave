@@ -177,7 +177,8 @@
     "clearAllConfirm": "Excluir todos os {{count}} presets importados? Os arquivos .milk precisarão ser reimportados.",
     "cleared": "Todos os presets importados foram excluídos",
     "idbUnavailable": "Presets importados requerem acesso ao armazenamento, que não está disponível no modo de navegação privada.",
-    "imported": "Importados"
+    "imported": "Importados",
+    "importInProgress": "Importando... {{count}} preset(s) até agora"
   },
 
   "importedTextures": {
@@ -237,7 +238,7 @@
     "maxPacksReached": "Limite máximo de 50 pacotes personalizados atingido",
     "packActive": "Reproduzindo de: {{name}}",
     "deactivatePack": "Parar pacote",
-    "packOverridesFilters": "Estes filtros não se aplicam enquanto um pacote personalizado está ativo",
+    "packOverridesFilters": "O piloto automático e o próximo preset usam o pacote ativo. Os filtros afetam apenas esta lista.",
     "favoritesAutoSwitch": "Alternado de favoritos para o modo todos"
   },
 

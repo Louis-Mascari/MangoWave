@@ -385,6 +385,9 @@ export function PresetBrowser({
     [customPacks, activeCustomPackId],
   );
 
+  const isImportModalOpen = useImportModalStore((s) => s.isOpen);
+  const importModalMode = useImportModalStore((s) => s.mode);
+
   const presetHistory = usePresetHistoryStore((s) => s.history);
 
   const filter = usePresetBrowserStore((s) => s.filter);
@@ -655,16 +658,13 @@ export function PresetBrowser({
           {t('customPacks.packOverridesFilters')}
         </p>
       )}
-      <div
-        className={`mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 ${activeCustomPackId ? 'pointer-events-none opacity-40' : ''}`}
-      >
+      <div className="mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
         {allPacks.map((pack) => (
           <label key={pack} className="flex cursor-pointer items-center gap-1 text-xs">
             <input
               type="checkbox"
               checked={enabledPackSet.has(pack)}
               onChange={() => togglePack(pack)}
-              disabled={!!activeCustomPackId}
               className="h-3 w-3 accent-orange-500"
             />
             <span className={enabledPackSet.has(pack) ? 'text-white/70' : 'text-white/30'}>
@@ -673,9 +673,7 @@ export function PresetBrowser({
           </label>
         ))}
       </div>
-      <div
-        className={`mb-1.5 flex items-center gap-2 ${activeCustomPackId ? 'pointer-events-none opacity-40' : ''}`}
-      >
+      <div className="mb-1.5 flex items-center gap-2">
         <button
           onClick={handleSelectAll}
           className="cursor-pointer border-none bg-transparent p-0 text-xs text-white/40 underline hover:text-orange-400"
@@ -1421,7 +1419,29 @@ export function PresetBrowser({
               className="w-full rounded border-none bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
             />
           )}
-          {importedPresets.length === 0 ? (
+          {isImportModalOpen && importModalMode === 'preset' ? (
+            <div className="flex flex-col items-center gap-2 py-6">
+              <svg className="h-5 w-5 animate-spin text-orange-400" viewBox="0 0 24 24" fill="none">
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  className="opacity-25"
+                />
+                <path
+                  d="M4 12a8 8 0 018-8"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <p className="text-xs text-white/50">
+                {t('importedPresets.importInProgress', { count: importedPresets.length })}
+              </p>
+            </div>
+          ) : importedPresets.length === 0 ? (
             <p className="py-2 text-center text-xs text-white/30">
               {t('importedPresets.emptyState')}
             </p>
@@ -1430,47 +1450,36 @@ export function PresetBrowser({
               <Virtuoso
                 data={filteredImportedPresets}
                 style={{ height: Math.min(filteredImportedPresets.length * 32, 320) }}
-                itemContent={(_index, preset) => {
-                  const isCurrent = preset.name === currentPreset;
-                  return (
-                    <div
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => handleSelectPreset(preset.name)}
-                      onKeyDown={(e) => {
-                        if (e.currentTarget !== e.target) return;
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          handleSelectPreset(preset.name);
-                        }
-                      }}
-                      className={`flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs ${
-                        isCurrent
-                          ? 'bg-orange-500/30 text-white'
-                          : 'text-white/70 hover:bg-white/10'
-                      }`}
-                    >
-                      <span className="min-w-0 flex-1 truncate text-left">{preset.name}</span>
-                      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-                      <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => handleDeleteImportedPreset(preset)}
-                          className="flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-red-500/20 hover:text-red-400"
-                          title={t('importedPresets.deletePreset')}
-                          aria-label={t('importedPresets.deletePreset')}
-                        >
-                          <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
-                            <path
-                              fillRule="evenodd"
-                              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </button>
-                      </div>
+                itemContent={(_index, preset) => (
+                  <div className="flex items-center">
+                    <div className="min-w-0 flex-1">
+                      <PresetRow
+                        name={preset.name}
+                        isCurrent={preset.name === currentPreset}
+                        isFavorite={favoriteSet.has(preset.name)}
+                        isBlocked={blockedSet.has(preset.name)}
+                        onSelect={() => handleSelectPreset(preset.name)}
+                        onToggleFavorite={() => handleToggleFavorite(preset.name)}
+                        onToggleBlock={() => handleToggleBlock(preset.name)}
+                        customPacks={customPacks}
+                      />
                     </div>
-                  );
-                }}
+                    <button
+                      onClick={() => handleDeleteImportedPreset(preset)}
+                      className="ml-0.5 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-red-500/20 hover:text-red-400"
+                      title={t('importedPresets.deletePreset')}
+                      aria-label={t('importedPresets.deletePreset')}
+                    >
+                      <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
+                        <path
+                          fillRule="evenodd"
+                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
               />
             </div>
           )}

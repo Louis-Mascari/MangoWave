@@ -177,7 +177,8 @@
     "clearAllConfirm": "Hapus semua {{count}} preset impor? File .milk perlu diimpor ulang.",
     "cleared": "Semua preset impor dihapus",
     "idbUnavailable": "Preset impor memerlukan akses penyimpanan, yang tidak tersedia dalam mode penjelajahan pribadi.",
-    "imported": "Diimpor"
+    "imported": "Diimpor",
+    "importInProgress": "Mengimpor... {{count}} preset sejauh ini"
   },
 
   "importedTextures": {
@@ -237,7 +238,7 @@
     "maxPacksReached": "Maksimum 50 paket kustom telah tercapai",
     "packActive": "Memutar dari: {{name}}",
     "deactivatePack": "Hentikan paket",
-    "packOverridesFilters": "Filter ini tidak berlaku selama paket kustom aktif",
+    "packOverridesFilters": "Autopilot dan preset berikutnya menggunakan paket aktif. Filter hanya memengaruhi daftar ini.",
     "favoritesAutoSwitch": "Beralih dari favorit ke mode semua"
   },
 

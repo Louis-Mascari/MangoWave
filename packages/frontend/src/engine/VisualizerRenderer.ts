@@ -188,10 +188,29 @@ export class VisualizerRenderer {
   loadPreset(name: string, blendTime = 2.0): void {
     if (!this.visualizer) return;
     if (this.presets[name]) {
+      const previousName = this.currentPresetName;
       setDiagnosticPresetName(name);
       this.visualizer.loadPreset(this.presets[name], blendTime);
       this.currentPresetIndex = this.presetKeys.indexOf(name);
       this.onPresetChange?.(name);
+      // Evict old WASM-compiled imported presets to prevent memory exhaustion.
+      // Each imported preset holds a WebAssembly.Instance + Globals that can't
+      // be GC'd while referenced. Keep current + previous (for blend transition).
+      this.evictStaleImportedPresets(name, previousName);
+    }
+  }
+
+  /**
+   * Remove compiled preset objects for imported presets that aren't actively
+   * in use. They remain registered (in _presetPackMap) so isImportedAndUnloaded()
+   * returns true and they'll be lazily recompiled on next visit.
+   */
+  private evictStaleImportedPresets(current: string, previous: string): void {
+    for (const key of this.presetKeys) {
+      if (key === current || key === previous) continue;
+      if (this._presetPackMap.get(key) === 'Imported' && this.presets[key]) {
+        delete this.presets[key];
+      }
     }
   }
 

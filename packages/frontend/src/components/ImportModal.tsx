@@ -321,7 +321,23 @@ function ImportModalInner() {
 
         {/* Processing phase */}
         {phase === 'processing' && (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col items-center gap-3 py-4">
+            <svg className="h-6 w-6 animate-spin text-orange-400" viewBox="0 0 24 24" fill="none">
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="3"
+                className="opacity-25"
+              />
+              <path
+                d="M4 12a8 8 0 018-8"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+              />
+            </svg>
             <p className="text-xs text-white/60">
               {t('importModal.importingProgress', {
                 current: progress.current,
@@ -334,13 +350,6 @@ function ImportModalInner() {
               aria-valuenow={progress.current}
               aria-valuemax={progress.total}
               className="h-2 w-full appearance-none overflow-hidden rounded-full [&::-moz-progress-bar]:bg-orange-500 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-white/10 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-orange-500"
-            />
-            <Virtuoso
-              totalCount={resultCount}
-              itemContent={renderResultItem}
-              followOutput="smooth"
-              style={{ height: Math.min(resultCount * 36, 300) }}
-              className="overflow-y-auto"
             />
           </div>
         )}

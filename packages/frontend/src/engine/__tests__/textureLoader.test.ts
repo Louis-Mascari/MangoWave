@@ -80,17 +80,17 @@ describe('readTextureFile', () => {
     const file = createMockFile('Cells.png', 5000, 'image/png');
     const result = await readTextureFile(file);
 
-    expect(result.name).toBe('cells');
+    expect(result.name).toBe('Cells');
     expect(result.dataUri).toBe('data:image/png;base64,abc123');
     expect(result.width).toBe(512);
     expect(result.height).toBe(512);
     expect(result.sizeBytes).toBe(5000);
   });
 
-  it('derives name by lowercasing filename stem', async () => {
+  it('derives name by preserving original case of filename stem', async () => {
     const file = createMockFile('My_Texture.File.jpg', 1000, 'image/jpeg');
     const result = await readTextureFile(file);
-    expect(result.name).toBe('my_texture.file');
+    expect(result.name).toBe('My_Texture.File');
   });
 
   it('throws for invalid file type', async () => {

@@ -209,7 +209,8 @@
     "gpuNote": "Textures loaded on the GPU persist until the page is reloaded.",
     "idbUnavailable": "Imported textures require storage access, which is unavailable in private browsing mode.",
     "duplicateName": "Already exists",
-    "emptyStateTextures": "No imported textures. Use \"Import Textures\" to add custom texture images."
+    "emptyStateTextures": "No imported textures. Use \"Import Textures\" to add custom texture images.",
+    "importInProgress": "Importing... {{count}} texture(s) so far"
   },
 
   "customPacks": {

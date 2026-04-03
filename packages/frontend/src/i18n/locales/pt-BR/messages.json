@@ -200,7 +200,8 @@
     "gpuNote": "Texturas carregadas na GPU persistem até a página ser recarregada.",
     "idbUnavailable": "Texturas importadas requerem acesso ao armazenamento, que não está disponível no modo de navegação privada.",
     "duplicateName": "Já existe",
-    "emptyStateTextures": "Nenhuma textura importada. Use \"Importar Texturas\" para adicionar imagens de texturas."
+    "emptyStateTextures": "Nenhuma textura importada. Use \"Importar Texturas\" para adicionar imagens de texturas.",
+    "importInProgress": "Importando... {{count}} textura(s) até agora"
   },
 
   "customPacks": {

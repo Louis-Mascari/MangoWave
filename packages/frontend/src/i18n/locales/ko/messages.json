@@ -200,7 +200,8 @@
     "gpuNote": "GPU에 로드된 텍스처는 페이지를 새로고침할 때까지 유지됩니다.",
     "idbUnavailable": "가져온 텍스처에는 저장소 접근이 필요하며, 시크릿 모드에서는 사용할 수 없습니다.",
     "duplicateName": "이미 존재합니다",
-    "emptyStateTextures": "가져온 텍스처가 없습니다. \"텍스처 가져오기\"를 사용하여 사용자 정의 텍스처 이미지를 추가하세요."
+    "emptyStateTextures": "가져온 텍스처가 없습니다. \"텍스처 가져오기\"를 사용하여 사용자 정의 텍스처 이미지를 추가하세요.",
+    "importInProgress": "가져오는 중... 현재 {{count}}개 텍스처"
   },
 
   "customPacks": {

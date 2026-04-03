@@ -200,7 +200,8 @@
     "gpuNote": "加载到 GPU 的纹理在页面重新加载之前会一直保留。",
     "idbUnavailable": "导入纹理需要存储访问权限，在隐私浏览模式下不可用。",
     "duplicateName": "已存在",
-    "emptyStateTextures": "没有导入的纹理。使用\"导入纹理\"添加自定义纹理图像。"
+    "emptyStateTextures": "没有导入的纹理。使用\"导入纹理\"添加自定义纹理图像。",
+    "importInProgress": "导入中...已完成 {{count}} 个纹理"
   },
 
   "customPacks": {

@@ -200,7 +200,8 @@
     "gpuNote": "Tekstur yang dimuat di GPU tetap ada hingga halaman dimuat ulang.",
     "idbUnavailable": "Tekstur yang diimpor memerlukan akses penyimpanan, yang tidak tersedia dalam mode penjelajahan pribadi.",
     "duplicateName": "Sudah ada",
-    "emptyStateTextures": "Belum ada tekstur yang diimpor. Gunakan \"Impor Tekstur\" untuk menambahkan gambar tekstur."
+    "emptyStateTextures": "Belum ada tekstur yang diimpor. Gunakan \"Impor Tekstur\" untuk menambahkan gambar tekstur.",
+    "importInProgress": "Mengimpor... {{count}} tekstur sejauh ini"
   },
 
   "customPacks": {

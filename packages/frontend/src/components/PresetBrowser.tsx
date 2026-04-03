@@ -1637,7 +1637,29 @@ export function PresetBrowser({
           {importedTextures.length > 0 && (
             <p className="text-[10px] text-white/30">{t('importedTextures.gpuNote')}</p>
           )}
-          {importedTextures.length === 0 ? (
+          {isImportModalOpen && importModalMode === 'texture' ? (
+            <div className="flex flex-col items-center gap-2 py-6">
+              <svg className="h-5 w-5 animate-spin text-orange-400" viewBox="0 0 24 24" fill="none">
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  className="opacity-25"
+                />
+                <path
+                  d="M4 12a8 8 0 018-8"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <p className="text-xs text-white/50">
+                {t('importedTextures.importInProgress', { count: importedTextures.length })}
+              </p>
+            </div>
+          ) : importedTextures.length === 0 ? (
             <p className="py-2 text-center text-xs text-white/30">
               {t('importedTextures.emptyStateTextures')}
             </p>

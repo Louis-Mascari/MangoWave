@@ -23,7 +23,7 @@
 ## Features
 
 - **400+ MilkDrop presets** from 5 butterchurn packs, organized by source pack with virtualized browsing
-- **Import .milk presets** — add community MilkDrop presets (PS1, PS2, and PS3) from the thousands available online. Raw files stored in IndexedDB, converted lazily on-demand via a forked `milkdrop-preset-converter` with GLSL ES 3.0 shader support
+- **Import .milk presets** — add community MilkDrop presets (PS1, PS2, and PS3) from the thousands available online. Raw files stored in IndexedDB, converted at import time in a Web Worker via a forked `milkdrop-preset-converter` (GLSL ES 3.0 shaders) with EEL equations compiled to WebAssembly at load time via `eel-wasm`
 - **Import custom textures** — upload JPEG/PNG/WebP images for MilkDrop presets that reference `sampler_<name>`. 66 standard MilkDrop textures bundled from the [projectM texture pack](https://github.com/projectM-visualizer/presets-milkdrop-texture-pack), plus 6 built-in butterchurn textures — covers all canonical presets. Additional author-specific textures can be uploaded manually
 - **Custom packs** — create, edit, import/export preset collections; start a pack to lock autopilot and navigation to its presets only
 - **Pack filtering** — enable/disable built-in packs to control which presets appear and which autopilot draws from
@@ -98,7 +98,7 @@ MangoWave/
 ├── packages/frontend/                   # React 19 + Vite 8 + TypeScript — the visualizer app
 ├── packages/butterchurn/                # Vendored butterchurn with ESM wrapper + types
 ├── packages/butterchurn-presets/        # Vendored preset packs with ESM wrapper + types
-├── packages/milkdrop-preset-converter/  # Forked .milk → butterchurn JSON converter (hlslparser-wasm + eel-wasm)
+├── packages/milkdrop-preset-converter/  # Forked .milk → butterchurn JSON converter (hlslparser-wasm + EEL preprocessor)
 ├── packages/milkdrop-textures/          # 66 standard MilkDrop textures (projectM texture pack)
 ├── packages/hlslparser-wasm/            # HLSL → GLSL ES 3.0 compiler (projectM fork, WASM)
 ├── packages/backend/                    # Lambda handlers for Spotify OAuth & settings sync

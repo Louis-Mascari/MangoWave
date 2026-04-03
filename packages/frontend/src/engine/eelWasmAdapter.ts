@@ -75,7 +75,7 @@ const FRAME_RW = [
   'wave_mode',
   'wave_dots',
   'wave_thick',
-  'wave_additive',
+  'additivewave',
   'wave_brighten',
   'wave_a',
   'wave_scale',
@@ -101,6 +101,11 @@ const FRAME_RW = [
   'b3x',
   'b1ed',
   'monitor',
+  'modwavealphabyvolume',
+  'modwavealphastart',
+  'modwavealphaend',
+  'warpanimspeed',
+  'warpscale',
 ];
 
 /** Q-variables shared across all equation types. */
@@ -160,6 +165,9 @@ const WAVE_VARS = [
   'additive',
   'x',
   'y',
+  'sample',
+  'value1',
+  'value2',
 ];
 
 // ---------------------------------------------------------------------------

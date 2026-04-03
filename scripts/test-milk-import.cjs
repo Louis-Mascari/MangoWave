@@ -151,6 +151,7 @@ async function main() {
       const waveVars = [
         'samples', 'sep', 'scaling', 'spectrum', 'smoothing',
         'r', 'g', 'b', 'a', 'usedots', 'thick', 'additive',
+        'sample', 'value1', 'value2',
       ];
 
       const pools = { main: pool };

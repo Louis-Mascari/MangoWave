@@ -116,7 +116,7 @@ On mobile, 27 GPU-heavy presets (identified via Pixel 10 Pro testing) are filter
 
 `useConfirmStore` drives the reusable `ConfirmDialog` component. API: `show({ title, message, onConfirm, confirmLabel?, destructive? })`. Supports destructive (red) and normal (orange) confirm buttons.
 
-`useImportModalStore` drives the `ImportModal` component for .milk preset and texture imports. API: `open(mode, presetPackMap?)` / `close()`. Processing logic lives in `importProcessor.ts` (not the component) — the modal only manages UI state (phase, results, progress). Supports drag-and-drop and file browser, per-file result log with texture warnings, filter tabs for mixed results, and "Upload Missing Textures" flow.
+`useImportModalStore` drives the `ImportModal` component for .milk preset and texture imports. API: `open(mode, presetPackMap?)` / `close()`. Processing logic lives in `importProcessor.ts` (not the component) — the modal only manages UI state (phase, results, progress). Supports drag-and-drop and file browser, per-file result log with texture warnings, filter tabs for mixed results, and inline texture upload in the results phase (collapsible section with missing texture list, compact drop zone, real-time resolution tracking).
 
 `useToastStore` drives single-message action toasts with typed variants (`info`, `error`, `warning`). API: `show(message, { type?, durationMs? })` — info auto-clears at 3.5s, error/warning at 6s. `durationMs` stored in state and drives both the JS cleanup timer and the CSS `toast-fade` animation duration (set dynamically via inline style).
 

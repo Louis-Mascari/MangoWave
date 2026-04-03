@@ -147,6 +147,15 @@ export function usePresetNavigation({
       pool = pool.filter((p) => !mobileBlockedSet.has(p) || overrideSet.has(p));
     }
 
+    if (pool.length === 0) {
+      if (presetPackMap.size > 0) {
+        useToastStore
+          .getState()
+          .show(i18n.t('toasts.noPresetsAvailable', { ns: 'messages' }), { type: 'warning' });
+      }
+      return;
+    }
+
     const historyStore = usePresetHistoryStore.getState();
     const result = pickPreset(
       pool,

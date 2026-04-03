@@ -63,7 +63,8 @@
     "favoritePresetsCleared": "Preset favorit dihapus",
     "silenceDetected": "Tidak ada audio terdeteksi. Pastikan audio sedang diputar di layar, jendela, atau tab yang dibagikan, dan kamu telah mencentang \"Bagikan audio\" di dialog browser.",
     "silenceDetectedMic": "Tidak ada audio terdeteksi dari mikrofon. Pastikan mikrofon tidak di-mute dan menangkap suara.",
-    "silenceDetectedLocal": "Tidak ada audio terdeteksi. Pastikan file berformat yang didukung dan volume perangkat sudah dinyalakan."
+    "silenceDetectedLocal": "Tidak ada audio terdeteksi. Pastikan file berformat yang didukung dan volume perangkat sudah dinyalakan.",
+    "noPresetsAvailable": "Tidak ada preset yang tersedia. Pastikan setidaknya satu paket diaktifkan dan tidak semua preset diblokir."
   },
   "playback": {
     "addSongsToQueue": "Tambahkan lagu ke antrean",
@@ -258,6 +259,9 @@
     "summaryPartial": "Berhasil mengimpor {{success}} dari {{total}} {{type}}. {{failed}} gagal, {{warnings}} dengan peringatan.",
     "summaryAllFailed": "Semua {{count}} {{type}} gagal diimpor",
     "uploadMissingTextures": "Unggah Tekstur yang Hilang",
+    "missingTexturesSection": "Tekstur yang Hilang ({{remaining}} tersisa)",
+    "missingTexturesAllResolved": "Semua tekstur yang hilang telah diunggah",
+    "dropTexturesHere": "Seret gambar tekstur ke sini atau pilih (JPEG, PNG, WebP)",
     "importMore": "Impor Lagi",
     "presets": "preset",
     "textures": "tekstur",

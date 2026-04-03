@@ -63,7 +63,8 @@
     "favoritePresetsCleared": "お気に入りプリセットをクリアしました",
     "silenceDetected": "音声が検出されません。共有している画面、ウィンドウ、またはタブで音声が再生されていること、およびブラウザのダイアログで「音声を共有」にチェックが入っていることを確認してください。",
     "silenceDetectedMic": "マイクからの音声が検出されません。マイクがミュートになっていないこと、音を拾っていることを確認してください。",
-    "silenceDetectedLocal": "音声が検出されません。ファイルが対応形式であること、デバイスの音量が上がっていることを確認してください。"
+    "silenceDetectedLocal": "音声が検出されません。ファイルが対応形式であること、デバイスの音量が上がっていることを確認してください。",
+    "noPresetsAvailable": "利用可能なプリセットがありません。少なくとも1つのパックが有効で、すべてのプリセットがブロックされていないか確認してください。"
   },
   "playback": {
     "addSongsToQueue": "キューに曲を追加",
@@ -258,6 +259,9 @@
     "summaryPartial": "{{total}}件の{{type}}中{{success}}件をインポートしました。{{failed}}件が失敗、{{warnings}}件に警告があります。",
     "summaryAllFailed": "{{count}}件の{{type}}すべてのインポートに失敗しました",
     "uploadMissingTextures": "不足しているテクスチャをアップロード",
+    "missingTexturesSection": "不足テクスチャ（残り {{remaining}} 件）",
+    "missingTexturesAllResolved": "不足テクスチャをすべてアップロードしました",
+    "dropTexturesHere": "テクスチャ画像をここにドロップするか参照（JPEG、PNG、WebP）",
     "importMore": "さらにインポート",
     "presets": "プリセット",
     "textures": "テクスチャ",

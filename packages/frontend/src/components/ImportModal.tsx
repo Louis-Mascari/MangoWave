@@ -32,12 +32,22 @@ function ImportModalInner() {
   const [resultFilter, setResultFilter] = useState<ResultFilter>('all');
   const dragCounterRef = useRef(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textureInputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const textureSectionRef = useRef<HTMLDivElement>(null);
 
   // Mutable results array — avoids O(n²) array copies from [...prev, result].
   // resultCount state triggers re-renders; Virtuoso reads from the ref.
   const resultsRef = useRef<ImportResult[]>([]);
   const [resultCount, setResultCount] = useState(0);
+
+  // Inline texture upload state
+  const [uploadedTextures, setUploadedTextures] = useState<Set<string>>(new Set());
+  const [textureSectionExpanded, setTextureSectionExpanded] = useState(true);
+  const [textureUploading, setTextureUploading] = useState(false);
+  const [textureUploadError, setTextureUploadError] = useState<string | null>(null);
+  const [textureDragOver, setTextureDragOver] = useState(false);
+  const textureDragCounterRef = useRef(0);
 
   useFocusTrap(dialogRef, true);
 
@@ -66,6 +76,26 @@ function ImportModalInner() {
     () => new Set(importedTextures.map((t) => t.name)),
     [importedTextures],
   );
+
+  // Aggregate all missing texture names from results, deduplicated.
+  const missingTextureNames = useMemo(() => {
+    const names = new Set<string>();
+    for (const r of resultsRef.current) {
+      for (const w of r.warnings) {
+        names.add(w);
+      }
+    }
+    return names;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resultCount]);
+
+  const unresolvedTextureCount = useMemo(() => {
+    let count = 0;
+    for (const name of missingTextureNames) {
+      if (!uploadedTextures.has(name) && !importedTextureNameSet.has(name)) count++;
+    }
+    return count;
+  }, [missingTextureNames, uploadedTextures, importedTextureNameSet]);
 
   // Derive summary stats from the ref, recomputed only when resultCount changes.
   const { successCount, warningCount, failedCount, hasTextureWarnings } = useMemo(() => {
@@ -147,6 +177,42 @@ function ImportModalInner() {
     [mode, importedNameSet, importedTextureNameSet, presetPackMap],
   );
 
+  const handleInlineTextureFiles = useCallback(
+    async (files: File[]) => {
+      if (files.length === 0) return;
+
+      setTextureUploading(true);
+      setTextureUploadError(null);
+
+      try {
+        const { processTextureImport } = await import('../engine/importProcessor.ts');
+        const uploaded = new Set<string>();
+
+        await processTextureImport(files, {
+          existingTextureNames: importedTextureNameSet,
+          onProgress: (result) => {
+            if (result.status === 'success' && result.presetName) {
+              uploaded.add(result.presetName);
+            }
+          },
+        });
+
+        if (uploaded.size > 0) {
+          setUploadedTextures((prev) => {
+            const next = new Set(prev);
+            for (const name of uploaded) next.add(name);
+            return next;
+          });
+        }
+      } catch {
+        setTextureUploadError(t('importModal.idbUnavailable'));
+      }
+
+      setTextureUploading(false);
+    },
+    [importedTextureNameSet, t],
+  );
+
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -177,8 +243,37 @@ function ImportModalInner() {
     [handleFiles],
   );
 
+  const handleTextureDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    textureDragCounterRef.current++;
+    if (textureDragCounterRef.current === 1) setTextureDragOver(true);
+  }, []);
+
+  const handleTextureDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    textureDragCounterRef.current--;
+    if (textureDragCounterRef.current === 0) setTextureDragOver(false);
+  }, []);
+
+  const handleTextureDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      textureDragCounterRef.current = 0;
+      setTextureDragOver(false);
+      handleInlineTextureFiles(Array.from(e.dataTransfer.files));
+    },
+    [handleInlineTextureFiles],
+  );
+
   const handleBrowse = useCallback(() => {
     fileInputRef.current?.click();
+  }, []);
+
+  const handleTextureBrowse = useCallback(() => {
+    textureInputRef.current?.click();
   }, []);
 
   const handleInputChange = useCallback(
@@ -188,6 +283,15 @@ function ImportModalInner() {
       handleFiles(files);
     },
     [handleFiles],
+  );
+
+  const handleTextureInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files ? Array.from(e.target.files) : [];
+      e.target.value = '';
+      handleInlineTextureFiles(files);
+    },
+    [handleInlineTextureFiles],
   );
 
   const handleDropZoneKeyDown = useCallback(
@@ -200,6 +304,16 @@ function ImportModalInner() {
     [handleBrowse],
   );
 
+  const handleTextureDropZoneKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleTextureBrowse();
+      }
+    },
+    [handleTextureBrowse],
+  );
+
   const handleImportMore = useCallback(() => {
     resultsRef.current = [];
     setResultCount(0);
@@ -207,11 +321,8 @@ function ImportModalInner() {
     setProgress({ current: 0, total: 0 });
     setIdbError(false);
     setResultFilter('all');
-  }, []);
-
-  const handleUploadTextures = useCallback(() => {
-    useImportModalStore.getState().close();
-    setTimeout(() => useImportModalStore.getState().open('texture'), 50);
+    setUploadedTextures(new Set());
+    setTextureUploadError(null);
   }, []);
 
   const handleBackdropClick = useCallback(() => {
@@ -226,10 +337,17 @@ function ImportModalInner() {
       const actualIndex = filteredIndices ? filteredIndices[index] : index;
       const result = resultsRef.current[actualIndex];
       if (!result) return <div />;
-      return <ResultRow result={result} mode={mode} />;
+      return (
+        <ResultRow
+          result={result}
+          mode={mode}
+          uploadedTextures={uploadedTextures}
+          importedTextureNameSet={importedTextureNameSet}
+        />
+      );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [filteredIndices, mode, resultCount],
+    [filteredIndices, mode, resultCount, uploadedTextures, importedTextureNameSet],
   );
 
   return (
@@ -243,7 +361,7 @@ function ImportModalInner() {
         ref={dialogRef}
         role="dialog"
         aria-label={title}
-        className="flex w-full max-w-lg flex-col rounded-lg bg-gray-900/95 p-5 shadow-2xl"
+        className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-lg bg-gray-900/95 p-5 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="mb-1 text-sm font-semibold text-white">{title}</h3>
@@ -356,7 +474,7 @@ function ImportModalInner() {
 
         {/* Results phase */}
         {phase === 'results' && (
-          <div className="flex flex-col gap-3">
+          <div className="flex min-h-0 flex-col gap-3">
             {idbError && <p className="text-xs text-red-400">{t('importModal.idbUnavailable')}</p>}
 
             {!idbError && resultCount > 0 && (
@@ -416,18 +534,163 @@ function ImportModalInner() {
                   style={{ height: Math.min(visibleCount * 36, 350) }}
                   className="overflow-y-auto"
                 />
+
+                {/* Inline missing textures section */}
+                {hasTextureWarnings && (
+                  <div
+                    ref={textureSectionRef}
+                    className="rounded-lg border border-amber-500/20 bg-amber-500/5"
+                  >
+                    <button
+                      onClick={() => setTextureSectionExpanded((prev) => !prev)}
+                      className="flex w-full cursor-pointer items-center justify-between border-none bg-transparent px-3 py-2 text-left"
+                    >
+                      <span className="text-xs font-medium text-amber-300">
+                        {unresolvedTextureCount > 0
+                          ? t('importModal.missingTexturesSection', {
+                              remaining: unresolvedTextureCount,
+                            })
+                          : t('importModal.missingTexturesAllResolved')}
+                      </span>
+                      <svg
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        className={`h-4 w-4 text-amber-300/60 transition-transform ${
+                          textureSectionExpanded ? 'rotate-180' : ''
+                        }`}
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+
+                    {textureSectionExpanded && (
+                      <div className="flex flex-col gap-2 border-t border-amber-500/10 px-3 pb-3 pt-2">
+                        {/* Missing texture list */}
+                        <div className="flex max-h-24 flex-col gap-0.5 overflow-y-auto">
+                          {[...missingTextureNames].map((name) => {
+                            const resolved =
+                              uploadedTextures.has(name) || importedTextureNameSet.has(name);
+                            return (
+                              <div key={name} className="flex items-center gap-1.5">
+                                {resolved ? (
+                                  <svg
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    className="h-3 w-3 flex-shrink-0 text-green-400"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                ) : (
+                                  <svg
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    className="h-3 w-3 flex-shrink-0 text-amber-400"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.345 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                )}
+                                <span
+                                  className={`text-[10px] ${resolved ? 'text-white/40 line-through' : 'text-white/70'}`}
+                                >
+                                  {name}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Compact upload area */}
+                        {unresolvedTextureCount > 0 && (
+                          <>
+                            <div
+                              role="button"
+                              tabIndex={0}
+                              onDragEnter={handleTextureDragEnter}
+                              onDragLeave={handleTextureDragLeave}
+                              onDragOver={handleDragOver}
+                              onDrop={handleTextureDrop}
+                              onClick={handleTextureBrowse}
+                              onKeyDown={handleTextureDropZoneKeyDown}
+                              className={`flex cursor-pointer items-center justify-center gap-2 rounded border-2 border-dashed px-3 py-2 transition-colors ${
+                                textureDragOver
+                                  ? 'border-orange-500 bg-orange-500/10'
+                                  : 'border-white/15 hover:border-white/30'
+                              }`}
+                            >
+                              {textureUploading ? (
+                                <svg
+                                  className="h-4 w-4 animate-spin text-orange-400"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                >
+                                  <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                    className="opacity-25"
+                                  />
+                                  <path
+                                    d="M4 12a8 8 0 018-8"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                    strokeLinecap="round"
+                                  />
+                                </svg>
+                              ) : (
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth={1.5}
+                                  className="h-4 w-4 text-white/40"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+                                  />
+                                </svg>
+                              )}
+                              <span className="text-[10px] text-white/50">
+                                {t('importModal.dropTexturesHere')}
+                              </span>
+                            </div>
+                            <input
+                              ref={textureInputRef}
+                              type="file"
+                              multiple
+                              accept="image/jpeg,image/png,image/webp"
+                              onChange={handleTextureInputChange}
+                              className="hidden"
+                            />
+                          </>
+                        )}
+
+                        {textureUploadError && (
+                          <p className="text-[10px] text-red-400">{textureUploadError}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </>
             )}
 
             <div className="flex flex-wrap justify-end gap-2">
-              {hasTextureWarnings && (
-                <button
-                  onClick={handleUploadTextures}
-                  className="cursor-pointer rounded-lg border-none bg-amber-500/80 px-4 py-1.5 text-xs font-medium text-white hover:bg-amber-500"
-                >
-                  {t('importModal.uploadMissingTextures')}
-                </button>
-              )}
               {!idbError && (
                 <button
                   onClick={handleImportMore}
@@ -509,15 +772,34 @@ function SummaryText({
   );
 }
 
-function ResultRow({ result, mode }: { result: ImportResult; mode: 'preset' | 'texture' }) {
+function ResultRow({
+  result,
+  mode,
+  uploadedTextures,
+  importedTextureNameSet,
+}: {
+  result: ImportResult;
+  mode: 'preset' | 'texture';
+  uploadedTextures: Set<string>;
+  importedTextureNameSet: Set<string>;
+}) {
   const { t } = useTranslation('messages');
   const displayName = result.presetName ?? result.fileName;
   const errorNs = mode === 'preset' ? 'importedPresets' : 'importedTextures';
 
+  // Compute which warnings are still unresolved
+  const unresolvedWarnings = result.warnings.filter(
+    (w) => !uploadedTextures.has(w) && !importedTextureNameSet.has(w),
+  );
+  const allWarningsResolved = result.warnings.length > 0 && unresolvedWarnings.length === 0;
+
+  // Effective status icon: if all warnings are resolved, show success icon
+  const effectiveStatus = allWarningsResolved ? 'success' : result.status;
+
   return (
     <div className="flex items-start gap-2 border-b border-white/5 py-1.5 last:border-b-0">
       <span className="mt-0.5 flex-shrink-0">
-        {result.status === 'success' && (
+        {effectiveStatus === 'success' && (
           <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 text-green-400">
             <path
               fillRule="evenodd"
@@ -526,7 +808,7 @@ function ResultRow({ result, mode }: { result: ImportResult; mode: 'preset' | 't
             />
           </svg>
         )}
-        {result.status === 'warning' && (
+        {effectiveStatus === 'warning' && (
           <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 text-amber-400">
             <path
               fillRule="evenodd"
@@ -535,7 +817,7 @@ function ResultRow({ result, mode }: { result: ImportResult; mode: 'preset' | 't
             />
           </svg>
         )}
-        {result.status === 'failed' && (
+        {effectiveStatus === 'failed' && (
           <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 text-red-400">
             <path
               fillRule="evenodd"
@@ -558,7 +840,21 @@ function ResultRow({ result, mode }: { result: ImportResult; mode: 'preset' | 't
         )}
         {result.warnings.length > 0 && (
           <p className="text-[10px] text-amber-400/80">
-            {t('importedPresets.missingTextures', { textures: result.warnings.join(', ') })}
+            {allWarningsResolved ? (
+              <span className="text-green-400/80 line-through">
+                {t('importedPresets.missingTextures', {
+                  textures: result.warnings.join(', '),
+                })}
+              </span>
+            ) : unresolvedWarnings.length < result.warnings.length ? (
+              <>
+                {t('importedPresets.missingTextures', {
+                  textures: unresolvedWarnings.join(', '),
+                })}
+              </>
+            ) : (
+              t('importedPresets.missingTextures', { textures: result.warnings.join(', ') })
+            )}
           </p>
         )}
       </div>

@@ -1039,7 +1039,9 @@ export function PresetBrowser({
         onConfirm: async () => {
           await useImportedPresetsStore.getState().removePreset(preset.name);
           removeImportedPresetMeta(preset.name);
-          if (preset.name === currentPreset) onNextPreset();
+          // Defer so React's useEffect in Visualizer unregisters the preset from
+          // the renderer before pickNextPreset reads the preset list.
+          if (preset.name === currentPreset) requestAnimationFrame(onNextPreset);
         },
       });
     },
@@ -1056,8 +1058,10 @@ export function PresetBrowser({
         const shouldAdvance = importedNames.has(currentPreset);
         await useImportedPresetsStore.getState().removeAllPresets();
         clearImportedPresetsMeta();
-        if (shouldAdvance) onNextPreset();
         useToastStore.getState().show(t('importedPresets.cleared'));
+        // Defer so React's useEffect in Visualizer unregisters the presets from
+        // the renderer before pickNextPreset reads the preset list.
+        if (shouldAdvance) requestAnimationFrame(onNextPreset);
       },
     });
   }, [t, importedPresets, clearImportedPresetsMeta, currentPreset, onNextPreset]);

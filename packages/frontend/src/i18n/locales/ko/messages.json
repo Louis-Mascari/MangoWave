@@ -63,7 +63,8 @@
     "favoritePresetsCleared": "즐겨찾기가 모두 해제됨",
     "silenceDetected": "오디오가 감지되지 않습니다. 공유한 화면, 창 또는 탭에서 오디오가 재생 중인지, 그리고 브라우저 대화상자에서 \"오디오 공유\"를 체크했는지 확인하세요.",
     "silenceDetectedMic": "마이크에서 오디오가 감지되지 않습니다. 마이크가 음소거되지 않았는지, 소리를 잘 잡고 있는지 확인하세요.",
-    "silenceDetectedLocal": "오디오가 감지되지 않습니다. 파일이 지원되는 형식인지, 기기 볼륨이 켜져 있는지 확인하세요."
+    "silenceDetectedLocal": "오디오가 감지되지 않습니다. 파일이 지원되는 형식인지, 기기 볼륨이 켜져 있는지 확인하세요.",
+    "noPresetsAvailable": "사용 가능한 프리셋이 없습니다. 팩이 하나 이상 활성화되어 있고 모든 프리셋이 차단되지 않았는지 확인하세요."
   },
   "playback": {
     "addSongsToQueue": "재생 목록에 곡 추가",
@@ -258,6 +259,9 @@
     "summaryPartial": "{{total}}개의 {{type}} 중 {{success}}개를 가져왔습니다. {{failed}}개 실패, {{warnings}}개 경고.",
     "summaryAllFailed": "{{count}}개의 {{type}} 모두 가져오기 실패",
     "uploadMissingTextures": "누락된 텍스처 업로드",
+    "missingTexturesSection": "누락된 텍스처 ({{remaining}}개 남음)",
+    "missingTexturesAllResolved": "누락된 텍스처 모두 업로드 완료",
+    "dropTexturesHere": "텍스처 이미지를 여기에 끌어다 놓거나 찾아보기 (JPEG, PNG, WebP)",
     "importMore": "더 가져오기",
     "presets": "프리셋",
     "textures": "텍스처",

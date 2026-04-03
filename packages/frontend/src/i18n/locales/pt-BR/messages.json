@@ -63,7 +63,8 @@
     "favoritePresetsCleared": "Presets favoritos limpos",
     "silenceDetected": "Nenhum áudio detectado. Certifique-se de que o áudio está tocando na tela, janela ou aba compartilhada, e que você marcou \"Compartilhar áudio\" na caixa de diálogo do navegador.",
     "silenceDetectedMic": "Nenhum áudio detectado do microfone. Certifique-se de que seu mic não está mutado e está captando som.",
-    "silenceDetectedLocal": "Nenhum áudio detectado. Certifique-se de que o arquivo é um formato suportado e que o volume do dispositivo está ligado."
+    "silenceDetectedLocal": "Nenhum áudio detectado. Certifique-se de que o arquivo é um formato suportado e que o volume do dispositivo está ligado.",
+    "noPresetsAvailable": "Nenhum preset disponível. Verifique se pelo menos um pacote está ativado e se nem todos os presets estão bloqueados."
   },
   "playback": {
     "addSongsToQueue": "Adicione músicas à sua fila",
@@ -258,6 +259,9 @@
     "summaryPartial": "Importados {{success}} de {{total}} {{type}}. {{failed}} falharam, {{warnings}} com avisos.",
     "summaryAllFailed": "Todos os {{count}} {{type}} falharam ao importar",
     "uploadMissingTextures": "Enviar texturas faltantes",
+    "missingTexturesSection": "Texturas faltantes ({{remaining}} restantes)",
+    "missingTexturesAllResolved": "Todas as texturas faltantes enviadas",
+    "dropTexturesHere": "Arraste imagens de textura aqui ou procure (JPEG, PNG, WebP)",
     "importMore": "Importar mais",
     "presets": "presets",
     "textures": "texturas",

@@ -67,7 +67,8 @@
     "favoritePresetsCleared": "Favorite presets cleared",
     "silenceDetected": "No audio detected. Make sure audio is playing in the shared screen, window, or tab, and that you checked \"Share audio\" in the browser dialog.",
     "silenceDetectedMic": "No audio detected from your microphone. Make sure your mic is not muted and is picking up sound.",
-    "silenceDetectedLocal": "No audio detected. Make sure the file is a supported format and your device volume is up."
+    "silenceDetectedLocal": "No audio detected. Make sure the file is a supported format and your device volume is up.",
+    "noPresetsAvailable": "No presets available. Check that at least one pack is enabled and not all presets are blocked."
   },
 
   "playback": {
@@ -267,6 +268,9 @@
     "summaryPartial": "Imported {{success}} of {{total}} {{type}}. {{failed}} failed, {{warnings}} with warnings.",
     "summaryAllFailed": "All {{count}} {{type}} failed to import",
     "uploadMissingTextures": "Upload Missing Textures",
+    "missingTexturesSection": "Missing Textures ({{remaining}} remaining)",
+    "missingTexturesAllResolved": "All missing textures uploaded",
+    "dropTexturesHere": "Drop texture images here or browse (JPEG, PNG, WebP)",
     "importMore": "Import More",
     "presets": "presets",
     "textures": "textures",

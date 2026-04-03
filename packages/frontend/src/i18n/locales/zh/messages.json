@@ -63,7 +63,8 @@
     "favoritePresetsCleared": "收藏的预设已清除",
     "silenceDetected": "未检测到音频。请确保共享的屏幕、窗口或标签页中正在播放音频，并且在浏览器对话框中勾选了「共享音频」。",
     "silenceDetectedMic": "未检测到麦克风音频。请确保麦克风未静音并且正在拾取声音。",
-    "silenceDetectedLocal": "未检测到音频。请确保文件格式受支持，并且设备音量已开启。"
+    "silenceDetectedLocal": "未检测到音频。请确保文件格式受支持，并且设备音量已开启。",
+    "noPresetsAvailable": "没有可用的预设。请检查是否启用了至少一个包，且并非所有预设都被屏蔽。"
   },
   "playback": {
     "addSongsToQueue": "将歌曲添加到队列",
@@ -258,6 +259,9 @@
     "summaryPartial": "已导入 {{total}} 个{{type}}中的 {{success}} 个。{{failed}} 个失败，{{warnings}} 个有警告。",
     "summaryAllFailed": "全部 {{count}} 个{{type}}导入失败",
     "uploadMissingTextures": "上传缺失的纹理",
+    "missingTexturesSection": "缺失的纹理（还剩 {{remaining}} 个）",
+    "missingTexturesAllResolved": "所有缺失的纹理已上传",
+    "dropTexturesHere": "将纹理图片拖到此处或浏览（JPEG、PNG、WebP）",
     "importMore": "导入更多",
     "presets": "预设",
     "textures": "纹理",

@@ -1670,9 +1670,9 @@ export function PresetBrowser({
                 style={{ height: Math.min(importedTextures.length * 40, 320) }}
                 itemContent={(_index, tex) => (
                   <div className="flex items-center justify-between rounded bg-white/5 px-2 py-1">
-                    <div className="min-w-0 flex-1">
-                      <span className="block truncate text-xs text-white/70">{tex.name}</span>
-                      <span className="text-[10px] text-white/30">
+                    <div className="flex min-w-0 flex-1 items-baseline gap-1.5">
+                      <span className="truncate text-xs text-white/70">{tex.name}</span>
+                      <span className="shrink-0 text-[10px] text-white/30">
                         {tex.width}×{tex.height} · {(tex.sizeBytes / 1024).toFixed(0)}KB
                       </span>
                     </div>

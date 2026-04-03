@@ -34,5 +34,9 @@
   "default": "默认",
   "high": "高",
   "ultra": "超高",
-  "controls": "控件"
+  "controls": "控件",
+  "today": "今天",
+  "yesterday": "昨天",
+  "collapseAll": "全部折叠",
+  "expandAll": "全部展开"
 }

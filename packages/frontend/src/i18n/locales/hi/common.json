@@ -34,5 +34,9 @@
   "default": "डिफ़ॉल्ट",
   "high": "उच्च",
   "ultra": "अल्ट्रा",
-  "controls": "नियंत्रण"
+  "controls": "नियंत्रण",
+  "today": "आज",
+  "yesterday": "कल",
+  "collapseAll": "सभी संक्षिप्त करें",
+  "expandAll": "सभी विस्तृत करें"
 }

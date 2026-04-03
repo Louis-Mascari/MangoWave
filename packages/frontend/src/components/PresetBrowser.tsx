@@ -924,6 +924,82 @@ export function PresetBrowser({
     return importedPresets.filter((p) => p.name.toLowerCase().includes(q));
   }, [importedPresets, deferredImportSearch]);
 
+  const [collapsedImportGroups, setCollapsedImportGroups] = useState<Set<string>>(new Set());
+  const toggleImportGroup = useCallback((key: string) => {
+    setCollapsedImportGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }, []);
+
+  const { importGroupCounts, importGroupLabels, importFlatPresets } = useMemo(() => {
+    if (filteredImportedPresets.length === 0) {
+      return { importGroupCounts: [], importGroupLabels: [], importFlatPresets: [] };
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const todayMs = today.getTime();
+    const yesterdayMs = yesterday.getTime();
+
+    // Sort by addedAt descending (most recent first), alpha within same date
+    const sorted = [...filteredImportedPresets].sort((a, b) => {
+      const dayA = new Date(a.addedAt);
+      dayA.setHours(0, 0, 0, 0);
+      const dayB = new Date(b.addedAt);
+      dayB.setHours(0, 0, 0, 0);
+      if (dayA.getTime() !== dayB.getTime()) return dayB.getTime() - dayA.getTime();
+      return a.name.localeCompare(b.name);
+    });
+
+    // Group by date
+    const groups: { key: string; label: string; presets: ImportedPresetMeta[] }[] = [];
+    for (const preset of sorted) {
+      const d = new Date(preset.addedAt);
+      d.setHours(0, 0, 0, 0);
+      const ms = d.getTime();
+      let label: string;
+      if (ms >= todayMs) {
+        label = tc('today');
+      } else if (ms >= yesterdayMs) {
+        label = tc('yesterday');
+      } else {
+        label = d.toLocaleDateString(undefined, {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        });
+      }
+      const key = String(ms);
+      const last = groups[groups.length - 1];
+      if (last && last.key === key) {
+        last.presets.push(preset);
+      } else {
+        groups.push({ key, label, presets: [preset] });
+      }
+    }
+
+    const counts: number[] = [];
+    const labels: string[] = [];
+    const flat: ImportedPresetMeta[] = [];
+    for (const group of groups) {
+      const isCollapsed = collapsedImportGroups.has(group.key);
+      labels.push(`${group.key}|||${group.label}|||${group.presets.length}`);
+      if (isCollapsed) {
+        counts.push(0);
+      } else {
+        counts.push(group.presets.length);
+        flat.push(...group.presets);
+      }
+    }
+
+    return { importGroupCounts: counts, importGroupLabels: labels, importFlatPresets: flat };
+  }, [filteredImportedPresets, collapsedImportGroups, tc]);
+
   const selectedPack = useMemo(
     () => customPacks.find((p) => p.id === selectedPackId) ?? null,
     [customPacks, selectedPackId],
@@ -1447,39 +1523,92 @@ export function PresetBrowser({
             </p>
           ) : (
             <div className="min-h-0 flex-1">
-              <Virtuoso
-                data={filteredImportedPresets}
-                style={{ height: Math.min(filteredImportedPresets.length * 32, 320) }}
-                itemContent={(_index, preset) => (
-                  <div className="flex items-center">
-                    <div className="min-w-0 flex-1">
-                      <PresetRow
-                        name={preset.name}
-                        isCurrent={preset.name === currentPreset}
-                        isFavorite={favoriteSet.has(preset.name)}
-                        isBlocked={blockedSet.has(preset.name)}
-                        onSelect={() => handleSelectPreset(preset.name)}
-                        onToggleFavorite={() => handleToggleFavorite(preset.name)}
-                        onToggleBlock={() => handleToggleBlock(preset.name)}
-                        customPacks={customPacks}
-                      />
-                    </div>
-                    <button
-                      onClick={() => handleDeleteImportedPreset(preset)}
-                      className="ml-0.5 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-red-500/20 hover:text-red-400"
-                      title={t('importedPresets.deletePreset')}
-                      aria-label={t('importedPresets.deletePreset')}
+              {importGroupLabels.length > 1 && (
+                <div className="mb-1 flex items-center gap-2">
+                  <button
+                    onClick={() =>
+                      setCollapsedImportGroups(
+                        new Set(importGroupLabels.map((l) => l.split('|||')[0])),
+                      )
+                    }
+                    className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
+                  >
+                    {tc('collapseAll')}
+                  </button>
+                  <button
+                    onClick={() => setCollapsedImportGroups(new Set())}
+                    className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
+                  >
+                    {tc('expandAll')}
+                  </button>
+                </div>
+              )}
+              <GroupedVirtuoso
+                style={{
+                  height: isMobileDevice
+                    ? 'max(280px, calc(100dvh - 380px))'
+                    : Math.min(importFlatPresets.length * 32 + importGroupLabels.length * 28, 320),
+                }}
+                groupCounts={importGroupCounts}
+                groupContent={(index) => {
+                  const raw = importGroupLabels[index];
+                  const [key, label, countStr] = raw.split('|||');
+                  const isCollapsed = collapsedImportGroups.has(key);
+                  return (
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => toggleImportGroup(key)}
+                      onKeyDown={(e) => {
+                        if (e.currentTarget !== e.target) return;
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          toggleImportGroup(key);
+                        }
+                      }}
+                      className="sticky top-0 z-[1] flex cursor-pointer items-center justify-between bg-black/80 px-2 py-1 backdrop-blur-sm"
                     >
-                      <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
-                        <path
-                          fillRule="evenodd"
-                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                          clipRule="evenodd"
+                      <span className="text-xs font-semibold text-orange-400">
+                        {isCollapsed ? '\u25B6' : '\u25BC'} {label}
+                      </span>
+                      <span className="text-xs text-white/40">{countStr}</span>
+                    </div>
+                  );
+                }}
+                itemContent={(index) => {
+                  const preset = importFlatPresets[index];
+                  if (!preset) return <div style={{ height: 1 }} />;
+                  return (
+                    <div className="flex items-center">
+                      <div className="min-w-0 flex-1">
+                        <PresetRow
+                          name={preset.name}
+                          isCurrent={preset.name === currentPreset}
+                          isFavorite={favoriteSet.has(preset.name)}
+                          isBlocked={blockedSet.has(preset.name)}
+                          onSelect={() => handleSelectPreset(preset.name)}
+                          onToggleFavorite={() => handleToggleFavorite(preset.name)}
+                          onToggleBlock={() => handleToggleBlock(preset.name)}
+                          customPacks={customPacks}
                         />
-                      </svg>
-                    </button>
-                  </div>
-                )}
+                      </div>
+                      <button
+                        onClick={() => handleDeleteImportedPreset(preset)}
+                        className="ml-0.5 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-red-500/20 hover:text-red-400"
+                        title={t('importedPresets.deletePreset')}
+                        aria-label={t('importedPresets.deletePreset')}
+                      >
+                        <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
+                          <path
+                            fillRule="evenodd"
+                            d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  );
+                }}
               />
             </div>
           )}

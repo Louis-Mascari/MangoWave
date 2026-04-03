@@ -34,5 +34,9 @@
   "default": "Default",
   "high": "Tinggi",
   "ultra": "Ultra",
-  "controls": "Kontrol"
+  "controls": "Kontrol",
+  "today": "Hari ini",
+  "yesterday": "Kemarin",
+  "collapseAll": "Ciutkan semua",
+  "expandAll": "Perluas semua"
 }

@@ -34,5 +34,9 @@
   "default": "Стандарт",
   "high": "Высокое",
   "ultra": "Ультра",
-  "controls": "Управление"
+  "controls": "Управление",
+  "today": "Сегодня",
+  "yesterday": "Вчера",
+  "collapseAll": "Свернуть все",
+  "expandAll": "Развернуть все"
 }

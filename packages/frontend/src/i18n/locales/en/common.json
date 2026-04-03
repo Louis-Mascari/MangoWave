@@ -34,5 +34,9 @@
   "default": "Default",
   "high": "High",
   "ultra": "Ultra",
-  "controls": "Controls"
+  "controls": "Controls",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "collapseAll": "Collapse all",
+  "expandAll": "Expand all"
 }

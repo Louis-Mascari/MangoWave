@@ -34,5 +34,9 @@
   "default": "デフォルト",
   "high": "高",
   "ultra": "ウルトラ",
-  "controls": "コントロール"
+  "controls": "コントロール",
+  "today": "今日",
+  "yesterday": "昨日",
+  "collapseAll": "すべて折りたたむ",
+  "expandAll": "すべて展開"
 }

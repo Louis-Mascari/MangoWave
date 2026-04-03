@@ -34,5 +34,9 @@
   "default": "Predeterminado",
   "high": "Alto",
   "ultra": "Ultra",
-  "controls": "Controles"
+  "controls": "Controles",
+  "today": "Hoy",
+  "yesterday": "Ayer",
+  "collapseAll": "Contraer todo",
+  "expandAll": "Expandir todo"
 }

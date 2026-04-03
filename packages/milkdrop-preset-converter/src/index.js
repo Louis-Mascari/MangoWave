@@ -506,6 +506,50 @@ function makeUvMutable(body) {
   return body;
 }
 
+/** Fix bvec-to-scalar casts in hlslparser output.
+ *  HLSL: `float x = (vec4 >= 0)` — component-wise compare, implicit bool→float.
+ *  hlslparser emits: `float(greaterThanEqual(A, B))` — but GLSL's greaterThanEqual
+ *  returns bvec, and float(bvec) is invalid. Fix: wrap with any() to reduce to bool. */
+function fixBvecScalarCast(text) {
+  const compareFns = [
+    'greaterThanEqual',
+    'lessThanEqual',
+    'greaterThan',
+    'lessThan',
+    'equal',
+    'notEqual',
+  ];
+  let result = text;
+  for (const fn of compareFns) {
+    const pattern = new RegExp('float\\s*\\(\\s*' + fn + '\\s*\\(', 'g');
+    // Collect matches in reverse order so index shifts don't affect later matches
+    const matches = [];
+    let m;
+    while ((m = pattern.exec(result)) !== null) matches.push(m.index);
+    for (let k = matches.length - 1; k >= 0; k--) {
+      const start = matches[k];
+      const floatParen = result.indexOf('(', start);
+      const fnParen = result.indexOf('(', floatParen + 1);
+      // Track parens to find end of comparison function call
+      let depth = 1;
+      let i = fnParen + 1;
+      while (i < result.length && depth > 0) {
+        if (result[i] === '(') depth++;
+        else if (result[i] === ')') depth--;
+        i++;
+      }
+      // Insert any() wrapper: float(fn(...)) → float(any(fn(...)))
+      result =
+        result.substring(0, floatParen + 1) +
+        'any(' +
+        result.substring(floatParen + 1, i) +
+        ')' +
+        result.substring(i);
+    }
+  }
+  return result;
+}
+
 /** Structure hlslparser GLSL output for butterchurn.
  *  hlslparser outputs: helper functions + main_shader_sentinel function.
  *  butterchurn expects: header (helper functions) + shader_body { body statements }.
@@ -672,10 +716,11 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
       bodyDeclaredNames.add(bdm[1]);
     }
     if (bodyDeclaredNames.size > 0) {
-      // For variables in BOTH presetLocals and the body: keep the presetLocals
-      // declaration (appears first) and strip the body's redeclaration.
-      // hlslparser may emit `vec3 ret1 = vec3( ret1 );` at the end of a scope
-      // while the variable was already used above (from the global).
+      // For overlapping names: strip the presetLocals version and keep the body
+      // declaration. hlslparser analyzes actual usage and may emit a different type
+      // than the raw global (e.g. global `float c;` vs body `vec2 c = vec2(...)` when
+      // the HLSL had local float2 shadowing a global float). Keeping the body version
+      // preserves hlslparser's type analysis.
       const presetLocalNames = new Set();
       const plNameRe = /(?:float|vec[234]|mat[234](?:x[234])?|int|bool)\s+([\w][\w\s,]*);/g;
       let plm;
@@ -685,21 +730,34 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
           if (name && !PREAMBLE_VARS.has(name)) presetLocalNames.add(name);
         }
       }
-      const overlap = [...presetLocalNames].filter((n) => bodyDeclaredNames.has(n));
-      for (const name of overlap) {
-        // Strip body redeclaration: `type name = expr;` or `type name;`
-        // Use a regex that matches the type + name + optional initializer + semicolon
-        const stripRe = new RegExp(
-          '\\b(?:float|vec[234]|mat[234](?:x[234])?|int|bool)\\s+' + name + '\\b[^;]*;',
-          'g',
+      const overlap = new Set([...presetLocalNames].filter((n) => bodyDeclaredNames.has(n)));
+      if (overlap.size > 0) {
+        // Strip overlapping names from presetLocals (keep body version)
+        // For comma-separated declarations like `float a, b, c;`, remove only the
+        // overlapping names. If all names overlap, remove the entire declaration.
+        presetLocals = presetLocals.replace(
+          /^\s*(?:float|vec[234]|mat[234](?:x[234])?|int|bool)\s+([\w][\w\s,]*);/gm,
+          (match, namesPart) => {
+            const names = namesPart.split(',').map((n) => n.trim());
+            const kept = names.filter((n) => !overlap.has(n));
+            if (kept.length === 0) return ''; // all names overlap, remove entire line
+            if (kept.length === names.length) return match; // no overlap, keep as-is
+            // Extract the type prefix and rebuild with remaining names
+            const typeMatch = match.match(/^\s*(float|vec[234]|mat[234](?:x[234])?|int|bool)\s+/);
+            return typeMatch ? '    ' + typeMatch[1] + ' ' + kept.join(', ') + ';' : match;
+          },
         );
-        body = body.replace(stripRe, '');
       }
     }
     if (presetLocals.trim()) {
       body = presetLocals + body;
     }
   }
+
+  // Fix bvec-to-scalar casts: hlslparser emits float(greaterThanEqual(A, B)) for HLSL
+  // `(A >= B)` assigned to float, but GLSL's greaterThanEqual returns bvec, not float.
+  // Wrap with any() to reduce bvec→bool, which can then convert to float.
+  body = fixBvecScalarCast(body);
 
   // Make uv mutable if the shader body assigns to it
   body = makeUvMutable(body);
@@ -778,6 +836,92 @@ function fixUniformAssignments(shaderBody) {
   return result;
 }
 
+/** Normalize frame-rate-dependent constants in converted GLSL shaders.
+ *  MilkDrop presets were designed for ~30fps. Shader constants like `ret -= 0.004`
+ *  and `ret *= 0.98` accumulate per frame, so at 60fps they're applied 2× per second.
+ *  butterchurn already provides `uniform float fps` in its shader preamble, so we
+ *  inject `float _mw_fps_ratio = 30.0 / fps;` and scale the constants accordingly.
+ *
+ *  Subtraction: `ret -= C` → `ret -= C * _mw_fps_ratio`  (linear scaling)
+ *  Multiplication: `ret *= F` (0<F<1) → `ret *= pow(F, _mw_fps_ratio)`  (exponential) */
+function normalizeFpsConstants(glsl) {
+  if (!glsl || !glsl.includes('shader_body')) return glsl;
+
+  let result = glsl;
+  let needsRatio = false;
+
+  // Compound pattern first (more specific, prevents double-transform):
+  // (ret - CONSTANT) * FACTOR  where 0 < FACTOR < 1
+  // Handles: `ret = (ret - 0.005)*0.98;`, `(ret -.02)*.98`
+  result = result.replace(
+    /(\(ret\s*-\s*)(\d*\.?\d+)(\s*\)\s*\*\s*)(\d*\.?\d+)/g,
+    (match, pre, subVal, mid, mulVal) => {
+      const sub = parseFloat(subVal);
+      const mul = parseFloat(mulVal);
+      if (isNaN(sub) || isNaN(mul)) return match;
+      if (sub === 0 && (mul <= 0 || mul >= 1)) return match;
+      let out = match;
+      if (sub > 0) {
+        out = pre + subVal + ' * _mw_fps_ratio' + mid;
+        needsRatio = true;
+      } else {
+        out = pre + subVal + mid;
+      }
+      if (mul > 0 && mul < 1) {
+        out += 'pow(' + mulVal + ', _mw_fps_ratio)';
+        needsRatio = true;
+      } else {
+        out += mulVal;
+      }
+      return out;
+    },
+  );
+
+  // Simple subtraction: ret -= CONSTANT; or ret.swizzle -= CONSTANT;
+  result = result.replace(
+    /(\bret(?:\.[xyzw]+)?\s*-=\s*)(\d*\.?\d+)(\s*;)/g,
+    (match, pre, val, post) => {
+      const num = parseFloat(val);
+      if (num === 0 || isNaN(num)) return match;
+      needsRatio = true;
+      return pre + val + ' * _mw_fps_ratio' + post;
+    },
+  );
+
+  // Assignment subtraction: ret = ret - CONSTANT; (feedback loop)
+  result = result.replace(/(\bret\s*=\s*ret\s*-\s*)(\d*\.?\d+)(\s*;)/g, (match, pre, val, post) => {
+    const num = parseFloat(val);
+    if (num === 0 || isNaN(num)) return match;
+    needsRatio = true;
+    return pre + val + ' * _mw_fps_ratio' + post;
+  });
+
+  // Simple multiplication decay: ret *= FACTOR; or ret.swizzle *= FACTOR; (0 < F < 1)
+  result = result.replace(
+    /(\bret(?:\.[xyzw]+)?\s*\*=\s*)(\d*\.?\d+)(\s*;)/g,
+    (match, pre, val, post) => {
+      const num = parseFloat(val);
+      if (num <= 0 || num >= 1 || isNaN(num)) return match;
+      needsRatio = true;
+      return pre + 'pow(' + val + ', _mw_fps_ratio)' + post;
+    },
+  );
+
+  // Insert _mw_fps_ratio declaration at start of shader_body
+  if (needsRatio) {
+    const bodyIdx = result.indexOf('shader_body');
+    if (bodyIdx > -1) {
+      const braceIdx = result.indexOf('{', bodyIdx);
+      if (braceIdx > -1) {
+        const decl = '\n    float _mw_fps_ratio = 30.0 / fps;';
+        result = result.substring(0, braceIdx + 1) + decl + result.substring(braceIdx + 1);
+      }
+    }
+  }
+
+  return result;
+}
+
 /** Convert HLSL shader to GLSL ES 3.0.
  *  Primary: hlslparser-wasm with manual macro expansion (handles type coercions,
  *  implicit float4→float2 truncation, etc.). Fallback: text-level regex conversion
@@ -804,12 +948,14 @@ export async function convertShader(shader) {
   }
 
   if (rawGlsl) {
-    return fixUniformAssignments(structureHlslparserOutput(rawGlsl, shaderBodyName));
+    return normalizeFpsConstants(
+      fixUniformAssignments(structureHlslparserOutput(rawGlsl, shaderBodyName)),
+    );
   }
 
   // Fallback: text-level HLSL→GLSL conversion
   console.warn('[convertShader] hlslparser-wasm failed, using text-level fallback');
-  return fixUniformAssignments(convertShaderTextLevel(shader));
+  return normalizeFpsConstants(fixUniformAssignments(convertShaderTextLevel(shader)));
 }
 
 export async function convertPreset(text) {

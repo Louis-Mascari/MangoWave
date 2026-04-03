@@ -56,6 +56,7 @@ function PresetRow({
   onSelect,
   onToggleFavorite,
   onToggleBlock,
+  onDelete,
   customPacks,
 }: {
   name: string;
@@ -65,6 +66,7 @@ function PresetRow({
   onSelect: () => void;
   onToggleFavorite: () => void;
   onToggleBlock: () => void;
+  onDelete?: () => void;
   customPacks?: CustomPack[];
 }) {
   const { t } = useTranslation('messages');
@@ -124,6 +126,22 @@ function PresetRow({
           </svg>
         </button>
         {customPacks && <AddToPackButton presetName={name} customPacks={customPacks} />}
+        {onDelete && (
+          <button
+            onClick={onDelete}
+            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-red-500/20 hover:text-red-400"
+            title={t('importedPresets.deletePreset')}
+            aria-label={t('importedPresets.deletePreset')}
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
+              <path
+                fillRule="evenodd"
+                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );
@@ -136,6 +154,7 @@ function HistoryRow({
   onSelect,
   onToggleFavorite,
   onToggleBlock,
+  customPacks,
 }: {
   name: string;
   isFavorite: boolean;
@@ -143,6 +162,7 @@ function HistoryRow({
   onSelect: () => void;
   onToggleFavorite: () => void;
   onToggleBlock: () => void;
+  customPacks?: CustomPack[];
 }) {
   const { t } = useTranslation('messages');
 
@@ -198,6 +218,7 @@ function HistoryRow({
             <line x1="5" y1="5" x2="15" y2="15" />
           </svg>
         </button>
+        {customPacks && <AddToPackButton presetName={name} customPacks={customPacks} />}
       </div>
     </div>
   );
@@ -748,39 +769,24 @@ export function PresetBrowser({
             if (!name) return <div style={{ height: 1 }} />;
             const isImported = importedNameSet.has(name);
             return (
-              <div className="flex items-center">
-                <div className="min-w-0 flex-1">
-                  <PresetRow
-                    name={name}
-                    isCurrent={name === currentPreset}
-                    isFavorite={favoriteSet.has(name)}
-                    isBlocked={blockedSet.has(name)}
-                    onSelect={() => handleSelectPreset(name)}
-                    onToggleFavorite={() => handleToggleFavorite(name)}
-                    onToggleBlock={() => handleToggleBlock(name)}
-                    customPacks={customPacks}
-                  />
-                </div>
-                {isImported && (
-                  <button
-                    onClick={() => {
-                      const meta = importedPresets.find((p) => p.name === name);
-                      if (meta) handleDeleteImportedPreset(meta);
-                    }}
-                    className="ml-0.5 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-red-500/20 hover:text-red-400"
-                    title={t('importedPresets.deletePreset')}
-                    aria-label={t('importedPresets.deletePreset')}
-                  >
-                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
-                      <path
-                        fillRule="evenodd"
-                        d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                )}
-              </div>
+              <PresetRow
+                name={name}
+                isCurrent={name === currentPreset}
+                isFavorite={favoriteSet.has(name)}
+                isBlocked={blockedSet.has(name)}
+                onSelect={() => handleSelectPreset(name)}
+                onToggleFavorite={() => handleToggleFavorite(name)}
+                onToggleBlock={() => handleToggleBlock(name)}
+                onDelete={
+                  isImported
+                    ? () => {
+                        const meta = importedPresets.find((p) => p.name === name);
+                        if (meta) handleDeleteImportedPreset(meta);
+                      }
+                    : undefined
+                }
+                customPacks={customPacks}
+              />
             );
           }}
         />
@@ -847,6 +853,7 @@ export function PresetBrowser({
           onSelect={() => handleSelectPreset(name)}
           onToggleFavorite={() => handleToggleFavorite(name)}
           onToggleBlock={() => handleToggleBlock(name)}
+          customPacks={customPacks}
         />
       ))}
       {historyList.length === 0 && (
@@ -1486,14 +1493,25 @@ export function PresetBrowser({
             )}
           </div>
           {importedPresets.length > 0 && (
-            <input
-              type="text"
-              placeholder={t('presetBrowser.searchPlaceholder')}
-              aria-label={t('presetBrowser.searchPlaceholder')}
-              value={importSearch}
-              onChange={(e) => setImportSearch(e.target.value)}
-              className="w-full rounded border-none bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                placeholder={t('presetBrowser.searchPlaceholder')}
+                aria-label={t('presetBrowser.searchPlaceholder')}
+                value={importSearch}
+                onChange={(e) => setImportSearch(e.target.value)}
+                className="w-full rounded border-none bg-white/10 px-2 py-1 pr-7 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
+              />
+              <button
+                onClick={() => setImportSearch('')}
+                className={`absolute top-1/2 right-1.5 flex h-4 w-4 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-none bg-white/20 text-[10px] leading-none text-white/60 hover:bg-white/30 hover:text-white ${
+                  importSearch ? 'visible' : 'invisible'
+                }`}
+                aria-label={t('presetBrowser.clearSearch')}
+              >
+                ✕
+              </button>
+            </div>
           )}
           {isImportModalOpen && importModalMode === 'preset' ? (
             <div className="flex flex-col items-center gap-2 py-6">
@@ -1579,34 +1597,17 @@ export function PresetBrowser({
                   const preset = importFlatPresets[index];
                   if (!preset) return <div style={{ height: 1 }} />;
                   return (
-                    <div className="flex items-center">
-                      <div className="min-w-0 flex-1">
-                        <PresetRow
-                          name={preset.name}
-                          isCurrent={preset.name === currentPreset}
-                          isFavorite={favoriteSet.has(preset.name)}
-                          isBlocked={blockedSet.has(preset.name)}
-                          onSelect={() => handleSelectPreset(preset.name)}
-                          onToggleFavorite={() => handleToggleFavorite(preset.name)}
-                          onToggleBlock={() => handleToggleBlock(preset.name)}
-                          customPacks={customPacks}
-                        />
-                      </div>
-                      <button
-                        onClick={() => handleDeleteImportedPreset(preset)}
-                        className="ml-0.5 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-red-500/20 hover:text-red-400"
-                        title={t('importedPresets.deletePreset')}
-                        aria-label={t('importedPresets.deletePreset')}
-                      >
-                        <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
-                          <path
-                            fillRule="evenodd"
-                            d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </button>
-                    </div>
+                    <PresetRow
+                      name={preset.name}
+                      isCurrent={preset.name === currentPreset}
+                      isFavorite={favoriteSet.has(preset.name)}
+                      isBlocked={blockedSet.has(preset.name)}
+                      onSelect={() => handleSelectPreset(preset.name)}
+                      onToggleFavorite={() => handleToggleFavorite(preset.name)}
+                      onToggleBlock={() => handleToggleBlock(preset.name)}
+                      onDelete={() => handleDeleteImportedPreset(preset)}
+                      customPacks={customPacks}
+                    />
                   );
                 }}
               />

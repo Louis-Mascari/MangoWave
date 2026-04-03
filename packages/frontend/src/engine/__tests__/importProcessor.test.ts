@@ -10,8 +10,7 @@ vi.mock('idb-keyval', () => ({
 }));
 
 // Mock conversionWorkerManager — passes raw text into init_eqs_str
-// so that validatePreset's EEL scanner can still detect blocked identifiers.
-// Sampler references in the raw text will also be detected by findMissingTextures.
+// so that findMissingTextures can still detect sampler references.
 vi.mock('../conversionWorkerManager.ts', () => ({
   convertInWorker: vi.fn((_name: string, text: string) => Promise.resolve({ init_eqs_str: text })),
 }));
@@ -167,44 +166,6 @@ describe('processPresetImport', () => {
     expect(results[0].status).toBe('success');
     expect(results[1].status).toBe('failed');
     expect(results[2].status).toBe('success');
-  });
-
-  it('rejects presets with blocked EEL identifiers', async () => {
-    // Mock converter passes raw text into init_eqs_str, so blocked identifiers trigger
-    const file = createMilkFile('Evil', 'fetch("http://evil.com")');
-    const results = await processPresetImport([file], defaultOpts);
-
-    expect(results[0].status).toBe('failed');
-    expect(results[0].errorCode).toBe('securityBlocked');
-  });
-
-  it('rejects all blocked identifiers', async () => {
-    const blocked = [
-      'eval',
-      'Function',
-      'WebSocket',
-      'localStorage',
-      'sessionStorage',
-      'indexedDB',
-      'XMLHttpRequest',
-      'importScripts',
-      'document',
-      'window',
-      'globalThis',
-      'self',
-      'top',
-      'parent',
-      'frames',
-    ];
-    for (const id of blocked) {
-      const file = createMilkFile(`test_${id}`, `x = ${id};`);
-      const results = await processPresetImport([file], {
-        ...defaultOpts,
-        onProgress: vi.fn(),
-      });
-      expect(results[0].status).toBe('failed');
-      expect(results[0].errorCode).toBe('securityBlocked');
-    }
   });
 });
 

@@ -3,6 +3,8 @@ import { get as idbGet, set as idbSet, del as idbDel, keys as idbKeys } from 'id
 
 const IDB_MILK_PREFIX = 'mw-milk:';
 const IDB_CONV_PREFIX = 'mw-conv:';
+const CONV_VERSION_KEY = 'mw-conv-version';
+const CONV_VERSION = 2; // v2 = eel-wasm format (EEL source strings, not JS)
 
 export interface ImportedPresetsState {
   loaded: boolean;
@@ -19,6 +21,15 @@ export const useImportedPresetsStore = create<ImportedPresetsState>()((set, _get
 
   loadFromIdb: async () => {
     try {
+      // Invalidate old JS-format cached conversions (pre-eel-wasm)
+      const version = localStorage.getItem(CONV_VERSION_KEY);
+      if (!version || parseInt(version, 10) < CONV_VERSION) {
+        const allKeys = await idbKeys();
+        const convKeys = (allKeys as string[]).filter((k) => k.startsWith(IDB_CONV_PREFIX));
+        await Promise.all(convKeys.map((k) => idbDel(k)));
+        localStorage.setItem(CONV_VERSION_KEY, String(CONV_VERSION));
+      }
+
       // Just mark as loaded — raw texts and converted results stay in IDB, read on demand
       set({ loaded: true });
     } catch (err) {
@@ -47,20 +58,28 @@ export const useImportedPresetsStore = create<ImportedPresetsState>()((set, _get
   getConvertedPreset: async (name: string) => {
     try {
       // Try cached converted result first
-      const cached = await idbGet<object>(`${IDB_CONV_PREFIX}${name}`);
-      if (cached) return cached;
+      let preset = await idbGet<Record<string, unknown>>(`${IDB_CONV_PREFIX}${name}`);
 
-      // Fallback: convert from raw .milk text (backwards compat + first access after import)
-      const text = await idbGet<string>(`${IDB_MILK_PREFIX}${name}`);
-      if (!text) return null;
+      if (!preset) {
+        // Fallback: convert from raw .milk text (backwards compat + first access after import)
+        const text = await idbGet<string>(`${IDB_MILK_PREFIX}${name}`);
+        if (!text) return null;
 
-      const { convertInWorker } = await import('../engine/conversionWorkerManager.ts');
-      const { validatePreset } = await import('../engine/milkdropConverter.ts');
-      const preset = await convertInWorker(name, text);
-      validatePreset(preset);
+        const { convertInWorker } = await import('../engine/conversionWorkerManager.ts');
+        const { validatePreset } = await import('../engine/milkdropConverter.ts');
+        preset = (await convertInWorker(name, text)) as Record<string, unknown>;
+        validatePreset(preset);
 
-      // Persist converted result for instant future access
-      await idbSet(`${IDB_CONV_PREFIX}${name}`, preset);
+        // Persist converted result for instant future access
+        await idbSet(`${IDB_CONV_PREFIX}${name}`, preset);
+      }
+
+      // Compile EEL source strings to WASM adapter functions
+      if (preset._eelFormat) {
+        const { compilePresetEel } = await import('../engine/eelWasmAdapter.ts');
+        await compilePresetEel(preset as Parameters<typeof compilePresetEel>[0]);
+      }
+
       return preset;
     } catch (err) {
       console.error(`Failed to convert preset "${name}":`, err);

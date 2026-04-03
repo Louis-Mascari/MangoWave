@@ -4,10 +4,6 @@ import sjson from 'secure-json-parse';
 const MAX_FILE_SIZE = 500_000; // 500KB
 const VALID_EXTENSIONS = ['.milk'];
 
-// Blocked identifiers in EEL equation strings — prevents script injection
-const BLOCKED_IDENTIFIERS =
-  /\b(fetch|eval|Function|WebSocket|localStorage|sessionStorage|indexedDB|XMLHttpRequest|importScripts|document|window|globalThis|self|top|parent|frames)\b/;
-
 /** Read a .milk file, validate size/extension, return raw text + derived name.
  *  Throws short error codes ('invalidFileType', 'fileTooLarge', 'emptyFile')
  *  for i18n resolution in the UI layer. */
@@ -26,31 +22,6 @@ export async function readMilkFile(file: File): Promise<{ name: string; text: st
   const text = await file.text();
   const name = file.name.replace(/\.milk$/i, '');
   return { name, text };
-}
-
-/** Scan raw .milk text for blocked identifiers before conversion.
- *  The converter may transform variable names, so scanning raw text is the primary defence. */
-export function scanRawMilkText(text: string): void {
-  if (BLOCKED_IDENTIFIERS.test(text)) {
-    throw new Error('securityBlocked');
-  }
-}
-
-/** Recursively scan all string values in an object for blocked identifiers. Throws on suspicious content. */
-function scanAllStrings(obj: unknown): void {
-  if (typeof obj === 'string') {
-    if (BLOCKED_IDENTIFIERS.test(obj)) {
-      throw new Error('securityBlocked');
-    }
-    return;
-  }
-  if (Array.isArray(obj)) {
-    for (const item of obj) scanAllStrings(item);
-    return;
-  }
-  if (obj && typeof obj === 'object') {
-    for (const val of Object.values(obj)) scanAllStrings(val);
-  }
 }
 
 // Built-in sampler names that butterchurn always provides (no user texture needed)
@@ -140,9 +111,8 @@ export function findMissingTextures(preset: object, loadedTextures: ReadonlySet<
 
 /** Security scan of a converted preset object. Throws on suspicious content. */
 export function validatePreset(preset: object): void {
-  // Run secure-json-parse scan for prototype pollution
+  // Run secure-json-parse scan for prototype pollution.
+  // EEL string scanning is no longer needed — eel-wasm compiles EEL to a WASM
+  // sandbox that cannot access JS globals, DOM, or network APIs.
   sjson.scan(preset);
-
-  // Recursively scan all string values for blocked identifiers
-  scanAllStrings(preset);
 }

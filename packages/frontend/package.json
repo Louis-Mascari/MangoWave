@@ -18,6 +18,7 @@
     "@sentry/react": "^10.45.0",
     "butterchurn": "*",
     "butterchurn-presets": "*",
+    "eel-wasm": "^0.0.17",
     "i18next": "^25.10.5",
     "i18next-browser-languagedetector": "^8.2.1",
     "idb-keyval": "^6.2.2",

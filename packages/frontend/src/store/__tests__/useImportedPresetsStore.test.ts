@@ -30,10 +30,16 @@ vi.mock('../../engine/milkdropConverter.ts', () => ({
   validatePreset: vi.fn(),
 }));
 
+// Mock eelWasmAdapter (compilePresetEel)
+vi.mock('../../engine/eelWasmAdapter.ts', () => ({
+  compilePresetEel: vi.fn((preset: object) => Promise.resolve(preset)),
+}));
+
 describe('useImportedPresetsStore', () => {
   beforeEach(() => {
     mockStore.clear();
     mockConvertInWorker.mockClear();
+    localStorage.clear();
     // Reset store state
     useImportedPresetsStore.setState({ loaded: false });
   });
@@ -49,6 +55,23 @@ describe('useImportedPresetsStore', () => {
       await result.current.loadFromIdb();
     });
     expect(result.current.loaded).toBe(true);
+  });
+
+  it('loadFromIdb clears old conv cache on version upgrade', async () => {
+    mockStore.set('mw-conv:OldPreset', { old: true });
+    mockStore.set('mw-milk:OldPreset', 'raw text');
+    mockStore.set('other-key', 'preserved');
+
+    const { result } = renderHook(() => useImportedPresetsStore());
+    await act(async () => {
+      await result.current.loadFromIdb();
+    });
+
+    // Old conv entries should be cleared
+    expect(mockStore.has('mw-conv:OldPreset')).toBe(false);
+    // Raw milk texts and other keys preserved
+    expect(mockStore.has('mw-milk:OldPreset')).toBe(true);
+    expect(mockStore.has('other-key')).toBe(true);
   });
 
   it('addPreset stores raw text in IDB', async () => {
@@ -99,6 +122,21 @@ describe('useImportedPresetsStore', () => {
 
     expect(converted).toEqual(cachedPreset);
     expect(mockConvertInWorker).not.toHaveBeenCalled();
+  });
+
+  it('getConvertedPreset compiles eel-wasm for _eelFormat presets', async () => {
+    const cachedPreset = { _eelFormat: true, init_eqs_str: 'x = 1;' };
+    mockStore.set('mw-conv:EelPreset', cachedPreset);
+
+    const { result } = renderHook(() => useImportedPresetsStore());
+    let converted: object | null = null;
+    await act(async () => {
+      converted = await result.current.getConvertedPreset('EelPreset');
+    });
+
+    expect(converted).toEqual(cachedPreset);
+    const { compilePresetEel } = await import('../../engine/eelWasmAdapter.ts');
+    expect(compilePresetEel).toHaveBeenCalledWith(cachedPreset);
   });
 
   it('getConvertedPreset converts via worker and caches when no cached result', async () => {

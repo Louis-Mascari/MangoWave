@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   readMilkFile,
   validatePreset,
-  scanRawMilkText,
   parsePsVersion,
   findMissingTextures,
 } from '../milkdropConverter.ts';
@@ -57,38 +56,6 @@ describe('validatePreset', () => {
     expect(() => validatePreset(preset)).not.toThrow();
   });
 
-  it('throws on blocked identifier in top-level EEL field', () => {
-    const preset = {
-      init_eqs_str: 'x = fetch("http://evil.com");',
-    };
-    expect(() => validatePreset(preset)).toThrow('securityBlocked');
-  });
-
-  it('throws on blocked identifier in nested shapes', () => {
-    const preset = {
-      shapes: [{ frame_eqs_str: 'y = eval("bad");' }],
-    };
-    expect(() => validatePreset(preset)).toThrow('securityBlocked');
-  });
-
-  it('throws on blocked identifier in nested waves', () => {
-    const preset = {
-      waves: [{ per_frame_eqs_str: 'z = localStorage.getItem("x");' }],
-    };
-    expect(() => validatePreset(preset)).toThrow('securityBlocked');
-  });
-
-  it('allows normal EEL code without blocked identifiers', () => {
-    const preset = {
-      init_eqs_str: 'x = sin(y) * cos(z);',
-      frame_eqs_str: 'rot = rot + 0.01;',
-      pixel_eqs_str: 'dx = dx * 1.02;',
-      shapes: [{ init_eqs_str: 'sides = 4;' }],
-      waves: [{ per_frame_eqs_str: 'r = bass * 0.5;' }],
-    };
-    expect(() => validatePreset(preset)).not.toThrow();
-  });
-
   it('throws on prototype pollution via __proto__', () => {
     const preset = JSON.parse('{"__proto__": {"polluted": true}}');
     expect(() => validatePreset(preset)).toThrow();
@@ -99,11 +66,12 @@ describe('validatePreset', () => {
     expect(() => validatePreset(preset)).toThrow();
   });
 
-  it('skips non-string EEL fields without error', () => {
+  it('allows EEL code with JS-like identifiers (WASM sandbox makes them safe)', () => {
+    // With eel-wasm, EEL strings are compiled to WASM — they can never
+    // execute as JS. These identifiers are harmless EEL variable names.
     const preset = {
-      init_eqs_str: 42,
-      frame_eqs_str: null,
-      shapes: [{ init_eqs_str: undefined }],
+      init_eqs_str: 'x = fetch + eval;',
+      frame_eqs_str: 'window = 1; document = 2;',
     };
     expect(() => validatePreset(preset)).not.toThrow();
   });
@@ -113,36 +81,8 @@ describe('validatePreset', () => {
     expect(() => validatePreset(preset)).not.toThrow();
   });
 
-  it('catches blocked identifier in arbitrary field names (e.g., per_frame_1)', () => {
-    const preset = {
-      per_frame_1: 'eval',
-      per_frame_2: 'x = sin(y);',
-    };
-    expect(() => validatePreset(preset)).toThrow('securityBlocked');
-  });
-
-  it('catches blocked identifier in deeply nested objects', () => {
-    const preset = {
-      shapes: [{ nested: { deep: 'window.location' } }],
-    };
-    expect(() => validatePreset(preset)).toThrow('securityBlocked');
-  });
-
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-});
-
-describe('scanRawMilkText', () => {
-  it('throws on blocked identifiers in raw .milk text', () => {
-    expect(() => scanRawMilkText('per_frame_1=eval')).toThrow('securityBlocked');
-    expect(() => scanRawMilkText('x = fetch("http://evil.com")')).toThrow('securityBlocked');
-    expect(() => scanRawMilkText('per_frame_1=window.location')).toThrow('securityBlocked');
-  });
-
-  it('allows normal EEL code', () => {
-    expect(() => scanRawMilkText('per_frame_1=x = sin(y) * cos(z);')).not.toThrow();
-    expect(() => scanRawMilkText('[preset00]\nfoo=bar')).not.toThrow();
   });
 });
 
@@ -177,8 +117,8 @@ describe('findMissingTextures', () => {
   });
 
   it('detects missing custom textures', () => {
-    const preset = { warp: 'sampler_main sampler_worms sampler_manyfish' };
-    expect(findMissingTextures(preset, new Set())).toEqual(['manyfish', 'worms']);
+    const preset = { warp: 'sampler_main sampler_worms sampler_alienfruit' };
+    expect(findMissingTextures(preset, new Set())).toEqual(['alienfruit', 'worms']);
   });
 
   it('excludes textures that are in the loaded set', () => {

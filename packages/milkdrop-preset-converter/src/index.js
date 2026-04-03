@@ -5,7 +5,6 @@ import {
   processUnOptimizedShader,
   createBasePresetFuns,
 } from 'milkdrop-preset-utils';
-import milkdropParser from 'milkdrop-eel-parser';
 import { convertHLSLShader } from 'hlslparser-wasm';
 
 // MilkDrop built-in macros for the text-level fallback converter.
@@ -130,7 +129,10 @@ function convertShaderTextLevel(shader) {
         if (result[i] === '{') depth++;
         else if (result[i] === '}') {
           depth--;
-          if (depth === 0) { closeIdx = i; break; }
+          if (depth === 0) {
+            closeIdx = i;
+            break;
+          }
         }
       }
       if (closeIdx > -1) {
@@ -197,8 +199,20 @@ function expandPrepareShaderMacros(hlsl) {
   // Preset authors define aliases like `#define sampler_pic sampler_cells` that hlslparser
   // needs expanded since we're about to strip all #define lines.
   const knownMacros = new Set([
-    'GetMain', 'GetPixel', 'GetBlur1', 'GetBlur2', 'GetBlur3', 'lum', 'saturate',
-    'tex2D', 'tex3D', 'tex2d', 'tex3d', 'M_PI', 'M_PI_2', 'M_INV_PI_2',
+    'GetMain',
+    'GetPixel',
+    'GetBlur1',
+    'GetBlur2',
+    'GetBlur3',
+    'lum',
+    'saturate',
+    'tex2D',
+    'tex3D',
+    'tex2d',
+    'tex3d',
+    'M_PI',
+    'M_PI_2',
+    'M_INV_PI_2',
   ]);
   const customDefRe = /^[ \t]*#define\s+(\w+)\s+(\w[^\n]*?)\s*$/gm;
   let cdm;
@@ -236,8 +250,7 @@ function expandPrepareShaderMacros(hlsl) {
       const inserts = [];
       for (const ca of constArrays) {
         result =
-          result.substring(0, ca.index - offset) +
-          result.substring(ca.index - offset + ca.length);
+          result.substring(0, ca.index - offset) + result.substring(ca.index - offset + ca.length);
         inserts.push('\n    ' + ca.text);
         offset += ca.length;
       }
@@ -295,7 +308,7 @@ function fixStarVariableNames(str) {
 }
 
 /** Insert implicit multiplication operators that MilkDrop's NSEEL tolerates
- *  but milkdrop-eel-parser requires explicitly:
+ *  but the EEL parser requires explicitly:
  *  - `)(`           → `)*(`     (close-paren before open-paren)
  *  - `5equal(`      → `5*equal(`  (digit before identifier)
  *  - `xdriftincequal(` → `xdriftinc*equal(` (identifier before known function) */
@@ -367,7 +380,7 @@ function insertImplicitOps(str) {
 }
 
 /** Strip unary + before identifiers/parens in EEL equation strings.
- *  The milkdrop-eel-parser can't handle unary + (e.g., sin(+atan2(...))).
+ *  The EEL parser can't handle unary + (e.g., sin(+atan2(...))).
  *  Unary + is a no-op, so removing it is always safe.
  *  No `m` flag — EEL uses ; as statement separator, not newlines.
  *  With `m`, ^+expr on a continuation line after ) is misidentified as unary. */
@@ -396,48 +409,77 @@ function deepPreprocessEel(val) {
   return val;
 }
 
-/** Fix missing semicolons in milkdrop-eel-parser JS output.
- *  The parser doesn't emit semicolons after non-assignment expression statements
- *  (e.g., bare `ob_bob_b+ob_b*sin(...)` with no `=`). This produces invalid JS
- *  like `...(a['time']*1.73))))) a['ob_g']=...` when the next statement follows.
- *  Fix: insert `;` where `)` is followed by `a[` (start of next statement). */
-function fixParserOutput(jsCode) {
-  if (typeof jsCode !== 'string' || jsCode.length === 0) return jsCode;
-  return jsCode.replace(/\)\s+a\[/g, ');\na[');
-}
-
-/** Recursively fix parser output in all string values of an object/array. */
-function deepFixParserOutput(val) {
-  if (typeof val === 'string') return fixParserOutput(val);
-  if (Array.isArray(val)) return val.map(deepFixParserOutput);
-  if (val && typeof val === 'object') {
-    const result = {};
-    for (const [k, v] of Object.entries(val)) {
-      result[k] = deepFixParserOutput(v);
-    }
-    return result;
-  }
-  return val;
-}
-
 // Variable names declared by butterchurn's preamble (prepareShader output) and hlslparser
 // boilerplate. These must NOT be re-declared when extracting preset-specific globals.
 const PREAMBLE_VARS = new Set([
-  'texsize_noise_lq', 'texsize_noise_mq', 'texsize_noise_hq', 'texsize_noise_lq_lite',
-  'texsize_noisevol_lq', 'texsize_noisevol_hq',
-  '_qa', '_qb', '_qc', '_qd', '_qe', '_qf', '_qg', '_qh',
+  'texsize_noise_lq',
+  'texsize_noise_mq',
+  'texsize_noise_hq',
+  'texsize_noise_lq_lite',
+  'texsize_noisevol_lq',
+  'texsize_noisevol_hq',
+  '_qa',
+  '_qb',
+  '_qc',
+  '_qd',
+  '_qe',
+  '_qf',
+  '_qg',
+  '_qh',
   ...Array.from({ length: 32 }, (_, i) => 'q' + (i + 1)),
-  'blur1_min', 'blur1_max', 'blur2_min', 'blur2_max', 'blur3_min', 'blur3_max',
-  'scale1', 'scale2', 'scale3', 'bias1', 'bias2', 'bias3',
-  'slow_roam_cos', 'roam_cos', 'slow_roam_sin', 'roam_sin',
-  'hue_shader', 'time', 'rand_preset', 'rand_frame', 'progress', 'frame', 'fps', 'decay',
-  'bass', 'mid', 'treb', 'vol', 'bass_att', 'mid_att', 'treb_att', 'vol_att',
-  'texsize', 'aspect', 'rad', 'ang', 'uv_orig',
+  'blur1_min',
+  'blur1_max',
+  'blur2_min',
+  'blur2_max',
+  'blur3_min',
+  'blur3_max',
+  'scale1',
+  'scale2',
+  'scale3',
+  'bias1',
+  'bias2',
+  'bias3',
+  'slow_roam_cos',
+  'roam_cos',
+  'slow_roam_sin',
+  'roam_sin',
+  'hue_shader',
+  'time',
+  'rand_preset',
+  'rand_frame',
+  'progress',
+  'frame',
+  'fps',
+  'decay',
+  'bass',
+  'mid',
+  'treb',
+  'vol',
+  'bass_att',
+  'mid_att',
+  'treb_att',
+  'vol_att',
+  'texsize',
+  'aspect',
+  'rad',
+  'ang',
+  'uv_orig',
   // Samplers from butterchurn preamble
-  'sampler_main', 'sampler_fw_main', 'sampler_pw_main', 'sampler_fc_main', 'sampler_pc_main',
-  'sampler_noise_lq', 'sampler_noise_lq_lite', 'sampler_noise_mq', 'sampler_noise_hq',
-  'sampler_noisevol_lq', 'sampler_noisevol_hq', 'sampler_pw_noise_lq',
-  'sampler_blur1', 'sampler_blur2', 'sampler_blur3',
+  'sampler_main',
+  'sampler_fw_main',
+  'sampler_pw_main',
+  'sampler_fc_main',
+  'sampler_pc_main',
+  'sampler_noise_lq',
+  'sampler_noise_lq_lite',
+  'sampler_noise_mq',
+  'sampler_noise_hq',
+  'sampler_noisevol_lq',
+  'sampler_noisevol_hq',
+  'sampler_pw_noise_lq',
+  'sampler_blur1',
+  'sampler_blur2',
+  'sampler_blur3',
 ]);
 
 /** Missing mult0 scalar↔vector overloads. hlslparser generates same-type pairs
@@ -457,8 +499,7 @@ vec4 mult0(vec4 x, float y) { return vec4(mult0(x.x, y), mult0(x.y, y), mult0(x.
  *  Presets that write to uv (panning, zooming, distortion) need a mutable copy. */
 function makeUvMutable(body) {
   // Match uv assignments including hlslparser's parenthesized form: (uv).xy +=
-  if (/\(uv\)\s*\.[xyzw]+\s*[+\-*\/]?=/.test(body) ||
-      /\buv(\.[xyzw]+)?\s*[+\-*\/]?=/.test(body)) {
+  if (/\(uv\)\s*\.[xyzw]+\s*[+\-*\/]?=/.test(body) || /\buv(\.[xyzw]+)?\s*[+\-*\/]?=/.test(body)) {
     body = body.replace(/\buv\b/g, '_mw_uv');
     body = '    vec2 _mw_uv = uv;\n' + body;
   }
@@ -473,9 +514,7 @@ function makeUvMutable(body) {
  *  This function properly splits helpers into the header and extracts body statements. */
 function structureHlslparserOutput(rawGlsl, shaderBodyName) {
   // Find the main function definition
-  const funcPattern = new RegExp(
-    'vec4\\s+' + shaderBodyName + '\\s*\\(vec2\\s+\\w+\\)\\s*\\{',
-  );
+  const funcPattern = new RegExp('vec4\\s+' + shaderBodyName + '\\s*\\(vec2\\s+\\w+\\)\\s*\\{');
   const funcMatch = rawGlsl.match(funcPattern);
 
   if (!funcMatch) {
@@ -627,8 +666,7 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
   // declaration and a local one — prepending both causes GLSL redefinition errors).
   if (presetLocals) {
     const bodyDeclaredNames = new Set();
-    const bodyDeclRe =
-      /\b(?:float|vec[234]|mat[234](?:x[234])?|int|bool)\s+(\w+)/g;
+    const bodyDeclRe = /\b(?:float|vec[234]|mat[234](?:x[234])?|int|bool)\s+(\w+)/g;
     let bdm;
     while ((bdm = bodyDeclRe.exec(body)) !== null) {
       bodyDeclaredNames.add(bdm[1]);
@@ -696,8 +734,7 @@ function fixUniformAssignments(shaderBody) {
       const braceIdx = result.indexOf('{', bodyIdx);
       if (braceIdx > -1) {
         const decl = '\n    ' + type + ' ' + localName + ' = ' + name + ';';
-        result =
-          result.substring(0, braceIdx + 1) + decl + result.substring(braceIdx + 1);
+        result = result.substring(0, braceIdx + 1) + decl + result.substring(braceIdx + 1);
       }
     }
   }
@@ -731,7 +768,8 @@ function fixUniformAssignments(shaderBody) {
         const braceIdx2 = result.indexOf('{', bodyIdx2);
         result =
           result.substring(0, braceIdx2 + 1) +
-          '\n' + decls.join('\n') +
+          '\n' +
+          decls.join('\n') +
           result.substring(braceIdx2 + 1);
       }
     }
@@ -778,18 +816,30 @@ export async function convertPreset(text) {
   const mainPresetText = _.split(text, '[preset00]')[1];
   const presetParts = splitPreset(mainPresetText);
 
-  // Preprocess EEL equations: insert implicit operators + strip unary +
-  const rawParsed = milkdropParser.convert_preset_wave_and_shape(
-    presetParts.presetVersion,
-    preprocessEel(presetParts.presetInit),
-    preprocessEel(presetParts.perFrame),
-    preprocessEel(presetParts.perVertex),
-    deepPreprocessEel(presetParts.shapes),
-    deepPreprocessEel(presetParts.waves),
-  );
-
-  // Fix missing semicolons in parser JS output (bare expression statements)
-  const parsedPreset = deepFixParserOutput(rawParsed);
+  // Preprocess EEL equations and pass through as EEL source strings.
+  // eel-wasm compiles these to WASM at preset load time (main thread).
+  const parsedPreset = {
+    perFrameInitEQs: preprocessEel(presetParts.presetInit) ?? '',
+    perFrameEQs: preprocessEel(presetParts.perFrame) ?? '',
+    perPixelEQs: preprocessEel(presetParts.perVertex) ?? '',
+    shapes: presetParts.shapes.map((s) =>
+      s.baseVals && s.baseVals.enabled !== 0
+        ? {
+            perFrameInitEQs: preprocessEel(s.init_eqs_str) ?? '',
+            perFrameEQs: preprocessEel(s.frame_eqs_str) ?? '',
+          }
+        : {},
+    ),
+    waves: presetParts.waves.map((w) =>
+      w.baseVals && w.baseVals.enabled !== 0
+        ? {
+            perFrameInitEQs: preprocessEel(w.init_eqs_str) ?? '',
+            perFrameEQs: preprocessEel(w.frame_eqs_str) ?? '',
+            perPointEQs: preprocessEel(w.point_eqs_str) ?? '',
+          }
+        : {},
+    ),
+  };
 
   const [presetMap, warpShader, compShader] = await Promise.all([
     createBasePresetFuns(parsedPreset, presetParts.shapes, presetParts.waves),
@@ -802,43 +852,29 @@ export async function convertPreset(text) {
     warp: warpShader,
     comp: compShader,
     presetParts,
+    _eelFormat: true,
   });
 }
 
-export function convertPresetEquations(presetVersion, initEQs, frameEQs, pixelEQs) {
-  const parsedPreset = milkdropParser.convert_basic_preset(
-    presetVersion,
-    initEQs,
-    frameEQs,
-    pixelEQs,
-  );
+export function convertPresetEquations(_presetVersion, initEQs, frameEQs, pixelEQs) {
   return {
-    init_eqs_str: fixParserOutput(parsedPreset.perFrameInitEQs?.trim() ?? ''),
-    frame_eqs_str: fixParserOutput(parsedPreset.perFrameEQs?.trim() ?? ''),
-    pixel_eqs_str: fixParserOutput(parsedPreset.perPixelEQs?.trim() ?? ''),
+    init_eqs_str: preprocessEel(initEQs)?.trim() ?? '',
+    frame_eqs_str: preprocessEel(frameEQs)?.trim() ?? '',
+    pixel_eqs_str: preprocessEel(pixelEQs)?.trim() ?? '',
   };
 }
 
-export function convertWaveEquations(presetVersion, initEQs, frameEQs, pointEQs) {
-  const parsedPreset = milkdropParser.make_wave_map(presetVersion, {
-    init_eqs_str: initEQs,
-    frame_eqs_str: frameEQs,
-    point_eqs_str: pointEQs,
-  });
+export function convertWaveEquations(_presetVersion, initEQs, frameEQs, pointEQs) {
   return {
-    init_eqs_str: fixParserOutput(parsedPreset.perFrameInitEQs?.trim() ?? ''),
-    frame_eqs_str: fixParserOutput(parsedPreset.perFrameEQs?.trim() ?? ''),
-    point_eqs_str: fixParserOutput(parsedPreset.perPointEQs?.trim() ?? ''),
+    init_eqs_str: preprocessEel(initEQs)?.trim() ?? '',
+    frame_eqs_str: preprocessEel(frameEQs)?.trim() ?? '',
+    point_eqs_str: preprocessEel(pointEQs)?.trim() ?? '',
   };
 }
 
-export function convertShapeEquations(presetVersion, initEQs, frameEQs) {
-  const parsedPreset = milkdropParser.make_shape_map(presetVersion, {
-    init_eqs_str: initEQs,
-    frame_eqs_str: frameEQs,
-  });
+export function convertShapeEquations(_presetVersion, initEQs, frameEQs) {
   return {
-    init_eqs_str: fixParserOutput(parsedPreset.perFrameInitEQs?.trim() ?? ''),
-    frame_eqs_str: fixParserOutput(parsedPreset.perFrameEQs?.trim() ?? ''),
+    init_eqs_str: preprocessEel(initEQs)?.trim() ?? '',
+    frame_eqs_str: preprocessEel(frameEQs)?.trim() ?? '',
   };
 }

@@ -98,8 +98,7 @@ MangoWave/
 ├── packages/frontend/                   # React 19 + Vite 8 + TypeScript — the visualizer app
 ├── packages/butterchurn/                # Vendored butterchurn with ESM wrapper + types
 ├── packages/butterchurn-presets/        # Vendored preset packs with ESM wrapper + types
-├── packages/milkdrop-preset-converter/  # Forked .milk → butterchurn JSON converter (hlslparser-wasm)
-├── packages/milkdrop-eel-parser/        # Vendored EEL2 equation parser (patched int() → Math.trunc)
+├── packages/milkdrop-preset-converter/  # Forked .milk → butterchurn JSON converter (hlslparser-wasm + eel-wasm)
 ├── packages/milkdrop-textures/          # 66 standard MilkDrop textures (projectM texture pack)
 ├── packages/hlslparser-wasm/            # HLSL → GLSL ES 3.0 compiler (projectM fork, WASM)
 ├── packages/backend/                    # Lambda handlers for Spotify OAuth & settings sync
@@ -200,7 +199,8 @@ See **[SELF-HOSTING.md](SELF-HOSTING.md)** for full instructions.
 ## Acknowledgments
 
 - [butterchurn](https://github.com/jberg/butterchurn) — WebGL 2 implementation of the MilkDrop visualizer by Jordan Berg
-- [milkdrop-preset-converter](https://github.com/jberg/milkdrop-preset-converter), [milkdrop-eel-parser](https://github.com/jberg/milkdrop-eel-parser), [milkdrop-preset-utils](https://github.com/jberg/milkdrop-preset-utils) — MilkDrop toolchain by Jordan Berg
+- [milkdrop-preset-converter](https://github.com/jberg/milkdrop-preset-converter), [milkdrop-preset-utils](https://github.com/jberg/milkdrop-preset-utils) — MilkDrop toolchain by Jordan Berg
+- [eel-wasm](https://github.com/captbaritone/eel-wasm) — EEL2 → WebAssembly compiler by Jordan Eldredge (captbaritone)
 - [projectM](https://github.com/projectM-visualizer/projectm) — open-source MilkDrop reimplementation; hlslparser fork (GLSL ES 3.0) vendored in `packages/hlslparser-wasm`; [standard texture pack](https://github.com/projectM-visualizer/presets-milkdrop-texture-pack) bundled in `packages/milkdrop-textures`
 - [MilkDrop](https://en.wikipedia.org/wiki/MilkDrop) — original visualizer by Ryan Geiss
 - [Winamp](https://en.wikipedia.org/wiki/Winamp) — created by Nullsoft

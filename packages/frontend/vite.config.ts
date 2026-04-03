@@ -12,7 +12,6 @@ export default defineConfig({
       'butterchurn',
       'butterchurn-presets',
       'milkdrop-preset-converter > milkdrop-preset-utils',
-      'milkdrop-eel-parser',
       'milkdrop-preset-converter > lodash',
       'milkdrop-textures',
     ],

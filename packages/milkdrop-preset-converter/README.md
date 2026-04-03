@@ -13,8 +13,9 @@ Forked [milkdrop-preset-converter](https://github.com/jberg/milkdrop-preset-conv
 ## Dependencies
 
 - `hlslparser-wasm` — HLSL to GLSL ES 3.0 compiler (dynamically imported)
-- `milkdrop-eel-parser` — EEL2 equation parser (vendored workspace package)
 - `milkdrop-preset-utils` — `.milk` file parser + GLSL post-processor (npm)
+
+EEL equations are preprocessed and passed through as source strings. Runtime compilation to WASM happens via `eel-wasm` in `eelWasmAdapter.ts` (frontend, main thread).
 
 ## Usage
 

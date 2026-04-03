@@ -46,6 +46,7 @@ src/
 │                  #     OnboardingOverlay (first-time tips), etc.
 ├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (butterchurn),
 │                  # milkdropConverter (.milk → butterchurn JSON via workspace milkdrop-preset-converter),
+│                  # eelWasmAdapter (EEL→WASM compilation via eel-wasm, butterchurn adapter functions),
 │                  # textureLoader (image validation), importProcessor (batch import with progress callbacks),
 │                  # isWebGL2Supported
 ├── data/          # quarantined-presets.json, mobile-blocked-presets.json, excludedPresets.ts (shared Sets)
@@ -65,7 +66,7 @@ src/
 │                  #     useImportedTexturesStore, useToastStore, useConfirmStore, useImportModalStore,
 │                  #     useWindowSyncStatusStore
 ├── utils/         # Shared utilities (isMobileDevice, browserInfo, settingsPortability, audioFileValidation)
-├── types/         # music-metadata.d.ts, getDisplayMedia.d.ts (type declarations for untyped APIs)
+├── types/         # music-metadata.d.ts, getDisplayMedia.d.ts, eel-wasm.d.ts (type declarations for untyped APIs)
 └── test/          # Vitest global setup
 
 e2e/                 # Playwright E2E tests (separate from Vitest, own tsconfig)

@@ -1,4 +1,4 @@
-import _butterchurn from '../lib/butterchurn.min.js';
+import _butterchurn from '../lib/butterchurn.js';
 import _butterchurnExtraImages from '../lib/butterchurnExtraImages.min.js';
 
 const butterchurn = _butterchurn.default ?? _butterchurn;

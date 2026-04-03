@@ -66,8 +66,11 @@ function convertShaderTextLevel(shader) {
   // HLSL type/function → GLSL ES 3.0 equivalents
   // NOTE: texture2D/texture3D are GLSL ES 1.0; ES 3.0 uses unified `texture`
   let result = shader
-    .replace(/\btex2D\b/g, 'texture')
-    .replace(/\btex3D\b/g, 'texture')
+    .replace(/\btex2[Dd]\b/g, 'texture')
+    .replace(/\btex3[Dd]\b/g, 'texture')
+    .replace(/\bfloat4x4\b/g, 'mat4')
+    .replace(/\bfloat3x3\b/g, 'mat3')
+    .replace(/\bfloat2x2\b/g, 'mat2')
     .replace(/\bfloat2\b/g, 'vec2')
     .replace(/\bfloat3\b/g, 'vec3')
     .replace(/\bfloat4\b/g, 'vec4')
@@ -82,6 +85,14 @@ function convertShaderTextLevel(shader) {
     .replace(/\bddy\b/g, 'dFdy')
     .replace(/\batan2\b/g, 'atan')
     .replace(/\bfmod\b/g, 'mod');
+
+  // HLSL C-style `{ }` matrix/vector initializers → GLSL constructor syntax
+  // e.g., `mat2 rot = { cos(q9), sin(q9), -sin(q9), cos(q9) };`
+  //     → `mat2 rot = mat2(cos(q9), sin(q9), -sin(q9), cos(q9));`
+  result = result.replace(
+    /\b(mat[234]|vec[234])\s+(\w+)\s*=\s*\{([^}]+)\}\s*;/g,
+    (m, type, name, init) => `${type} ${name} = ${type}(${init.trim()});`,
+  );
 
   // HLSL mul(a, b) → GLSL ((a) * (b))
   result = expandHlslMul(result);
@@ -844,80 +855,180 @@ function fixUniformAssignments(shaderBody) {
  *
  *  Subtraction: `ret -= C` → `ret -= C * _mw_fps_ratio`  (linear scaling)
  *  Multiplication: `ret *= F` (0<F<1) → `ret *= pow(F, _mw_fps_ratio)`  (exponential) */
+/**
+ * Normalize fps-dependent constants in the final GLSL shader output.
+ * Runs AFTER hlslparser + structureHlslparserOutput (or text-level fallback).
+ *
+ * Must run on GLSL (not HLSL) because hlslparser constant-folds expressions
+ * involving preamble variables — injecting `30.0 / fps` in HLSL gets evaluated
+ * at parse time instead of remaining as a runtime expression.
+ *
+ * butterchurn's GLSL preamble provides `uniform float fps;`.
+ *
+ * hlslparser wraps values: `float(0.004)` instead of `0.004`,
+ * `vec3 (float(0.004))` for type promotion, statements in `(...)`.
+ * Patterns must handle both text-level and hlslparser forms.
+ */
 function normalizeFpsConstants(glsl) {
   if (!glsl || !glsl.includes('shader_body')) return glsl;
 
   let result = glsl;
-  let needsRatio = false;
 
-  // Compound pattern first (more specific, prevents double-transform):
-  // (ret - CONSTANT) * FACTOR  where 0 < FACTOR < 1
-  // Handles: `ret = (ret - 0.005)*0.98;`, `(ret -.02)*.98`
-  result = result.replace(
-    /(\(ret\s*-\s*)(\d*\.?\d+)(\s*\)\s*\*\s*)(\d*\.?\d+)/g,
-    (match, pre, subVal, mid, mulVal) => {
-      const sub = parseFloat(subVal);
-      const mul = parseFloat(mulVal);
-      if (isNaN(sub) || isNaN(mul)) return match;
-      if (sub === 0 && (mul <= 0 || mul >= 1)) return match;
-      let out = match;
-      if (sub > 0) {
-        out = pre + subVal + ' * _mw_fps_ratio' + mid;
-        needsRatio = true;
-      } else {
-        out = pre + subVal + mid;
-      }
-      if (mul > 0 && mul < 1) {
-        out += 'pow(' + mulVal + ', _mw_fps_ratio)';
-        needsRatio = true;
-      } else {
-        out += mulVal;
-      }
-      return out;
-    },
-  );
+  // Helper: match a numeric constant in either bare (`0.004`) or
+  // hlslparser-wrapped (`float(0.004)`, `vec3 (float(0.004))`) form.
+  // Returns [fullMatch, numericValue] or null.
+  const CONST_RE = /(?:vec[234]\s*\(\s*)?(?:float\s*\(\s*)?(\d*\.?\d+)\s*\)?\s*\)?/;
 
-  // Simple subtraction: ret -= CONSTANT; or ret.swizzle -= CONSTANT;
-  result = result.replace(
-    /(\bret(?:\.[xyzw]+)?\s*-=\s*)(\d*\.?\d+)(\s*;)/g,
-    (match, pre, val, post) => {
-      const num = parseFloat(val);
-      if (num === 0 || isNaN(num)) return match;
-      needsRatio = true;
-      return pre + val + ' * _mw_fps_ratio' + post;
-    },
-  );
+  // Process line by line — fps normalization only affects `ret` statements
+  const lines = result.split('\n');
+  for (let li = 0; li < lines.length; li++) {
+    const line = lines[li];
+    if (!/\bret\b/.test(line)) continue;
+    const indent = line.match(/^(\s*)/)[1];
+    let stmt = line.trim();
+    // Strip inline comments before matching (e.g., `ret = ret-0.001;// comment`)
+    stmt = stmt.replace(/\/\/.*$/, '').trim();
+    if (!stmt) continue;
+    // hlslparser wraps entire statements in (...); — unwrap for matching
+    const outerWrap = stmt.match(/^\((.+)\);$/);
+    if (outerWrap) stmt = outerWrap[1].trim() + ';';
 
-  // Assignment subtraction: ret = ret - CONSTANT; (feedback loop)
-  result = result.replace(/(\bret\s*=\s*ret\s*-\s*)(\d*\.?\d+)(\s*;)/g, (match, pre, val, post) => {
-    const num = parseFloat(val);
-    if (num === 0 || isNaN(num)) return match;
-    needsRatio = true;
-    return pre + val + ' * _mw_fps_ratio' + post;
-  });
-
-  // Simple multiplication decay: ret *= FACTOR; or ret.swizzle *= FACTOR; (0 < F < 1)
-  result = result.replace(
-    /(\bret(?:\.[xyzw]+)?\s*\*=\s*)(\d*\.?\d+)(\s*;)/g,
-    (match, pre, val, post) => {
-      const num = parseFloat(val);
-      if (num <= 0 || num >= 1 || isNaN(num)) return match;
-      needsRatio = true;
-      return pre + 'pow(' + val + ', _mw_fps_ratio)' + post;
-    },
-  );
-
-  // Insert _mw_fps_ratio declaration at start of shader_body
-  if (needsRatio) {
-    const bodyIdx = result.indexOf('shader_body');
-    if (bodyIdx > -1) {
-      const braceIdx = result.indexOf('{', bodyIdx);
-      if (braceIdx > -1) {
-        const decl = '\n    float _mw_fps_ratio = 30.0 / fps;';
-        result = result.substring(0, braceIdx + 1) + decl + result.substring(braceIdx + 1);
+    // --- Pattern: ret -= CONST; (simple subtraction) ---
+    // Text: `ret -= 0.004;`  hlslparser: `ret -= vec3 (float(0.004));`
+    const subMatch = stmt.match(/^ret(?:\.[xyzw]+)?\s*-=\s*(.+?)\s*;$/);
+    if (subMatch) {
+      const cm = subMatch[1].match(CONST_RE);
+      if (cm) {
+        const num = parseFloat(cm[1]);
+        if (num > 0 && !isNaN(num)) {
+          const newExpr = subMatch[1] + ' * _mw_fps_ratio';
+          const newStmt = stmt.replace(subMatch[1], newExpr);
+          lines[li] = indent + (outerWrap ? '(' + newStmt.replace(/;$/, ');') : newStmt);
+          continue;
+        }
       }
     }
+
+    // --- Pattern: ret = ret - CONST; (assignment form of subtraction) ---
+    // ORB presets use `ret = ret-0.001;` instead of `ret -= 0.001;`
+    const retAssignSubMatch = stmt.match(
+      /^ret(?:\.[xyzw]+)?\s*=\s*ret(?:\.[xyzw]+)?\s*-\s*(.+?)\s*;$/,
+    );
+    if (retAssignSubMatch) {
+      const cm = retAssignSubMatch[1].match(CONST_RE);
+      if (cm) {
+        const num = parseFloat(cm[1]);
+        if (num > 0 && !isNaN(num)) {
+          const newExpr = retAssignSubMatch[1] + ' * _mw_fps_ratio';
+          const newStmt = stmt.replace(retAssignSubMatch[1], newExpr);
+          lines[li] = indent + (outerWrap ? '(' + newStmt.replace(/;$/, ');') : newStmt);
+          continue;
+        }
+      }
+    }
+
+    // --- Pattern: ret *= CONST; (decay/amplification) ---
+    // Text: `ret *= 0.95;`  hlslparser: `ret *= vec3 (float(0.95));`
+    // Handles both decay (0 < F < 1) and amplification (F > 1) — both are
+    // fps-dependent in MilkDrop's feedback loop. pow(F, ratio) gives correct
+    // per-second rate at any fps.
+    const mulMatch = stmt.match(/^ret(?:\.[xyzw]+)?\s*\*=\s*(.+?)\s*;$/);
+    if (mulMatch) {
+      const cm = mulMatch[1].match(CONST_RE);
+      if (cm) {
+        const num = parseFloat(cm[1]);
+        if (num > 0 && !isNaN(num) && Math.abs(num - 1.0) > 0.001) {
+          const newExpr = 'pow(' + mulMatch[1] + ', _mw_fps_ratio)';
+          const newStmt = stmt.replace(mulMatch[1], newExpr);
+          lines[li] = indent + (outerWrap ? '(' + newStmt.replace(/;$/, ');') : newStmt);
+          continue;
+        }
+      }
+    }
+
+    // --- Pattern: ret = (ret - CONST) * FACTOR; (compound) ---
+    // Text: `ret = (ret - 0.003)*0.98;`
+    const compoundMatch = stmt.match(/\(\s*ret\s*-\s*(\d*\.?\d+)\s*\)\s*\*\s*(\d*\.?\d+)/);
+    if (compoundMatch) {
+      const sub = parseFloat(compoundMatch[1]);
+      const mul = parseFloat(compoundMatch[2]);
+      if (!isNaN(sub) && !isNaN(mul)) {
+        let newStmt = stmt;
+        if (sub > 0) {
+          newStmt = newStmt.replace(
+            /(\(\s*ret\s*-\s*)(\d*\.?\d+)(\s*\))/,
+            '$1$2 * _mw_fps_ratio$3',
+          );
+        }
+        if (mul > 0 && mul < 1) {
+          newStmt = newStmt.replace(
+            /(\)\s*\*\s*)(\d*\.?\d+)/,
+            (m, pre, val) => pre + 'pow(' + val + ', _mw_fps_ratio)',
+          );
+        }
+        if (newStmt !== stmt) {
+          lines[li] = indent + (outerWrap ? '(' + newStmt.replace(/;$/, ');') : newStmt);
+          continue;
+        }
+      }
+    }
+
+    // --- Pattern: ret = A + B*ret; (affine transform in feedback loop) ---
+    // Handles contrast/brightness operations like `ret = -0.3 + 1.7*ret;` in comp
+    // shaders. These are fps-dependent because the comp output feeds back into
+    // the next frame. Uses mix() first-order approximation — close enough for
+    // visual correctness and generalizes well across affine variants.
+    // Form 1: ret = A + B*ret;   (e.g., `ret = -0.3 + 1.7*ret;`)
+    // Form 2: ret = B*ret + A;   (e.g., `ret = 1.7*ret - 0.3;`)
+    // Form 3: ret = ret*B + A;   (e.g., `ret = ret*1.7 - 0.3;`)
+    const sw = stmt.replace(/\.[xyzw]+/g, ''); // strip swizzles for matching
+    let affineA = null;
+    let affineB = null;
+    let affineRhs = null;
+    // Form 1: ret = A + B*ret;
+    const af1 = sw.match(/^ret\s*=\s*(-?\d*\.?\d+)\s*([+-])\s*(\d*\.?\d+)\s*\*\s*ret\s*;$/);
+    if (af1) {
+      affineA = parseFloat(af1[2] === '-' ? '-' + af1[1] : af1[1]);
+      affineB = parseFloat(af1[3]);
+      affineRhs = stmt.match(/=\s*(.+?)\s*;$/)?.[1];
+    }
+    // Form 2: ret = B*ret + A;
+    if (affineA === null) {
+      const af2 = sw.match(/^ret\s*=\s*(\d*\.?\d+)\s*\*\s*ret\s*([+-])\s*(\d*\.?\d+)\s*;$/);
+      if (af2) {
+        affineB = parseFloat(af2[1]);
+        affineA = parseFloat(af2[2] === '-' ? '-' + af2[3] : af2[3]);
+        affineRhs = stmt.match(/=\s*(.+?)\s*;$/)?.[1];
+      }
+    }
+    // Form 3: ret = ret*B + A;
+    if (affineA === null) {
+      const af3 = sw.match(/^ret\s*=\s*ret\s*\*\s*(\d*\.?\d+)\s*([+-])\s*(\d*\.?\d+)\s*;$/);
+      if (af3) {
+        affineB = parseFloat(af3[1]);
+        affineA = parseFloat(af3[2] === '-' ? '-' + af3[3] : af3[3]);
+        affineRhs = stmt.match(/=\s*(.+?)\s*;$/)?.[1];
+      }
+    }
+    if (
+      affineA !== null &&
+      affineB !== null &&
+      affineRhs &&
+      !isNaN(affineA) &&
+      !isNaN(affineB) &&
+      Math.abs(affineB - 1.0) > 0.001
+    ) {
+      const newStmt = `ret = mix(ret, ${affineRhs}, _mw_fps_ratio);`;
+      lines[li] = indent + (outerWrap ? '(' + newStmt.replace(/;$/, ');') : newStmt);
+      continue;
+    }
   }
+
+  result = lines.join('\n');
+
+  // _mw_fps_ratio is now a butterchurn uniform (injected into the warp/comp
+  // shader preamble), so no local variable declaration is needed here.
+  // The converter just references it directly in the transformed expressions.
 
   return result;
 }
@@ -931,6 +1042,40 @@ export async function convertShader(shader) {
     return '';
   }
 
+  // Detect HLSL features that text-level regex conversion can't handle.
+  // These need hlslparser's proper type analysis for correct GLSL output.
+  const needsHlslParser =
+    // Structural complexity: loops, matrix types, custom samplers, const arrays
+    /\bfor\s*\(|\bwhile\s*\(|\bfloat[234]x[234]\b|\bsampler\s+sampler_\w+\s*;|\bconst\s+\w+\s+\w+\s*\[/.test(
+      shader,
+    ) ||
+    // Helper functions before shader_body (e.g., `float4 myFunc(float2 uv) {`)
+    /\b(?:float[234]?|half[234]?|void|int)\s+\w+\s*\([^)]*\)\s*\{/.test(
+      shader.split('shader_body')[0] || '',
+    ) ||
+    // Type coercion: float/float2/float3 vars + vector functions (GetPixel/GetBlur
+    // return vec3; HLSL implicitly truncates vec→float/vec2, GLSL doesn't)
+    (/^\s*float[234]?\s+\w+/m.test(shader) &&
+      /\bGetPixel\b|\bGetBlur[123]?\b|\bGetMain\b/.test(shader));
+
+  // Try text-level conversion first for simple shaders — produces GLSL that
+  // butterchurn renders correctly. hlslparser produces technically valid GLSL
+  // that compiles but renders black for many simple shaders (semantic mismatch
+  // with butterchurn's shader template).
+  if (!needsHlslParser) {
+    try {
+      const textResult = normalizeFpsConstants(
+        fixUniformAssignments(convertShaderTextLevel(shader)),
+      );
+      if (textResult && textResult.includes('shader_body')) {
+        return textResult;
+      }
+    } catch {
+      // text-level failed — fall through to hlslparser
+    }
+  }
+
+  // Escalation: hlslparser-wasm for complex shaders (PS3, helper functions)
   const shaderBodyName = 'main_shader_sentinel';
   let fullShader = prepareShader(shader);
   fullShader = fullShader.replace('float4 shader_body (', `float4 ${shaderBodyName} (`);
@@ -953,9 +1098,9 @@ export async function convertShader(shader) {
     );
   }
 
-  // Fallback: text-level HLSL→GLSL conversion
-  console.warn('[convertShader] hlslparser-wasm failed, using text-level fallback');
-  return normalizeFpsConstants(fixUniformAssignments(convertShaderTextLevel(shader)));
+  // Both paths failed — return empty
+  console.error('[convertShader] Both text-level and hlslparser failed');
+  return '';
 }
 
 export async function convertPreset(text) {

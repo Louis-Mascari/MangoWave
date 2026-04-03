@@ -412,8 +412,10 @@ export async function compilePresetEel(preset: EelPreset): Promise<EelPreset> {
     };
   }
 
-  // Compile all equations into a single WASM module
-  const mod = await loadModule({ pools, functions });
+  // Compile all equations into a single WASM module.
+  // eelVersion 1 makes rand() floor its result to match MilkDrop's integer behavior.
+  // Without this, rand(24) returns floats and equal(rand(24),0) never matches.
+  const mod = await loadModule({ pools, functions, eelVersion: 1 });
   const exports = mod.exports as Record<string, (() => void) | undefined>;
 
   // Set adapter functions on the preset object.

@@ -985,6 +985,132 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
     }
   }
 
+  // Hoist use-before-declare: hlslparser can reorder statements so that a variable is used
+  // before its declaration (e.g., `dx = dot(... hor ...)` appears before `vec2 hor = ...`).
+  // Scan body lines: track first-use and declaration positions, hoist declarations that
+  // appear after first use to the top of the body.
+  {
+    const bodyLines = body.split('\n');
+    const firstUse = new Map(); // name → line index of first use
+    const declInfo = new Map(); // name → { line index, full line text }
+    const typeKw = '(?:float|vec[234]|mat[234](?:x[234])?|int|bool)';
+    const declLineRe = new RegExp('^\\s*' + typeKw + '\\s+(\\w+)\\s*(?:=[^;]*)?;\\s*$');
+    const identRe = /\b([a-zA-Z_]\w*)\b/g;
+    // Known GLSL/preamble identifiers to skip
+    const skipIdents = new Set([
+      'float',
+      'vec2',
+      'vec3',
+      'vec4',
+      'mat2',
+      'mat3',
+      'mat4',
+      'int',
+      'bool',
+      'void',
+      'const',
+      'if',
+      'else',
+      'for',
+      'while',
+      'return',
+      'break',
+      'continue',
+      'true',
+      'false',
+      'discard',
+      'in',
+      'out',
+      'uniform',
+      'sampler2D',
+      'texture',
+      'fract',
+      'clamp',
+      'min',
+      'max',
+      'abs',
+      'sign',
+      'floor',
+      'ceil',
+      'mod',
+      'pow',
+      'sqrt',
+      'sin',
+      'cos',
+      'tan',
+      'asin',
+      'acos',
+      'atan',
+      'dot',
+      'cross',
+      'length',
+      'normalize',
+      'mix',
+      'step',
+      'smoothstep',
+      'exp',
+      'exp2',
+      'log',
+      'log2',
+      'inversesqrt',
+      'reflect',
+      'refract',
+      'greaterThanEqual',
+      'lessThanEqual',
+      'greaterThan',
+      'lessThan',
+      'equal',
+      'notEqual',
+      'any',
+      'all',
+      'not',
+      'shader_body',
+      'ret',
+      'uv',
+      'rad',
+      'ang',
+    ]);
+    for (let i = 0; i < bodyLines.length; i++) {
+      const line = bodyLines[i];
+      const declMatch = line.match(declLineRe);
+      if (declMatch) {
+        const name = declMatch[1];
+        if (!PREAMBLE_VARS.has(name) && !skipIdents.has(name) && !declInfo.has(name)) {
+          declInfo.set(name, { idx: i, text: line });
+        }
+      }
+      // Track first use of identifiers
+      let m;
+      identRe.lastIndex = 0;
+      while ((m = identRe.exec(line)) !== null) {
+        const name = m[1];
+        if (!firstUse.has(name) && !skipIdents.has(name) && !PREAMBLE_VARS.has(name)) {
+          firstUse.set(name, i);
+        }
+      }
+    }
+    // Find declarations that appear after first use
+    const toHoist = [];
+    for (const [name, info] of declInfo) {
+      const use = firstUse.get(name);
+      if (use !== undefined && use < info.idx) {
+        toHoist.push(info);
+      }
+    }
+    if (toHoist.length > 0) {
+      // Sort by original position (preserve relative order)
+      toHoist.sort((a, b) => a.idx - b.idx);
+      // Remove from original positions and prepend after `shader_body {`
+      const removeSet = new Set(toHoist.map((t) => t.idx));
+      const filtered = bodyLines.filter((_, i) => !removeSet.has(i));
+      // Insert after the opening `shader_body {` line
+      const openIdx = filtered.findIndex((l) => l.includes('shader_body'));
+      const hoisted = toHoist.map((t) => t.text);
+      filtered.splice(openIdx + 1, 0, ...hoisted);
+      body = filtered.join('\n');
+    }
+  }
+
   // Initialize uninitialized `samples` array: MilkDrop fills this at runtime with composite
   // sampling offsets/weights, but butterchurn doesn't provide it. Default: 5-tap cross filter
   // (center + 4 cardinal neighbors at ±1 pixel) matching MilkDrop's default comp behavior.

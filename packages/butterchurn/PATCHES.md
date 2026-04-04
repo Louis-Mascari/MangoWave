@@ -1,8 +1,6 @@
 # butterchurn Patches
 
-MangoWave patches applied to the vendored butterchurn source (`lib/butterchurn.js`, beautified from `butterchurn.min.js`). If the bundle is ever regenerated from upstream, these patches must be re-applied.
-
-**Source file:** `lib/butterchurn.js` (beautified with js-beautify + prettier from the original `butterchurn.min.js`)
+MangoWave patches applied to the butterchurn source fork (`src/butterchurn/`, forked from jberg/butterchurn v2.6.7, commit `d90f271`). All patches are searchable via `[MW-PATCH:` comments.
 
 ---
 
@@ -23,17 +21,9 @@ butterchurn's per-frame effects (decay, border alpha, motion vector alpha, echo 
 
 A guard skips the computation when `30/fps` is within 1% of 1.0 (i.e., fps ≈ 30).
 
-### Edge cases
-
-- `decay=1.0` → `pow(1,x)=1` (no decay, unchanged)
-- `decay=0.0` → `pow(0,x)=0` (instant black, unchanged)
-- `alpha=0` → `1-pow(1,x)=0` (disabled, unchanged)
-- `alpha=1` → `1-pow(0,x)=1` (opaque, unchanged)
-- fps=30 → ratio ≈ 1.0, skipped by guard
-
 ### Location
 
-Search for `/* [MW-PATCH: frame-rate normalization] */` — inserted after frame equation evaluation, before warp rendering.
+`src/butterchurn/rendering/renderer.js` — search for `/* [MW-PATCH: frame-rate normalization] */`. Inserted after `this.presetEquationRunner.runFrameEquations(globalVars)`, before `this.runPixelEquations()`.
 
 ### Verification
 
@@ -63,22 +53,11 @@ Previously the converter injected `float _mw_fps_ratio = 30.0 / fps;` as a local
 
 ### Location
 
-Search for `/* [MW-PATCH: _mw_fps_ratio uniform] */` in the `renderQuadTexture` methods (warp + comp).
+`src/butterchurn/rendering/shaders/warp.js` and `src/butterchurn/rendering/shaders/comp.js`:
 
-In `createShader` for both warp and comp: `_mw_fps_ratio` added to the fragment shader preamble string (after `uniform float fps;`), and `this.mwFpsRatioLoc` cached via `getUniformLocation`.
-
-### Remaining limitation
-
-This uniform is available to **imported** presets (which go through the converter) but not to **bundled** pre-compiled presets. 6 bundled presets in the NonMinimal pack have shader-level fade constants:
-
-| Preset                                   | Subtraction/frame | Severity |
-| ---------------------------------------- | ----------------- | -------- |
-| martin - bombyx mori                     | 0.025             | Severe   |
-| martin - fruit machine                   | 0.025             | Severe   |
-| suksma - Rovastar - Sunflower Passion... | 0.004             | Moderate |
-| Geiss - Spiral Artifact                  | 0.004             | Moderate |
-| martin - frosty caves 2                  | 0.004             | Moderate |
-| Martin - charisma                        | 0.002             | Slow     |
+- Fragment shader preamble: `uniform float _mw_fps_ratio;` after `uniform float fps;`
+- `createShader`: `this.mwFpsRatioLoc` cached via `getUniformLocation`
+- `renderQuadTexture`: search for `/* [MW-PATCH: _mw_fps_ratio uniform] */`
 
 ---
 
@@ -90,27 +69,77 @@ butterchurn has zero `gl.getShaderParameter(COMPILE_STATUS)` checks. Broken shad
 
 ### Solution
 
-Added `_mwCheckShader(gl, shader, label)` and `_mwCheckProgram(gl, program, label)` helper functions near the top of the module (after the `_` utility class). These check compile/link status and log errors via `console.error('[butterchurn] ...')`.
+Added `_mwCheckShader(gl, shader, label)` and `_mwCheckProgram(gl, program, label)` module-level helper functions at the top of both warp.js and comp.js. These check compile/link status and log errors via `console.error('[butterchurn] ...')`.
 
-Called after compile/link in the warp and comp shader `createShader` methods — the two dynamic shader paths that accept user/preset GLSL code. Static shaders (border, motion vectors, blur, etc.) are not checked since their source is hardcoded and known-good.
+Called after compile/link in `createShader` methods — the two dynamic shader paths that accept user/preset GLSL code. Static shaders (border, motion vectors, blur, etc.) are not checked since their source is hardcoded and known-good.
 
 ### Location
 
-Search for `_mwCheckShader` and `_mwCheckProgram` function definitions and call sites.
+`src/butterchurn/rendering/shaders/warp.js` and `src/butterchurn/rendering/shaders/comp.js` — search for `_mwCheckShader` and `_mwCheckProgram`.
 
 ---
 
-## 4. Source Beautification
+## 4. Graceful Shader Error Fallback
+
+### Problem
+
+When a preset's warp or comp shader fails to compile/link (malformed GLSL, unsupported extensions, etc.), the visualizer renders black until the next preset loads. Users see no indication of what went wrong.
+
+### Solution
+
+In both warp.js and comp.js `createShader(shaderText, _fallback)` methods:
+
+1. After compiling + linking, if `_mwCheckShader` or `_mwCheckProgram` fails AND `shaderText` was non-empty (user/preset shader):
+   - Logs `console.warn('[butterchurn] Warp/Comp shader failed to compile, falling back to default')`
+   - Calls `this.createShader('', true)` to use the default passthrough shader
+   - Returns early
+2. The `_fallback` guard parameter prevents infinite recursion if the default shader somehow fails
+
+### Location
+
+`src/butterchurn/rendering/shaders/warp.js` and `src/butterchurn/rendering/shaders/comp.js` — search for `/* [MW-PATCH: graceful shader fallback] */` in `createShader`.
+
+---
+
+## 5. Universal FPS Normalization for Shader Constants
+
+### Problem
+
+395 butterchurn pack presets have pre-compiled shader strings that don't go through `milkdrop-preset-converter`. 6 known presets (all in NonMinimal pack) have hardcoded per-frame fade constants that run 2× too fast at 60fps. The converter's `normalizeFpsConstants()` only ran at import/build time, missing bundled presets entirely.
+
+### Solution
+
+Extracted `normalizeFpsConstants()` into `src/butterchurn/rendering/shaders/fpsNormalization.js` and applied it universally in both warp.js and comp.js `createShader()` methods. Every preset's shader body is normalized at shader creation time, regardless of whether it came from a bundled pack or user import.
+
+The function is idempotent — already-normalized presets (imported, MilkDrop) pass through unchanged because the patterns it matches (`ret -= CONST`, `ret *= CONST` where 0<F<1) are replaced with expressions containing `_mw_fps_ratio`, which don't re-match.
+
+### Patterns handled
+
+| Pattern            | Replacement                    | Rationale                             |
+| ------------------ | ------------------------------ | ------------------------------------- |
+| `ret -= C`         | `ret -= C * _mw_fps_ratio`     | Per-frame subtraction (fade to black) |
+| `ret = ret - C`    | `ret -= C * _mw_fps_ratio`     | Expanded subtraction form             |
+| `ret *= F` (0<F<1) | `ret *= pow(F, _mw_fps_ratio)` | Multiplicative decay                  |
+| `(ret - C) * F`    | Compound affine normalization  | Combined fade + decay                 |
+| `ret = A + B*ret`  | Affine transform normalization | General affine patterns               |
+
+### Location
+
+`src/butterchurn/rendering/shaders/fpsNormalization.js` — the function itself.
+`src/butterchurn/rendering/shaders/warp.js` and `comp.js` — called in `createShader` after shader text processing, search for `normalizeFpsConstants`.
+
+---
+
+## 6. Source Beautification → Source Fork
 
 ### Background
 
-The original `butterchurn.min.js` is a 193KB single-line minified blob with mangled variable names. Debugging shader issues (black output, silent failures) is impossible in minified form.
+The original `butterchurn.min.js` was a 193KB single-line minified blob with mangled variable names. Previously beautified with js-beautify + prettier (~8,400 lines), still with mangled names.
 
-### Process
+### Current state
 
-1. `npx js-beautify` — expanded to readable indented structure
-2. `npx prettier --print-width 80` — reformatted to 80-char lines (~8400 lines)
+Replaced entirely with the actual ES6 source from jberg/butterchurn v2.6.7 (commit `d90f271`). The source has ~30 modules with meaningful class/method/variable names. Vite bundles from source directly — no intermediate build step.
 
-The beautified `butterchurn.js` is the active source. `butterchurn.min.js` is retained as the original reference.
+`lib/butterchurn.js` and `lib/butterchurn.min.js` have been deleted. `lib/butterchurnExtraImages.min.js` is retained (static texture data, not part of the source fork).
 
-Variable names remain mangled (single letters), but the code structure (class methods, shader templates, uniform binding) is readable and patchable.
+The `ecma-proposal-math-extensions` dependency (upstream uses `Math.clamp`) is replaced with an inline polyfill in `src/butterchurn/index.js`.

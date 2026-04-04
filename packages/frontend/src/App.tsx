@@ -509,6 +509,36 @@ function MainApp() {
             )}
             <NowPlaying enabled={songInfoDisplay !== 'off'} track={nowPlayingTrack} />
           </div>
+          {/* Initializing indicator — visible after launch animation clears while presets still loading */}
+          {!showLaunchAnimation && presetsLoading && (
+            <div className="pointer-events-none fixed inset-0 z-[48] flex items-center justify-center">
+              <div className="flex items-center gap-2 rounded-full bg-black/70 px-4 py-2 backdrop-blur-sm">
+                <svg
+                  className="h-4 w-4 animate-spin text-orange-400"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    className="opacity-25"
+                  />
+                  <path
+                    d="M4 12a8 8 0 018-8"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <span className="text-sm text-white/70">
+                  {i18n.t('loadingPresets', { ns: 'common' })}
+                </span>
+              </div>
+            </div>
+          )}
           <RateLimitToast />
           <ControlBar
             onNextPreset={handleNextPreset}

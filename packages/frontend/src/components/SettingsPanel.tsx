@@ -183,7 +183,7 @@ function EqualizerTab() {
         </h3>
         <button
           onClick={resetEQ}
-          className="cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-xs text-white/70 hover:bg-white/20"
+          className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs text-orange-400 hover:bg-orange-500/30"
         >
           <svg
             viewBox="0 0 20 20"
@@ -299,7 +299,7 @@ function RenderingTab() {
         <h3 className="text-sm font-semibold text-white">{t('rendering.title')}</h3>
         <button
           onClick={resetRendering}
-          className="cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-xs text-white/70 hover:bg-white/20"
+          className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs text-orange-400 hover:bg-orange-500/30"
         >
           <svg
             viewBox="0 0 20 20"
@@ -559,7 +559,7 @@ function PresetsTab() {
         </h3>
         <button
           onClick={resetPresets}
-          className="cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-xs text-white/70 hover:bg-white/20"
+          className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs text-orange-400 hover:bg-orange-500/30"
         >
           <svg
             viewBox="0 0 20 20"

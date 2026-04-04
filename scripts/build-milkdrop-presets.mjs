@@ -78,6 +78,7 @@ const BLOCKED = new Set([
   'Unchained - Unclaimed Property',
   "Unchained - Morat's Final Trainer2",
   'flexi - predator-prey ecosystem [Geiss - Cauldron remix]',
+  'Zylot - Building Block of color - Bitcore Tweak',
 ]);
 
 // ---------------------------------------------------------------------------

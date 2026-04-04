@@ -1115,6 +1115,61 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
     }
   }
 
+  // Fix modulo operator: GLSL `%` requires integer operands, but hlslparser's int→float
+  // conversion may have changed `int n` to `float n`. Replace `LHS % RHS` with
+  // `mod(float(LHS), float(RHS))`. Scan for `%` and extract operands properly.
+  {
+    let result = '';
+    let i = 0;
+    while (i < body.length) {
+      if (body[i] === '%') {
+        // Extract RHS: skip whitespace, then grab word
+        let ri = i + 1;
+        while (ri < body.length && /\s/.test(body[ri])) ri++;
+        let rhs = '';
+        while (ri < body.length && /\w/.test(body[ri])) {
+          rhs += body[ri];
+          ri++;
+        }
+
+        // Extract LHS: scan backwards from before %, skip whitespace
+        let li = i - 1;
+        while (li >= 0 && /\s/.test(body[li])) li--;
+        let lhs = '';
+        if (li >= 0 && body[li] === ')') {
+          // Balanced paren scan backwards
+          let depth = 1;
+          let lstart = li - 1;
+          while (lstart >= 0 && depth > 0) {
+            if (body[lstart] === ')') depth++;
+            else if (body[lstart] === '(') depth--;
+            lstart--;
+          }
+          lstart++; // points to the opening (
+          lhs = body.substring(lstart, li + 1);
+          result = result.substring(0, result.length - (i - 1 - li) - (li + 1 - lstart));
+        } else if (li >= 0 && /\w/.test(body[li])) {
+          let lstart = li;
+          while (lstart > 0 && /\w/.test(body[lstart - 1])) lstart--;
+          lhs = body.substring(lstart, li + 1);
+          result = result.substring(0, result.length - (i - 1 - li) - (li + 1 - lstart));
+        }
+
+        if (lhs && rhs) {
+          result += 'mod(float(' + lhs + '), float(' + rhs + '))';
+          i = ri;
+        } else {
+          result += body[i];
+          i++;
+        }
+      } else {
+        result += body[i];
+        i++;
+      }
+    }
+    body = result;
+  }
+
   // Initialize uninitialized `samples` array: MilkDrop fills this at runtime with composite
   // sampling offsets/weights, but butterchurn doesn't provide it. Default: 5-tap cross filter
   // (center + 4 cardinal neighbors at ±1 pixel) matching MilkDrop's default comp behavior.

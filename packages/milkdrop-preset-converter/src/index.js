@@ -1202,10 +1202,17 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
   // GLSL ES 3.0 disallows implicit bool→int and vec*int multiplication.
   // Convert to float with explicit cast, matching the text-level fix.
   // Skip for-loop variables (`for (int i = ...`) — they need int for array indexing.
+  // Also handles bare `int x;` and comma-separated `int a, b;`.
   body = body.replace(/\bint\s+(\w+)\s*=\s*([^;]+);/g, (m, name, init, offset) => {
     const before = body.substring(Math.max(0, offset - 20), offset);
     if (/for\s*\(\s*$/.test(before)) return m;
     return `float ${name} = float(${init.trim()});`;
+  });
+  // Bare `int name;` and comma-separated `int a, b, c;` (not inside for-loops)
+  body = body.replace(/^(\s*)\bint\s+([\w][\w\s,]*);/gm, (m, indent, names, offset) => {
+    const before = body.substring(Math.max(0, offset - 20), offset);
+    if (/for\s*\(\s*$/.test(before)) return m;
+    return indent + 'float ' + names + ';';
   });
 
   // Fix bvec-to-scalar casts FIRST: hlslparser emits float(greaterThanEqual(A, B)) for

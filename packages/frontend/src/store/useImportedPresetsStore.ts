@@ -4,7 +4,7 @@ import { get as idbGet, set as idbSet, del as idbDel, keys as idbKeys } from 'id
 const IDB_MILK_PREFIX = 'mw-milk:';
 const IDB_CONV_PREFIX = 'mw-conv:';
 const CONV_VERSION_KEY = 'mw-conv-version';
-const CONV_VERSION = 22; // v22 = int literal→float promotion in hlslparser output
+const CONV_VERSION = 23; // v23 = bare int→float declaration conversion in hlslparser output
 
 export interface ImportedPresetsState {
   loaded: boolean;

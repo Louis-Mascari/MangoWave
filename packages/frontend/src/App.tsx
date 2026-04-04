@@ -509,8 +509,12 @@ function MainApp() {
             )}
             <NowPlaying enabled={songInfoDisplay !== 'off'} track={nowPlayingTrack} />
           </div>
-          {/* Initializing indicator — visible after launch animation clears while presets still loading */}
-          {!showLaunchAnimation && presetsLoading && (
+          {/* Initializing indicator — rendered immediately (before init blocks the main thread)
+              so the browser paints it to the DOM. Sits behind the launch animation (z-48 vs z-100),
+              becoming visible when the animation fades. Uses CSS animation (compositor thread) so
+              the spinner keeps spinning even while JS is blocked. Dismissed once the first preset
+              loads (currentPreset set during init). */}
+          {!currentPreset && (
             <div className="pointer-events-none fixed inset-0 z-[48] flex items-center justify-center">
               <div className="flex items-center gap-2 rounded-full bg-black/70 px-4 py-2 backdrop-blur-sm">
                 <svg

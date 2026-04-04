@@ -5,6 +5,7 @@ import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useImportedTexturesStore } from '../store/useImportedTexturesStore.ts';
 import quarantinedData from '../data/quarantined-presets.json';
 import mobileBlockedData from '../data/mobile-blocked-presets.json';
+import { BUTTERCHURN_MILKDROP_NAMES } from '../data/presetThematicPacks.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 
 interface VisualizerProps {
@@ -92,7 +93,9 @@ export function Visualizer({
           // Use a localStorage flag so the pack is never re-created if the user deletes it.
           if (!localStorage.getItem('mw-milkdrop-classic-seeded')) {
             const settings = useSettingsStore.getState();
-            const names = [...renderer.milkdropPresetNames];
+            // Include both the 438 bundled MilkDrop presets and the ~111 butterchurn
+            // presets that are also original MilkDrop presets (deduped at build time).
+            const names = [...renderer.milkdropPresetNames, ...BUTTERCHURN_MILKDROP_NAMES];
             if (names.length > 0) {
               settings.createCustomPack('MilkDrop Classic', names);
               localStorage.setItem('mw-milkdrop-classic-seeded', '1');

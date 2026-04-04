@@ -1448,7 +1448,7 @@ export function PresetBrowser({
                     <svg
                       viewBox="0 0 20 20"
                       fill="currentColor"
-                      className="mr-0.5 inline-block h-2.5 w-2.5"
+                      className="mr-0.5 -mt-0.5 inline-block h-2.5 w-2.5"
                     >
                       <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                     </svg>

@@ -188,7 +188,7 @@ function EqualizerTab() {
           <svg
             viewBox="0 0 20 20"
             fill="currentColor"
-            className="mr-1 inline-block h-3 w-3 align-text-bottom"
+            className="mr-1 -mt-0.5 inline-block h-3 w-3"
           >
             <path
               fillRule="evenodd"
@@ -304,7 +304,7 @@ function RenderingTab() {
           <svg
             viewBox="0 0 20 20"
             fill="currentColor"
-            className="mr-1 inline-block h-3 w-3 align-text-bottom"
+            className="mr-1 -mt-0.5 inline-block h-3 w-3"
           >
             <path
               fillRule="evenodd"
@@ -564,7 +564,7 @@ function PresetsTab() {
           <svg
             viewBox="0 0 20 20"
             fill="currentColor"
-            className="mr-1 inline-block h-3 w-3 align-text-bottom"
+            className="mr-1 -mt-0.5 inline-block h-3 w-3"
           >
             <path
               fillRule="evenodd"
@@ -962,7 +962,7 @@ function DataTab() {
           <svg
             viewBox="0 0 20 20"
             fill="currentColor"
-            className="mr-1 inline-block h-3 w-3 align-text-bottom"
+            className="mr-1 -mt-0.5 inline-block h-3 w-3"
           >
             <path
               fillRule="evenodd"
@@ -1028,7 +1028,7 @@ function DataTab() {
               <svg
                 viewBox="0 0 20 20"
                 fill="currentColor"
-                className="mr-1 inline-block h-3 w-3 align-text-bottom"
+                className="mr-1 -mt-0.5 inline-block h-3 w-3"
               >
                 <path
                   fillRule="evenodd"

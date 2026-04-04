@@ -1369,7 +1369,7 @@ export function PresetBrowser({
             <svg
               viewBox="0 0 20 20"
               fill="currentColor"
-              className="mr-1 inline-block h-3 w-3 align-text-bottom"
+              className="mr-1 -mt-0.5 inline-block h-3 w-3"
             >
               <path
                 fillRule="evenodd"
@@ -1386,7 +1386,7 @@ export function PresetBrowser({
             <svg
               viewBox="0 0 20 20"
               fill="currentColor"
-              className="mr-1 inline-block h-3 w-3 align-text-bottom"
+              className="mr-1 -mt-0.5 inline-block h-3 w-3"
             >
               <path
                 fillRule="evenodd"
@@ -1529,7 +1529,7 @@ export function PresetBrowser({
               <svg
                 viewBox="0 0 20 20"
                 fill="currentColor"
-                className="mr-1 inline-block h-3 w-3 align-text-bottom"
+                className="mr-1 -mt-0.5 inline-block h-3 w-3"
               >
                 <path
                   fillRule="evenodd"
@@ -1690,7 +1690,7 @@ export function PresetBrowser({
               <svg
                 viewBox="0 0 20 20"
                 fill="currentColor"
-                className="mr-1 inline-block h-3 w-3 align-text-bottom"
+                className="mr-1 -mt-0.5 inline-block h-3 w-3"
               >
                 <path
                   fillRule="evenodd"

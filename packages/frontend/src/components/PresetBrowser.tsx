@@ -1366,7 +1366,11 @@ export function PresetBrowser({
             onClick={handleCreatePack}
             className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
           >
-            <svg viewBox="0 0 20 20" fill="currentColor" className="mr-1 inline-block h-3 w-3">
+            <svg
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              className="mr-1 inline-block h-3 w-3 align-text-bottom"
+            >
               <path
                 fillRule="evenodd"
                 d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
@@ -1379,7 +1383,11 @@ export function PresetBrowser({
             onClick={handleImportPack}
             className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
           >
-            <svg viewBox="0 0 20 20" fill="currentColor" className="mr-1 inline-block h-3 w-3">
+            <svg
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              className="mr-1 inline-block h-3 w-3 align-text-bottom"
+            >
               <path
                 fillRule="evenodd"
                 d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
@@ -1518,7 +1526,11 @@ export function PresetBrowser({
               onClick={handleImportMilk}
               className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
             >
-              <svg viewBox="0 0 20 20" fill="currentColor" className="mr-1 inline-block h-3 w-3">
+              <svg
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="mr-1 inline-block h-3 w-3 align-text-bottom"
+              >
                 <path
                   fillRule="evenodd"
                   d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
@@ -1675,7 +1687,11 @@ export function PresetBrowser({
               onClick={handleImportTextures}
               className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
             >
-              <svg viewBox="0 0 20 20" fill="currentColor" className="mr-1 inline-block h-3 w-3">
+              <svg
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="mr-1 inline-block h-3 w-3 align-text-bottom"
+              >
                 <path
                   fillRule="evenodd"
                   d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"

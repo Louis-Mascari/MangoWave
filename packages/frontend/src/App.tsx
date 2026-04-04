@@ -315,23 +315,21 @@ function MainApp() {
   const handleTogglePause = useCallback(() => {
     const renderer = rendererRef.current;
     if (!renderer) return;
-    setRenderPaused((prev) => {
-      const next = !prev;
-      if (next) {
-        renderer.stop();
-      } else {
-        renderer.start();
-      }
-      useToastStore
-        .getState()
-        .show(
-          next
-            ? i18n.t('toasts.renderingPaused', { ns: 'messages' })
-            : i18n.t('toasts.renderingResumed', { ns: 'messages' }),
-        );
-      return next;
-    });
-  }, []);
+    const next = !renderPaused;
+    setRenderPaused(next);
+    if (next) {
+      renderer.stop();
+    } else {
+      renderer.start();
+    }
+    useToastStore
+      .getState()
+      .show(
+        next
+          ? i18n.t('toasts.renderingPaused', { ns: 'messages' })
+          : i18n.t('toasts.renderingResumed', { ns: 'messages' }),
+      );
+  }, [renderPaused]);
 
   const handleTogglePanel = useCallback((panel: PanelView) => {
     setActivePanel((current) => (current === panel ? 'none' : panel));

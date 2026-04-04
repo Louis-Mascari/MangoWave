@@ -38,7 +38,7 @@ export const EXPORT_CATEGORIES: ExportCategory[] = [
   {
     key: 'display',
     labelKey: 'data.categoryDisplay',
-    fields: ['presetNameDisplay', 'songInfoDisplay', 'transitionTime', 'volume'],
+    fields: ['presetNameDisplay', 'songInfoDisplay', 'transitionTime', 'volume', 'brightness'],
   },
   {
     key: 'favorites',
@@ -175,10 +175,17 @@ export async function restoreImportedData(
     }
   }
 
-  // Restore textures
+  // Restore textures — validate shape matches what textureLoader produces
   if (imported.textures) {
     for (const [name, val] of Object.entries(imported.textures)) {
-      if (!val) continue;
+      if (
+        !val ||
+        typeof val !== 'object' ||
+        typeof (val as Record<string, unknown>).data !== 'string' ||
+        typeof (val as Record<string, unknown>).width !== 'number' ||
+        typeof (val as Record<string, unknown>).height !== 'number'
+      )
+        continue;
       await idbSet(`mw-tex:${name}`, val);
     }
   }
@@ -374,6 +381,7 @@ const SANITIZERS: Record<string, (val: unknown) => unknown> = {
   },
   transitionTime: (v) => clamp(v, 0, 10, 2.0),
   volume: (v) => clamp(v, 0, 1, 0.5),
+  brightness: (v) => clamp(v, 0.1, 1, 1.0),
   customPacks: (v) => {
     if (!Array.isArray(v)) return undefined;
     return v

@@ -11,7 +11,7 @@ Static data from an unmaintained npm package. Vendoring ensures CI/deploy is nev
 | Pack       | Presets | Size  |
 | ---------- | ------- | ----- |
 | Extra      | ~180    | 828KB |
-| Presets    | ~140    | 640KB |
+| Minimal    | ~140    | 640KB |
 | Extra2     | ~120    | 596KB |
 | NonMinimal | ~100    | 460KB |
 | MD1        | ~60     | 280KB |

@@ -204,6 +204,13 @@ function MainApp() {
     }
   }, []);
 
+  // Fallback: clear presetsLoading after 10s even if milkdrop-presets name registration
+  // never fires (e.g., dynamic import failure). Presets button spinner shouldn't persist forever.
+  useEffect(() => {
+    const timer = setTimeout(() => setPresetsLoading(false), 10_000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const {
     pickNextPreset,
     handleNextPreset,

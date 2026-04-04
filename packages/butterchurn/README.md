@@ -1,6 +1,6 @@
 # butterchurn
 
-Vendored [butterchurn](https://github.com/jberg/butterchurn) v2 — WebGL 2 MilkDrop visualizer. ESM wrapper around the original minified UMD bundle with TypeScript declarations.
+Vendored [butterchurn](https://github.com/jberg/butterchurn) v2 — WebGL 2 MilkDrop visualizer. ESM wrapper around the beautified UMD bundle (with MangoWave patches) and TypeScript declarations.
 
 ## Why vendored
 
@@ -13,10 +13,10 @@ butterchurn is effectively unmaintained (last stable release 2018). Vendoring el
 
 ## Structure
 
-- `lib/` — original minified bundles (`butterchurn.min.js`, `butterchurnExtraImages.min.js`)
+- `lib/` — `butterchurn.js` (beautified, active, with patches), `butterchurn.min.js` (gitignored reference), `butterchurnExtraImages.min.js`
 - `src/index.js` — ESM wrapper with CJS interop (`mod.default ?? mod`)
 - `src/index.d.ts` — TypeScript declarations
 
 ## MangoWave Patches
 
-The minified bundle includes MangoWave-specific patches. See [PATCHES.md](PATCHES.md) for details, math, and re-application instructions.
+The beautified bundle (`butterchurn.js`) includes MangoWave-specific patches. See [PATCHES.md](PATCHES.md) for details, math, and re-application instructions.

@@ -143,11 +143,12 @@ export function Visualizer({
     if (!renderer) return;
 
     const names = importedPresets.map((p) => p.name);
+    const nameSet = new Set(names);
 
     // Unregister any names the renderer has that are no longer in the store
     const packMap = renderer.presetPackMap;
     for (const key of renderer.presetList) {
-      if (packMap.get(key) === 'Imported' && !names.includes(key)) {
+      if (packMap.get(key) === 'Imported' && !nameSet.has(key)) {
         renderer.unregisterImportedPreset(key);
       }
     }

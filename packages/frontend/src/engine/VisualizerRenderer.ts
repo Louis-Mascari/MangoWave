@@ -296,5 +296,7 @@ export class VisualizerRenderer {
     this.presetKeys = [];
     this.presetKeySet = new Set();
     this._presetPackMap = new Map();
+    this.onPresetChange = undefined;
+    this.onPresetsRegistered = undefined;
   }
 }

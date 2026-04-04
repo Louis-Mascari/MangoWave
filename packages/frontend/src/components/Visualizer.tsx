@@ -88,11 +88,15 @@ export function Visualizer({
         onPresetsRegistered: () => {
           onPresetsLoaded(renderer.presetList, renderer.presetPackMap);
 
-          // Seed "MilkDrop Classic" custom pack (one-time, after MilkDrop names register)
-          const settings = useSettingsStore.getState();
-          if (!settings.customPacks.some((p) => p.name === 'MilkDrop Classic')) {
+          // Seed "MilkDrop Classic" custom pack (one-time, after MilkDrop names register).
+          // Use a localStorage flag so the pack is never re-created if the user deletes it.
+          if (!localStorage.getItem('mw-milkdrop-classic-seeded')) {
+            const settings = useSettingsStore.getState();
             const names = [...renderer.milkdropPresetNames];
-            if (names.length > 0) settings.createCustomPack('MilkDrop Classic', names);
+            if (names.length > 0) {
+              settings.createCustomPack('MilkDrop Classic', names);
+              localStorage.setItem('mw-milkdrop-classic-seeded', '1');
+            }
           }
         },
       });
@@ -136,8 +140,9 @@ export function Visualizer({
     const names = importedPresets.map((p) => p.name);
 
     // Unregister any names the renderer has that are no longer in the store
+    const packMap = renderer.presetPackMap;
     for (const key of renderer.presetList) {
-      if (renderer.presetPackMap.get(key) === 'Imported' && !names.includes(key)) {
+      if (packMap.get(key) === 'Imported' && !names.includes(key)) {
         renderer.unregisterImportedPreset(key);
       }
     }

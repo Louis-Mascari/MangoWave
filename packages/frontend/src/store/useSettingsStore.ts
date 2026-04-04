@@ -27,7 +27,7 @@ export interface AudioSettings {
 export interface CustomPack {
   id: string; // crypto.randomUUID()
   name: string; // max 50 chars
-  presets: string[]; // preset names (no duplicates), max 395
+  presets: string[]; // preset names (no duplicates)
   createdAt: number; // Date.now()
 }
 

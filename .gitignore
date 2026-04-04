@@ -46,6 +46,8 @@ mw-import-errors.json
 
 # Classification script intermediate output
 scripts/preset-classification.json
+scripts/preset-classification-heuristic.json
+scripts/llm-classification-partial.json
 
 # Playwright
 playwright-report/

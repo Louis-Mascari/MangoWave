@@ -4,7 +4,7 @@ import { get as idbGet, set as idbSet, del as idbDel, keys as idbKeys } from 'id
 const IDB_MILK_PREFIX = 'mw-milk:';
 const IDB_CONV_PREFIX = 'mw-conv:';
 const CONV_VERSION_KEY = 'mw-conv-version';
-const CONV_VERSION = 24; // v24 = fix % scanner orphaning cast keywords (int mod → int(mod))
+const CONV_VERSION = 25; // v25 = rewrite % scanner for correctness with multiple operators
 
 export interface ImportedPresetsState {
   loaded: boolean;

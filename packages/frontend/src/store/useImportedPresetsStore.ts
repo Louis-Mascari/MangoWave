@@ -4,7 +4,7 @@ import { get as idbGet, set as idbSet, del as idbDel, keys as idbKeys } from 'id
 const IDB_MILK_PREFIX = 'mw-milk:';
 const IDB_CONV_PREFIX = 'mw-conv:';
 const CONV_VERSION_KEY = 'mw-conv-version';
-const CONV_VERSION = 16; // v16 = fix presetLocals overlap (strip body dupe, keep top decl)
+const CONV_VERSION = 17; // v17 = hybrid overlap: hoist body type to top (fixes both ret1 + noise)
 
 export interface ImportedPresetsState {
   loaded: boolean;

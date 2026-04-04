@@ -914,10 +914,14 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
       bodyDeclaredNames.add(bdm[1]);
     }
     if (bodyDeclaredNames.size > 0) {
-      // For overlapping names: strip the BODY version and keep presetLocals (top of body).
-      // hlslparser sometimes emits redundant declarations deep in the body (e.g.,
-      // `vec3 ret1 = vec3(ret1)`) while the variable is already used earlier — the global
-      // declaration extracted into presetLocals must come first for correct scoping.
+      // Hybrid overlap handling: hlslparser may emit both a global declaration (extracted
+      // into presetLocals) and a body declaration with a different type (e.g., global
+      // `float3 noise` → presetLocals `vec3 noise`, but body has `float noise` after type
+      // analysis). We need the body's TYPE (hlslparser's analysis is more accurate) but
+      // presetLocals' POSITION (top of body, before first use).
+      //
+      // Strategy: extract body declarations for overlapping names, strip them from body,
+      // replace the presetLocals entry with the body version (preserving type + initializer).
       const presetLocalNames = new Set();
       const plNameRe = /(?:float|vec[234]|mat[234](?:x[234])?|int|bool)\s+([\w][\w\s,]*);/g;
       let plm;
@@ -929,17 +933,38 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
       }
       const overlap = new Set([...presetLocalNames].filter((n) => bodyDeclaredNames.has(n)));
       if (overlap.size > 0) {
-        // Strip overlapping declarations from body (keep presetLocals at top).
-        // Matches `type name = ...;` and bare `type name;` declarations.
-        // Handles hlslparser patterns like `vec3 ret1 = vec3( ret1 );`.
+        // For each overlapping name: extract its body declaration (type + init), strip
+        // from body, and collect for insertion at top. Then strip from presetLocals.
+        const bodyDeclsToHoist = [];
         for (const name of overlap) {
-          const stripRe = new RegExp(
-            '^(\\s*)(?:float|vec[234]|mat[234](?:x[234])?|int|bool)\\s+' +
+          const extractRe = new RegExp(
+            '^\\s*(?:float|vec[234]|mat[234](?:x[234])?|int|bool)\\s+' +
               name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') +
               '\\s*(?:=[^;]*)?;\\s*$',
             'gm',
           );
-          body = body.replace(stripRe, '');
+          const match = body.match(extractRe);
+          if (match) {
+            // Keep the body's declaration (with its type) but hoist it
+            bodyDeclsToHoist.push(match[0].trim());
+            body = body.replace(extractRe, '');
+          }
+        }
+        // Strip overlapping names from presetLocals (body version takes precedence)
+        presetLocals = presetLocals.replace(
+          /^\s*(?:float|vec[234]|mat[234](?:x[234])?|int|bool)\s+([\w][\w\s,]*);/gm,
+          (match, namesPart) => {
+            const names = namesPart.split(',').map((n) => n.trim());
+            const kept = names.filter((n) => !overlap.has(n));
+            if (kept.length === 0) return ''; // all names overlap, remove entire line
+            if (kept.length === names.length) return match; // no overlap, keep as-is
+            const typeMatch = match.match(/^\s*(float|vec[234]|mat[234](?:x[234])?|int|bool)\s+/);
+            return typeMatch ? '    ' + typeMatch[1] + ' ' + kept.join(', ') + ';' : match;
+          },
+        );
+        // Prepend hoisted body declarations to presetLocals
+        if (bodyDeclsToHoist.length > 0) {
+          presetLocals = bodyDeclsToHoist.map((d) => '    ' + d).join('\n') + '\n' + presetLocals;
         }
       }
     }

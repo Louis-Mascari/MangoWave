@@ -1366,12 +1366,26 @@ export function PresetBrowser({
             onClick={handleCreatePack}
             className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
           >
+            <svg viewBox="0 0 20 20" fill="currentColor" className="mr-1 inline-block h-3 w-3">
+              <path
+                fillRule="evenodd"
+                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                clipRule="evenodd"
+              />
+            </svg>
             {t('customPacks.createPack')}
           </button>
           <button
             onClick={handleImportPack}
             className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
           >
+            <svg viewBox="0 0 20 20" fill="currentColor" className="mr-1 inline-block h-3 w-3">
+              <path
+                fillRule="evenodd"
+                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
+                clipRule="evenodd"
+              />
+            </svg>
             {t('customPacks.importPack')}
           </button>
         </div>
@@ -1423,6 +1437,13 @@ export function PresetBrowser({
                     onClick={() => setSelectedPackId(pack.id)}
                     className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[10px] text-white/50 hover:bg-white/20"
                   >
+                    <svg
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className="mr-0.5 inline-block h-2.5 w-2.5"
+                    >
+                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                    </svg>
                     {t('customPacks.edit')}
                   </button>
                   <button
@@ -1497,6 +1518,13 @@ export function PresetBrowser({
               onClick={handleImportMilk}
               className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
             >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="mr-1 inline-block h-3 w-3">
+                <path
+                  fillRule="evenodd"
+                  d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
               {t('importedPresets.importMilk')}
             </button>
             {importedPresets.length > 0 && (
@@ -1647,6 +1675,13 @@ export function PresetBrowser({
               onClick={handleImportTextures}
               className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
             >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="mr-1 inline-block h-3 w-3">
+                <path
+                  fillRule="evenodd"
+                  d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
               {t('importedTextures.importTextures')}
             </button>
             {importedTextures.length > 0 && (

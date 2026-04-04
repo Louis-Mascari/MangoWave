@@ -55,6 +55,8 @@
   "toasts": {
     "autopilotOn": "자동 전환 켜짐",
     "autopilotOff": "자동 전환 꺼짐",
+    "renderingPaused": "Rendering paused",
+    "renderingResumed": "Rendering resumed",
     "addedToFavorites": "즐겨찾기에 추가됨",
     "removedFromFavorites": "즐겨찾기에서 제거됨",
     "presetBlocked": "프리셋 차단됨",
@@ -116,6 +118,8 @@
     "removeFromFavorites": "즐겨찾기에서 제거 (S)",
     "toggleAutopilot": "자동 전환 켜기/끄기 (A)",
     "toggleFullscreen": "전체 화면 전환 (F)",
+    "togglePause": "Pause rendering (V)",
+    "resumeRendering": "Resume rendering (V)",
     "exitFS": "전체 화면 종료"
   },
   "mobile": {

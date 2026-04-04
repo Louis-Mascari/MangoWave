@@ -109,6 +109,7 @@
     "toggleAutopilot": "Alihkan autopilot",
     "toggleFavorite": "Alihkan favorit",
     "toggleBlock": "Alihkan blokir",
+    "togglePause": "Pause / resume rendering",
     "toggleQueue": "Alihkan antrean (file lokal)",
     "playPause": "Putar / jeda",
     "previousTrack": "Lagu sebelumnya",

@@ -55,6 +55,8 @@
   "toasts": {
     "autopilotOn": "Автопилот включён",
     "autopilotOff": "Автопилот выключен",
+    "renderingPaused": "Rendering paused",
+    "renderingResumed": "Rendering resumed",
     "addedToFavorites": "Добавлено в избранное",
     "removedFromFavorites": "Удалено из избранного",
     "presetBlocked": "Пресет заблокирован",
@@ -116,6 +118,8 @@
     "removeFromFavorites": "Из избранного (S)",
     "toggleAutopilot": "Автопилот (A)",
     "toggleFullscreen": "Полный экран (F)",
+    "togglePause": "Pause rendering (V)",
+    "resumeRendering": "Resume rendering (V)",
     "exitFS": "Выйти"
   },
   "mobile": {

@@ -134,6 +134,7 @@ function MainApp() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [webglContextLost, setWebglContextLost] = useState(false);
   const [presetsLoading, setPresetsLoading] = useState(true);
+  const [renderPaused, setRenderPaused] = useState(false);
   const brightness = useSettingsStore((s) => s.brightness);
   const silenceCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const setOnboardingShown = useSettingsStore((s) => s.setOnboardingShown);
@@ -311,6 +312,27 @@ function MainApp() {
       );
   }, [autopilot.enabled, setAutopilotEnabled]);
 
+  const handleTogglePause = useCallback(() => {
+    const renderer = rendererRef.current;
+    if (!renderer) return;
+    setRenderPaused((prev) => {
+      const next = !prev;
+      if (next) {
+        renderer.stop();
+      } else {
+        renderer.start();
+      }
+      useToastStore
+        .getState()
+        .show(
+          next
+            ? i18n.t('toasts.renderingPaused', { ns: 'messages' })
+            : i18n.t('toasts.renderingResumed', { ns: 'messages' }),
+        );
+      return next;
+    });
+  }, []);
+
   const handleTogglePanel = useCallback((panel: PanelView) => {
     setActivePanel((current) => (current === panel ? 'none' : panel));
   }, []);
@@ -400,6 +422,7 @@ function MainApp() {
     onToggleAutopilot: handleToggleAutopilot,
     onToggleFavorite: handleToggleFavorite,
     onToggleBlock: handleToggleBlock,
+    onTogglePause: handleTogglePause,
     onToggleQueue: handleToggleQueue,
     onPlayPause: handlePlayPause,
     onNextTrack: handleNextTrack,
@@ -442,6 +465,7 @@ function MainApp() {
             onPresetsLoaded={handlePresetsLoaded}
             onToggleFullscreen={handleToggleFullscreen}
             onContextLost={handleWebGLContextLost}
+            renderPaused={renderPaused}
           />
           {brightness < 1 && (
             <div
@@ -515,6 +539,8 @@ function MainApp() {
             onPauseIdle={pausePlaybackIdle}
             onResumeIdle={resumePlaybackIdle}
             presetsLoading={presetsLoading}
+            renderPaused={renderPaused}
+            onTogglePause={handleTogglePause}
           />
           <PlaybackPanel
             adapter={playbackAdapter}

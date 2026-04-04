@@ -8,6 +8,7 @@ interface KeyboardHandlers {
   onToggleAutopilot: () => void;
   onToggleFavorite: () => void;
   onToggleBlock: () => void;
+  onTogglePause: () => void;
   onToggleQueue: () => void;
   onPlayPause?: () => void;
   onNextTrack?: () => void;
@@ -65,6 +66,10 @@ export function useKeyboardShortcuts(handlers: KeyboardHandlers) {
         case 'b':
         case 'B':
           handlers.onToggleBlock();
+          break;
+        case 'v':
+        case 'V':
+          handlers.onTogglePause();
           break;
         case 'q':
         case 'Q':

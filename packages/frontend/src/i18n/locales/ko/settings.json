@@ -109,6 +109,7 @@
     "toggleAutopilot": "자동 전환 켜기/끄기",
     "toggleFavorite": "즐겨찾기 전환",
     "toggleBlock": "차단 전환",
+    "togglePause": "Pause / resume rendering",
     "toggleQueue": "재생 목록 전환 (로컬 파일)",
     "playPause": "재생 / 일시정지",
     "previousTrack": "이전 트랙",

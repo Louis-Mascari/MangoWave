@@ -109,6 +109,7 @@
     "toggleAutopilot": "ऑटोपायलट टॉगल",
     "toggleFavorite": "फ़ेवरिट टॉगल",
     "toggleBlock": "ब्लॉक टॉगल",
+    "togglePause": "Pause / resume rendering",
     "toggleQueue": "क़तार टॉगल (लोकल फ़ाइलें)",
     "playPause": "चलाओ / रोको",
     "previousTrack": "पिछला ट्रैक",

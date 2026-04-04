@@ -55,6 +55,8 @@
   "toasts": {
     "autopilotOn": "オートパイロット オン",
     "autopilotOff": "オートパイロット オフ",
+    "renderingPaused": "Rendering paused",
+    "renderingResumed": "Rendering resumed",
     "addedToFavorites": "お気に入りに追加しました",
     "removedFromFavorites": "お気に入りから削除しました",
     "presetBlocked": "プリセットをブロックしました",
@@ -116,6 +118,8 @@
     "removeFromFavorites": "お気に入りから削除 (S)",
     "toggleAutopilot": "オートパイロット切り替え (A)",
     "toggleFullscreen": "フルスクリーン切り替え (F)",
+    "togglePause": "Pause rendering (V)",
+    "resumeRendering": "Resume rendering (V)",
     "exitFS": "FS終了"
   },
   "mobile": {

@@ -34,6 +34,8 @@ interface ControlBarProps {
   onPauseIdle: () => void;
   onResumeIdle: () => void;
   presetsLoading?: boolean;
+  renderPaused?: boolean;
+  onTogglePause?: () => void;
 }
 
 export function ControlBar(props: ControlBarProps) {
@@ -94,6 +96,8 @@ function DesktopControlBar({
   onPauseIdle,
   onResumeIdle,
   presetsLoading,
+  renderPaused,
+  onTogglePause,
 }: ControlBarProps) {
   const { t } = useTranslation('messages');
   const { t: tc } = useTranslation('common');
@@ -253,6 +257,16 @@ function DesktopControlBar({
           <BarButton onClick={() => onTogglePanel('settings')} active={activePanel === 'settings'}>
             {tc('settings')}
           </BarButton>
+          {onTogglePause && (
+            <BarButton
+              onClick={onTogglePause}
+              active={renderPaused}
+              title={renderPaused ? t('controlBar.resumeRendering') : t('controlBar.togglePause')}
+              hotkey="V"
+            >
+              {tc('pause')}
+            </BarButton>
+          )}
           <BarButton
             onClick={onToggleFullscreen}
             active={isFullscreen}

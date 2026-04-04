@@ -55,6 +55,8 @@
   "toasts": {
     "autopilotOn": "ऑटोपायलट चालू",
     "autopilotOff": "ऑटोपायलट बंद",
+    "renderingPaused": "Rendering paused",
+    "renderingResumed": "Rendering resumed",
     "addedToFavorites": "फ़ेवरिट में जोड़ा गया",
     "removedFromFavorites": "फ़ेवरिट से हटाया गया",
     "presetBlocked": "प्रीसेट ब्लॉक किया",
@@ -116,6 +118,8 @@
     "removeFromFavorites": "फ़ेवरिट से हटाओ (S)",
     "toggleAutopilot": "ऑटोपायलट टॉगल (A)",
     "toggleFullscreen": "फ़ुलस्क्रीन टॉगल (F)",
+    "togglePause": "Pause rendering (V)",
+    "resumeRendering": "Resume rendering (V)",
     "exitFS": "FS बाहर"
   },
   "mobile": {

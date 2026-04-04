@@ -55,6 +55,8 @@
   "toasts": {
     "autopilotOn": "Autopilot activado",
     "autopilotOff": "Autopilot desactivado",
+    "renderingPaused": "Rendering paused",
+    "renderingResumed": "Rendering resumed",
     "addedToFavorites": "Agregado a favoritos",
     "removedFromFavorites": "Eliminado de favoritos",
     "presetBlocked": "Preset bloqueado",
@@ -116,6 +118,8 @@
     "removeFromFavorites": "Eliminar de favoritos (S)",
     "toggleAutopilot": "Alternar autopilot (A)",
     "toggleFullscreen": "Alternar pantalla completa (F)",
+    "togglePause": "Pause rendering (V)",
+    "resumeRendering": "Resume rendering (V)",
     "exitFS": "Salir de PC"
   },
   "mobile": {

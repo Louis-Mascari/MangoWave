@@ -109,6 +109,7 @@
     "toggleAutopilot": "Автопилот",
     "toggleFavorite": "В избранное / из избранного",
     "toggleBlock": "Заблокировать / разблокировать",
+    "togglePause": "Pause / resume rendering",
     "toggleQueue": "Очередь (локальные файлы)",
     "playPause": "Воспроизведение / пауза",
     "previousTrack": "Предыдущий трек",

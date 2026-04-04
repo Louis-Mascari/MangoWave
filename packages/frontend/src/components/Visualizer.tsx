@@ -15,6 +15,7 @@ interface VisualizerProps {
   onPresetsLoaded: (presets: string[], packMap: Map<string, string>) => void;
   onToggleFullscreen: () => void;
   onContextLost: () => void;
+  renderPaused?: boolean;
 }
 
 export function Visualizer({
@@ -24,6 +25,7 @@ export function Visualizer({
   onPresetsLoaded,
   onToggleFullscreen,
   onContextLost,
+  renderPaused,
 }: VisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const performance = useSettingsStore((s) => s.performance);
@@ -214,7 +216,8 @@ export function Visualizer({
     audioEngine.setFftSize(audio.fftSize);
   }, [audioEngine, audio.fftSize]);
 
-  // Auto-pause rendering when the tab is hidden to save GPU
+  // Auto-pause rendering when the tab is hidden to save GPU.
+  // If the user manually paused (renderPaused), don't auto-resume on tab focus.
   useEffect(() => {
     const renderer = rendererRef.current;
     if (!renderer) return;
@@ -222,14 +225,14 @@ export function Visualizer({
     const handleVisibilityChange = () => {
       if (document.hidden) {
         renderer.stop();
-      } else {
+      } else if (!renderPaused) {
         renderer.start();
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [rendererRef]);
+  }, [rendererRef, renderPaused]);
 
   // Sync EQ settings to audio engine
   useEffect(() => {

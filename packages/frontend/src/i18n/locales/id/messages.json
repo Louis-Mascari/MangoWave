@@ -55,6 +55,8 @@
   "toasts": {
     "autopilotOn": "Autopilot aktif",
     "autopilotOff": "Autopilot nonaktif",
+    "renderingPaused": "Rendering paused",
+    "renderingResumed": "Rendering resumed",
     "addedToFavorites": "Ditambahkan ke favorit",
     "removedFromFavorites": "Dihapus dari favorit",
     "presetBlocked": "Preset diblokir",
@@ -116,6 +118,8 @@
     "removeFromFavorites": "Hapus dari favorit (S)",
     "toggleAutopilot": "Alihkan autopilot (A)",
     "toggleFullscreen": "Alihkan layar penuh (F)",
+    "togglePause": "Pause rendering (V)",
+    "resumeRendering": "Resume rendering (V)",
     "exitFS": "Keluar"
   },
   "mobile": {

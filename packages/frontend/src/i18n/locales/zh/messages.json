@@ -55,6 +55,8 @@
   "toasts": {
     "autopilotOn": "自动播放已开启",
     "autopilotOff": "自动播放已关闭",
+    "renderingPaused": "Rendering paused",
+    "renderingResumed": "Rendering resumed",
     "addedToFavorites": "已添加到收藏",
     "removedFromFavorites": "已从收藏中移除",
     "presetBlocked": "预设已屏蔽",
@@ -116,6 +118,8 @@
     "removeFromFavorites": "从收藏中移除 (S)",
     "toggleAutopilot": "切换自动播放 (A)",
     "toggleFullscreen": "切换全屏 (F)",
+    "togglePause": "Pause rendering (V)",
+    "resumeRendering": "Resume rendering (V)",
     "exitFS": "退出全屏"
   },
   "mobile": {

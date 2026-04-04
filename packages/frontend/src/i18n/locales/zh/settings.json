@@ -109,6 +109,7 @@
     "toggleAutopilot": "切换自动播放",
     "toggleFavorite": "切换收藏",
     "toggleBlock": "切换屏蔽",
+    "togglePause": "Pause / resume rendering",
     "toggleQueue": "切换队列（本地文件）",
     "playPause": "播放 / 暂停",
     "previousTrack": "上一首",

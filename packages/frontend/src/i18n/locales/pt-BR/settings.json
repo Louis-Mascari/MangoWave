@@ -109,6 +109,7 @@
     "toggleAutopilot": "Alternar piloto automático",
     "toggleFavorite": "Alternar favorito",
     "toggleBlock": "Alternar bloqueio",
+    "togglePause": "Pause / resume rendering",
     "toggleQueue": "Alternar fila (arquivos locais)",
     "playPause": "Reproduzir / pausar",
     "previousTrack": "Faixa anterior",

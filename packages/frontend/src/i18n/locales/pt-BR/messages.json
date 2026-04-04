@@ -55,6 +55,8 @@
   "toasts": {
     "autopilotOn": "Piloto automático ligado",
     "autopilotOff": "Piloto automático desligado",
+    "renderingPaused": "Rendering paused",
+    "renderingResumed": "Rendering resumed",
     "addedToFavorites": "Adicionado aos favoritos",
     "removedFromFavorites": "Removido dos favoritos",
     "presetBlocked": "Preset bloqueado",
@@ -116,6 +118,8 @@
     "removeFromFavorites": "Remover dos favoritos (S)",
     "toggleAutopilot": "Alternar piloto automático (A)",
     "toggleFullscreen": "Alternar tela cheia (F)",
+    "togglePause": "Pause rendering (V)",
+    "resumeRendering": "Resume rendering (V)",
     "exitFS": "Sair TC"
   },
   "mobile": {

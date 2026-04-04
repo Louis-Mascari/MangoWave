@@ -109,6 +109,7 @@
     "toggleAutopilot": "Toggle autopilot",
     "toggleFavorite": "Toggle favorite",
     "toggleBlock": "Toggle block",
+    "togglePause": "Pause / resume rendering",
     "toggleQueue": "Toggle queue (local files)",
     "playPause": "Play / pause",
     "previousTrack": "Previous track",

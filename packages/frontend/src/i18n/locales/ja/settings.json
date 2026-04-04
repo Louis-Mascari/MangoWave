@@ -109,6 +109,7 @@
     "toggleAutopilot": "オートパイロット切り替え",
     "toggleFavorite": "お気に入り切り替え",
     "toggleBlock": "ブロック切り替え",
+    "togglePause": "Pause / resume rendering",
     "toggleQueue": "キュー切り替え（ローカルファイル）",
     "playPause": "再生 / 一時停止",
     "previousTrack": "前のトラック",

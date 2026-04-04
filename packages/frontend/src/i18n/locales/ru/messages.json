@@ -19,6 +19,8 @@
     "noAudioUnknown": "На Windows и ChromeOS все режимы демонстрации поддерживают звук. На macOS 14.2+ в Chrome поддерживается захват звука с экрана и окна. На Linux только демонстрация вкладки поддерживает звук.",
     "webgl2NotSupported": "WebGL 2 не поддерживается",
     "webgl2NotSupportedDesc": "MangoWave требует WebGL 2 для рендеринга визуализаций. Попробуйте современный браузер: Chrome, Firefox или Edge.",
+    "webgl2GpuCrash": "WebGL 2 Temporarily Unavailable",
+    "webgl2GpuCrashDesc": "Your browser's GPU process may need to recover. Try closing other tabs or restarting your browser.",
     "webglContextLost": "Визуализатор потерял графический контекст",
     "webglContextLostDesc": "Графическая система устройства была прервана. Это может произойти при высокой нагрузке, когда GPU используется другими приложениями или изменилась конфигурация дисплея. Перезагрузка страницы восстановит визуализатор.",
     "renderingError": "Произошла ошибка рендеринга, возможно, связанная с WebGL или Web Audio.",

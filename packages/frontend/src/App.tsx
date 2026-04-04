@@ -38,7 +38,7 @@ import { usePresetHistoryStore } from './store/usePresetHistoryStore.ts';
 import { useToastStore } from './store/useToastStore.ts';
 import { PlaybackPanel } from './components/PlaybackPanel.tsx';
 import { MediaPlaylist } from './components/MediaPlaylist.tsx';
-import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
+import { isWebGL2Supported, isLikelyGpuCrash } from './engine/isWebGL2Supported.ts';
 import { isMobileDevice } from './utils/isMobileDevice.ts';
 import {
   exitFullscreen,
@@ -84,6 +84,7 @@ function App() {
 
 function MainApp() {
   const webgl2 = useMemo(() => isWebGL2Supported(), []);
+  const gpuCrash = useMemo(() => !webgl2 && isLikelyGpuCrash(), [webgl2]);
   useUnlockCheck();
   useSpotifyAuth();
   useSettingsSync();
@@ -401,11 +402,23 @@ function MainApp() {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-black font-sans text-white">
         <h1 className="mb-2 text-3xl font-bold text-red-500">
-          {i18n.t('errors.webgl2NotSupported', { ns: 'messages' })}
+          {gpuCrash
+            ? i18n.t('errors.webgl2GpuCrash', { ns: 'messages' })
+            : i18n.t('errors.webgl2NotSupported', { ns: 'messages' })}
         </h1>
         <p className="max-w-md text-center opacity-60">
-          {i18n.t('errors.webgl2NotSupportedDesc', { ns: 'messages' })}
+          {gpuCrash
+            ? i18n.t('errors.webgl2GpuCrashDesc', { ns: 'messages' })
+            : i18n.t('errors.webgl2NotSupportedDesc', { ns: 'messages' })}
         </p>
+        {gpuCrash && (
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-6 cursor-pointer rounded-lg border-none bg-orange-500 px-8 py-3 text-lg font-bold text-white hover:bg-orange-400"
+          >
+            {i18n.t('reloadPage', { ns: 'common' })}
+          </button>
+        )}
       </div>
     );
   }

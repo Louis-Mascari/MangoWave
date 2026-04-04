@@ -214,6 +214,23 @@ export function Visualizer({
     audioEngine.setFftSize(audio.fftSize);
   }, [audioEngine, audio.fftSize]);
 
+  // Auto-pause rendering when the tab is hidden to save GPU
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    if (!renderer) return;
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        renderer.stop();
+      } else {
+        renderer.start();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [rendererRef]);
+
   // Sync EQ settings to audio engine
   useEffect(() => {
     audioEngine.setPreAmpGain(eq.preAmpGain);

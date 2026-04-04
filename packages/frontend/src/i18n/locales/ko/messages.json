@@ -19,6 +19,8 @@
     "noAudioUnknown": "Windows와 ChromeOS에서는 모든 공유 모드가 오디오를 지원합니다. macOS 14.2 이상에서는 Chrome에서 화면 및 창 공유가 오디오를 지원합니다. Linux에서는 탭 공유만 오디오를 지원합니다.",
     "webgl2NotSupported": "WebGL 2 미지원",
     "webgl2NotSupportedDesc": "MangoWave는 시각화 렌더링에 WebGL 2가 필요합니다. Chrome, Firefox 또는 Edge 등의 최신 브라우저를 사용해 주세요.",
+    "webgl2GpuCrash": "WebGL 2 Temporarily Unavailable",
+    "webgl2GpuCrashDesc": "Your browser's GPU process may need to recover. Try closing other tabs or restarting your browser.",
     "webglContextLost": "비주얼라이저 그래픽 컨텍스트 손실",
     "webglContextLostDesc": "기기의 그래픽 시스템이 중단되었습니다. 기기에 부하가 많거나, GPU를 다른 애플리케이션과 공유하고 있거나, 디스플레이 설정이 변경되었을 때 발생할 수 있습니다. 페이지를 새로고침하면 비주얼라이저가 복원됩니다.",
     "renderingError": "렌더링 오류가 발생했습니다. WebGL 또는 Web Audio 관련 문제일 수 있습니다.",

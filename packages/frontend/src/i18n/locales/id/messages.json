@@ -19,6 +19,8 @@
     "noAudioUnknown": "Di Windows dan ChromeOS, semua mode berbagi mendukung audio. Di macOS 14.2+, berbagi layar dan jendela mendukung audio di Chrome. Di Linux, hanya berbagi tab yang mendukung audio.",
     "webgl2NotSupported": "WebGL 2 Tidak Didukung",
     "webgl2NotSupportedDesc": "MangoWave memerlukan WebGL 2 untuk merender visualisasi. Silakan coba browser modern seperti Chrome, Firefox, atau Edge.",
+    "webgl2GpuCrash": "WebGL 2 Temporarily Unavailable",
+    "webgl2GpuCrashDesc": "Your browser's GPU process may need to recover. Try closing other tabs or restarting your browser.",
     "webglContextLost": "Visualizer Kehilangan Konteks Grafis",
     "webglContextLostDesc": "Sistem grafis perangkatmu terputus. Ini bisa terjadi saat perangkat dalam beban berat, GPU digunakan bersama aplikasi lain, atau konfigurasi layar berubah. Memuat ulang halaman akan memulihkan visualizer.",
     "renderingError": "Terjadi kesalahan rendering, kemungkinan masalah WebGL atau Web Audio.",

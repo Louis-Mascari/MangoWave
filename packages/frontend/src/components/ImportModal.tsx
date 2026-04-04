@@ -364,7 +364,24 @@ function ImportModalInner() {
         className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-lg bg-gray-900/95 p-5 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="mb-1 text-sm font-semibold text-white">{title}</h3>
+        <div className="mb-1 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-white">{title}</h3>
+          {phase !== 'processing' && (
+            <button
+              onClick={close}
+              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border-none bg-white/10 text-sm text-white/70 hover:bg-white/20"
+              aria-label={tc('close')}
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
+                <path
+                  fillRule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
 
         {/* Select phase */}
         {phase === 'select' && (

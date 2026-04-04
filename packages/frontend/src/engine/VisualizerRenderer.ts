@@ -283,6 +283,8 @@ export class VisualizerRenderer {
     if (this.animationFrameId !== null) return;
     const now = performance.now();
     this.lastFrameTime = now;
+    // Reset lastRenderTime so the first frame after resume doesn't get a
+    // huge delta (which would cause butterchurn to skip-forward visuals).
     this.lastRenderTime = now;
     this.render();
   }

@@ -37,6 +37,12 @@ function getWorker(): Worker {
     };
     worker.onerror = (e) => {
       console.error('Conversion worker error:', e);
+      // Reject all pending promises — a fatal crash (WASM OOM, etc.) won't post a result
+      for (const [id, p] of pending) {
+        p.reject(new Error('Conversion worker crashed'));
+        pending.delete(id);
+      }
+      worker = null; // Force fresh worker on next call
     };
   }
   return worker;

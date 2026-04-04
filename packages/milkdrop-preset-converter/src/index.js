@@ -1117,68 +1117,87 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
 
   // Fix modulo operator: GLSL `%` requires integer operands, but hlslparser's int→float
   // conversion may have changed `int n` to `float n`. Replace `LHS % RHS` with
-  // `mod(float(LHS), float(RHS))`. Scan for `%` and extract operands properly.
+  // `mod(float(LHS), float(RHS))`. Collect all % positions, extract operands from original
+  // string, then replace right-to-left so earlier positions stay valid.
   {
-    let result = '';
-    let i = 0;
-    while (i < body.length) {
-      if (body[i] === '%') {
-        // Extract RHS: skip whitespace, then grab word
-        let ri = i + 1;
-        while (ri < body.length && /\s/.test(body[ri])) ri++;
-        let rhs = '';
-        while (ri < body.length && /\w/.test(body[ri])) {
-          rhs += body[ri];
-          ri++;
-        }
+    const replacements = []; // { lhsStart, rhsEnd, replacement }
+    for (let i = 0; i < body.length; i++) {
+      if (body[i] !== '%') continue;
 
-        // Extract LHS: scan backwards from before %, skip whitespace
-        let li = i - 1;
-        while (li >= 0 && /\s/.test(body[li])) li--;
-        let lhs = '';
-        if (li >= 0 && body[li] === ')') {
-          // Balanced paren scan backwards
-          let depth = 1;
-          let lstart = li - 1;
-          while (lstart >= 0 && depth > 0) {
-            if (body[lstart] === ')') depth++;
-            else if (body[lstart] === '(') depth--;
-            lstart--;
-          }
-          lstart++; // points to the opening (
-          // Include preceding word (function/cast name like `int`, `float`, `ivec2`)
-          // so `int(expr) % 2` captures `int(expr)` not just `(expr)`
-          let fnStart = lstart - 1;
-          while (fnStart >= 0 && /\s/.test(body[fnStart])) fnStart--;
-          if (fnStart >= 0 && /\w/.test(body[fnStart])) {
-            let ws = fnStart + 1;
-            while (fnStart > 0 && /\w/.test(body[fnStart - 1])) fnStart--;
-            lhs = body.substring(fnStart, li + 1);
-            result = result.substring(0, result.length - (i - 1 - li) - (li + 1 - fnStart));
-          } else {
-            lhs = body.substring(lstart, li + 1);
-            result = result.substring(0, result.length - (i - 1 - li) - (li + 1 - lstart));
-          }
-        } else if (li >= 0 && /\w/.test(body[li])) {
-          let lstart = li;
-          while (lstart > 0 && /\w/.test(body[lstart - 1])) lstart--;
-          lhs = body.substring(lstart, li + 1);
-          result = result.substring(0, result.length - (i - 1 - li) - (li + 1 - lstart));
+      // Extract RHS: skip whitespace, grab word or balanced parens
+      let ri = i + 1;
+      while (ri < body.length && /\s/.test(body[ri])) ri++;
+      let rhsStart = ri;
+      let rhsEnd = ri;
+      if (ri < body.length && body[ri] === '(') {
+        let depth = 1;
+        rhsEnd = ri + 1;
+        while (rhsEnd < body.length && depth > 0) {
+          if (body[rhsEnd] === '(') depth++;
+          else if (body[rhsEnd] === ')') depth--;
+          rhsEnd++;
         }
-
-        if (lhs && rhs) {
-          result += 'mod(float(' + lhs + '), float(' + rhs + '))';
-          i = ri;
-        } else {
-          result += body[i];
-          i++;
-        }
+        // Include preceding function/cast name: int(...), float(...)
+        let fnStart = rhsStart - 1;
+        while (fnStart >= ri && /\s/.test(body[fnStart])) fnStart--;
+        // (no preceding word possible here — rhsStart IS after whitespace)
       } else {
-        result += body[i];
-        i++;
+        while (rhsEnd < body.length && /\w/.test(body[rhsEnd])) rhsEnd++;
+        // Check if word is followed by (...) — e.g. `int(x)`
+        if (rhsEnd < body.length && body[rhsEnd] === '(') {
+          let depth = 1;
+          rhsEnd++;
+          while (rhsEnd < body.length && depth > 0) {
+            if (body[rhsEnd] === '(') depth++;
+            else if (body[rhsEnd] === ')') depth--;
+            rhsEnd++;
+          }
+        }
+      }
+
+      // Extract LHS: scan backwards from before %, skip whitespace
+      let li = i - 1;
+      while (li >= 0 && /\s/.test(body[li])) li--;
+      let lhsStart = -1;
+      if (li >= 0 && body[li] === ')') {
+        // Balanced paren scan backwards
+        let depth = 1;
+        let lstart = li - 1;
+        while (lstart >= 0 && depth > 0) {
+          if (body[lstart] === ')') depth++;
+          else if (body[lstart] === '(') depth--;
+          lstart--;
+        }
+        lstart++; // points to the opening (
+        lhsStart = lstart;
+        // Include preceding word (function/cast name like `int`, `float`, `ivec2`)
+        let fnStart = lstart - 1;
+        while (fnStart >= 0 && /\s/.test(body[fnStart])) fnStart--;
+        if (fnStart >= 0 && /\w/.test(body[fnStart])) {
+          while (fnStart > 0 && /\w/.test(body[fnStart - 1])) fnStart--;
+          lhsStart = fnStart;
+        }
+      } else if (li >= 0 && /\w/.test(body[li])) {
+        let lstart = li;
+        while (lstart > 0 && /\w/.test(body[lstart - 1])) lstart--;
+        lhsStart = lstart;
+      }
+
+      const lhs = lhsStart >= 0 ? body.substring(lhsStart, li + 1) : '';
+      const rhs = body.substring(rhsStart, rhsEnd);
+      if (lhs && rhs) {
+        replacements.push({
+          lhsStart,
+          rhsEnd,
+          replacement: 'mod(float(' + lhs + '), float(' + rhs + '))',
+        });
       }
     }
-    body = result;
+    // Apply right-to-left so positions don't shift
+    for (let r = replacements.length - 1; r >= 0; r--) {
+      const { lhsStart, rhsEnd, replacement } = replacements[r];
+      body = body.substring(0, lhsStart) + replacement + body.substring(rhsEnd);
+    }
   }
 
   // Promote bare integer literals to float in expressions. hlslparser's int→float conversion

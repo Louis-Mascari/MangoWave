@@ -176,6 +176,11 @@ export default class CompShader {
 
     this.userTextures = ShaderUtils.getUserSamplers(fragShaderHeaderText);
 
+    /* [MW-PATCH: clean up previous program to avoid GPU memory leak] */
+    if (this.shaderProgram) {
+      this.gl.deleteProgram(this.shaderProgram);
+    }
+
     this.shaderProgram = this.gl.createProgram();
 
     const vertShader = this.gl.createShader(this.gl.VERTEX_SHADER);
@@ -354,6 +359,12 @@ export default class CompShader {
     this.gl.linkProgram(this.shaderProgram);
 
     const linkOk = _mwCheckProgram(this.gl, this.shaderProgram, 'Comp program');
+
+    /* Detach and delete shaders — program retains compiled code after linking */
+    this.gl.detachShader(this.shaderProgram, vertShader);
+    this.gl.detachShader(this.shaderProgram, fragShader);
+    this.gl.deleteShader(vertShader);
+    this.gl.deleteShader(fragShader);
 
     if ((!fragOk || !linkOk) && shaderText.length > 0 && !_fallback) {
       console.warn('[butterchurn] Comp shader failed, falling back to default');

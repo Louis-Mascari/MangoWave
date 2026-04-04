@@ -64,42 +64,46 @@ const PACK_DEFINITIONS = {
   Ambient: {
     description: 'Smooth, time-driven animations — calm and meditative',
     signals:
-      'Slow, gentle motion (small zoom/rot values). Mathematical patterns that evolve smoothly ' +
-      'over time. Low or modest audio reactivity — audio may modulate slightly but doesn\'t ' +
-      'dominate. Simple or no shaders. Calm color palettes. Think: lava lamp, slow kaleidoscope, ' +
-      'gentle flowing patterns.',
+      'Slow, gentle motion. Mathematical patterns evolving smoothly over time. Audio may modulate ' +
+      'slightly but is NOT the dominant driver. Simple or no shaders. Calm aesthetic. ' +
+      'Think: lava lamp, slow kaleidoscope, reaction diffusion, gentle flowing. ' +
+      'This is also the DEFAULT/FALLBACK — if a preset doesn\'t strongly fit elsewhere, it\'s Ambient.',
   },
   Reactive: {
     description: 'Responds to beats — audio-driven motion and color',
     signals:
-      'Heavy use of audio variables (bass, mid, treb, bass_att, mid_att, treb_att, vol) as ' +
-      'primary drivers of visual change. Conditional logic based on audio levels. Motion, color, ' +
-      'or shape changes are clearly tied to audio input. The visual experience is fundamentally ' +
-      'different with vs without audio. Think: equalizer-driven, beat-pulsing, audio-responsive geometry.',
+      'Audio variables (bass/mid/treb/etc.) are the PRIMARY driver of visual change. The visual ' +
+      'experience is FUNDAMENTALLY different with vs without music. Heavy audio variable usage in ' +
+      'equations driving motion, color, size, or intensity. Think: beat-pulsing geometry, bass-driven ' +
+      'explosions, audio-responsive patterns. NOTE: Most presets reference audio somewhat — that alone ' +
+      'does NOT make them Reactive. Audio must DOMINATE. 10+ audio refs driving core motion/color = ' +
+      'Reactive. 3 audio refs as minor modulation = probably something else.',
   },
   Psychedelic: {
     description: 'Intense shaders, warping, and visual complexity',
     signals:
-      'Complex warp/comp shaders. High warp values. Intense visual effects: solarize, invert, ' +
-      'color cycling, heavy distortion. Aggressive motion (fast zoom, rotation). Blur and noise ' +
-      'texture sampling. Fractal-like or kaleidoscopic patterns. Visual overload / sensory intensity. ' +
-      'Think: acid trip, deep fractal zoom, intense color storms.',
+      'Complex warp/comp shaders. High warp values. Intense effects: solarize, invert, heavy color ' +
+      'cycling, aggressive distortion. Fractal patterns, kaleidoscopic patterns with intensity. ' +
+      'Visual overload / sensory intensity. Think: acid trip, deep fractal zoom, intense color storms, ' +
+      'heavy shader processing.',
   },
   Waveform: {
     description: 'Spectrum bars, oscilloscope lines, and audio shapes',
     signals:
-      'The visual IS the audio waveform or spectrum. Motion vectors visible (mv_a > 0 = spectrum ' +
-      'grid). High wave alpha (wave_a > 0.8 = prominent oscilloscope line). Multiple custom waves ' +
-      'drawing audio-driven shapes. The preset\'s primary visual identity is "showing you the sound". ' +
-      'Think: oscilloscope, spectrum analyzer, audio-shaped geometry.',
+      'STRICT: The waveform, spectrum, or audio-driven geometric shape IS the primary visual element ' +
+      '— not just an accent. Spectrum analyzer (mv_a > 0 as main visual), oscilloscope (high wave_a ' +
+      'as dominant element), or custom waves drawing audio shapes AS the main visual. CRITICAL: A preset ' +
+      'with visible waves that is primarily about something else (fractals, tunnels, particles, bouncing ' +
+      'objects) is NOT Waveform. This is the SMALLEST and most selective pack. When in doubt, NOT Waveform.',
   },
   Ethereal: {
     description: 'Trails, echo layers, and soft glowing persistence',
     signals:
-      'High decay (> 0.97 = long visual trails). Echo layers (echo_alpha > 0 = ghost images). ' +
-      'Blur effects creating soft, dreamy visuals. Layered, translucent imagery. The aesthetic is ' +
-      'ghostly, misty, or otherworldly — previous frames linger and blend. Think: ghost trails, ' +
-      'echo chambers, foggy dreamscapes, soft-glow persistence.',
+      'High decay (>0.97) creating long visual trails. Echo layers (echo_alpha > 0) creating ghost ' +
+      'images. The aesthetic is ghostly, misty, dreamy — previous frames linger and blend visibly. ' +
+      'Soft-glow, translucent layering. Think: ghost trails, echo chambers, foggy dreamscapes. ' +
+      'IMPORTANT: Requires VISIBLE persistence/trail/echo as the defining aesthetic. High decay alone ' +
+      'with intense visuals = Psychedelic, not Ethereal. The overall feel must be dreamy/ghostly/soft.',
   },
 };
 
@@ -241,12 +245,12 @@ Classify each preset into exactly ONE of these packs:
     system += `**${pack}**: ${def.description}\n  Classification signals: ${def.signals}\n\n`;
   }
 
-  system += `IMPORTANT GUIDELINES:
-- The preset NAME is often very descriptive — use it as a strong signal (e.g., "Rovastar - Waveform Dreams" → likely Waveform).
-- Focus on what DOMINATES the visual experience, not just what's present. Most presets reference audio somewhat — that alone doesn't make them Reactive.
-- Reactive means audio is the PRIMARY visual driver — the preset looks fundamentally different with vs without music.
-- Ambient is for presets that are pleasant and smooth but not dominated by any specific category signal.
-- When in doubt between two categories, consider: "what would a user browsing by category expect to find here?"
+  system += `DISAMBIGUATION RULES:
+1. Preset NAME is a strong signal — "acid", "fractal", "psychedelic", "trippy" → Psychedelic. "Spectrum", "oscilloscope", "sine wave" → Waveform. "Ghost", "fog", "trail", "echo" → Ethereal. "Gentle", "calm", "slow" → Ambient.
+2. Reactive requires audio as PRIMARY driver, not just present. 10+ audio refs in equations with audio driving core motion/color = Reactive. 3 audio refs as minor modulation = probably something else.
+3. Waveform is the MOST selective pack. Only classify as Waveform if the preset is fundamentally about displaying the audio signal as a visual shape. Custom waves that draw decorative patterns but aren't "the point" don't qualify.
+4. Ethereal vs Ambient: both can be calm, but Ethereal has visible persistence (high decay + echo/blur creating dreamy layers). Ambient is cleaner, more about smooth motion than ghostly layering.
+5. When genuinely uncertain, prefer Ambient as the safe fallback.
 
 Respond with ONLY a JSON object mapping preset names to pack names. No explanation, no markdown fences, no extra text.
 Example: {"Preset A": "Ambient", "Preset B": "Reactive"}`;

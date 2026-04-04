@@ -157,7 +157,7 @@
 
   "importedPresets": {
     "sectionTitle": "가져온 프리셋",
-    "description": "커뮤니티 MilkDrop 프리셋(.milk)과 참조하는 텍스처를 추가하세요.",
+    "description": "커뮤니티 MilkDrop 프리셋(.milk)과 참조하는 텍스처를 추가하세요. MilkDrop은 네이티브 데스크톱 애플리케이션으로 설계되었습니다. 셰이더 변환 차이로 인해 일부 프리셋은 브라우저에서 완벽하게 렌더링되지 않을 수 있습니다.",
     "emptyState": "가져온 프리셋이 없습니다. \"Import .milk\"를 사용하여 커뮤니티 MilkDrop 프리셋을 추가하세요.",
     "importMilk": ".milk 가져오기",
     "importingPresets": "프리셋 가져오는 중...",
@@ -247,7 +247,7 @@
   "importModal": {
     "titlePresets": "프리셋 가져오기",
     "titleTextures": "텍스처 가져오기",
-    "descriptionPresets": "커뮤니티 MilkDrop 프리셋(.milk 파일)을 추가하세요.\n일부 프리셋은 커스텀 텍스처가 필요합니다. 가져오기 후 누락된 텍스처가 알림됩니다.\n가져온 프리셋은 의도한 대로 렌더링되지 않을 수 있으므로 확인이 필요합니다.",
+    "descriptionPresets": "커뮤니티 MilkDrop 프리셋(.milk 파일)을 추가하세요.\nMilkDrop 프리셋은 네이티브 Windows 애플리케이션용으로 설계되었습니다. MangoWave는 이를 브라우저에서 실행할 수 있도록 변환하지만, 셰이더 처리 방식의 차이로 인해 일부 프리셋이 올바르게 렌더링되지 않을 수 있습니다. 복잡한 프리셋일수록 시각적 차이가 나타날 가능성이 높습니다.\n일부 프리셋은 커스텀 텍스처가 필요합니다. 가져오기 후 누락된 텍스처가 알림됩니다.",
     "descriptionTextures": "가져온 프리셋에서 사용하는 텍스처 이미지(JPEG, PNG 또는 WebP)를 업로드하세요.\n프리셋은 이름으로 텍스처를 참조합니다. 예를 들어 sampler_fire를 사용하는 프리셋에는 \"fire\"라는 이름의 텍스처가 필요합니다.",
     "storageNotePresets": "프리셋은 브라우저에 저장됩니다. 사이트 데이터를 삭제하면 함께 삭제되므로 원본 .milk 파일을 보관하세요.",
     "storageNoteTextures": "텍스처는 브라우저에 저장됩니다. 사이트 데이터를 삭제하면 함께 삭제되므로 원본 이미지 파일을 보관하세요.",

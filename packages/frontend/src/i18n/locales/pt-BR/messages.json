@@ -157,7 +157,7 @@
 
   "importedPresets": {
     "sectionTitle": "Presets Importados",
-    "description": "Adicione presets comunitários do MilkDrop (.milk) e as texturas que eles referenciam.",
+    "description": "Adicione presets comunitários do MilkDrop (.milk) e as texturas que eles referenciam. O MilkDrop foi projetado como um aplicativo nativo de desktop — alguns presets podem não ser renderizados perfeitamente no navegador devido a diferenças na tradução de shaders.",
     "emptyState": "Nenhum preset importado. Use \"Import .milk\" para adicionar presets comunitários do MilkDrop.",
     "importMilk": "Importar .milk",
     "importingPresets": "Importando presets...",
@@ -247,7 +247,7 @@
   "importModal": {
     "titlePresets": "Importar presets",
     "titleTextures": "Importar texturas",
-    "descriptionPresets": "Adicione presets comunitários do MilkDrop (arquivos .milk).\nAlguns presets requerem texturas personalizadas — você será notificado sobre texturas faltantes após a importação.\nPresets importados podem não renderizar exatamente como esperado e devem ser verificados.",
+    "descriptionPresets": "Adicione presets comunitários do MilkDrop (arquivos .milk).\nOs presets do MilkDrop foram projetados para um aplicativo nativo do Windows. O MangoWave os traduz para rodar no navegador, mas alguns presets podem não ser renderizados corretamente devido a diferenças no processamento de shaders. Presets mais complexos têm maior probabilidade de apresentar diferenças visuais.\nAlguns presets requerem texturas personalizadas — você será notificado sobre texturas faltantes após a importação.",
     "descriptionTextures": "Envie imagens de textura (JPEG, PNG ou WebP) usadas pelos presets importados.\nPresets referenciam texturas pelo nome — por exemplo, um preset usando sampler_fire precisa de uma textura chamada \"fire\".",
     "storageNotePresets": "Os presets são armazenados no seu navegador. Limpar os dados do site os removerá, então guarde seus arquivos .milk originais.",
     "storageNoteTextures": "As texturas são armazenadas no seu navegador. Limpar os dados do site as removerá, então guarde seus arquivos de imagem originais.",

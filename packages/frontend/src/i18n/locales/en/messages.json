@@ -166,7 +166,7 @@
 
   "importedPresets": {
     "sectionTitle": "Imported Presets",
-    "description": "Add community MilkDrop presets (.milk) and the textures they reference.",
+    "description": "Add community MilkDrop presets (.milk) and the textures they reference. MilkDrop was designed as a native desktop application — some presets may not render perfectly in the browser due to differences in shader translation.",
     "emptyState": "No imported presets. Use \"Import .milk\" to add community MilkDrop presets.",
     "importMilk": "Import .milk",
     "importingPresets": "Importing presets...",
@@ -256,7 +256,7 @@
   "importModal": {
     "titlePresets": "Import Presets",
     "titleTextures": "Import Textures",
-    "descriptionPresets": "Add community MilkDrop presets (.milk files).\nSome presets require custom textures — you'll be notified of any missing textures after import.\nImported presets may not render exactly as intended and should be verified.",
+    "descriptionPresets": "Add community MilkDrop presets (.milk files).\nMilkDrop presets were designed for a native Windows application. MangoWave translates them to run in the browser, but some presets may not render correctly due to differences in how shaders are processed. Complex presets are more likely to have visual differences.\nSome presets require custom textures — you'll be notified of any missing textures after import.",
     "descriptionTextures": "Upload texture images (JPEG, PNG, or WebP) used by imported presets.\nPresets reference textures by name — for example, a preset using sampler_fire needs a texture named \"fire\".",
     "storageNotePresets": "Presets are stored in your browser. Clearing site data will remove them, so keep your original .milk files.",
     "storageNoteTextures": "Textures are stored in your browser. Clearing site data will remove them, so keep your original image files.",

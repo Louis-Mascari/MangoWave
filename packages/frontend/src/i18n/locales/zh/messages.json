@@ -157,7 +157,7 @@
 
   "importedPresets": {
     "sectionTitle": "已导入预设",
-    "description": "添加社区 MilkDrop 预设（.milk）及其引用的纹理。",
+    "description": "添加社区 MilkDrop 预设（.milk）及其引用的纹理。MilkDrop 是为原生桌面应用程序设计的——由于着色器转换的差异，部分预设在浏览器中可能无法完美渲染。",
     "emptyState": "没有已导入的预设。使用「导入 .milk」添加社区 MilkDrop 预设。",
     "importMilk": "导入 .milk",
     "importingPresets": "正在导入预设...",
@@ -247,7 +247,7 @@
   "importModal": {
     "titlePresets": "导入预设",
     "titleTextures": "导入纹理",
-    "descriptionPresets": "添加社区 MilkDrop 预设（.milk 文件）。\n某些预设需要自定义纹理——导入后会通知您缺少哪些纹理。\n导入的预设可能无法完全按预期渲染，请自行验证。",
+    "descriptionPresets": "添加社区 MilkDrop 预设（.milk 文件）。\nMilkDrop 预设是为原生 Windows 应用程序设计的。MangoWave 将其转换为可在浏览器中运行，但由于着色器处理方式的差异，部分预设可能无法正确渲染。越复杂的预设越可能出现视觉差异。\n某些预设需要自定义纹理——导入后会通知您缺少哪些纹理。",
     "descriptionTextures": "上传导入预设使用的纹理图像（JPEG、PNG 或 WebP）。\n预设按名称引用纹理——例如，使用 sampler_fire 的预设需要名为「fire」的纹理。",
     "storageNotePresets": "预设存储在浏览器中。清除站点数据会将其删除，请保留原始 .milk 文件。",
     "storageNoteTextures": "纹理存储在浏览器中。清除站点数据会将其删除，请保留原始图像文件。",

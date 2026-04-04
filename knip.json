@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/knip@latest/schema.json",
   "ignoreBinaries": ["tsc", "prettier", "eslint"],
   "exclude": ["types"],
-  "ignore": ["scripts/**"],
+  "ignore": ["scripts/**", "infrastructure/lib/**"],
   "workspaces": {
     "packages/frontend": {
       "entry": ["e2e/**/*.spec.ts"],
@@ -12,6 +12,7 @@
     },
     "packages/butterchurn": {},
     "packages/butterchurn-presets": {},
+    "packages/milkdrop-presets": {},
     "packages/milkdrop-textures": {},
     "packages/backend": {},
     "infrastructure": {

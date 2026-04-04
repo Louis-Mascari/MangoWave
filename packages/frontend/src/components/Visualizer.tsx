@@ -84,6 +84,8 @@ export function Visualizer({
         textureRatio: performance.textureRatio,
         fxaa: performance.fxaa,
         excludedPresets,
+        // Propagate updated preset list when MilkDrop pack names finish registering
+        onPresetsRegistered: () => onPresetsLoaded(renderer.presetList, renderer.presetPackMap),
       });
 
       // Register imported preset names from persisted metadata (synchronously available).

@@ -576,9 +576,16 @@ export const useSettingsStore = create<SettingsState>()(
         if ((version ?? 0) < 10) {
           state.importedTextures = state.importedTextures ?? [];
         }
+        // v10 → v11: Add 'MilkDrop' pack to enabledPacks for existing users
+        if ((version ?? 0) < 11) {
+          const packs = (state.enabledPacks as string[]) ?? [];
+          if (packs.length > 0 && !packs.includes('MilkDrop')) {
+            state.enabledPacks = [...packs, 'MilkDrop'];
+          }
+        }
         return state as unknown as SettingsState;
       },
-      version: 10,
+      version: 11,
     },
   ),
 );

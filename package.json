@@ -7,6 +7,7 @@
     "packages/butterchurn-presets",
     "packages/hlslparser-wasm",
     "packages/milkdrop-preset-converter",
+    "packages/milkdrop-presets",
     "packages/milkdrop-textures",
     "packages/frontend",
     "packages/backend",
@@ -42,6 +43,9 @@
       "prettier --write"
     ],
     "packages/hlslparser-wasm/src/**/*.{js,ts}": [
+      "prettier --write"
+    ],
+    "packages/milkdrop-presets/src/**/*.{js,ts}": [
       "prettier --write"
     ],
     "packages/milkdrop-textures/src/**/*.{js,ts}": [

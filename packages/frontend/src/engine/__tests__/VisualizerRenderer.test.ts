@@ -17,6 +17,13 @@ vi.mock('butterchurn', () => ({
   },
 }));
 
+// Mock milkdrop-presets (empty for tests — MilkDrop presets load async)
+vi.mock('milkdrop-presets', () => ({
+  getPresets: () => ({}),
+  getPresetNames: () => [],
+  getPreset: () => undefined,
+}));
+
 // Mock butterchurn-presets (Minimal pack provides test presets; others empty)
 vi.mock('butterchurn-presets', () => ({
   presetsMinimal: {
@@ -186,8 +193,8 @@ describe('VisualizerRenderer', () => {
       renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
 
       renderer.registerImportedPresetNames(['Lazy Preset']);
-      expect(renderer.isImportedAndUnloaded('Lazy Preset')).toBe(true);
-      expect(renderer.isImportedAndUnloaded('Preset A')).toBe(false);
+      expect(renderer.isEelPresetUnloaded('Lazy Preset')).toBe(true);
+      expect(renderer.isEelPresetUnloaded('Preset A')).toBe(false);
     });
 
     it('registers a converted imported preset object', () => {
@@ -195,10 +202,10 @@ describe('VisualizerRenderer', () => {
       renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
 
       renderer.registerImportedPresetNames(['My Import']);
-      expect(renderer.isImportedAndUnloaded('My Import')).toBe(true);
+      expect(renderer.isEelPresetUnloaded('My Import')).toBe(true);
 
-      renderer.registerImportedPreset('My Import', { code: 'imported' });
-      expect(renderer.isImportedAndUnloaded('My Import')).toBe(false);
+      renderer.registerEelPreset('My Import', { code: 'imported' });
+      expect(renderer.isEelPresetUnloaded('My Import')).toBe(false);
     });
 
     it('unregisters an imported preset', () => {

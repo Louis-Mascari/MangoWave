@@ -23,6 +23,7 @@
     "i18next-browser-languagedetector": "^8.2.1",
     "idb-keyval": "^6.2.2",
     "milkdrop-preset-converter": "*",
+    "milkdrop-presets": "*",
     "milkdrop-textures": "*",
     "music-metadata": "^11.12.3",
     "posthog-js": "^1.363.3",

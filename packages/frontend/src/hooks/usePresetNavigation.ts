@@ -103,8 +103,15 @@ export function usePresetNavigation({
       blendTime: number,
       fallbackToNext?: () => void,
     ) => {
-      if (renderer.isImportedAndUnloaded(name)) {
-        const preset = await useImportedPresetsStore.getState().getConvertedPreset(name);
+      if (renderer.isEelPresetUnloaded(name)) {
+        let preset: object | null = null;
+        const pack = renderer.presetPackMap.get(name);
+        if (pack === 'Imported') {
+          preset = await useImportedPresetsStore.getState().getConvertedPreset(name);
+        } else if (pack === 'MilkDrop') {
+          const { loadMilkdropPreset } = await import('../engine/milkdropPresetsLoader.ts');
+          preset = await loadMilkdropPreset(name);
+        }
         if (!preset) {
           useToastStore
             .getState()
@@ -112,7 +119,7 @@ export function usePresetNavigation({
           fallbackToNext?.();
           return;
         }
-        renderer.registerImportedPreset(name, preset);
+        renderer.registerEelPreset(name, preset);
       }
       renderer.loadPreset(name, blendTime);
     },

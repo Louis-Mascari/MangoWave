@@ -749,8 +749,15 @@ export function PresetBrowser({
                 }}
                 className="sticky top-0 z-[1] flex cursor-pointer items-center justify-between bg-black/80 px-2 py-1 backdrop-blur-sm"
               >
-                <span className="text-xs font-semibold uppercase tracking-wider text-orange-400">
-                  {isCollapsed ? '▶' : '▼'} {packName}
+                <span className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-orange-400">
+                  <svg
+                    viewBox="0 0 10 10"
+                    fill="currentColor"
+                    className={`h-2.5 w-2.5 transition-transform duration-150 ${isCollapsed ? '' : 'rotate-90'}`}
+                  >
+                    <path d="M3 1l5 4-5 4V1z" />
+                  </svg>
+                  {packName}
                 </span>
                 <span className="flex items-center gap-1.5">
                   {packName === 'Imported' && (
@@ -1595,8 +1602,15 @@ export function PresetBrowser({
                       }}
                       className="sticky top-0 z-[1] flex cursor-pointer items-center justify-between bg-black/80 px-2 py-1 backdrop-blur-sm"
                     >
-                      <span className="text-xs font-semibold text-orange-400">
-                        {isCollapsed ? '\u25B6' : '\u25BC'} {label}
+                      <span className="flex items-center gap-1 text-xs font-semibold text-orange-400">
+                        <svg
+                          viewBox="0 0 10 10"
+                          fill="currentColor"
+                          className={`h-2.5 w-2.5 transition-transform duration-150 ${isCollapsed ? '' : 'rotate-90'}`}
+                        >
+                          <path d="M3 1l5 4-5 4V1z" />
+                        </svg>
+                        {label}
                       </span>
                       <span className="text-xs text-white/40">{countStr}</span>
                     </div>

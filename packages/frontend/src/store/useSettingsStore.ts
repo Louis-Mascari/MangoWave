@@ -116,6 +116,10 @@ export interface SettingsState {
   songInfoDisplay: 'off' | number; // 'off' or duration in seconds (hardcoded to 5)
   setSongInfoDisplay: (value: 'off' | number) => void;
 
+  // Visual
+  brightness: number; // 0.1 to 1.0 (1.0 = full brightness, no dimming)
+  setBrightness: (value: number) => void;
+
   // Transitions
   transitionTime: number; // seconds for preset blend
   setTransitionTime: (seconds: number) => void;
@@ -191,6 +195,7 @@ const IMPORTABLE_KEYS: (keyof SettingsState)[] = [
   'excludedOverrides',
   'presetNameDisplay',
   'songInfoDisplay',
+  'brightness',
   'transitionTime',
   'volume',
   'customPacks',
@@ -405,6 +410,10 @@ export const useSettingsStore = create<SettingsState>()(
       songInfoDisplay: 5,
       setSongInfoDisplay: (value) => set({ songInfoDisplay: value }),
 
+      // Visual
+      brightness: 1.0,
+      setBrightness: (value) => set({ brightness: Math.min(1, Math.max(0.1, value)) }),
+
       // Transitions
       transitionTime: 2.0,
       setTransitionTime: (seconds) => set({ transitionTime: seconds }),
@@ -596,9 +605,13 @@ export const useSettingsStore = create<SettingsState>()(
             state.enabledPacks = newPacks;
           }
         }
+        // v12 → v13: Add brightness setting
+        if ((version ?? 0) < 13) {
+          state.brightness = state.brightness ?? 1.0;
+        }
         return state as unknown as SettingsState;
       },
-      version: 12,
+      version: 13,
     },
   ),
 );

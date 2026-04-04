@@ -261,6 +261,8 @@ function RenderingTab() {
   const setMeshSize = useSettingsStore((s) => s.setMeshSize);
   const setTextureRatio = useSettingsStore((s) => s.setTextureRatio);
   const setFxaa = useSettingsStore((s) => s.setFxaa);
+  const brightness = useSettingsStore((s) => s.brightness);
+  const setBrightness = useSettingsStore((s) => s.setBrightness);
   const audio = useSettingsStore((s) => s.audio);
   const setSmoothingConstant = useSettingsStore((s) => s.setSmoothingConstant);
   const setFftSize = useSettingsStore((s) => s.setFftSize);
@@ -431,6 +433,30 @@ function RenderingTab() {
           >
             {tc('off')}
           </button>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <span className="flex items-center text-xs text-white/60">
+          {t('rendering.brightness', { value: Math.round(brightness * 100) })}
+          <Tooltip text={t('rendering.brightnessTooltip')} />
+        </span>
+        <div className="flex items-center gap-2">
+          <input
+            type="range"
+            min="0.1"
+            max="1"
+            step="0.05"
+            value={brightness}
+            onChange={(e) => setBrightness(parseFloat(e.target.value))}
+            aria-label={t('rendering.brightness', { value: Math.round(brightness * 100) })}
+            aria-valuetext={`${Math.round(brightness * 100)}%`}
+            className="range-fill flex-1"
+            style={rangeFillStyle(brightness, 0.1, 1)}
+          />
+          <span className="w-8 text-right text-xs text-white/50">
+            {Math.round(brightness * 100)}%
+          </span>
         </div>
       </div>
 

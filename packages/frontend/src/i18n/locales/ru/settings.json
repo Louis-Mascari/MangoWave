@@ -33,6 +33,8 @@
     "textureQualityTooltip": "Множитель внутреннего разрешения рендеринга. Ниже = быстрее, выше = суперсэмплинг",
     "antiAliasing": "Сглаживание",
     "antiAliasingTooltip": "Сглаживание рваных краёв через FXAA. Небольшое влияние на производительность (~2–3%)",
+    "brightness": "Visual Brightness: {{value}}%",
+    "brightnessTooltip": "Dims the visualizer. Useful in dark rooms or when you want subtle ambient visuals",
     "analysis": "Анализ",
     "audioSmoothing": "Сглаживание звука: {{value}}",
     "audioSmoothingTooltip": "Ниже = более резкая реакция на биты, выше = более плавное движение. Влияние незначительное: пресеты применяют собственное внутреннее сглаживание",

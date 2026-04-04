@@ -33,6 +33,8 @@
     "textureQualityTooltip": "内部渲染分辨率倍数。越低 = 越快，越高 = 超采样质量",
     "antiAliasing": "抗锯齿",
     "antiAliasingTooltip": "使用 FXAA 平滑锯齿边缘。性能开销较小（约 2-3%）",
+    "brightness": "Visual Brightness: {{value}}%",
+    "brightnessTooltip": "Dims the visualizer. Useful in dark rooms or when you want subtle ambient visuals",
     "analysis": "分析",
     "audioSmoothing": "音频平滑度：{{value}}",
     "audioSmoothingTooltip": "越低 = 对节拍的反应越灵敏，越高 = 运动越平滑。效果较细微：预设会应用自身的内部平滑",

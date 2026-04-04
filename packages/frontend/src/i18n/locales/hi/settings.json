@@ -33,6 +33,8 @@
     "textureQualityTooltip": "इंटरनल रेंडर रेज़ोल्यूशन मल्टीप्लायर। कम = तेज़, ज़्यादा = सुपरसैंपल्ड क्वालिटी",
     "antiAliasing": "एंटी-एलियासिंग",
     "antiAliasingTooltip": "FXAA से दाँतेदार किनारे स्मूद करो। थोड़ा परफ़ॉर्मेंस खर्च (~2-3%)",
+    "brightness": "Visual Brightness: {{value}}%",
+    "brightnessTooltip": "Dims the visualizer. Useful in dark rooms or when you want subtle ambient visuals",
     "analysis": "एनालिसिस",
     "audioSmoothing": "ऑडियो स्मूदिंग: {{value}}",
     "audioSmoothingTooltip": "कम = बीट्स पर तेज़ रिएक्शन, ज़्यादा = स्मूद मूवमेंट। असर सूक्ष्म है: प्रीसेट अपनी इंटरनल स्मूदिंग लगाते हैं",

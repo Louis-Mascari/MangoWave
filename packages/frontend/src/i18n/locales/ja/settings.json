@@ -33,6 +33,8 @@
     "textureQualityTooltip": "内部レンダリング解像度の倍率です。低い = 高速、高い = スーパーサンプリング品質",
     "antiAliasing": "アンチエイリアシング",
     "antiAliasingTooltip": "FXAAでジャギーを滑らかにします。わずかなパフォーマンスコスト（約2-3%）",
+    "brightness": "Visual Brightness: {{value}}%",
+    "brightnessTooltip": "Dims the visualizer. Useful in dark rooms or when you want subtle ambient visuals",
     "analysis": "分析",
     "audioSmoothing": "オーディオスムージング: {{value}}",
     "audioSmoothingTooltip": "低い = ビートへの反応が速い、高い = 動きが滑らか。効果は微妙で、プリセットは独自の内部スムージングを適用します",

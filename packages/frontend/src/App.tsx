@@ -133,6 +133,8 @@ function MainApp() {
   const [showLaunchAnimation, setShowLaunchAnimation] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [webglContextLost, setWebglContextLost] = useState(false);
+  const [presetsLoading, setPresetsLoading] = useState(true);
+  const brightness = useSettingsStore((s) => s.brightness);
   const silenceCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const setOnboardingShown = useSettingsStore((s) => s.setOnboardingShown);
   const resetAutopilotRef = useRef<() => void>(() => {});
@@ -190,9 +192,15 @@ function MainApp() {
     [broadcastPreset, isRemotePresetRef],
   );
 
+  const presetsLoadedCountRef = useRef(0);
   const handlePresetsLoaded = useCallback((presets: string[], packMap: Map<string, string>) => {
     setPresetList(presets);
     setPresetPackMap(packMap);
+    // First call = butterchurn packs only, second = milkdrop-presets registered (all loaded)
+    presetsLoadedCountRef.current += 1;
+    if (presetsLoadedCountRef.current >= 2) {
+      setPresetsLoading(false);
+    }
   }, []);
 
   const {
@@ -435,6 +443,12 @@ function MainApp() {
             onToggleFullscreen={handleToggleFullscreen}
             onContextLost={handleWebGLContextLost}
           />
+          {brightness < 1 && (
+            <div
+              className="pointer-events-none fixed inset-0 z-[1] bg-black"
+              style={{ opacity: 1 - brightness }}
+            />
+          )}
           {webglContextLost && (
             <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/90 font-sans text-white">
               <h1 className="mb-2 text-2xl font-bold text-red-400">
@@ -500,6 +514,7 @@ function MainApp() {
             resetIdle={resetPlaybackIdle}
             onPauseIdle={pausePlaybackIdle}
             onResumeIdle={resumePlaybackIdle}
+            presetsLoading={presetsLoading}
           />
           <PlaybackPanel
             adapter={playbackAdapter}

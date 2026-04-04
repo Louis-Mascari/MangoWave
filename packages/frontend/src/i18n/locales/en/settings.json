@@ -33,6 +33,8 @@
     "textureQualityTooltip": "Internal render resolution multiplier. Lower = faster, higher = supersampled quality",
     "antiAliasing": "Anti-Aliasing",
     "antiAliasingTooltip": "Smooth jagged edges with FXAA. Small performance cost (~2-3%)",
+    "brightness": "Visual Brightness: {{value}}%",
+    "brightnessTooltip": "Dims the visualizer. Useful in dark rooms or when you want subtle ambient visuals",
     "analysis": "Analysis",
     "audioSmoothing": "Audio Smoothing: {{value}}",
     "audioSmoothingTooltip": "Lower = snappier reaction to beats, higher = smoother movement. Effect is subtle: presets apply their own internal smoothing",

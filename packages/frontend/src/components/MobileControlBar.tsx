@@ -31,6 +31,7 @@ interface MobileControlBarProps {
   isIdle: boolean;
   forceIdle: () => void;
   resetIdle: () => void;
+  presetsLoading?: boolean;
 }
 
 // Circular layout: 9 items evenly spaced around a 360° circle.
@@ -69,6 +70,7 @@ export function MobileControlBar({
   isIdle,
   forceIdle,
   resetIdle,
+  presetsLoading,
 }: MobileControlBarProps) {
   const { t } = useTranslation('messages');
   const { t: tc } = useTranslation('common');
@@ -172,7 +174,21 @@ export function MobileControlBar({
   const circleItems = [
     {
       label: tc('presets'),
-      icon: 'P',
+      icon: presetsLoading ? (
+        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="3"
+            className="opacity-25"
+          />
+          <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        </svg>
+      ) : (
+        'P'
+      ),
       action: () => openModal('presets'),
     },
     {

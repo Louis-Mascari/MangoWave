@@ -33,6 +33,8 @@
     "textureQualityTooltip": "내부 렌더 해상도 배율입니다. 낮으면 빠르고, 높으면 슈퍼샘플링 품질이 됩니다",
     "antiAliasing": "안티앨리어싱",
     "antiAliasingTooltip": "FXAA로 계단 현상을 완화합니다. 약간의 성능 비용(~2-3%)",
+    "brightness": "Visual Brightness: {{value}}%",
+    "brightnessTooltip": "Dims the visualizer. Useful in dark rooms or when you want subtle ambient visuals",
     "analysis": "분석",
     "audioSmoothing": "오디오 스무딩: {{value}}",
     "audioSmoothingTooltip": "낮을수록 비트에 빠르게 반응하고, 높을수록 부드럽게 움직입니다. 프리셋 자체 스무딩이 적용되므로 효과는 미묘합니다",

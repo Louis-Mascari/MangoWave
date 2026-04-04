@@ -33,6 +33,8 @@
     "textureQualityTooltip": "Pengali resolusi render internal. Lebih rendah = lebih cepat, lebih tinggi = kualitas supersampled",
     "antiAliasing": "Anti-Aliasing",
     "antiAliasingTooltip": "Menghaluskan tepian bergerigi dengan FXAA. Biaya performa kecil (~2-3%)",
+    "brightness": "Visual Brightness: {{value}}%",
+    "brightnessTooltip": "Dims the visualizer. Useful in dark rooms or when you want subtle ambient visuals",
     "analysis": "Analisis",
     "audioSmoothing": "Audio Smoothing: {{value}}",
     "audioSmoothingTooltip": "Lebih rendah = reaksi lebih cepat terhadap ketukan, lebih tinggi = gerakan lebih halus. Efeknya halus: preset menerapkan smoothing internal sendiri",

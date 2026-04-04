@@ -33,6 +33,7 @@ interface ControlBarProps {
   resetIdle: () => void;
   onPauseIdle: () => void;
   onResumeIdle: () => void;
+  presetsLoading?: boolean;
 }
 
 export function ControlBar(props: ControlBarProps) {
@@ -60,6 +61,7 @@ export function ControlBar(props: ControlBarProps) {
         isIdle={props.isIdle}
         forceIdle={props.forceIdle}
         resetIdle={props.resetIdle}
+        presetsLoading={props.presetsLoading}
       />
     );
   }
@@ -91,6 +93,7 @@ function DesktopControlBar({
   isIdle,
   onPauseIdle,
   onResumeIdle,
+  presetsLoading,
 }: ControlBarProps) {
   const { t } = useTranslation('messages');
   const { t: tc } = useTranslation('common');
@@ -149,6 +152,28 @@ function DesktopControlBar({
         <div className="flex items-center gap-2">
           <BarButton onClick={() => onTogglePanel('presets')} active={activePanel === 'presets'}>
             {tc('presets')}
+            {presetsLoading && (
+              <svg
+                className="ml-1.5 inline-block h-3 w-3 animate-spin text-white/40"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  className="opacity-25"
+                />
+                <path
+                  d="M4 12a8 8 0 018-8"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+            )}
           </BarButton>
 
           <IconButton

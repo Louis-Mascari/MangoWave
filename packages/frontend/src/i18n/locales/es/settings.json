@@ -33,6 +33,8 @@
     "textureQualityTooltip": "Multiplicador de resolución de renderizado interno. Menor = más rápido, mayor = calidad con sobremuestreo",
     "antiAliasing": "Anti-Aliasing",
     "antiAliasingTooltip": "Suaviza bordes irregulares con FXAA. Pequeño costo de rendimiento (~2-3%)",
+    "brightness": "Visual Brightness: {{value}}%",
+    "brightnessTooltip": "Dims the visualizer. Useful in dark rooms or when you want subtle ambient visuals",
     "analysis": "Análisis",
     "audioSmoothing": "Suavizado de audio: {{value}}",
     "audioSmoothingTooltip": "Menor = reacción más rápida a los beats, mayor = movimiento más suave. El efecto es sutil: los presets aplican su propio suavizado interno",

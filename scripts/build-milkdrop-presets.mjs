@@ -215,6 +215,11 @@ const outPath = join(outDir, 'presets.json');
 const json = JSON.stringify(results);
 await writeFile(outPath, json, 'utf-8');
 
+// Write a lightweight names-only manifest for eager registration (avoids parsing the 5MB data)
+const namesPath = join(outDir, 'presetNames.json');
+const namesJson = JSON.stringify(Object.keys(results));
+await writeFile(namesPath, namesJson, 'utf-8');
+
 const sizeMB = (Buffer.byteLength(json, 'utf-8') / 1024 / 1024).toFixed(2);
 
 console.log('\n--- Summary ---');

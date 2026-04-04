@@ -14,6 +14,7 @@ export default defineConfig({
       'milkdrop-preset-converter > milkdrop-preset-utils',
       'milkdrop-preset-converter > lodash',
       'milkdrop-presets',
+      'milkdrop-presets/names',
       'milkdrop-textures',
     ],
   },
@@ -44,5 +45,9 @@ export default defineConfig({
     globals: true,
     setupFiles: './src/test/setup.ts',
     exclude: ['e2e/**', 'node_modules/**'],
+  },
+  server: {
+    host: true,
+    allowedHosts: true,
   },
 });

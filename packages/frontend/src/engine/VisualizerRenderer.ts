@@ -117,9 +117,9 @@ export class VisualizerRenderer {
       if (Object.keys(variants).length > 0) this.loadExtraImages(variants);
     });
 
-    // Register MilkDrop-Original preset names (lazy-loaded, EEL→WASM compiled on demand).
-    // Loaded async so the 4.8MB JSON doesn't block init.
-    import('milkdrop-presets').then(({ getPresetNames }) => {
+    // Register MilkDrop-Original preset names from a lightweight manifest (18KB).
+    // The heavy 5MB preset data stays in a separate chunk, loaded lazily on first access.
+    import('milkdrop-presets/names').then(({ getPresetNames }) => {
       this.registerMilkdropPresetNames(getPresetNames());
       this.onPresetsRegistered?.();
     });

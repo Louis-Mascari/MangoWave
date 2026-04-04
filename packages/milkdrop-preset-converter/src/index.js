@@ -1170,6 +1170,17 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
     body = result;
   }
 
+  // Promote bare integer literals to float in expressions. hlslparser's int→float conversion
+  // changes `int n` to `float n`, but leaves literal `1` as int. GLSL ES 3.0 forbids
+  // mixed `float + int`. Same pattern as text-level path. Skip for-loop lines (need int).
+  body = body
+    .split('\n')
+    .map((line) => {
+      if (/\bfor\s*\(/.test(line)) return line;
+      return line.replace(/(?<![.\w[])(\d+)(?!\.\d|\w)/g, '$1.0');
+    })
+    .join('\n');
+
   // Initialize uninitialized `samples` array: MilkDrop fills this at runtime with composite
   // sampling offsets/weights, but butterchurn doesn't provide it. Default: 5-tap cross filter
   // (center + 4 cardinal neighbors at ±1 pixel) matching MilkDrop's default comp behavior.

@@ -1,6 +1,6 @@
 # Preset Classification System
 
-Classifies MangoWave's 833 presets into 5 thematic packs. Two classification approaches are available:
+Classifies MangoWave's 833 presets into 4 thematic packs. Two classification approaches are available:
 
 1. **LLM-based** (`classify-presets-llm.mjs`) — uses Claude to semantically classify presets based on their code, parameters, and names. Higher accuracy; understands intent. This is the canonical classification used in production.
 2. **Heuristic** (`classify-presets.mjs`) — regex/threshold-based scoring. Fast, no API key needed, useful for quick re-runs or as a baseline to diff against.
@@ -9,11 +9,12 @@ Classifies MangoWave's 833 presets into 5 thematic packs. Two classification app
 
 | Pack            | Description                                          | Key Signals                                                                                                                                              |
 | --------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ambient**     | Smooth, time-driven animations — calm and meditative | Gentle motion, mathematical patterns, modest audio modulation. Calm, time-driven.                                                                        |
+| **Ambient**     | Smooth, time-driven animations — calm and meditative | Gentle motion, mathematical patterns, modest audio modulation. Calm, time-driven. Default/fallback.                                                      |
 | **Reactive**    | Responds to beats — audio-driven motion and color    | Audio variables (`bass`, `mid`, `treb`, `bass_att`, `mid_att`, `treb_att`, `vol`) are the PRIMARY driver. Fundamentally different with vs without audio. |
 | **Psychedelic** | Intense shaders, warping, and visual complexity      | High warp, complex shaders, solarize/invert, aggressive motion, blur/noise. Visual intensity.                                                            |
-| **Waveform**    | Spectrum bars, oscilloscope lines, and audio shapes  | Motion vectors (`mv_a > 0`), high wave alpha (`wave_a > 0.8`), custom waves drawing audio shapes.                                                        |
 | **Ethereal**    | Trails, echo layers, and soft glowing persistence    | High decay (>0.97), echo alpha >0, blur effects. Ghostly, dreamy, layered persistence.                                                                   |
+
+**Waveform pack (removed):** Only 4 presets (spectrum analyzers/oscilloscopes) qualified — too few to be useful as a filter. Merged into Reactive. Re-add when the preset library grows (e.g., cream-of-the-crop expansion).
 
 ## How to Re-classify All Presets
 
@@ -58,9 +59,8 @@ For reviewing borderline cases, check `scripts/preset-classification.json` which
 1. **Score** each preset on 4 dimensions: audio reactivity, waveform prominence, psychedelic complexity, ethereal persistence.
 2. **Compute percentile thresholds** across all presets (65th for audio, 60th for psychedelic/ethereal).
 3. **Classify** using priority rules:
-   - Waveform first (score >= 3.0) — most selective category
+   - High waveform score → Reactive (waveform-style presets merged into Reactive)
    - Dominant category wins if above percentile threshold
-   - Secondary waveform (score >= 1.5)
    - **Ambient as fallback**
 
 ## Audio Variable Reference

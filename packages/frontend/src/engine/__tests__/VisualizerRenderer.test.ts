@@ -41,7 +41,7 @@ vi.mock('butterchurn-presets', () => ({
 
 // Mock presetThematicMap — test presets map to known thematic packs
 vi.mock('../../data/presetThematicPacks.ts', () => ({
-  THEMATIC_PACKS: ['Ambient', 'Reactive', 'Psychedelic', 'Waveform', 'Ethereal'],
+  THEMATIC_PACKS: ['Ambient', 'Reactive', 'Psychedelic', 'Ethereal'],
   presetThematicMap: {
     'Preset A': 'Reactive',
     'Preset B': 'Psychedelic',

@@ -847,7 +847,7 @@ describe('useSettingsStore', () => {
 
       // After migration, should have all thematic packs
       const newPacks = [...THEMATIC_PACKS];
-      expect(newPacks).toEqual(['Ambient', 'Reactive', 'Psychedelic', 'Waveform', 'Ethereal']);
+      expect(newPacks).toEqual(['Ambient', 'Reactive', 'Psychedelic', 'Ethereal']);
     });
 
     it('preserves Imported in enabledPacks during migration', () => {

@@ -1,10 +1,4 @@
-export const THEMATIC_PACKS = [
-  'Ambient',
-  'Reactive',
-  'Psychedelic',
-  'Waveform',
-  'Ethereal',
-] as const;
+export const THEMATIC_PACKS = ['Ambient', 'Reactive', 'Psychedelic', 'Ethereal'] as const;
 export type ThematicPack = (typeof THEMATIC_PACKS)[number];
 
 /** Tooltip descriptions for each thematic pack (used in PresetBrowser checkboxes). */
@@ -12,7 +6,6 @@ export const PACK_DESCRIPTIONS: Record<string, string> = {
   Ambient: 'Smooth, time-driven animations \u2014 calm and meditative',
   Reactive: 'Responds to beats \u2014 audio-driven motion and color',
   Psychedelic: 'Intense shaders, warping, and visual complexity',
-  Waveform: 'Spectrum bars, oscilloscope lines, and audio shapes',
   Ethereal: 'Trails, echo layers, and soft glowing persistence',
 };
 
@@ -36,11 +29,11 @@ export const presetThematicMap: Record<string, ThematicPack> = {
   _Mig_028: 'Psychedelic',
   _Mig_039: 'Ethereal',
   _Mig_049: 'Ambient',
-  _Mig_056: 'Waveform',
+  _Mig_056: 'Reactive',
   _Mig_079: 'Psychedelic',
   _Mig_085: 'Reactive',
   _Mig_COLORFUL9: 'Psychedelic',
-  _Mig_Oscilloscope008: 'Waveform',
+  _Mig_Oscilloscope008: 'Reactive',
   '_Rovastar + Geiss - Hurricane Nightmare (Posterize Mix)': 'Reactive',
   '_Vovan + Geiss - Bass With Flover (Feedback Mix) 2': 'Reactive',
   '$$$ Royal - Mashup (160)': 'Ethereal',
@@ -610,7 +603,7 @@ export const presetThematicMap: Record<string, ThematicPack> = {
   'ORB - Kalidescope': 'Psychedelic',
   'ORB - Lava Lamp': 'Ambient',
   'ORB - Magma Pool': 'Psychedelic',
-  'ORB - Mega Spectrum': 'Waveform',
+  'ORB - Mega Spectrum': 'Reactive',
   'ORB - Nova Sunrise': 'Ambient',
   'ORB - Pastel Primer': 'Ambient',
   'ORB - Planetary Alignment': 'Ambient',
@@ -822,7 +815,7 @@ export const presetThematicMap: Record<string, ThematicPack> = {
   'suksma - water cooled red uranium vs dotes - freeenergynow.net': 'Reactive',
   'TEcHNO & SandStorm - Psychodelic Highway': 'Psychedelic',
   'Telek - City Helix Lattice': 'Ethereal',
-  'Telek - Sine Wave': 'Waveform',
+  'Telek - Sine Wave': 'Reactive',
   'Tokyo corridor (shifter tumbling cubes remix)': 'Ambient',
   "TonyMilkdrop - Leonardo Da Vinci's Balloon [Flexi - merry-go-round + techstyle]": 'Psychedelic',
   "TonyMilkdrop - Magellan's Nebula [Flexi - fancy + $this shall not retain]": 'Ethereal',

@@ -2,7 +2,7 @@
 
 /**
  * Classify all MangoWave presets into 5 thematic packs:
- *   Ambient, Reactive, Psychedelic, Waveform, Ethereal
+ *   Ambient, Reactive, Psychedelic, Ethereal
  *
  * Loads butterchurn presets (5 packs, pre-compiled JS) and MilkDrop-Original
  * presets (converted JSON with _eelFormat). Scores each preset on 5 dimensions
@@ -242,9 +242,8 @@ const etherealP60 = percentile(allScores.map((s) => s.etherealScore), 0.6);
 function classify(name, scores) {
   const { audioScore, waveScore, psychScore, etherealScore } = scores;
 
-  // 1. Waveform — motion vectors or very prominent wave display
-  //    This is the most selective category (~8-12%)
-  if (waveScore >= 3.0) return 'Waveform';
+  // 1. Waveform features → Reactive (Waveform pack removed — too few presets)
+  if (waveScore >= 3.0) return 'Reactive';
 
   // 2. Dominant category wins — only if clearly above the population median
   //    and dominant over other categories
@@ -265,8 +264,8 @@ function classify(name, scores) {
     return 'Ethereal';
   }
 
-  // 3. Secondary waveform
-  if (waveScore >= 1.5) return 'Waveform';
+  // 3. Secondary waveform features → Reactive
+  if (waveScore >= 1.5) return 'Reactive';
 
   // 4. Ambient — presets that don't strongly score in any specific category.
   // These are typically smooth, time-driven animations that may reference audio
@@ -277,7 +276,7 @@ function classify(name, scores) {
 // ── Run classification ─────────────────────────────────────────────────────
 
 const classification = {};
-const packCounts = { Ambient: 0, Reactive: 0, Psychedelic: 0, Waveform: 0, Ethereal: 0 };
+const packCounts = { Ambient: 0, Reactive: 0, Psychedelic: 0, Ethereal: 0 };
 
 for (const [name, preset] of Object.entries(allPresets)) {
   const scores = presetScores[name];
@@ -303,10 +302,10 @@ console.log(`\nWrote ${jsonPath}`);
 // ── Generate TypeScript mapping (--update flag) ────────────────────────────
 
 if (process.argv.includes('--update')) {
-  const THEMATIC_PACKS = ['Ambient', 'Reactive', 'Psychedelic', 'Waveform', 'Ethereal'];
+  const THEMATIC_PACKS = ['Ambient', 'Reactive', 'Psychedelic', 'Ethereal'];
 
   const lines = [
-    "export const THEMATIC_PACKS = ['Ambient', 'Reactive', 'Psychedelic', 'Waveform', 'Ethereal'] as const;",
+    "export const THEMATIC_PACKS = ['Ambient', 'Reactive', 'Psychedelic', 'Ethereal'] as const;",
     'export type ThematicPack = (typeof THEMATIC_PACKS)[number];',
     '',
     '/** Tooltip descriptions for each thematic pack (used in PresetBrowser checkboxes). */',
@@ -314,7 +313,6 @@ if (process.argv.includes('--update')) {
     "  Ambient: 'Smooth, time-driven animations \\u2014 calm and meditative',",
     "  Reactive: 'Responds to beats \\u2014 audio-driven motion and color',",
     "  Psychedelic: 'Intense shaders, warping, and visual complexity',",
-    "  Waveform: 'Spectrum bars, oscilloscope lines, and audio shapes',",
     "  Ethereal: 'Trails, echo layers, and soft glowing persistence',",
     '};',
     '',

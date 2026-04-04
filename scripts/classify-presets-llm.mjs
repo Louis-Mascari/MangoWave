@@ -87,15 +87,8 @@ const PACK_DEFINITIONS = {
       'Visual overload / sensory intensity. Think: acid trip, deep fractal zoom, intense color storms, ' +
       'heavy shader processing.',
   },
-  Waveform: {
-    description: 'Spectrum bars, oscilloscope lines, and audio shapes',
-    signals:
-      'STRICT: The waveform, spectrum, or audio-driven geometric shape IS the primary visual element ' +
-      '— not just an accent. Spectrum analyzer (mv_a > 0 as main visual), oscilloscope (high wave_a ' +
-      'as dominant element), or custom waves drawing audio shapes AS the main visual. CRITICAL: A preset ' +
-      'with visible waves that is primarily about something else (fractals, tunnels, particles, bouncing ' +
-      'objects) is NOT Waveform. This is the SMALLEST and most selective pack. When in doubt, NOT Waveform.',
-  },
+  // Waveform pack removed — only 4 presets qualified (spectrum/oscilloscope). Merged into Reactive.
+  // Re-add when preset library grows (cream-of-the-crop) and enough waveform presets exist.
   Ethereal: {
     description: 'Trails, echo layers, and soft glowing persistence',
     signals:
@@ -330,7 +323,7 @@ function quoteName(str) {
 
 function generateTypeScript(classification) {
   const lines = [
-    "export const THEMATIC_PACKS = ['Ambient', 'Reactive', 'Psychedelic', 'Waveform', 'Ethereal'] as const;",
+    "export const THEMATIC_PACKS = ['Ambient', 'Reactive', 'Psychedelic', 'Ethereal'] as const;",
     'export type ThematicPack = (typeof THEMATIC_PACKS)[number];',
     '',
     '/** Tooltip descriptions for each thematic pack (used in PresetBrowser checkboxes). */',
@@ -338,7 +331,6 @@ function generateTypeScript(classification) {
     "  Ambient: 'Smooth, time-driven animations \\u2014 calm and meditative',",
     "  Reactive: 'Responds to beats \\u2014 audio-driven motion and color',",
     "  Psychedelic: 'Intense shaders, warping, and visual complexity',",
-    "  Waveform: 'Spectrum bars, oscilloscope lines, and audio shapes',",
     "  Ethereal: 'Trails, echo layers, and soft glowing persistence',",
     '};',
     '',

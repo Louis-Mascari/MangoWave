@@ -18,6 +18,7 @@ import {
   parsePackImportFile,
 } from '../utils/settingsPortability.ts';
 import { PACK_ORDER } from '../engine/VisualizerRenderer.ts';
+import { PACK_DESCRIPTIONS } from '../data/presetThematicPacks.ts';
 import { useImportModalStore } from '../store/useImportModalStore.ts';
 import type {
   CustomPack,
@@ -681,7 +682,11 @@ export function PresetBrowser({
       )}
       <div className="mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
         {allPacks.map((pack) => (
-          <label key={pack} className="flex cursor-pointer items-center gap-1 text-xs">
+          <label
+            key={pack}
+            title={PACK_DESCRIPTIONS[pack]}
+            className="flex cursor-pointer items-center gap-1 text-xs"
+          >
             <input
               type="checkbox"
               checked={enabledPackSet.has(pack)}

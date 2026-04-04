@@ -85,7 +85,16 @@ export function Visualizer({
         fxaa: performance.fxaa,
         excludedPresets,
         // Propagate updated preset list when MilkDrop pack names finish registering
-        onPresetsRegistered: () => onPresetsLoaded(renderer.presetList, renderer.presetPackMap),
+        onPresetsRegistered: () => {
+          onPresetsLoaded(renderer.presetList, renderer.presetPackMap);
+
+          // Seed "MilkDrop Classic" custom pack (one-time, after MilkDrop names register)
+          const settings = useSettingsStore.getState();
+          if (!settings.customPacks.some((p) => p.name === 'MilkDrop Classic')) {
+            const names = [...renderer.milkdropPresetNames];
+            if (names.length > 0) settings.createCustomPack('MilkDrop Classic', names);
+          }
+        },
       });
 
       // Register imported preset names from persisted metadata (synchronously available).

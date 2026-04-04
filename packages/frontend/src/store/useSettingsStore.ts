@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { EQ_BANDS } from '../engine/AudioEngine.ts';
 import { quarantinedSet, mobileBlockedSet } from '../data/excludedPresets.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
+import { THEMATIC_PACKS } from '../data/presetThematicPacks.ts';
 
 export interface PerformanceSettings {
   fpsCap: number; // 0 = uncapped, 15–300
@@ -583,9 +584,21 @@ export const useSettingsStore = create<SettingsState>()(
             state.enabledPacks = [...packs, 'MilkDrop'];
           }
         }
+        // v11 → v12: Remap old source-based enabledPacks to thematic pack names
+        if ((version ?? 0) < 12) {
+          const OLD_PACKS = ['Minimal', 'Non-Minimal', 'Extra', 'Extra 2', 'MD1', 'MilkDrop'];
+          const packs = (state.enabledPacks as string[]) ?? [];
+          if (packs.length > 0 && packs.some((p) => OLD_PACKS.includes(p))) {
+            // Old pack names are non-descriptive — no meaningful 1:1 mapping possible.
+            // Enable all thematic packs; preserve 'Imported' if present.
+            const newPacks: string[] = [...THEMATIC_PACKS];
+            if (packs.includes('Imported')) newPacks.push('Imported');
+            state.enabledPacks = newPacks;
+          }
+        }
         return state as unknown as SettingsState;
       },
-      version: 11,
+      version: 12,
     },
   ),
 );

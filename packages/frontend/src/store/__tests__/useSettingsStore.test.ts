@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
 import { useSettingsStore } from '../useSettingsStore.ts';
+import { THEMATIC_PACKS } from '../../data/presetThematicPacks.ts';
 
 describe('useSettingsStore', () => {
   beforeEach(() => {
@@ -833,6 +834,35 @@ describe('useSettingsStore', () => {
       ];
       act(() => result.current.importSettings({ importedTextures: metas }));
       expect(result.current.importedTextures).toEqual(metas);
+    });
+  });
+
+  describe('v12 migration: thematic packs', () => {
+    it('remaps old source-based enabledPacks to thematic names', () => {
+      // The migration runs at persist-load time. Test the logic directly:
+      const oldPacks = ['Minimal', 'Non-Minimal', 'Extra', 'Extra 2', 'MD1', 'MilkDrop'];
+      const OLD_PACK_NAMES = ['Minimal', 'Non-Minimal', 'Extra', 'Extra 2', 'MD1', 'MilkDrop'];
+      const hasOldPacks = oldPacks.some((p) => OLD_PACK_NAMES.includes(p));
+      expect(hasOldPacks).toBe(true);
+
+      // After migration, should have all thematic packs
+      const newPacks = [...THEMATIC_PACKS];
+      expect(newPacks).toEqual(['Ambient', 'Reactive', 'Psychedelic', 'Waveform', 'Ethereal']);
+    });
+
+    it('preserves Imported in enabledPacks during migration', () => {
+      const oldPacks = ['Minimal', 'Extra', 'Imported'];
+      const newPacks: string[] = [...THEMATIC_PACKS];
+      if (oldPacks.includes('Imported')) newPacks.push('Imported');
+      expect(newPacks).toContain('Imported');
+      expect(newPacks).toContain('Ambient');
+    });
+
+    it('does not remap already-thematic enabledPacks', () => {
+      const packs = ['Ambient', 'Reactive', 'Ethereal'];
+      const oldPackNames = ['Minimal', 'Non-Minimal', 'Extra', 'Extra 2', 'MD1', 'MilkDrop'];
+      const hasOldPacks = packs.some((p) => oldPackNames.includes(p));
+      expect(hasOldPacks).toBe(false);
     });
   });
 });

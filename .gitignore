@@ -44,6 +44,9 @@ coverage/
 # Test output artifacts
 mw-import-errors.json
 
+# Classification script intermediate output
+scripts/preset-classification.json
+
 # Playwright
 playwright-report/
 test-results/

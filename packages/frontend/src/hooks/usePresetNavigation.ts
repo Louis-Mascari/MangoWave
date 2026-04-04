@@ -105,10 +105,9 @@ export function usePresetNavigation({
     ) => {
       if (renderer.isEelPresetUnloaded(name)) {
         let preset: object | null = null;
-        const pack = renderer.presetPackMap.get(name);
-        if (pack === 'Imported') {
+        if (renderer.isImportedPreset(name)) {
           preset = await useImportedPresetsStore.getState().getConvertedPreset(name);
-        } else if (pack === 'MilkDrop') {
+        } else if (renderer.isMilkdropPreset(name)) {
           const { loadMilkdropPreset } = await import('../engine/milkdropPresetsLoader.ts');
           preset = await loadMilkdropPreset(name);
         }

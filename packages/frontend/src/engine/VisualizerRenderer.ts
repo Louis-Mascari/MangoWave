@@ -9,21 +9,20 @@ import {
   presetsExtra2,
   presetsMD1,
 } from 'butterchurn-presets';
+import { THEMATIC_PACKS, presetThematicMap } from '../data/presetThematicPacks.ts';
 
 const PACK_SOURCES = [
-  { label: 'Minimal', getPresets: () => presetsMinimal.getPresets() },
-  { label: 'Non-Minimal', getPresets: () => presetsNonMinimal.getPresets() },
-  { label: 'Extra', getPresets: () => presetsExtra.getPresets() },
-  { label: 'Extra 2', getPresets: () => presetsExtra2.getPresets() },
-  { label: 'MD1', getPresets: () => presetsMD1.getPresets() },
+  presetsMinimal,
+  presetsNonMinimal,
+  presetsExtra,
+  presetsExtra2,
+  presetsMD1,
 ] as const;
 
-/** Authoritative pack display order — derived from PACK_SOURCES load sequence + MilkDrop. */
-export const PACK_ORDER = [...PACK_SOURCES.map((p) => p.label), 'MilkDrop'];
+/** Authoritative pack display order — thematic packs derived from preset classification. */
+export const PACK_ORDER: string[] = [...THEMATIC_PACKS];
 
 export class VisualizerRenderer {
-  private static readonly EEL_PACKS = new Set(['Imported', 'MilkDrop']);
-
   private visualizer: ReturnType<typeof butterchurn.createVisualizer> | null = null;
   private animationFrameId: number | null = null;
   private presets: Record<string, object> = {};
@@ -36,6 +35,8 @@ export class VisualizerRenderer {
   private onPresetChange?: (name: string) => void;
   private onPresetsRegistered?: () => void;
   private _presetPackMap: Map<string, string> = new Map();
+  private _milkdropPresetNames: Set<string> = new Set();
+  private _importedPresetNames: Set<string> = new Set();
 
   get currentPresetName(): string {
     return this.presetKeys[this.currentPresetIndex] ?? '';
@@ -79,13 +80,15 @@ export class VisualizerRenderer {
     this.visualizer.connectAudio(analyserNode);
 
     this._presetPackMap = new Map();
+    this._milkdropPresetNames = new Set();
+    this._importedPresetNames = new Set();
     this.presets = {};
 
-    for (const { label, getPresets } of PACK_SOURCES) {
-      const packPresets = getPresets();
+    for (const source of PACK_SOURCES) {
+      const packPresets = source.getPresets();
       for (const [name, preset] of Object.entries(packPresets)) {
         this.presets[name] = preset;
-        this._presetPackMap.set(name, label);
+        this._presetPackMap.set(name, presetThematicMap[name] ?? 'Ambient');
       }
     }
 
@@ -168,6 +171,7 @@ export class VisualizerRenderer {
   /** Register imported preset names into the preset list and pack map (without preset objects). */
   registerImportedPresetNames(names: string[]): void {
     for (const name of names) {
+      this._importedPresetNames.add(name);
       if (!this._presetPackMap.has(name)) {
         this._presetPackMap.set(name, 'Imported');
         if (!this.presetKeySet.has(name)) {
@@ -181,8 +185,9 @@ export class VisualizerRenderer {
   /** Register MilkDrop-Original preset names (lazy-loaded, EEL→WASM compiled on demand). */
   private registerMilkdropPresetNames(names: string[]): void {
     for (const name of names) {
+      this._milkdropPresetNames.add(name);
       if (!this._presetPackMap.has(name)) {
-        this._presetPackMap.set(name, 'MilkDrop');
+        this._presetPackMap.set(name, presetThematicMap[name] ?? 'Ambient');
         if (!this.presetKeySet.has(name)) {
           this.presetKeys.push(name);
           this.presetKeySet.add(name);
@@ -207,15 +212,32 @@ export class VisualizerRenderer {
   unregisterImportedPreset(name: string): void {
     delete this.presets[name];
     this._presetPackMap.delete(name);
+    this._importedPresetNames.delete(name);
     this.presetKeys = this.presetKeys.filter((k) => k !== name);
     this.presetKeySet.delete(name);
   }
 
-  /** Check if a preset is in an EEL pack (Imported or MilkDrop) but not yet WASM-compiled. */
+  /** Check if a preset is an EEL preset (Imported or MilkDrop) but not yet WASM-compiled. */
   isEelPresetUnloaded(name: string): boolean {
     return (
-      VisualizerRenderer.EEL_PACKS.has(this._presetPackMap.get(name) ?? '') && !this.presets[name]
+      (this._importedPresetNames.has(name) || this._milkdropPresetNames.has(name)) &&
+      !this.presets[name]
     );
+  }
+
+  /** Whether the preset was user-imported (.milk file). */
+  isImportedPreset(name: string): boolean {
+    return this._importedPresetNames.has(name);
+  }
+
+  /** Whether the preset is from the bundled MilkDrop-Original pack. */
+  isMilkdropPreset(name: string): boolean {
+    return this._milkdropPresetNames.has(name);
+  }
+
+  /** Names of all bundled MilkDrop-Original presets. */
+  get milkdropPresetNames(): ReadonlySet<string> {
+    return this._milkdropPresetNames;
   }
 
   loadPreset(name: string, blendTime = 2.0): void {
@@ -242,7 +264,7 @@ export class VisualizerRenderer {
     for (const key of this.presetKeys) {
       if (key === current || key === previous) continue;
       if (
-        VisualizerRenderer.EEL_PACKS.has(this._presetPackMap.get(key) ?? '') &&
+        (this._importedPresetNames.has(key) || this._milkdropPresetNames.has(key)) &&
         this.presets[key]
       ) {
         delete this.presets[key];
@@ -296,6 +318,8 @@ export class VisualizerRenderer {
     this.presetKeys = [];
     this.presetKeySet = new Set();
     this._presetPackMap = new Map();
+    this._milkdropPresetNames = new Set();
+    this._importedPresetNames = new Set();
     this.onPresetChange = undefined;
     this.onPresetsRegistered = undefined;
   }

@@ -6,9 +6,9 @@ import { usePresetBrowserStore } from '../../store/usePresetBrowserStore.ts';
 
 const PRESETS = ['Alpha Wave', 'Beta Pulse', 'Gamma Storm'];
 const PACK_MAP = new Map([
-  ['Alpha Wave', 'Minimal'],
-  ['Beta Pulse', 'Minimal'],
-  ['Gamma Storm', 'Extra'],
+  ['Alpha Wave', 'Reactive'],
+  ['Beta Pulse', 'Reactive'],
+  ['Gamma Storm', 'Psychedelic'],
 ]);
 
 describe('PresetBrowser', () => {
@@ -120,9 +120,9 @@ describe('PresetBrowser', () => {
       />,
     );
 
-    // Pack filter buttons come from PACK_ORDER (all 5 packs shown)
-    expect(screen.getByText('Minimal')).toBeInTheDocument();
-    expect(screen.getByText('Extra')).toBeInTheDocument();
+    // Pack filter buttons come from PACK_ORDER (all 5 thematic packs shown)
+    expect(screen.getByText('Reactive')).toBeInTheDocument();
+    expect(screen.getByText('Psychedelic')).toBeInTheDocument();
   });
 
   it('shows import tab with buttons and empty state', async () => {

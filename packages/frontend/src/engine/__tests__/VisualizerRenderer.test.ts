@@ -39,6 +39,17 @@ vi.mock('butterchurn-presets', () => ({
   presetsMD1: { getPresets: () => ({}) },
 }));
 
+// Mock presetThematicMap — test presets map to known thematic packs
+vi.mock('../../data/presetThematicPacks.ts', () => ({
+  THEMATIC_PACKS: ['Ambient', 'Reactive', 'Psychedelic', 'Waveform', 'Ethereal'],
+  presetThematicMap: {
+    'Preset A': 'Reactive',
+    'Preset B': 'Psychedelic',
+    'Preset C': 'Ethereal',
+  },
+  PACK_DESCRIPTIONS: {},
+}));
+
 describe('VisualizerRenderer', () => {
   let renderer: VisualizerRenderer;
 
@@ -70,14 +81,14 @@ describe('VisualizerRenderer', () => {
       expect(onPresetChange).toHaveBeenCalledWith('Preset A');
     });
 
-    it('builds pack map tracking preset origins', () => {
+    it('builds pack map using thematic classification', () => {
       const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
       renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
 
       const packMap = renderer.presetPackMap;
-      expect(packMap.get('Preset A')).toBe('Minimal');
-      expect(packMap.get('Preset B')).toBe('Minimal');
-      expect(packMap.get('Preset C')).toBe('Minimal');
+      expect(packMap.get('Preset A')).toBe('Reactive');
+      expect(packMap.get('Preset B')).toBe('Psychedelic');
+      expect(packMap.get('Preset C')).toBe('Ethereal');
     });
 
     it('excludes mobile-blocked presets via excludedPresets set', () => {
@@ -229,6 +240,33 @@ describe('VisualizerRenderer', () => {
 
       const count = renderer.presetList.filter((n) => n === 'Dup').length;
       expect(count).toBe(1);
+    });
+
+    it('isImportedPreset returns true for imported, false for others', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+
+      renderer.registerImportedPresetNames(['Import A']);
+      expect(renderer.isImportedPreset('Import A')).toBe(true);
+      expect(renderer.isImportedPreset('Preset A')).toBe(false);
+    });
+
+    it('isMilkdropPreset returns false before MilkDrop names are registered', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+
+      expect(renderer.isMilkdropPreset('Preset A')).toBe(false);
+    });
+
+    it('unregisterImportedPreset removes from _importedPresetNames', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+
+      renderer.registerImportedPresetNames(['To Remove']);
+      expect(renderer.isImportedPreset('To Remove')).toBe(true);
+
+      renderer.unregisterImportedPreset('To Remove');
+      expect(renderer.isImportedPreset('To Remove')).toBe(false);
     });
   });
 

@@ -1491,7 +1491,7 @@ export function PresetBrowser({
 
   // Render import tab
   const renderImport = () => (
-    <div className="flex min-h-0 flex-1 flex-col gap-2 max-md:min-h-0">
+    <div className="flex min-h-0 flex-1 flex-col gap-3 max-md:min-h-0">
       <p className="text-xs text-white/40">{t('importedPresets.description')}</p>
 
       {/* Sub-tab radio buttons */}
@@ -1520,7 +1520,7 @@ export function PresetBrowser({
 
       {/* Presets sub-tab */}
       {importSubTab === 'presets' && (
-        <div className="flex min-h-0 flex-1 flex-col gap-1">
+        <div className="flex min-h-0 flex-1 flex-col gap-2">
           <div className="flex items-center justify-between">
             <button
               onClick={handleImportMilk}
@@ -1681,7 +1681,7 @@ export function PresetBrowser({
 
       {/* Textures sub-tab */}
       {importSubTab === 'textures' && (
-        <div className="flex min-h-0 flex-1 flex-col gap-1">
+        <div className="flex min-h-0 flex-1 flex-col gap-2">
           <div className="flex items-center justify-between">
             <button
               onClick={handleImportTextures}

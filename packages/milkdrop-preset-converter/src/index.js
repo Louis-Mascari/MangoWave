@@ -945,8 +945,20 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
           );
           const match = body.match(extractRe);
           if (match) {
-            // Keep the body's declaration (with its type) but hoist it
-            bodyDeclsToHoist.push(match[0].trim());
+            // Keep the body's declaration (with its type) but hoist it.
+            // Strip self-referencing initializers: hlslparser emits `vec3 ret1 = vec3(ret1)`
+            // as a cast from the global — once hoisted there's no prior value to reference.
+            let decl = match[0].trim();
+            const selfRefRe = new RegExp(
+              '=\\s*(?:float|vec[234]|int|bool)\\s*\\(\\s*' +
+                name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') +
+                '\\s*\\)',
+            );
+            if (selfRefRe.test(decl)) {
+              // Strip initializer: `vec3 ret1 = vec3(ret1);` → `vec3 ret1;`
+              decl = decl.replace(/\s*=\s*[^;]*/, '');
+            }
+            bodyDeclsToHoist.push(decl);
             body = body.replace(extractRe, '');
           }
         }

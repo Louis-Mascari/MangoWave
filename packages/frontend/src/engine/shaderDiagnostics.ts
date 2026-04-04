@@ -27,6 +27,11 @@ let installed = false;
 
 let presetCount = 0;
 
+// Shader source capture — stores the last fragment shader source per preset
+const shaderSources: Map<string, { warpFrag?: string; compFrag?: string }> = new Map();
+let capturePhase: 'warp' | 'comp' | 'other' = 'other';
+let fragmentSourcePending: string | null = null;
+
 export function setDiagnosticPresetName(name: string): void {
   if (!installed) return;
   currentPreset = name;
@@ -47,6 +52,28 @@ export function installShaderDiagnostics(): void {
   installed = true;
 
   const proto = WebGL2RenderingContext.prototype;
+
+  // --- shaderSource (capture fragment sources for debugging) ---
+  const origShaderSource = proto.shaderSource;
+  proto.shaderSource = function (
+    this: WebGL2RenderingContext,
+    shader: WebGLShader,
+    source: string,
+  ) {
+    origShaderSource.call(this, shader, source);
+    const typeParam = this.getShaderParameter(shader, this.SHADER_TYPE) as number;
+    if (typeParam === this.FRAGMENT_SHADER && source.includes('#version 300 es')) {
+      fragmentSourcePending = source;
+      // Detect warp vs comp: comp preamble has "gammaAdj" and "fShader", warp doesn't
+      if (source.includes('uniform float gammaAdj')) {
+        capturePhase = 'comp';
+      } else if (source.includes('uniform float decay')) {
+        capturePhase = 'warp';
+      } else {
+        capturePhase = 'other';
+      }
+    }
+  };
 
   // --- compileShader ---
   const origCompile = proto.compileShader;
@@ -88,6 +115,17 @@ export function installShaderDiagnostics(): void {
           .join('\n');
         console.log(`[MW-QA] SHADER LINES ${start + 1}-${end}:\n${snippet}`);
       }
+    } else {
+      // Successful compile — capture source for later dump
+      if (fragmentSourcePending && capturePhase !== 'other') {
+        if (!shaderSources.has(currentPreset)) {
+          shaderSources.set(currentPreset, {});
+        }
+        const entry = shaderSources.get(currentPreset)!;
+        if (capturePhase === 'warp') entry.warpFrag = fragmentSourcePending;
+        else if (capturePhase === 'comp') entry.compFrag = fragmentSourcePending;
+        fragmentSourcePending = null;
+      }
     }
   };
 
@@ -122,9 +160,56 @@ export function installShaderDiagnostics(): void {
       failures.length = 0;
       failedPresets.clear();
     },
+    /** Dump full fragment shader source for a preset. Call with no args for current. */
+    dumpShader: (name?: string) => {
+      const target = name ?? currentPreset;
+      const entry = shaderSources.get(target);
+      if (!entry) {
+        console.log(`[MW-QA] No shader sources captured for "${target}"`);
+        console.log('Available:', [...shaderSources.keys()].join(', '));
+        return;
+      }
+      if (entry.warpFrag) {
+        console.log(`[MW-QA] === WARP FRAGMENT for "${target}" ===`);
+        console.log(entry.warpFrag);
+      }
+      if (entry.compFrag) {
+        console.log(`[MW-QA] === COMP FRAGMENT for "${target}" ===`);
+        console.log(entry.compFrag);
+      }
+    },
+    /** List all presets with captured shaders */
+    listCaptured: () => [...shaderSources.keys()],
+    /** Compare two presets' shaders side by side (useful for bundled vs imported) */
+    compare: (name1: string, name2: string) => {
+      const e1 = shaderSources.get(name1);
+      const e2 = shaderSources.get(name2);
+      if (!e1 || !e2) {
+        console.log(`[MW-QA] Need both presets loaded. Available:`, [...shaderSources.keys()]);
+        return;
+      }
+      for (const type of ['warpFrag', 'compFrag'] as const) {
+        const s1 = e1[type] ?? '(none)';
+        const s2 = e2[type] ?? '(none)';
+        if (s1 === s2) {
+          console.log(`[MW-QA] ${type}: IDENTICAL`);
+        } else {
+          console.log(`[MW-QA] ${type}: DIFFERENT`);
+          console.log(`--- ${name1} (${s1.length} chars) ---`);
+          console.log(s1);
+          console.log(`--- ${name2} (${s2.length} chars) ---`);
+          console.log(s2);
+        }
+      }
+    },
   };
 
   console.log(
-    '[MW-QA] Shader diagnostics installed. Use __mwShaderQA.getFailures() to see results.',
+    '[MW-QA] Shader diagnostics installed. Commands:\n' +
+      '  __mwShaderQA.dumpShader()           — dump current preset shader\n' +
+      '  __mwShaderQA.dumpShader("name")      — dump specific preset shader\n' +
+      '  __mwShaderQA.compare("a", "b")       — compare two presets\n' +
+      '  __mwShaderQA.listCaptured()          — list all captured presets\n' +
+      '  __mwShaderQA.getFailures()           — get compile/link failures',
   );
 }

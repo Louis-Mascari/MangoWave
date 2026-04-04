@@ -4,7 +4,7 @@ import { get as idbGet, set as idbSet, del as idbDel, keys as idbKeys } from 'id
 const IDB_MILK_PREFIX = 'mw-milk:';
 const IDB_CONV_PREFIX = 'mw-conv:';
 const CONV_VERSION_KEY = 'mw-conv-version';
-const CONV_VERSION = 3; // v3 = fps-normalized shaders + bvec/type-conflict fixes
+const CONV_VERSION = 15; // v15 = hlslparser-first + fix bvec .x (was any()) + fps decay-only + samples init
 
 export interface ImportedPresetsState {
   loaded: boolean;

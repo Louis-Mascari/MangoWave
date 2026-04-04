@@ -63,9 +63,12 @@ function convertShaderTextLevel(shader) {
     return '';
   }
 
+  // Strip .milk line prefix backticks — invalid GLSL characters
+  let result = shader.replace(/`/g, '');
+
   // HLSL type/function → GLSL ES 3.0 equivalents
   // NOTE: texture2D/texture3D are GLSL ES 1.0; ES 3.0 uses unified `texture`
-  let result = shader
+  result = result
     .replace(/\btex2[Dd]\b/g, 'texture')
     .replace(/\btex3[Dd]\b/g, 'texture')
     .replace(/\bfloat4x4\b/g, 'mat4')
@@ -94,6 +97,50 @@ function convertShaderTextLevel(shader) {
     (m, type, name, init) => `${type} ${name} = ${type}(${init.trim()});`,
   );
 
+  // HLSL C-style array initializers (possibly multi-line):
+  // `const vec4 samples[5] = { 0,0,0,1, 1,0,0,.25, ... };`
+  // → `const vec4 samples[5] = vec4[5]( vec4(0,0,0,1), vec4(1,0,0,.25), ... );`
+  // GLSL ES 3.0 requires per-element constructors.
+  {
+    const arrInitRe =
+      /\b(const\s+)?(vec[234]|mat[234])\s+(\w+)\s*\[(\d+)\]\s*=\s*\{([\s\S]*?)\}\s*;/g;
+    result = result.replace(arrInitRe, (m, constPfx, type, name, count, vals) => {
+      const n = parseInt(count, 10);
+      const dim = type.startsWith('vec') ? parseInt(type[3], 10) : parseInt(type[3], 10) ** 2;
+      // Split values respecting nested parens
+      const flat = [];
+      let depth = 0;
+      let start = 0;
+      const trimmed = vals.replace(/`/g, ''); // strip .milk backtick prefixes
+      for (let i = 0; i <= trimmed.length; i++) {
+        if (i === trimmed.length || (trimmed[i] === ',' && depth === 0)) {
+          const v = trimmed.substring(start, i).trim();
+          if (v) flat.push(v);
+          start = i + 1;
+        } else if (trimmed[i] === '(') depth++;
+        else if (trimmed[i] === ')') depth--;
+      }
+      if (flat.length !== n * dim) return m; // unexpected count, don't transform
+      const elems = [];
+      for (let i = 0; i < n; i++) {
+        elems.push(type + '(' + flat.slice(i * dim, (i + 1) * dim).join(', ') + ')');
+      }
+      return (
+        (constPfx || '') +
+        type +
+        ' ' +
+        name +
+        '[' +
+        count +
+        '] = ' +
+        type +
+        '[](' +
+        elems.join(', ') +
+        ');'
+      );
+    });
+  }
+
   // HLSL mul(a, b) → GLSL ((a) * (b))
   result = expandHlslMul(result);
 
@@ -107,7 +154,7 @@ function convertShaderTextLevel(shader) {
     const promotedBody = body
       .split('\n')
       .map((line) =>
-        /^\s*#/.test(line) ? line : line.replace(/(?<![.\w])(\d+)(?!\.\d|\w)/g, '$1.0'),
+        /^\s*#/.test(line) ? line : line.replace(/(?<![.\w[])(\d+)(?!\.\d|\w)/g, '$1.0'),
       )
       .join('\n');
     result = header + promotedBody;
@@ -119,6 +166,131 @@ function convertShaderTextLevel(shader) {
     /\b(vec[234])\s+(\w+)\s*=\s*(-?[\d.]+)\s*;/g,
     (m, type, name, val) => `${type} ${name} = ${type}(${val});`,
   );
+
+  // HLSL tex2D() returns float4, GLSL texture() returns vec4. MilkDrop shaders
+  // almost always work with vec3 (RGB). HLSL silently truncates float4→float3,
+  // GLSL doesn't. Append .xyz to texture() calls not already followed by a swizzle,
+  // using paren-balancing to handle nested UV expressions.
+  {
+    let out = '';
+    let idx = 0;
+    const texRe = /\btexture\s*\(/g;
+    let tm;
+    while ((tm = texRe.exec(result)) !== null) {
+      out += result.substring(idx, tm.index + tm[0].length);
+      let depth = 1;
+      let j = texRe.lastIndex;
+      while (j < result.length && depth > 0) {
+        if (result[j] === '(') depth++;
+        else if (result[j] === ')') depth--;
+        j++;
+      }
+      out += result.substring(texRe.lastIndex, j);
+      if (!(j < result.length && result[j] === '.')) {
+        out += '.xyz';
+      }
+      idx = j;
+      texRe.lastIndex = j;
+    }
+    out += result.substring(idx);
+    result = out;
+  }
+
+  // Fix HLSL implicit type coercions that GLSL ES 3.0 rejects:
+  // 1) scalar → vec3 assignment: `vec3 x = scalar;` → `vec3 x = vec3(scalar);`
+  // 2) vec2 += vec3: `uv += vec3_var * k;` → `uv += (vec3_var * k).xy;`
+  // Track vec3 variable names from declarations, then fix assignments.
+  {
+    const vec3Vars = new Set();
+    // Match vec3 declarations including comma-separated: `vec3 color, mus;`
+    const declRe = /\bvec3\s+([\w]+(?:\s*,\s*\w+)*)/g;
+    let dm;
+    while ((dm = declRe.exec(result)) !== null) {
+      for (const name of dm[1].split(',')) {
+        const trimmed = name.trim();
+        if (trimmed) vec3Vars.add(trimmed);
+      }
+    }
+    // Also treat 'ret' as vec3 (butterchurn's shader template declares it)
+    vec3Vars.add('ret');
+
+    if (vec3Vars.size > 1) {
+      // Don't process 'ret' as a target — it's always vec3, no coercion needed
+      const targetVec3 = new Set(vec3Vars);
+      targetVec3.delete('ret');
+
+      const lines = result.split('\n');
+      for (let li = 0; li < lines.length; li++) {
+        const line = lines[li];
+
+        // Fix: uv += vec3_expr → uv += (vec3_expr).xy
+        // uv is always vec2 in butterchurn's shader template
+        const uvAssignRe = /^(\s*uv\s*[\+\-]?=\s*)(.+);(\s*)$/;
+        const uvM = line.match(uvAssignRe);
+        if (uvM) {
+          const expr = uvM[2];
+          // Check if expression references any vec3 variable
+          const refsVec3 = [...vec3Vars].some((v) => new RegExp('\\b' + v + '\\b').test(expr));
+          if (refsVec3 && !expr.includes('.xy')) {
+            lines[li] = uvM[1] + '(' + expr + ').xy;' + uvM[3];
+          }
+        }
+
+        // Fix: vec3_var = scalar_expr → vec3_var = vec3(scalar_expr)
+        for (const v of targetVec3) {
+          const assignRe = new RegExp('^(\\s*' + v + '\\s*=\\s*)(.+);(\\s*)$');
+          const am = line.match(assignRe);
+          if (!am) continue;
+          const rhs = am[2];
+          // Skip if RHS already produces a vector (vec3, texture, another vec3 var, ret)
+          if (/\bvec[234]\b|\btexture\b|\bGet/.test(rhs)) continue;
+          const refsVec3 = [...vec3Vars].some((ov) => new RegExp('\\b' + ov + '\\b').test(rhs));
+          if (refsVec3) continue;
+          // RHS is likely scalar — wrap in vec3()
+          lines[li] = am[1] + 'vec3(' + rhs + ');' + am[3];
+        }
+      }
+      result = lines.join('\n');
+    }
+  }
+
+  // Fix HLSL `int` declarations in shader body. MilkDrop shaders use `int` only
+  // for boolean masks (e.g., `int mask = (c.y > 0);`). GLSL ES 3.0 disallows
+  // implicit bool→int and vec*int. Convert to float with explicit cast.
+  // Skip for-loop variables (`for (int i = ...`) — they need int for array indexing.
+  result = result.replace(/\bint\s+(\w+)\s*=\s*([^;]+);/g, (m, name, init, offset) => {
+    const before = result.substring(Math.max(0, offset - 20), offset);
+    if (/for\s*\(\s*$/.test(before)) return m;
+    return `float ${name} = float(${init.trim()});`;
+  });
+
+  // Fix pow(vecN, scalar) — GLSL requires matching types for pow.
+  // After int promotion, `pow(ret, 2.0)` is pow(vec3, float) — invalid.
+  // Wrap scalar second arg in vec3() when first arg references a known vec3 var.
+  {
+    const vec3VarsForPow = new Set(['ret']);
+    const declRePow = /\bvec3\s+([\w]+(?:\s*,\s*\w+)*)/g;
+    let dmp;
+    while ((dmp = declRePow.exec(result)) !== null) {
+      for (const n of dmp[1].split(',')) {
+        const t = n.trim();
+        if (t) vec3VarsForPow.add(t);
+      }
+    }
+    const vec3Pattern = [...vec3VarsForPow]
+      .map((v) => v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+      .join('|');
+    if (vec3Pattern) {
+      // Match pow(expr_containing_vec3_var, scalar_literal)
+      result = result.replace(
+        new RegExp(
+          '\\bpow\\s*\\(\\s*(' + vec3Pattern + ')\\b([^,]*),\\s*(-?[\\d.]+(?:e[+-]?\\d+)?)\\s*\\)',
+          'g',
+        ),
+        (m, v, rest, scalar) => `pow(${v}${rest}, vec3(${scalar}))`,
+      );
+    }
+  }
 
   // Prepend MilkDrop built-in macros to the header (before shader_body).
   const sbIdx = result.indexOf('shader_body');
@@ -187,7 +359,8 @@ function expandFunctionMacro(text, name, template) {
  *  parse failure. Expanding macros before parsing lets the HLSL parser handle
  *  type coercions (float4→float2 truncation, etc.) correctly. */
 function expandPrepareShaderMacros(hlsl) {
-  let result = hlsl;
+  // Strip .milk line prefix backticks — hlslparser can't parse them
+  let result = hlsl.replace(/`/g, '');
 
   // Simple token aliases
   result = result.replace(/\btex2d\b/g, 'tex2D');
@@ -505,6 +678,19 @@ vec4 mult0(float x, vec4 y) { return vec4(mult0(x, y.x), mult0(x, y.y), mult0(x,
 vec4 mult0(vec4 x, float y) { return vec4(mult0(x.x, y), mult0(x.y, y), mult0(x.z, y), mult0(x.w, y)); }
 `.trim();
 
+/** HLSL allows implicit vector→scalar truncation (float4→float takes .x).
+ *  GLSL ES 3.0 does NOT — float(vec3) is a compile error.
+ *  hlslparser wraps truncations as float(<vec_expr>). These overloaded helpers
+ *  handle both same-type (no-op) and truncation (extract .x) cases. */
+const FLOAT_TRUNC_HELPERS = `
+float _mw_truncf(float x) { return x; }
+float _mw_truncf(int x) { return float(x); }
+float _mw_truncf(bool x) { return x ? 1.0 : 0.0; }
+float _mw_truncf(vec2 x) { return x.x; }
+float _mw_truncf(vec3 x) { return x.x; }
+float _mw_truncf(vec4 x) { return x.x; }
+`.trim();
+
 /** If the shader body assigns to `uv`, create a mutable local copy.
  *  butterchurn declares `uv` as `in vec2` (read-only in GLSL ES 3.0).
  *  Presets that write to uv (panning, zooming, distortion) need a mutable copy. */
@@ -520,7 +706,8 @@ function makeUvMutable(body) {
 /** Fix bvec-to-scalar casts in hlslparser output.
  *  HLSL: `float x = (vec4 >= 0)` — component-wise compare, implicit bool→float.
  *  hlslparser emits: `float(greaterThanEqual(A, B))` — but GLSL's greaterThanEqual
- *  returns bvec, and float(bvec) is invalid. Fix: wrap with any() to reduce to bool. */
+ *  returns bvec, and float(bvec) is invalid. Fix: extract .x to match HLSL's
+ *  vector→scalar truncation (takes first component, not any()). */
 function fixBvecScalarCast(text) {
   const compareFns = [
     'greaterThanEqual',
@@ -549,13 +736,9 @@ function fixBvecScalarCast(text) {
         else if (result[i] === ')') depth--;
         i++;
       }
-      // Insert any() wrapper: float(fn(...)) → float(any(fn(...)))
-      result =
-        result.substring(0, floatParen + 1) +
-        'any(' +
-        result.substring(floatParen + 1, i) +
-        ')' +
-        result.substring(i);
+      // Append .x to extract first component: float(fn(...)) → float(fn(...).x)
+      // HLSL truncates bvec→bool by taking .x; any() would check ALL components.
+      result = result.substring(0, i) + '.x' + result.substring(i);
     }
   }
   return result;
@@ -619,6 +802,10 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
   if (/\bfloat\s+mult0\s*\(/.test(header)) {
     header += '\n' + MULT_MIXED_OVERLOADS;
   }
+
+  // Add float truncation helpers — HLSL allows float(vec3) (takes .x),
+  // GLSL ES 3.0 does not. These overloaded helpers handle both cases.
+  header += '\n' + FLOAT_TRUNC_HELPERS;
 
   // Extract preset-specific global variable declarations from the header.
   // Presets declare variables outside shader_body (e.g. `float2 rs; float3 noise;`) which
@@ -765,10 +952,45 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
     }
   }
 
-  // Fix bvec-to-scalar casts: hlslparser emits float(greaterThanEqual(A, B)) for HLSL
-  // `(A >= B)` assigned to float, but GLSL's greaterThanEqual returns bvec, not float.
-  // Wrap with any() to reduce bvec→bool, which can then convert to float.
+  // Initialize uninitialized `samples` array: MilkDrop fills this at runtime with composite
+  // sampling offsets/weights, but butterchurn doesn't provide it. Default: 5-tap cross filter
+  // (center + 4 cardinal neighbors at ±1 pixel) matching MilkDrop's default comp behavior.
+  // Runs AFTER presetLocals is prepended — `samples` may have been extracted from rawHeader.
+  body = body.replace(/\bvec4\s+samples\[(\d+)\]\s*;/g, (_, count) => {
+    const n = parseInt(count, 10);
+    const taps = [
+      'vec4(0.0, 0.0, 0.0, 1.0)',
+      'vec4(1.0, 0.0, 0.0, 0.25)',
+      'vec4(-1.0, 0.0, 0.0, 0.25)',
+      'vec4(0.0, 1.0, 0.0, 0.25)',
+      'vec4(0.0, -1.0, 0.0, 0.25)',
+    ];
+    const elems = Array.from({ length: n }, (_, i) => taps[i] || 'vec4(0.0)');
+    return `vec4 samples[${count}] = vec4[](${elems.join(', ')});`;
+  });
+
+  // Fix int declarations: hlslparser emits `int mask = int(...)` for boolean masks.
+  // GLSL ES 3.0 disallows implicit bool→int and vec*int multiplication.
+  // Convert to float with explicit cast, matching the text-level fix.
+  // Skip for-loop variables (`for (int i = ...`) — they need int for array indexing.
+  body = body.replace(/\bint\s+(\w+)\s*=\s*([^;]+);/g, (m, name, init, offset) => {
+    const before = body.substring(Math.max(0, offset - 20), offset);
+    if (/for\s*\(\s*$/.test(before)) return m;
+    return `float ${name} = float(${init.trim()});`;
+  });
+
+  // Fix bvec-to-scalar casts FIRST: hlslparser emits float(greaterThanEqual(A, B)) for
+  // HLSL `(A >= B)` assigned to float, but GLSL's greaterThanEqual returns bvec, not float.
+  // Append .x to extract first component: float(fn(...).x) — matches HLSL's truncation.
+  // Must run before float→_mw_truncf replacement (which would break the pattern match).
   body = fixBvecScalarCast(body);
+
+  // Fix float(vec_expr) truncation: HLSL allows float(vec3) (takes .x component),
+  // GLSL ES 3.0 does not. hlslparser wraps truncations as float(<expr>).
+  // Replace with _mw_truncf() overloaded helpers (added to header above).
+  // After bvec fix, remaining float() casts are either legitimate (float(int)) or
+  // truncation (float(vec3)). _mw_truncf handles both via overloading.
+  body = body.replace(/\bfloat\s*\(/g, '_mw_truncf(');
 
   // Make uv mutable if the shader body assigns to it
   body = makeUvMutable(body);
@@ -869,6 +1091,12 @@ function fixUniformAssignments(shaderBody) {
  * `vec3 (float(0.004))` for type promotion, statements in `(...)`.
  * Patterns must handle both text-level and hlslparser forms.
  */
+/** Ensure a numeric string is a GLSL float literal (has a decimal point).
+ *  GLSL ES 3.0 treats `10` as int — `pow(10, float)` is invalid. */
+function glslFloat(s) {
+  return s.includes('.') ? s : s + '.0';
+}
+
 function normalizeFpsConstants(glsl) {
   if (!glsl || !glsl.includes('shader_body')) return glsl;
 
@@ -877,7 +1105,10 @@ function normalizeFpsConstants(glsl) {
   // Helper: match a numeric constant in either bare (`0.004`) or
   // hlslparser-wrapped (`float(0.004)`, `vec3 (float(0.004))`) form.
   // Returns [fullMatch, numericValue] or null.
-  const CONST_RE = /(?:vec[234]\s*\(\s*)?(?:float\s*\(\s*)?(\d*\.?\d+)\s*\)?\s*\)?/;
+  // MUST be anchored (^...$) — otherwise it matches constants INSIDE complex
+  // expressions like `clamp(mult0(...), 0.0, 1.0)`, causing false positives.
+  const CONST_RE =
+    /^(?:vec[234]\s*\(\s*)?(?:(?:float|_mw_truncf)\s*\(\s*)?(\d*\.?\d+)\s*\)?\s*\)?$/;
 
   // Process line by line — fps normalization only affects `ret` statements
   const lines = result.split('\n');
@@ -892,6 +1123,10 @@ function normalizeFpsConstants(glsl) {
     // hlslparser wraps entire statements in (...); — unwrap for matching
     const outerWrap = stmt.match(/^\((.+)\);$/);
     if (outerWrap) stmt = outerWrap[1].trim() + ';';
+    // hlslparser also wraps assignment RHS in parens: `ret = (ret - CONST);`
+    // Unwrap so the patterns below can match: `ret = ret - CONST;`
+    const innerWrap = stmt.match(/^(ret(?:\.[xyzw]+)?\s*=\s*)\((.+)\);$/);
+    if (innerWrap) stmt = innerWrap[1] + innerWrap[2] + ';';
 
     // --- Pattern: ret -= CONST; (simple subtraction) ---
     // Text: `ret -= 0.004;`  hlslparser: `ret -= vec3 (float(0.004));`
@@ -927,19 +1162,23 @@ function normalizeFpsConstants(glsl) {
       }
     }
 
-    // --- Pattern: ret *= CONST; (decay/amplification) ---
+    // --- Pattern: ret *= CONST; (feedback decay) ---
     // Text: `ret *= 0.95;`  hlslparser: `ret *= vec3 (float(0.95));`
-    // Handles both decay (0 < F < 1) and amplification (F > 1) — both are
-    // fps-dependent in MilkDrop's feedback loop. pow(F, ratio) gives correct
-    // per-second rate at any fps.
+    // Only normalize decay constants (0 < F < 1) — these accumulate per frame
+    // in the feedback loop. Constants >= 1 (e.g., `ret *= 10.0` for gamma/brightness)
+    // are one-time composite operations, NOT fps-dependent.
     const mulMatch = stmt.match(/^ret(?:\.[xyzw]+)?\s*\*=\s*(.+?)\s*;$/);
     if (mulMatch) {
       const cm = mulMatch[1].match(CONST_RE);
       if (cm) {
         const num = parseFloat(cm[1]);
-        if (num > 0 && !isNaN(num) && Math.abs(num - 1.0) > 0.001) {
-          const newExpr = 'pow(' + mulMatch[1] + ', _mw_fps_ratio)';
-          const newStmt = stmt.replace(mulMatch[1], newExpr);
+        if (num > 0 && num < 1 && !isNaN(num)) {
+          // Use the bare numeric value in pow() to avoid type mismatch.
+          // hlslparser wraps constants as vec3(float(0.95)) — pow(vec3, float) is
+          // invalid GLSL. Using the bare number: pow(0.95, float) → valid.
+          const newExpr = 'pow(' + glslFloat(cm[1]) + ', _mw_fps_ratio)';
+          const newStmt =
+            'ret' + stmt.match(/^ret((?:\.[xyzw]+)?)\s*\*=/)[1] + ' *= ' + newExpr + ';';
           lines[li] = indent + (outerWrap ? '(' + newStmt.replace(/;$/, ');') : newStmt);
           continue;
         }
@@ -963,7 +1202,7 @@ function normalizeFpsConstants(glsl) {
         if (mul > 0 && mul < 1) {
           newStmt = newStmt.replace(
             /(\)\s*\*\s*)(\d*\.?\d+)/,
-            (m, pre, val) => pre + 'pow(' + val + ', _mw_fps_ratio)',
+            (m, pre, val) => pre + 'pow(' + glslFloat(val) + ', _mw_fps_ratio)',
           );
         }
         if (newStmt !== stmt) {
@@ -1034,60 +1273,24 @@ function normalizeFpsConstants(glsl) {
 }
 
 /** Convert HLSL shader to GLSL ES 3.0.
- *  Primary: hlslparser-wasm with manual macro expansion (handles type coercions,
- *  implicit float4→float2 truncation, etc.). Fallback: text-level regex conversion
- *  for any shaders the parser still can't handle. */
+ *  Primary: hlslparser-wasm (proper type analysis, handles implicit HLSL coercions).
+ *  Fallback: text-level regex conversion for shaders hlslparser can't parse. */
 export async function convertShader(shader) {
   if (shader.length === 0) {
     return '';
   }
 
-  // Detect HLSL features that text-level regex conversion can't handle.
-  // These need hlslparser's proper type analysis for correct GLSL output.
-  const needsHlslParser =
-    // Structural complexity: loops, matrix types, custom samplers, const arrays
-    /\bfor\s*\(|\bwhile\s*\(|\bfloat[234]x[234]\b|\bsampler\s+sampler_\w+\s*;|\bconst\s+\w+\s+\w+\s*\[/.test(
-      shader,
-    ) ||
-    // Helper functions before shader_body (e.g., `float4 myFunc(float2 uv) {`)
-    /\b(?:float[234]?|half[234]?|void|int)\s+\w+\s*\([^)]*\)\s*\{/.test(
-      shader.split('shader_body')[0] || '',
-    ) ||
-    // Type coercion: float/float2/float3 vars + vector functions (GetPixel/GetBlur
-    // return vec3; HLSL implicitly truncates vec→float/vec2, GLSL doesn't)
-    (/^\s*float[234]?\s+\w+/m.test(shader) &&
-      /\bGetPixel\b|\bGetBlur[123]?\b|\bGetMain\b/.test(shader));
-
-  // Try text-level conversion first for simple shaders — produces GLSL that
-  // butterchurn renders correctly. hlslparser produces technically valid GLSL
-  // that compiles but renders black for many simple shaders (semantic mismatch
-  // with butterchurn's shader template).
-  if (!needsHlslParser) {
-    try {
-      const textResult = normalizeFpsConstants(
-        fixUniformAssignments(convertShaderTextLevel(shader)),
-      );
-      if (textResult && textResult.includes('shader_body')) {
-        return textResult;
-      }
-    } catch {
-      // text-level failed — fall through to hlslparser
-    }
-  }
-
-  // Escalation: hlslparser-wasm for complex shaders (PS3, helper functions)
+  // hlslparser-wasm first — handles HLSL type coercions (implicit truncation,
+  // scalar↔vector broadcast, etc.) that text-level regex cannot.
   const shaderBodyName = 'main_shader_sentinel';
   let fullShader = prepareShader(shader);
   fullShader = fullShader.replace('float4 shader_body (', `float4 ${shaderBodyName} (`);
 
-  // Expand macros (hlslparser-wasm's preprocessor is broken in the WASM build)
   const expanded = expandPrepareShaderMacros(fullShader);
 
-  // Try hlslparser-wasm (handles type coercions, complex expressions)
   let rawGlsl = await tryHlslParser(expanded, shaderBodyName);
 
   if (!rawGlsl) {
-    // Retry with C/C++ comments stripped
     const noComments = expanded.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
     rawGlsl = await tryHlslParser(noComments, shaderBodyName);
   }
@@ -1098,7 +1301,18 @@ export async function convertShader(shader) {
     );
   }
 
-  // Both paths failed — return empty
+  // hlslparser failed — fallback to text-level regex conversion.
+  try {
+    const textFallback = normalizeFpsConstants(
+      fixUniformAssignments(convertShaderTextLevel(shader)),
+    );
+    if (textFallback && textFallback.includes('shader_body')) {
+      return textFallback;
+    }
+  } catch {
+    // text-level also failed
+  }
+
   console.error('[convertShader] Both text-level and hlslparser failed');
   return '';
 }

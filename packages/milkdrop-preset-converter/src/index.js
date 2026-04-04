@@ -1146,8 +1146,19 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
             lstart--;
           }
           lstart++; // points to the opening (
-          lhs = body.substring(lstart, li + 1);
-          result = result.substring(0, result.length - (i - 1 - li) - (li + 1 - lstart));
+          // Include preceding word (function/cast name like `int`, `float`, `ivec2`)
+          // so `int(expr) % 2` captures `int(expr)` not just `(expr)`
+          let fnStart = lstart - 1;
+          while (fnStart >= 0 && /\s/.test(body[fnStart])) fnStart--;
+          if (fnStart >= 0 && /\w/.test(body[fnStart])) {
+            let ws = fnStart + 1;
+            while (fnStart > 0 && /\w/.test(body[fnStart - 1])) fnStart--;
+            lhs = body.substring(fnStart, li + 1);
+            result = result.substring(0, result.length - (i - 1 - li) - (li + 1 - fnStart));
+          } else {
+            lhs = body.substring(lstart, li + 1);
+            result = result.substring(0, result.length - (i - 1 - li) - (li + 1 - lstart));
+          }
         } else if (li >= 0 && /\w/.test(body[li])) {
           let lstart = li;
           while (lstart > 0 && /\w/.test(body[lstart - 1])) lstart--;

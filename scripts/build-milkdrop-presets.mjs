@@ -79,6 +79,7 @@ const BLOCKED = new Set([
   "Unchained - Morat's Final Trainer2",
   'flexi - predator-prey ecosystem [Geiss - Cauldron remix]',
   'Zylot - Building Block of color - Bitcore Tweak',
+  'Rovastar & Zylot - Crystal Ball (Many Visions Mix)',
 ]);
 
 // ---------------------------------------------------------------------------

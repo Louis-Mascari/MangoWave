@@ -4,7 +4,7 @@ import { get as idbGet, set as idbSet, del as idbDel, keys as idbKeys } from 'id
 const IDB_MILK_PREFIX = 'mw-milk:';
 const IDB_CONV_PREFIX = 'mw-conv:';
 const CONV_VERSION_KEY = 'mw-conv-version';
-const CONV_VERSION = 19; // v19 = hoist use-before-declare vars (hlslparser reordering)
+const CONV_VERSION = 20; // v20 = iterative hoist + comma-separated decl support
 
 export interface ImportedPresetsState {
   loaded: boolean;

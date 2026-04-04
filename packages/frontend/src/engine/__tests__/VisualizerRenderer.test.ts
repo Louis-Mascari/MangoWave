@@ -24,6 +24,11 @@ vi.mock('milkdrop-presets', () => ({
   getPreset: () => undefined,
 }));
 
+// Mock milkdrop-presets/names (lightweight manifest loaded at init)
+vi.mock('milkdrop-presets/names', () => ({
+  getPresetNames: () => [],
+}));
+
 // Mock butterchurn-presets (Minimal pack provides test presets; others empty)
 vi.mock('butterchurn-presets', () => ({
   presetsMinimal: {

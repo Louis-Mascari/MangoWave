@@ -346,7 +346,7 @@ function MainApp() {
 
   const windowSyncEnabled = useSettingsStore((s) => s.windowSyncEnabled);
   const { reset: resetAutopilot } = useAutopilot(handleAutopilotAdvance, {
-    suppress: windowSyncEnabled && !isLeader,
+    suppress: renderPaused || (windowSyncEnabled && !isLeader),
   });
   useEffect(() => {
     resetAutopilotRef.current = resetAutopilot;

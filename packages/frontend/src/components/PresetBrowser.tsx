@@ -275,6 +275,89 @@ function PackNameInput({
   );
 }
 
+/** Isolated child component so pack-search keystrokes don't re-render the entire PresetBrowser. */
+function PackAddPresets({
+  packId,
+  packPresets,
+  presetList,
+  currentPreset,
+  onSelectPreset,
+}: {
+  packId: string;
+  packPresets: string[];
+  presetList: string[];
+  currentPreset: string;
+  onSelectPreset: (name: string) => void;
+}) {
+  const { t } = useTranslation('messages');
+  const [search, setSearch] = useState('');
+  const deferredSearch = useDeferredValue(search);
+
+  const addable = useMemo(() => {
+    const inPack = new Set(packPresets);
+    const lower = deferredSearch.toLowerCase();
+    return presetList.filter((name) => {
+      if (inPack.has(name)) return false;
+      if (deferredSearch && !name.toLowerCase().includes(lower)) return false;
+      return true;
+    });
+  }, [packPresets, presetList, deferredSearch]);
+
+  return (
+    <div className="flex min-h-0 flex-[1.5] flex-col border-t border-white/10 pt-2">
+      <p className="mb-1 text-xs font-semibold text-white/50">{t('customPacks.addPresets')}</p>
+      <input
+        type="text"
+        placeholder={t('customPacks.searchPresets')}
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="mb-1 w-full rounded border-none bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
+      />
+      {addable.length === 0 ? (
+        <p className="py-1 text-center text-xs text-white/30">{t('customPacks.allPresetsAdded')}</p>
+      ) : (
+        <div className="min-h-0 flex-1 overflow-hidden">
+          <Virtuoso
+            data={addable}
+            style={{ height: isMobileDevice ? 'max(200px, calc(100dvh - 420px))' : '100%' }}
+            itemContent={(_index, name) => (
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => onSelectPreset(name)}
+                onKeyDown={(e) => {
+                  if (e.currentTarget !== e.target) return;
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelectPreset(name);
+                  }
+                }}
+                className={`flex shrink-0 cursor-pointer items-center justify-between rounded px-2 py-0.5 text-xs ${
+                  name === currentPreset
+                    ? 'bg-orange-500/30 text-white'
+                    : 'text-white/60 hover:bg-white/10'
+                }`}
+              >
+                <span className="min-w-0 flex-1 truncate text-left">{name}</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    useSettingsStore.getState().addPresetToCustomPack(packId, name);
+                  }}
+                  className="flex h-5 w-5 cursor-pointer items-center justify-center rounded border-none bg-transparent text-sm leading-none text-green-500/60 hover:bg-white/10 hover:text-green-400"
+                  aria-label={`${t('presetBrowser.addToPack')} ${name}`}
+                >
+                  +
+                </button>
+              </div>
+            )}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AddToPackButton({
   presetName,
   customPacks,
@@ -961,9 +1044,7 @@ export function PresetBrowser({
     </div>
   );
 
-  // Pack detail search state
-  const [packSearch, setPackSearch] = useState('');
-  const deferredPackSearch = useDeferredValue(packSearch);
+  // Pack detail search state moved to PackAddPresets child component
 
   // Import tab state
   const [importSubTab, setImportSubTab] = useState<'presets' | 'textures'>('presets');
@@ -1057,17 +1138,7 @@ export function PresetBrowser({
     [customPacks, selectedPackId],
   );
 
-  // Presets available to add to selected pack (not already in it)
-  const addablePresets = useMemo(() => {
-    if (!selectedPack) return [];
-    const inPack = new Set(selectedPack.presets);
-    const lowerSearch = deferredPackSearch.toLowerCase();
-    return presetList.filter((name) => {
-      if (inPack.has(name)) return false;
-      if (deferredPackSearch && !name.toLowerCase().includes(lowerSearch)) return false;
-      return true;
-    });
-  }, [selectedPack, presetList, deferredPackSearch]);
+  // addablePresets filtering moved to PackAddPresets child component
 
   // --- Imported presets ---
 
@@ -1244,7 +1315,6 @@ export function PresetBrowser({
             <button
               onClick={() => {
                 setSelectedPackId(null);
-                setPackSearch('');
               }}
               className="cursor-pointer border-none bg-transparent p-0 text-white/60 hover:text-white"
               aria-label={t('customPacks.back')}
@@ -1330,62 +1400,14 @@ export function PresetBrowser({
             </div>
           )}
 
-          {/* Add presets — header + search stay pinned, list scrolls */}
-          <div className="flex min-h-0 flex-[1.5] flex-col border-t border-white/10 pt-2">
-            <p className="mb-1 text-xs font-semibold text-white/50">
-              {t('customPacks.addPresets')}
-            </p>
-            <input
-              type="text"
-              placeholder={t('customPacks.searchPresets')}
-              value={packSearch}
-              onChange={(e) => setPackSearch(e.target.value)}
-              className="mb-1 w-full rounded border-none bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
-            />
-            {addablePresets.length === 0 ? (
-              <p className="py-1 text-center text-xs text-white/30">
-                {t('customPacks.allPresetsAdded')}
-              </p>
-            ) : (
-              <div className="min-h-0 flex-1 overflow-hidden">
-                <Virtuoso
-                  data={addablePresets}
-                  style={{ height: isMobileDevice ? 'max(200px, calc(100dvh - 420px))' : '100%' }}
-                  itemContent={(_index, name) => (
-                    <div
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => onSelectPreset(name)}
-                      onKeyDown={(e) => {
-                        if (e.currentTarget !== e.target) return;
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          onSelectPreset(name);
-                        }
-                      }}
-                      className={`flex shrink-0 cursor-pointer items-center justify-between rounded px-2 py-0.5 text-xs ${
-                        name === currentPreset
-                          ? 'bg-orange-500/30 text-white'
-                          : 'text-white/60 hover:bg-white/10'
-                      }`}
-                    >
-                      <span className="min-w-0 flex-1 truncate text-left">{name}</span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          useSettingsStore.getState().addPresetToCustomPack(selectedPack.id, name);
-                        }}
-                        className="flex h-5 w-5 cursor-pointer items-center justify-center rounded border-none bg-transparent text-sm leading-none text-green-500/60 hover:bg-white/10 hover:text-green-400"
-                        aria-label={`${t('presetBrowser.addToPack')} ${name}`}
-                      >
-                        +
-                      </button>
-                    </div>
-                  )}
-                />
-              </div>
-            )}
-          </div>
+          {/* Add presets — search state isolated in child to avoid re-rendering parent */}
+          <PackAddPresets
+            packId={selectedPack.id}
+            packPresets={selectedPack.presets}
+            presetList={presetList}
+            currentPreset={currentPreset}
+            onSelectPreset={onSelectPreset}
+          />
         </div>
       );
     }

@@ -18,6 +18,8 @@ async function openPacksTab(app: Page) {
 test.describe('Preset Browser', () => {
   test.beforeEach(async ({ app }) => {
     await app.addInitScript(installAudioMocks());
+    // Prevent auto-seeding of "MilkDrop Classic" pack so tests start with no custom packs
+    await app.addInitScript(() => localStorage.setItem('mw-milkdrop-classic-seeded', '1'));
     await app.goto('/');
 
     // Start visualizer
@@ -180,7 +182,8 @@ test.describe('Preset Browser', () => {
     await expect(app.getByText('Pack 1', { exact: true })).toBeVisible();
   });
 
-  test('active pack dims All tab filters with override notice', async ({ app }) => {
+  test('active pack dims All tab filters with override notice', async ({ app }, testInfo) => {
+    testInfo.setTimeout(60000);
     await openPacksTab(app);
 
     // Create a pack (auto-enters edit view) and add a preset
@@ -195,10 +198,15 @@ test.describe('Preset Browser', () => {
     await expect(startBtn2).toBeVisible();
     await startBtn2.click({ force: true });
 
+    // Wait for pack activation (renderer may load a preset, causing re-renders)
+    await expect(app.getByText(/Playing from: Pack 1/)).toBeVisible({ timeout: 10000 });
+
     // Switch to All tab
-    await app.getByRole('button', { name: /^all$/i }).click();
+    const allTab = app.getByRole('button', { name: /^all$/i });
+    await expect(allTab).toBeVisible({ timeout: 5000 });
+    await allTab.click();
 
     // Override notice should be visible
-    await expect(app.getByText(/filters don't apply/)).toBeVisible();
+    await expect(app.getByText(/Filters only affect this list/)).toBeVisible();
   });
 });

@@ -198,7 +198,7 @@ export function MobileControlBar({
       icon: '▶',
       action: () => {
         onNextPreset();
-        forceIdle();
+        resetIdle();
       },
     },
     {
@@ -206,7 +206,7 @@ export function MobileControlBar({
       icon: '★',
       action: () => {
         onToggleFavorite();
-        forceIdle();
+        resetIdle();
       },
       active: isFavorite,
       activeColor: 'yellow' as const,
@@ -226,7 +226,7 @@ export function MobileControlBar({
       icon: '⛶',
       action: () => {
         onToggleFullscreen();
-        forceIdle();
+        resetIdle();
       },
       active: isFullscreen,
     },
@@ -235,7 +235,7 @@ export function MobileControlBar({
       icon: 'A',
       action: () => {
         onToggleAutopilot();
-        forceIdle();
+        resetIdle();
       },
       active: autopilotEnabled,
     },
@@ -244,7 +244,7 @@ export function MobileControlBar({
       icon: '⊘',
       action: () => {
         onToggleBlock();
-        forceIdle();
+        resetIdle();
       },
       active: isBlocked,
       activeColor: 'red' as const,
@@ -254,7 +254,7 @@ export function MobileControlBar({
       icon: '◀',
       action: () => {
         onPreviousPreset?.();
-        forceIdle();
+        resetIdle();
       },
       disabled: !canGoBack,
     },

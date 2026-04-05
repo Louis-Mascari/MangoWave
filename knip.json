@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@latest/schema.json",
-  "ignoreBinaries": ["tsc", "prettier", "eslint"],
+  "ignoreBinaries": ["tsc"],
   "exclude": ["types"],
   "ignore": ["scripts/**", "infrastructure/lib/**"],
   "workspaces": {

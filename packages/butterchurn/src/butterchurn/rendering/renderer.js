@@ -690,10 +690,23 @@ export default class Renderer {
     this.presetEquationRunner.runFrameEquations(globalVars);
     const mdVSFrame = this.presetEquationRunner.mdVSFrame;
 
-    /* [MW-PATCH: frame-rate normalization] */
+    /* [MW-PATCH: frame-rate normalization]
+     * MilkDrop was designed for ~30fps. Multiplicative per-frame values (decay, zoom, sx, sy)
+     * use pow(value, fpsRatio) so the per-second rate matches 30fps. Additive per-frame values
+     * (rot, dx, dy) are scaled linearly by fpsRatio. Alpha values (ob_a, ib_a, mv_a,
+     * echo_alpha) use the complementary-power formula to preserve opacity accumulation. */
     const fpsRatio = 30.0 / this.fps;
     if (Math.abs(fpsRatio - 1.0) > 0.01) {
+      // Multiplicative per-frame: pow(value, fpsRatio)
       mdVSFrame.decay = Math.pow(mdVSFrame.decay, fpsRatio);
+      mdVSFrame.zoom = Math.pow(mdVSFrame.zoom, fpsRatio);
+      mdVSFrame.sx = Math.pow(mdVSFrame.sx, fpsRatio);
+      mdVSFrame.sy = Math.pow(mdVSFrame.sy, fpsRatio);
+      // Additive per-frame: value * fpsRatio
+      mdVSFrame.rot *= fpsRatio;
+      mdVSFrame.dx *= fpsRatio;
+      mdVSFrame.dy *= fpsRatio;
+      // Alpha accumulation: 1 - pow(1 - value, fpsRatio)
       mdVSFrame.ob_a = 1.0 - Math.pow(1.0 - mdVSFrame.ob_a, fpsRatio);
       mdVSFrame.ib_a = 1.0 - Math.pow(1.0 - mdVSFrame.ib_a, fpsRatio);
       mdVSFrame.mv_a = 1.0 - Math.pow(1.0 - mdVSFrame.mv_a, fpsRatio);

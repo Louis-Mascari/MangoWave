@@ -8,16 +8,20 @@ MangoWave patches applied to the butterchurn source fork (`src/butterchurn/`, fo
 
 ### Problem
 
-butterchurn's per-frame effects (decay, border alpha, motion vector alpha, echo alpha) accumulate once per frame without time normalization. Presets authored for MilkDrop's ~30fps look wrong at 60-144fps. Example: `fDecay=0.98` at 30fps gives `0.98^30 = 0.545` brightness after 1 second, but at 60fps gives `0.98^60 = 0.297` — nearly twice as dark.
+butterchurn's per-frame effects accumulate once per frame without time normalization. Presets authored for MilkDrop's ~30fps look wrong at 60-144fps. Example: `fDecay=0.98` at 30fps gives `0.98^30 = 0.545` brightness after 1 second, but at 60fps gives `0.98^60 = 0.297` — nearly twice as dark. Similarly, `zoom=1.013` accumulates to 1.47x/sec at 30fps but 2.17x/sec at 60fps.
 
 ### Math (reference rate = 30fps)
 
-| Parameter      | Formula                      | Rationale                                                                           |
-| -------------- | ---------------------------- | ----------------------------------------------------------------------------------- |
-| `decay`        | `pow(decay, 30/fps)`         | Multiplicative per-frame; `decay^N` after N frames must equal `decay^30` per second |
-| `ob_a`, `ib_a` | `1 - pow(1 - alpha, 30/fps)` | Alpha blending accumulation; ensures same opacity buildup per second                |
-| `mv_a`         | `1 - pow(1 - alpha, 30/fps)` | Same alpha blending pattern as borders                                              |
-| `echo_alpha`   | `1 - pow(1 - alpha, 30/fps)` | Video echo blend                                                                    |
+| Parameter      | Type           | Formula                      | Rationale                                                                           |
+| -------------- | -------------- | ---------------------------- | ----------------------------------------------------------------------------------- |
+| `decay`        | multiplicative | `pow(decay, 30/fps)`         | Multiplicative per-frame; `decay^N` after N frames must equal `decay^30` per second |
+| `zoom`         | multiplicative | `pow(zoom, 30/fps)`          | Per-frame zoom factor; same logic as decay                                          |
+| `sx`, `sy`     | multiplicative | `pow(sx, 30/fps)`            | Per-frame stretch factors                                                           |
+| `rot`          | additive       | `rot * 30/fps`               | Per-frame rotation increment; scales linearly with frame count                      |
+| `dx`, `dy`     | additive       | `dx * 30/fps`                | Per-frame translation; scales linearly                                              |
+| `ob_a`, `ib_a` | alpha          | `1 - pow(1 - alpha, 30/fps)` | Alpha blending accumulation; ensures same opacity buildup per second                |
+| `mv_a`         | alpha          | `1 - pow(1 - alpha, 30/fps)` | Same alpha blending pattern as borders                                              |
+| `echo_alpha`   | alpha          | `1 - pow(1 - alpha, 30/fps)` | Video echo blend                                                                    |
 
 A guard skips the computation when `30/fps` is within 1% of 1.0 (i.e., fps ≈ 30).
 
@@ -28,8 +32,9 @@ A guard skips the computation when `30/fps` is within 1% of 1.0 (i.e., fps ≈ 3
 ### Verification
 
 1. Load "Aderrasi - See" (`fDecay=1.0`, `ob_a=0.1`) — border should not eat the screen at 60fps
-2. Toggle FPS cap between 30/60/uncapped — trail persistence and border opacity should look equivalent
-3. Normal presets (decay 0.95-0.99) — subtle correction, should not look noticeably different at 60fps
+2. Toggle FPS cap between 30/60/uncapped — trail persistence, zoom drift, and border opacity should look equivalent
+3. Load "Geiss - Game of Life 3" — cellular automaton should sustain (zoom drift was killing cells at 60fps before normalization)
+4. Normal presets (decay 0.95-0.99) — subtle correction, should not look noticeably different at 60fps
 
 ---
 
@@ -231,3 +236,19 @@ Init-time or infrequent buffers (resample, output, blur, darkenCenter, border, t
 ### Location
 
 Search for `[MW-PATCH: DYNAMIC_DRAW for per-frame buffers]` in the files above.
+
+---
+
+## 12. Clean Up Previous Shader Program on Preset Change
+
+### Problem
+
+When a new preset is loaded, `createShader()` creates a new WebGL program but never deletes the old one. Each preset change leaks one GPU program object.
+
+### Solution
+
+Call `gl.deleteProgram(this.shaderProgram)` at the top of `createShader()` before creating the replacement program. The guard `if (this.shaderProgram)` skips the first call (no prior program).
+
+### Location
+
+`src/butterchurn/rendering/shaders/warp.js` and `src/butterchurn/rendering/shaders/comp.js` — search for `[MW-PATCH: clean up previous program to avoid GPU memory leak]`.

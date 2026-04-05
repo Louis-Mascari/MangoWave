@@ -1202,11 +1202,13 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
 
   // Promote bare integer literals to float in expressions. hlslparser's int→float conversion
   // changes `int n` to `float n`, but leaves literal `1` as int. GLSL ES 3.0 forbids
-  // mixed `float + int`. Same pattern as text-level path. Skip for-loop lines (need int).
+  // mixed `float + int`. Same pattern as text-level path. Only skip for-loop lines that
+  // declare an `int` iterator (e.g., `for (int i = 0; ...)`). For-loops using a pre-declared
+  // float variable (e.g., `for ((n = 1); (n <= 6); ...)`) need their literals promoted.
   body = body
     .split('\n')
     .map((line) => {
-      if (/\bfor\s*\(/.test(line)) return line;
+      if (/\bfor\s*\(\s*\(?\s*int\b/.test(line)) return line;
       return line.replace(/(?<![.\w[])(\d+)(?!\.\d|\w)/g, '$1.0');
     })
     .join('\n');

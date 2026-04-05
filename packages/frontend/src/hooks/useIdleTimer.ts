@@ -8,7 +8,7 @@ export function useIdleTimer(
 ): {
   isIdle: boolean;
   pause: () => void;
-  resume: () => void;
+  resume: (initialDelayMs?: number) => void;
   forceIdle: () => void;
   reset: () => void;
 } {
@@ -36,16 +36,19 @@ export function useIdleTimer(
     setIsIdle(false);
   }, []);
 
-  const resume = useCallback(() => {
-    pausedRef.current = false;
-    setIsIdle(false);
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-    timerRef.current = setTimeout(() => {
-      setIsIdle(true);
-    }, timeoutMs);
-  }, [timeoutMs]);
+  const resume = useCallback(
+    (initialDelayMs?: number) => {
+      pausedRef.current = false;
+      setIsIdle(false);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+      timerRef.current = setTimeout(() => {
+        setIsIdle(true);
+      }, initialDelayMs ?? timeoutMs);
+    },
+    [timeoutMs],
+  );
 
   const forceIdle = useCallback(() => {
     if (timerRef.current) {

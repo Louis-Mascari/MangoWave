@@ -750,86 +750,88 @@ export function PresetBrowser({
       </div>
 
       {groupNames.length > 0 ? (
-        <GroupedVirtuoso
-          ref={virtuosoRef}
-          style={{ height: isMobileDevice ? 'max(280px, calc(100dvh - 320px))' : '280px' }}
-          initialScrollTop={initialScrollTop.current}
-          onScroll={(e) => {
-            scrollTopRef.current = (e.target as HTMLElement).scrollTop;
-          }}
-          groupCounts={groupCounts}
-          groupContent={(index) => {
-            const raw = groupNames[index];
-            const [packName, countStr] = raw.split('|||');
-            const isCollapsed = collapsedPacks.has(packName);
-            return (
-              <div
-                role="button"
-                tabIndex={0}
-                onClick={() => toggleCollapsePack(packName)}
-                onKeyDown={(e) => {
-                  if (e.currentTarget !== e.target) return;
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    toggleCollapsePack(packName);
-                  }
-                }}
-                className="sticky top-0 z-[1] flex cursor-pointer items-center justify-between bg-black/80 px-2 py-1 backdrop-blur-sm"
-              >
-                <span className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-orange-400">
-                  <svg
-                    viewBox="0 0 10 10"
-                    fill="currentColor"
-                    className={`h-2.5 w-2.5 transition-transform duration-150 ${isCollapsed ? '' : 'rotate-90'}`}
-                  >
-                    <path d="M3 1l5 4-5 4V1z" />
-                  </svg>
-                  {packName}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  {packName === 'Imported' && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleClearAllImported();
-                      }}
-                      className="cursor-pointer rounded border-none bg-red-500/20 px-1.5 py-0.5 text-[9px] text-red-400/70 hover:bg-red-500/30 hover:text-red-400"
+        <div className="min-h-0 flex-1">
+          <GroupedVirtuoso
+            ref={virtuosoRef}
+            style={{ height: isMobileDevice ? 'max(280px, calc(100dvh - 320px))' : '100%' }}
+            initialScrollTop={initialScrollTop.current}
+            onScroll={(e) => {
+              scrollTopRef.current = (e.target as HTMLElement).scrollTop;
+            }}
+            groupCounts={groupCounts}
+            groupContent={(index) => {
+              const raw = groupNames[index];
+              const [packName, countStr] = raw.split('|||');
+              const isCollapsed = collapsedPacks.has(packName);
+              return (
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => toggleCollapsePack(packName)}
+                  onKeyDown={(e) => {
+                    if (e.currentTarget !== e.target) return;
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      toggleCollapsePack(packName);
+                    }
+                  }}
+                  className="sticky top-0 z-[1] flex cursor-pointer items-center justify-between bg-black/80 px-2 py-1 backdrop-blur-sm"
+                >
+                  <span className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-orange-400">
+                    <svg
+                      viewBox="0 0 10 10"
+                      fill="currentColor"
+                      className={`h-2.5 w-2.5 transition-transform duration-150 ${isCollapsed ? '' : 'rotate-90'}`}
                     >
-                      {t('importedPresets.clearAll')}
-                    </button>
-                  )}
-                  <span className="text-xs text-white/40">{countStr}</span>
-                </span>
-              </div>
-            );
-          }}
-          itemContent={(index) => {
-            const name = flatPresets[index];
-            if (!name) return <div style={{ height: 1 }} />;
-            const isImported = importedNameSet.has(name);
-            return (
-              <PresetRow
-                name={name}
-                isCurrent={name === currentPreset}
-                isFavorite={favoriteSet.has(name)}
-                isBlocked={blockedSet.has(name)}
-                onSelect={() => handleSelectPreset(name)}
-                onToggleFavorite={() => handleToggleFavorite(name)}
-                onToggleBlock={() => handleToggleBlock(name)}
-                onDelete={
-                  isImported
-                    ? () => {
-                        const meta = importedPresets.find((p) => p.name === name);
-                        if (meta) handleDeleteImportedPreset(meta);
-                      }
-                    : undefined
-                }
-                customPacks={customPacks}
-                missingTextures={missingTexturesByName.get(name)}
-              />
-            );
-          }}
-        />
+                      <path d="M3 1l5 4-5 4V1z" />
+                    </svg>
+                    {packName}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    {packName === 'Imported' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleClearAllImported();
+                        }}
+                        className="cursor-pointer rounded border-none bg-red-500/20 px-1.5 py-0.5 text-[9px] text-red-400/70 hover:bg-red-500/30 hover:text-red-400"
+                      >
+                        {t('importedPresets.clearAll')}
+                      </button>
+                    )}
+                    <span className="text-xs text-white/40">{countStr}</span>
+                  </span>
+                </div>
+              );
+            }}
+            itemContent={(index) => {
+              const name = flatPresets[index];
+              if (!name) return <div style={{ height: 1 }} />;
+              const isImported = importedNameSet.has(name);
+              return (
+                <PresetRow
+                  name={name}
+                  isCurrent={name === currentPreset}
+                  isFavorite={favoriteSet.has(name)}
+                  isBlocked={blockedSet.has(name)}
+                  onSelect={() => handleSelectPreset(name)}
+                  onToggleFavorite={() => handleToggleFavorite(name)}
+                  onToggleBlock={() => handleToggleBlock(name)}
+                  onDelete={
+                    isImported
+                      ? () => {
+                          const meta = importedPresets.find((p) => p.name === name);
+                          if (meta) handleDeleteImportedPreset(meta);
+                        }
+                      : undefined
+                  }
+                  customPacks={customPacks}
+                  missingTextures={missingTexturesByName.get(name)}
+                />
+              );
+            }}
+          />
+        </div>
       ) : (
         <p className="py-2 text-center text-xs text-white/40">
           {t('presetBrowser.noPresetsVisible')}
@@ -866,19 +868,21 @@ export function PresetBrowser({
 
     if (filteredPresets.length < 50) {
       return (
-        <div className="flex flex-col gap-0.5 overflow-y-auto max-md:min-h-0 max-md:flex-1 md:max-h-[400px]">
-          {filteredPresets.map(row)}
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className="flex flex-col gap-0.5">{filteredPresets.map(row)}</div>
         </div>
       );
     }
 
     return (
-      <Virtuoso
-        data={filteredPresets}
-        className="max-md:min-h-0 max-md:flex-1"
-        style={isMobileDevice ? undefined : { height: 400 }}
-        itemContent={(_index, name) => row(name)}
-      />
+      <div className="min-h-0 flex-1">
+        <Virtuoso
+          data={filteredPresets}
+          className="max-md:min-h-0 max-md:flex-1"
+          style={{ height: isMobileDevice ? undefined : '100%' }}
+          itemContent={(_index, name) => row(name)}
+        />
+      </div>
     );
   };
 
@@ -1626,7 +1630,7 @@ export function PresetBrowser({
               {t('importedPresets.emptyState')}
             </p>
           ) : (
-            <div className="min-h-0 flex-1">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
               {importGroupLabels.length > 1 && (
                 <div className="mb-1 flex items-center gap-2">
                   <button
@@ -1647,64 +1651,64 @@ export function PresetBrowser({
                   </button>
                 </div>
               )}
-              <GroupedVirtuoso
-                style={{
-                  height: isMobileDevice
-                    ? 'max(280px, calc(100dvh - 380px))'
-                    : Math.min(importFlatPresets.length * 32 + importGroupLabels.length * 28, 320),
-                }}
-                groupCounts={importGroupCounts}
-                groupContent={(index) => {
-                  const raw = importGroupLabels[index];
-                  const [key, label, countStr] = raw.split('|||');
-                  const isCollapsed = collapsedImportGroups.has(key);
-                  return (
-                    <div
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => toggleImportGroup(key)}
-                      onKeyDown={(e) => {
-                        if (e.currentTarget !== e.target) return;
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          toggleImportGroup(key);
-                        }
-                      }}
-                      className="sticky top-0 z-[1] flex cursor-pointer items-center justify-between bg-black/80 px-2 py-1 backdrop-blur-sm"
-                    >
-                      <span className="flex items-center gap-1 text-xs font-semibold text-orange-400">
-                        <svg
-                          viewBox="0 0 10 10"
-                          fill="currentColor"
-                          className={`h-2.5 w-2.5 transition-transform duration-150 ${isCollapsed ? '' : 'rotate-90'}`}
-                        >
-                          <path d="M3 1l5 4-5 4V1z" />
-                        </svg>
-                        {label}
-                      </span>
-                      <span className="text-xs text-white/40">{countStr}</span>
-                    </div>
-                  );
-                }}
-                itemContent={(index) => {
-                  const preset = importFlatPresets[index];
-                  if (!preset) return <div style={{ height: 1 }} />;
-                  return (
-                    <PresetRow
-                      name={preset.name}
-                      isCurrent={preset.name === currentPreset}
-                      isFavorite={favoriteSet.has(preset.name)}
-                      isBlocked={blockedSet.has(preset.name)}
-                      onSelect={() => handleSelectPreset(preset.name)}
-                      onToggleFavorite={() => handleToggleFavorite(preset.name)}
-                      onToggleBlock={() => handleToggleBlock(preset.name)}
-                      onDelete={() => handleDeleteImportedPreset(preset)}
-                      customPacks={customPacks}
-                      missingTextures={missingTexturesByName.get(preset.name)}
-                    />
-                  );
-                }}
-              />
+              <div className="min-h-0 flex-1">
+                <GroupedVirtuoso
+                  style={{
+                    height: isMobileDevice ? 'max(280px, calc(100dvh - 380px))' : '100%',
+                  }}
+                  groupCounts={importGroupCounts}
+                  groupContent={(index) => {
+                    const raw = importGroupLabels[index];
+                    const [key, label, countStr] = raw.split('|||');
+                    const isCollapsed = collapsedImportGroups.has(key);
+                    return (
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => toggleImportGroup(key)}
+                        onKeyDown={(e) => {
+                          if (e.currentTarget !== e.target) return;
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleImportGroup(key);
+                          }
+                        }}
+                        className="sticky top-0 z-[1] flex cursor-pointer items-center justify-between bg-black/80 px-2 py-1 backdrop-blur-sm"
+                      >
+                        <span className="flex items-center gap-1 text-xs font-semibold text-orange-400">
+                          <svg
+                            viewBox="0 0 10 10"
+                            fill="currentColor"
+                            className={`h-2.5 w-2.5 transition-transform duration-150 ${isCollapsed ? '' : 'rotate-90'}`}
+                          >
+                            <path d="M3 1l5 4-5 4V1z" />
+                          </svg>
+                          {label}
+                        </span>
+                        <span className="text-xs text-white/40">{countStr}</span>
+                      </div>
+                    );
+                  }}
+                  itemContent={(index) => {
+                    const preset = importFlatPresets[index];
+                    if (!preset) return <div style={{ height: 1 }} />;
+                    return (
+                      <PresetRow
+                        name={preset.name}
+                        isCurrent={preset.name === currentPreset}
+                        isFavorite={favoriteSet.has(preset.name)}
+                        isBlocked={blockedSet.has(preset.name)}
+                        onSelect={() => handleSelectPreset(preset.name)}
+                        onToggleFavorite={() => handleToggleFavorite(preset.name)}
+                        onToggleBlock={() => handleToggleBlock(preset.name)}
+                        onDelete={() => handleDeleteImportedPreset(preset)}
+                        customPacks={customPacks}
+                        missingTextures={missingTexturesByName.get(preset.name)}
+                      />
+                    );
+                  }}
+                />
+              </div>
             </div>
           )}
         </div>
@@ -1773,7 +1777,9 @@ export function PresetBrowser({
             <div className="min-h-0 flex-1">
               <Virtuoso
                 data={importedTextures}
-                style={{ height: Math.min(importedTextures.length * 40, 320) }}
+                style={{
+                  height: isMobileDevice ? Math.min(importedTextures.length * 40, 320) : '100%',
+                }}
                 itemContent={(_index, tex) => (
                   <div className="flex items-center justify-between rounded bg-white/5 px-2 py-1">
                     <div className="flex min-w-0 flex-1 items-baseline gap-1.5">
@@ -1808,7 +1814,7 @@ export function PresetBrowser({
 
   return (
     <div
-      className={`relative flex flex-col gap-3 overflow-hidden rounded-lg bg-black/60 p-4 backdrop-blur-sm max-md:min-h-0 max-md:flex-1 ${selectedPack ? 'md:h-[36rem]' : 'md:max-h-[32rem]'}`}
+      className={`relative flex flex-col gap-3 overflow-hidden rounded-lg bg-black/60 p-4 backdrop-blur-sm max-md:min-h-0 max-md:flex-1 ${selectedPack ? 'md:h-[36rem]' : 'md:h-[38rem]'}`}
     >
       <div className="flex flex-col gap-2">
         {!isMobileDevice && (
@@ -1832,7 +1838,7 @@ export function PresetBrowser({
           </div>
         )}
         <div className="flex flex-wrap gap-1.5">
-          {(['all', 'favorites', 'blocked', 'excluded', 'history', 'packs', 'import'] as const).map(
+          {(['all', 'packs', 'favorites', 'blocked', 'excluded', 'history', 'import'] as const).map(
             (f) => (
               <button
                 key={f}

@@ -523,7 +523,10 @@ function MainApp() {
             <LaunchAnimation
               onComplete={() => {
                 setShowLaunchAnimation(false);
-                resumePlaybackIdle();
+                // Mobile: longer initial grace period (8s) since there are no window-level
+                // touch listeners to reset the timer — controls would auto-hide in 5s before
+                // the user can orient. Subsequent reveal/idle cycles use the normal 5s timeout.
+                resumePlaybackIdle(isMobileDevice ? 8000 : undefined);
               }}
             />
           )}

@@ -82,7 +82,7 @@ export function SettingsPanel() {
   const showSyncTab = !isMobileDevice;
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg bg-black/60 p-4 backdrop-blur-sm">
+    <div className="flex flex-col gap-3 overflow-hidden rounded-lg bg-black/60 p-4 backdrop-blur-sm md:h-[38rem]">
       <div className="flex flex-wrap gap-2 border-b border-white/10 pb-2">
         <TabButton active={activeTab === 'equalizer'} onClick={() => setActiveTab('equalizer')}>
           {t('tabs.equalizer')}
@@ -111,35 +111,37 @@ export function SettingsPanel() {
         )}
       </div>
 
-      {activeTab === 'equalizer' && <EqualizerTab />}
-      {activeTab === 'rendering' && <RenderingTab />}
-      {activeTab === 'presets' && <PresetsTab />}
-      {activeTab === 'shortcuts' && <ShortcutsTab />}
-      {activeTab === 'data' && <DataTab />}
-      {activeTab === 'sync' && showSyncTab && <SyncTab />}
-      {activeTab === 'spotify' && showSpotifyTab && <SpotifyTab />}
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
+        {activeTab === 'equalizer' && <EqualizerTab />}
+        {activeTab === 'rendering' && <RenderingTab />}
+        {activeTab === 'presets' && <PresetsTab />}
+        {activeTab === 'shortcuts' && <ShortcutsTab />}
+        {activeTab === 'data' && <DataTab />}
+        {activeTab === 'sync' && showSyncTab && <SyncTab />}
+        {activeTab === 'spotify' && showSpotifyTab && <SpotifyTab />}
 
-      <div className="mt-2 border-t border-white/10 pt-2">
-        <a
-          href="https://github.com/Louis-Mascari/MangoWave/issues/new/choose"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1.5 text-xs text-white/40 no-underline transition-colors hover:text-white/60"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            width="14"
-            height="14"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+        <div className="mt-2 border-t border-white/10 pt-2">
+          <a
+            href="https://github.com/Louis-Mascari/MangoWave/issues/new/choose"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-xs text-white/40 no-underline transition-colors hover:text-white/60"
           >
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-          {tc('sendFeedback')}
-        </a>
+            <svg
+              viewBox="0 0 24 24"
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            {tc('sendFeedback')}
+          </a>
+        </div>
       </div>
     </div>
   );

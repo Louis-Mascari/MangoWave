@@ -1,7 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import howlingSrc from '../assets/howling.png';
 
 export const LAUNCH_DURATION_MS = 2500;
+/** Time at which the overlay is translucent enough for clicks to pass through.
+ *  CSS `launch-fade` holds opacity:1 until 70%, then fades to 0 at 100%.
+ *  At 85% the overlay is roughly half-transparent — safe to allow pointer-events. */
+const PASSTHROUGH_MS = LAUNCH_DURATION_MS * 0.85;
 
 interface LaunchAnimationProps {
   onComplete: () => void;
@@ -9,33 +13,39 @@ interface LaunchAnimationProps {
 
 export function LaunchAnimation({ onComplete }: LaunchAnimationProps) {
   const completedRef = useRef(false);
+  const [passthrough, setPassthrough] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    // Allow clicks through once the overlay has faded to transparent
+    const fadeTimer = setTimeout(() => setPassthrough(true), PASSTHROUGH_MS);
+    const completeTimer = setTimeout(() => {
       if (!completedRef.current) {
         completedRef.current = true;
         onComplete();
       }
     }, LAUNCH_DURATION_MS);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(completeTimer);
+    };
   }, [onComplete]);
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black"
+      className={`fixed inset-0 z-[100] flex items-center justify-center bg-black ${passthrough ? 'pointer-events-none' : ''}`}
       style={{ animation: `launch-fade ${LAUNCH_DURATION_MS}ms ease-in-out forwards` }}
     >
-      {/* Glow layer — separate element so it uses only opacity (compositor-friendly).
-          The radial gradients approximate the original drop-shadow effect. */}
-      <div
-        className="pointer-events-none absolute"
+      {/* Glow layer — blurred copy of the image. The image's own orange body
+          and purple headphones/notes produce the brand-color glow naturally.
+          Only transform + opacity animate → compositor-friendly. */}
+      <img
+        src={howlingSrc}
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute max-h-[70vh] max-w-[70vw] object-contain"
         style={{
-          width: 'min(70vw, 70vh)',
-          height: 'min(70vw, 70vh)',
+          filter: 'blur(30px) brightness(1.8) saturate(1.4)',
           animation: `launch-glow ${LAUNCH_DURATION_MS}ms ease-in-out forwards`,
-          background:
-            'radial-gradient(ellipse at center, rgba(255,140,50,0.5) 0%, transparent 60%), ' +
-            'radial-gradient(ellipse at center, rgba(224,80,224,0.3) 0%, transparent 70%)',
         }}
       />
       <img
@@ -51,10 +61,10 @@ export function LaunchAnimation({ onComplete }: LaunchAnimationProps) {
           100% { opacity: 0; }
         }
         @keyframes launch-glow {
-          0% { opacity: 0; transform: scale(0.8); }
-          30% { opacity: 1; transform: scale(1.1); }
-          60% { opacity: 0.5; transform: scale(1.15); }
-          100% { opacity: 0; transform: scale(1.2); }
+          0% { opacity: 0; transform: scale(0.85); }
+          30% { opacity: 0.9; transform: scale(1.08); }
+          60% { opacity: 0.4; transform: scale(1.12); }
+          100% { opacity: 0; transform: scale(1.15); }
         }
         @keyframes launch-image {
           0% {

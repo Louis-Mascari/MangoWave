@@ -119,29 +119,29 @@ export function SettingsPanel() {
         {activeTab === 'data' && <DataTab />}
         {activeTab === 'sync' && showSyncTab && <SyncTab />}
         {activeTab === 'spotify' && showSpotifyTab && <SpotifyTab />}
+      </div>
 
-        <div className="mt-2 border-t border-white/10 pt-2">
-          <a
-            href="https://github.com/Louis-Mascari/MangoWave/issues/new/choose"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-xs text-white/40 no-underline transition-colors hover:text-white/60"
+      <div className="border-t border-white/10 pt-2">
+        <a
+          href="https://github.com/Louis-Mascari/MangoWave/issues/new/choose"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 text-xs text-white/40 no-underline transition-colors hover:text-white/60"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <svg
-              viewBox="0 0 24 24"
-              width="14"
-              height="14"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-            {tc('sendFeedback')}
-          </a>
-        </div>
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+          {tc('sendFeedback')}
+        </a>
       </div>
     </div>
   );

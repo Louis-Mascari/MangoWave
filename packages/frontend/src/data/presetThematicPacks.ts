@@ -743,7 +743,6 @@ export const presetThematicMap: Record<string, ThematicPack> = {
   'shifter - dark tides (eo.s+phat_whisps of doom mix)': 'Psychedelic',
   'shifter - dark tides bdrv mix': 'Psychedelic',
   'shifter - dark tides bdrv mix 2': 'Psychedelic',
-  'shifter - digi': 'Ethereal',
   'shifter - escape the worm - Eo.S. + Phat - Before_It_Eats_Your_Brain_Mix_v2': 'Psychedelic',
   'shifter - feathers (angel wings)': 'Reactive',
   'shifter - feathers (angel wings)_phat_remix relief 2': 'Reactive',
@@ -892,7 +891,7 @@ export const presetThematicMap: Record<string, ThematicPack> = {
 
 /**
  * Butterchurn presets that are also original MilkDrop presets (deduped at build time).
- * Used by MilkDrop Classic custom pack seeding to include these alongside the 438 bundled presets.
+ * Used by MilkDrop Classic custom pack seeding to include these alongside the 437 bundled presets.
  */
 export const BUTTERCHURN_MILKDROP_NAMES: ReadonlySet<string> = new Set([
   'Aderrasi - Airhandler (Principle of Sharing)',

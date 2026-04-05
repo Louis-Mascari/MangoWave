@@ -96,7 +96,7 @@ export function Visualizer({
           // Use a localStorage flag so the pack is never re-created if the user deletes it.
           if (!localStorage.getItem('mw-milkdrop-classic-seeded')) {
             const settings = useSettingsStore.getState();
-            // Include both the 438 bundled MilkDrop presets and the ~108 butterchurn
+            // Include both the 437 bundled MilkDrop presets and the ~108 butterchurn
             // presets that are also original MilkDrop presets (deduped at build time).
             // Filter out quarantined and user-blocked presets.
             const { blockedPresets: blocked } = settings;

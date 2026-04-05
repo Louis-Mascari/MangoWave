@@ -1,6 +1,6 @@
 # Preset Classification System
 
-Classifies MangoWave's 833 presets into 4 thematic packs. Two classification approaches are available:
+Classifies MangoWave's 832 presets into 4 thematic packs. Two classification approaches are available:
 
 1. **LLM-based** (`classify-presets-llm.mjs`) — uses Claude to semantically classify presets based on their code, parameters, and names. Higher accuracy; understands intent. This is the canonical classification used in production.
 2. **Heuristic** (`classify-presets.mjs`) — regex/threshold-based scoring. Fast, no API key needed, useful for quick re-runs or as a baseline to diff against.
@@ -41,7 +41,7 @@ node scripts/classify-presets.mjs --update
 
 Both scripts:
 
-1. Load all butterchurn (5 packs) and MilkDrop-Original (438) presets
+1. Load all butterchurn (5 packs) and MilkDrop-Original (437) presets
 2. Classify each preset
 3. Write `scripts/preset-classification.json` (intermediate, gitignored)
 4. With `--update`: regenerate `packages/frontend/src/data/presetThematicPacks.ts`

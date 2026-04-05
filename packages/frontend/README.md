@@ -50,7 +50,7 @@ src/
 │                  # textureLoader (image validation), importProcessor (batch import with progress callbacks),
 │                  # isWebGL2Supported
 ├── data/          # quarantined-presets.json, mobile-blocked-presets.json, excludedPresets.ts (shared Sets),
-│                  # presetThematicPacks.ts (833-preset thematic classification map)
+│                  # presetThematicPacks.ts (832-preset thematic classification map)
 ├── constants/     # shortcuts.ts (keyboard/mouse shortcut definitions)
 ├── i18n/          # i18next config + 9 locale dirs (en, es, zh, hi, ja, ko, ru, id, pt-BR)
 │                  # 4 namespaces per locale: common, start, settings, messages
@@ -111,7 +111,7 @@ Blocked and favorited presets are mutually exclusive.
 
 On mobile, 36 GPU-heavy presets (identified via Pixel 10 Pro testing) are filtered from the pool and shown in the Excluded tab alongside quarantined presets. Users can permanently restore any excluded preset via the Excluded tab — overrides persist in `excludedOverrides`.
 
-**Custom packs** are user-created preset collections (max 50 packs, up to 833 presets each). Starting a pack takes highest priority in pool-building — autopilot and manual prev/next cycle within the pack's presets only (minus blocked). Starting a pack auto-switches `favorites` autopilot mode to `all` and auto-advances if the current preset isn't in the pack. Empty packs cannot be started (Start button hidden). Removing the currently playing preset from the active pack during editing auto-advances to the next preset. Packs can be exported/imported as standalone `.json` files (`_meta.source: 'mangowave-pack'`, distinct from settings export). In the pack edit view, presets show status tags (blocked/excluded/mobile-skipped) so users can see which will be skipped at play time. All tab pack filter checkboxes remain interactive while a pack is active (autopilot/next-preset still draw from the pack pool; filters only affect the visible list). Synced via window sync (BroadcastChannel) and cloud sync (backend validates and persists `customPacks` and `activeCustomPackId`).
+**Custom packs** are user-created preset collections (max 50 packs, up to 832 presets each). Starting a pack takes highest priority in pool-building — autopilot and manual prev/next cycle within the pack's presets only (minus blocked). Starting a pack auto-switches `favorites` autopilot mode to `all` and auto-advances if the current preset isn't in the pack. Empty packs cannot be started (Start button hidden). Removing the currently playing preset from the active pack during editing auto-advances to the next preset. Packs can be exported/imported as standalone `.json` files (`_meta.source: 'mangowave-pack'`, distinct from settings export). In the pack edit view, presets show status tags (blocked/excluded/mobile-skipped) so users can see which will be skipped at play time. All tab pack filter checkboxes remain interactive while a pack is active (autopilot/next-preset still draw from the pack pool; filters only affect the visible list). Synced via window sync (BroadcastChannel) and cloud sync (backend validates and persists `customPacks` and `activeCustomPackId`).
 
 `useMediaPlayerStore` manages local file playback state (queue, current track, shuffle history, repeat mode). Not persisted — `File` objects can't survive page reload.
 
@@ -184,7 +184,7 @@ Floating panel (`components/PlaybackPanel.tsx`) rendered by App.tsx when local p
 - **WebGL 2 required.** `isWebGL2Supported()` checks on mount and shows a fallback if unavailable.
 - **butterchurn is untyped** — vendored as workspace packages (`packages/butterchurn`, `packages/butterchurn-presets`) with ESM wrappers and `.d.ts` declarations. 66 standard MilkDrop textures bundled via `milkdrop-textures` workspace package (loaded at renderer init alongside butterchurn's 6 built-in textures).
 - **`vite.config.ts`** imports `defineConfig` from `vitest/config` (not `vite`) to support the `test` property.
-- **833 presets** (395 butterchurn + 438 MilkDrop-Original) across 4 thematic packs (Ambient, Reactive, Psychedelic, Ethereal) with virtualized browsing (`react-virtuoso`).
+- **832 presets** (395 butterchurn + 437 MilkDrop-Original) across 4 thematic packs (Ambient, Reactive, Psychedelic, Ethereal) with virtualized browsing (`react-virtuoso`).
 - **`secure-json-parse`** used for prototype pollution protection on settings import.
 - **Settings import sanitization** — all imported values clamped to UI-enforced ranges. Whitelisted data keys only (store functions can't be overwritten). Array fields (favorites, blocked, packs) are merged/unioned with existing state rather than replaced. Custom packs merge by id with auto-rename on name collision. If a preset is in both favorites and blocked after merge, block wins (removed from favorites).
 - **Audio capture errors** — `humanizeAudioError` in `useAudioCapture` maps DOMException names to user-friendly messages per source (system vs mic). Missing audio tracks on screen share (user forgot "Share audio") block launch with browser/OS-aware guidance via `buildNoAudioMessage` (uses `browserInfo` to show only the relevant platform's constraints and names the user's browser if non-Chromium). `startCapture`/`startMicCapture` return `boolean` success so callers gate on result.

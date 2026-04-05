@@ -152,8 +152,8 @@
       "syncSettings": "Sinkronkan EQ & pengaturan rendering",
       "syncSettingsHint": "Bagikan pengaturan EQ, pre-amp, analisis audio, dan rendering antar perangkat. Hapus centang jika perangkat memerlukan pengaturan performa yang berbeda.",
       "copiedToClipboard": "Tersalin!",
-      "autopilotNote": "Pengaturan autopilot selalu tersinkronisasi — perangkat mana pun bisa mengaktifkan autopilot, tapi hanya timer pembuat ruangan yang berjalan.",
-      "audioTip": "Device Sync hanya menyinkronkan visual — setiap perangkat membutuhkan sumber audionya sendiri. Untuk pengalaman terbaik, atur semua perangkat ke input mikrofon di ruangan yang sama agar bereaksi terhadap musik yang sama dari speaker bersama. Aplikasi seperti AmpMe juga bisa menyinkronkan pemutaran audio di beberapa speaker ponsel."
+      "autopilotNote": "Pengaturan autopilot selalu tersinkronisasi. Perangkat mana pun bisa mengaktifkan autopilot, tapi hanya timer pembuat ruangan yang berjalan.",
+      "audioTip": "Device Sync hanya menyinkronkan visual. Setiap perangkat membutuhkan sumber audionya sendiri. Untuk pengalaman terbaik, atur semua perangkat ke input mikrofon di ruangan yang sama agar bereaksi terhadap musik yang sama dari speaker bersama. Aplikasi seperti AmpMe, Easy Jam, dan BeatSync juga bisa menyinkronkan pemutaran audio di beberapa speaker ponsel."
     }
   },
 

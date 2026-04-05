@@ -174,7 +174,7 @@
 
   "importedPresets": {
     "sectionTitle": "Imported Presets",
-    "description": "Add community MilkDrop presets (.milk) and the textures they reference. MilkDrop was designed as a native desktop application — some presets may not render perfectly in the browser due to differences in shader translation.",
+    "description": "Add community MilkDrop presets (.milk) and the textures they reference. MilkDrop was designed as a native desktop application, so some presets may not render perfectly in the browser due to differences in shader translation.",
     "emptyState": "No imported presets. Use \"Import .milk\" to add community MilkDrop presets.",
     "importMilk": "Import .milk",
     "importingPresets": "Importing presets...",
@@ -252,7 +252,7 @@
     "packDeleted": "Pack deleted",
     "packImported": "Pack \"{{name}}\" imported with {{count}} presets",
     "notPackFile": "Not a MangoWave pack file",
-    "settingsFileNotPack": "This is a settings file — use Settings › Data to import custom packs",
+    "settingsFileNotPack": "This is a settings file. Use Settings › Data to import custom packs",
     "packImportedPartial": "Pack \"{{name}}\" imported with {{count}} presets ({{skipped}} not found and skipped)",
     "maxPacksReached": "Maximum of 50 custom packs reached",
     "packActive": "Playing from: {{name}}",
@@ -266,7 +266,7 @@
     "titlePresets": "Import Presets",
     "titleTextures": "Import Textures",
     "descriptionPresets": "Add community MilkDrop presets (.milk files).\nMilkDrop presets were designed for a native Windows application. MangoWave translates them to run in the browser, but some presets may not render correctly due to differences in how shaders are processed. Complex presets are more likely to have visual differences.\nSome presets require custom textures — you'll be notified of any missing textures after import.",
-    "descriptionTextures": "Upload texture images (JPEG, PNG, or WebP) used by imported presets.\nPresets reference textures by name — for example, a preset using sampler_fire needs a texture named \"fire\".",
+    "descriptionTextures": "Upload texture images (JPEG, PNG, or WebP) used by imported presets.\nPresets reference textures by name: for example, a preset using sampler_fire needs a texture named \"fire\".",
     "storageNotePresets": "Presets are stored in your browser. Clearing site data will remove them, so keep your original .milk files.",
     "storageNoteTextures": "Textures are stored in your browser. Clearing site data will remove them, so keep your original image files.",
     "dropZonePresets": "Drop .milk files here or click to browse",

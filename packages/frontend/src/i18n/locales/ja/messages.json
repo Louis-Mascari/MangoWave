@@ -243,7 +243,7 @@
     "packDeleted": "パックを削除しました",
     "packImported": "パック「{{name}}」を{{count}}件のプリセットとともにインポートしました",
     "notPackFile": "MangoWaveのパックファイルではありません",
-    "settingsFileNotPack": "これは設定ファイルです — カスタムパックをインポートするには設定 › データをご利用ください",
+    "settingsFileNotPack": "これは設定ファイルです。カスタムパックをインポートするには設定 › データをご利用ください",
     "packImportedPartial": "パック「{{name}}」を{{count}}件のプリセットとともにインポートしました（{{skipped}}件が見つからずスキップ）",
     "maxPacksReached": "カスタムパックの上限（50個）に達しました",
     "packActive": "再生中：{{name}}",

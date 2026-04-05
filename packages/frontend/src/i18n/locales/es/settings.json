@@ -152,8 +152,8 @@
       "syncSettings": "Sincronizar EQ y renderizado",
       "syncSettingsHint": "Comparte EQ, pre-amp, análisis de audio y renderizado entre dispositivos. Desmarca si los dispositivos necesitan configuraciones de rendimiento diferentes.",
       "copiedToClipboard": "¡Copiado!",
-      "autopilotNote": "La configuración del autopilot siempre se sincroniza — cualquier dispositivo puede activarlo, pero solo el temporizador del creador de la sala se ejecuta.",
-      "audioTip": "Device Sync solo sincroniza los visuales — cada dispositivo necesita su propia fuente de audio. Para la mejor experiencia, configura todos los dispositivos con entrada de micrófono en la misma habitación para que reaccionen a la misma música desde un altavoz compartido. Apps como AmpMe también pueden sincronizar la reproducción de audio entre varios altavoces de teléfono."
+      "autopilotNote": "La configuración del autopilot siempre se sincroniza. Cualquier dispositivo puede activarlo, pero solo el temporizador del creador de la sala se ejecuta.",
+      "audioTip": "Device Sync solo sincroniza los visuales. Cada dispositivo necesita su propia fuente de audio. Para la mejor experiencia, configura todos los dispositivos con entrada de micrófono en la misma habitación para que reaccionen a la misma música desde un altavoz compartido. Apps como AmpMe, Easy Jam y BeatSync también pueden sincronizar la reproducción de audio entre varios altavoces de teléfono."
     }
   },
 

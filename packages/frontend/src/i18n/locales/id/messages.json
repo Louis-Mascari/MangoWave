@@ -165,7 +165,7 @@
 
   "importedPresets": {
     "sectionTitle": "Preset yang Diimpor",
-    "description": "Tambahkan preset MilkDrop komunitas (.milk) dan tekstur yang direferensikan. MilkDrop dirancang sebagai aplikasi desktop native — beberapa preset mungkin tidak ditampilkan sempurna di browser karena perbedaan dalam penerjemahan shader.",
+    "description": "Tambahkan preset MilkDrop komunitas (.milk) dan tekstur yang direferensikan. MilkDrop dirancang sebagai aplikasi desktop native, sehingga beberapa preset mungkin tidak ditampilkan sempurna di browser karena perbedaan dalam penerjemahan shader.",
     "emptyState": "Belum ada preset yang diimpor. Gunakan \"Import .milk\" untuk menambahkan preset MilkDrop komunitas.",
     "importMilk": "Impor .milk",
     "importingPresets": "Mengimpor preset...",
@@ -243,7 +243,7 @@
     "packDeleted": "Paket dihapus",
     "packImported": "Paket \"{{name}}\" diimpor dengan {{count}} preset",
     "notPackFile": "Bukan file paket MangoWave",
-    "settingsFileNotPack": "Ini adalah file pengaturan — gunakan Pengaturan › Data untuk mengimpor paket kustom",
+    "settingsFileNotPack": "Ini adalah file pengaturan. Gunakan Pengaturan › Data untuk mengimpor paket kustom",
     "packImportedPartial": "Paket \"{{name}}\" diimpor dengan {{count}} preset ({{skipped}} tidak ditemukan dan dilewati)",
     "maxPacksReached": "Maksimum 50 paket kustom telah tercapai",
     "packActive": "Memutar dari: {{name}}",
@@ -257,7 +257,7 @@
     "titlePresets": "Impor Preset",
     "titleTextures": "Impor Tekstur",
     "descriptionPresets": "Tambahkan preset MilkDrop komunitas (file .milk).\nPreset MilkDrop dirancang untuk aplikasi Windows native. MangoWave menerjemahkannya agar dapat berjalan di browser, tetapi beberapa preset mungkin tidak ditampilkan dengan benar karena perbedaan dalam pemrosesan shader. Preset yang lebih kompleks lebih mungkin memiliki perbedaan visual.\nBeberapa preset memerlukan tekstur kustom — Anda akan diberi tahu tentang tekstur yang hilang setelah impor.",
-    "descriptionTextures": "Unggah gambar tekstur (JPEG, PNG, atau WebP) yang digunakan oleh preset yang diimpor.\nPreset mereferensikan tekstur berdasarkan nama — misalnya, preset yang menggunakan sampler_fire memerlukan tekstur bernama \"fire\".",
+    "descriptionTextures": "Unggah gambar tekstur (JPEG, PNG, atau WebP) yang digunakan oleh preset yang diimpor.\nPreset mereferensikan tekstur berdasarkan nama: misalnya, preset yang menggunakan sampler_fire memerlukan tekstur bernama \"fire\".",
     "storageNotePresets": "Preset disimpan di browser Anda. Menghapus data situs akan menghapusnya, jadi simpan file .milk asli Anda.",
     "storageNoteTextures": "Tekstur disimpan di browser Anda. Menghapus data situs akan menghapusnya, jadi simpan file gambar asli Anda.",
     "dropZonePresets": "Seret file .milk ke sini atau klik untuk memilih",

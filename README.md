@@ -27,7 +27,7 @@
 - **Import custom textures** — upload JPEG/PNG/WebP images for MilkDrop presets that reference `sampler_<name>`. 66 standard MilkDrop textures bundled from the [projectM texture pack](https://github.com/projectM-visualizer/presets-milkdrop-texture-pack), plus 6 built-in butterchurn textures — covers all canonical presets. Additional author-specific textures can be uploaded manually
 - **Custom packs** — create, edit, import/export preset collections; start a pack to lock autopilot and navigation to its presets only
 - **Pack filtering** — enable/disable built-in packs to control which presets appear and which autopilot draws from
-- **Excluded presets** — quarantined presets (broken or inappropriate content) and mobile-blocked presets (27 GPU-heavy presets identified via device testing) collected in a unified Excluded tab with reason badges and per-preset overrides
+- **Excluded presets** — quarantined presets (broken or inappropriate content) and mobile-blocked presets (36 GPU-heavy presets identified via device testing) collected in a unified Excluded tab with reason badges and per-preset overrides
 - **Multiple audio sources** — system/tab audio, local files, or microphone input
 - **Local file playback** with queue, shuffle, repeat, seek, volume controls, and ID3 metadata display (title, artist, album, album art)
 - **10-band EQ** that shapes which frequencies drive the visuals
@@ -35,7 +35,7 @@
 - **Autopilot** with shuffle-style rounds (no repeats), all or favorites-only mode, proportional favorite weighting (1–10x)
 - **Preset history** with previous/next navigation and browseable history tab
 - **Shortcuts** — keyboard and mouse shortcuts for preset navigation, fullscreen, favorites, and more
-- **Mobile-optimized UI** with tap-to-reveal circular controls, full-screen modal panels, and automatic filtering of 27 GPU-heavy presets on mobile devices
+- **Mobile-optimized UI** with tap-to-reveal circular controls, full-screen modal panels, and automatic filtering of 36 GPU-heavy presets on mobile devices
 - **Optional Spotify integration** — Now Playing metadata for all authorized users; seek, shuffle, and repeat controls for Premium users. Cloud-synced settings. Owner-mode only due to Spotify's dev mode policy (1 Client ID per developer, max 5 authorized users, Premium required to register the app). Self-hosters can set up their own Spotify developer app via the included PKCE code
 - **Visual quality controls** — mesh resolution, texture quality, FXAA anti-aliasing, plus FPS cap, resolution scaling, FFT size, smoothing
 - **Multi-window sync** — sync presets and settings across browser windows on the same device via BroadcastChannel. Any window can make changes; automatic leader election drives autopilot from one window

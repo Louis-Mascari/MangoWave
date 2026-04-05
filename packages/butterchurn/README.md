@@ -1,10 +1,10 @@
 # butterchurn
 
-Vendored [butterchurn](https://github.com/jberg/butterchurn) v2 — WebGL 2 MilkDrop visualizer. ESM wrapper around the beautified UMD bundle (with MangoWave patches) and TypeScript declarations.
+Source-forked [butterchurn](https://github.com/jberg/butterchurn) v2.6.7 (commit `d90f271`) — WebGL 2 MilkDrop visualizer. ~30 ES6 source modules with meaningful names, bundled directly by Vite (no intermediate build step). TypeScript declarations provided.
 
-## Why vendored
+## Why source-forked
 
-butterchurn is effectively unmaintained (last stable release 2018). Vendoring eliminates npm as a single point of failure and allows MangoWave-specific patches.
+butterchurn is effectively unmaintained (last stable release 2018). The source fork eliminates npm as a single point of failure, enables MangoWave-specific patches, and provides readable source for debugging.
 
 ## Exports
 
@@ -13,10 +13,30 @@ butterchurn is effectively unmaintained (last stable release 2018). Vendoring el
 
 ## Structure
 
-- `lib/` — `butterchurn.js` (beautified, active, with patches), `butterchurn.min.js` (gitignored reference), `butterchurnExtraImages.min.js`
-- `src/index.js` — ESM wrapper with CJS interop (`mod.default ?? mod`)
+- `src/butterchurn/` — ES6 source modules (~30 files) with 12 MangoWave patches
+- `src/index.js` — ESM wrapper
 - `src/index.d.ts` — TypeScript declarations
+- `lib/butterchurnExtraImages.min.js` — built-in texture data (static, not part of the source fork)
 
 ## MangoWave Patches
 
-The beautified bundle (`butterchurn.js`) includes MangoWave-specific patches. See [PATCHES.md](PATCHES.md) for details, math, and re-application instructions.
+12 patches applied to the source. All searchable via `[MW-PATCH:` comments. See [PATCHES.md](PATCHES.md) for details, math, and verification instructions.
+
+### Patch Summary
+
+1. Frame-rate normalization (JS-level)
+2. `_mw_fps_ratio` shader uniform
+3. Shader compile/link error handling
+4. Graceful shader error fallback
+5. Universal FPS normalization for shader constants
+6. Source fork (replaces beautified UMD bundle)
+7. Fix `targetTexture` leak on resize
+8. Fix `solarize` mixing bug
+9. Fix `this.frame` reference in `calcTimeAndFPS`
+10. Ring buffer for FPS history
+11. `DYNAMIC_DRAW` for per-frame buffers
+12. Clean up previous shader program on preset change
+
+## Upstream
+
+The `ecma-proposal-math-extensions` dependency (upstream uses `Math.clamp`) is replaced with an inline polyfill in `src/butterchurn/index.js`.

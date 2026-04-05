@@ -42,7 +42,8 @@
     "fieldNotApplied": "\"{{field}}\" tidak dapat diterapkan",
     "importedWithWarnings": "Pengaturan diimpor. Beberapa pengaturan tidak dapat diterapkan karena perubahan aplikasi",
     "importedSuccess": "Pengaturan berhasil diimpor",
-    "importedDataRestored": "Preset dan tekstur yang diimpor telah dipulihkan"
+    "importedDataRestored": "Preset dan tekstur yang diimpor telah dipulihkan",
+    "mergeNote": "Favorit, preset yang diblokir, dan paket akan digabungkan dengan yang sudah ada."
   },
   "spotify": {
     "connectingToSpotify": "Menghubungkan ke Spotify...",

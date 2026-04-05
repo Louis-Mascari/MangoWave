@@ -42,7 +42,8 @@
     "fieldNotApplied": "「{{field}}」を適用できませんでした",
     "importedWithWarnings": "設定をインポートしました。アプリの変更により一部の設定を適用できませんでした",
     "importedSuccess": "設定のインポートが完了しました",
-    "importedDataRestored": "インポートしたプリセットとテクスチャを復元しました"
+    "importedDataRestored": "インポートしたプリセットとテクスチャを復元しました",
+    "mergeNote": "お気に入り、ブロック済みプリセット、パックは既存のものとマージされます。"
   },
   "spotify": {
     "connectingToSpotify": "Spotifyに接続中...",

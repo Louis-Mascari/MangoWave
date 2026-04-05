@@ -42,7 +42,8 @@
     "fieldNotApplied": "\"{{field}}\"을(를) 적용할 수 없습니다",
     "importedWithWarnings": "설정을 가져왔습니다. 앱 변경으로 인해 일부 설정을 적용할 수 없었습니다",
     "importedSuccess": "설정을 성공적으로 가져왔습니다",
-    "importedDataRestored": "가져온 프리셋 및 텍스처가 복원되었습니다"
+    "importedDataRestored": "가져온 프리셋 및 텍스처가 복원되었습니다",
+    "mergeNote": "즐겨찾기, 차단된 프리셋, 팩은 기존 항목과 병합됩니다."
   },
   "spotify": {
     "connectingToSpotify": "Spotify에 연결하는 중...",

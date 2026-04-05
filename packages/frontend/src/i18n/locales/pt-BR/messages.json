@@ -42,7 +42,8 @@
     "fieldNotApplied": "\"{{field}}\" não pôde ser aplicado",
     "importedWithWarnings": "Configurações importadas. Algumas configurações não puderam ser aplicadas devido a mudanças no aplicativo",
     "importedSuccess": "Configurações importadas com sucesso",
-    "importedDataRestored": "Presets e texturas importados restaurados"
+    "importedDataRestored": "Presets e texturas importados restaurados",
+    "mergeNote": "Favoritos, presets bloqueados e pacotes serão mesclados com os existentes."
   },
   "spotify": {
     "connectingToSpotify": "Conectando ao Spotify...",

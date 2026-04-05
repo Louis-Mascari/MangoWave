@@ -42,7 +42,8 @@
     "fieldNotApplied": "「{{field}}」无法应用",
     "importedWithWarnings": "设置已导入。由于应用变更，部分设置无法应用",
     "importedSuccess": "设置导入成功",
-    "importedDataRestored": "已恢复导入的预设和纹理"
+    "importedDataRestored": "已恢复导入的预设和纹理",
+    "mergeNote": "收藏、屏蔽的预设和包将与现有内容合并。"
   },
   "spotify": {
     "connectingToSpotify": "正在连接 Spotify...",

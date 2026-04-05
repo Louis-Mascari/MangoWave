@@ -439,9 +439,18 @@ export interface ImportResult {
   warnings: string[];
 }
 
+/** Fields that should be union-merged (not replaced) with current state on import. */
+const MERGE_STRING_ARRAYS: (keyof SettingsState)[] = [
+  'favoritePresets',
+  'blockedPresets',
+  'enabledPacks',
+  'excludedOverrides',
+];
+
 export function buildImportPayload(
   data: ExportData,
   selectedCategories: Set<string>,
+  currentState?: Partial<SettingsState>,
 ): ImportResult {
   const payload: Record<string, unknown> = {};
   const warnings: string[] = [];
@@ -458,6 +467,81 @@ export function buildImportPayload(
           warnings.push(i18n.t('settingsImport.fieldNotApplied', { field, ns: 'messages' }));
         }
       }
+    }
+  }
+
+  // Merge string arrays with current state (union, deduplicated)
+  if (currentState) {
+    for (const field of MERGE_STRING_ARRAYS) {
+      if (field in payload) {
+        const incoming = payload[field] as string[];
+        const existing = (currentState[field] as string[] | undefined) ?? [];
+        const merged = [...new Set([...existing, ...incoming])];
+        payload[field] = merged;
+      }
+    }
+
+    // Block wins: if a preset is in both favorites and blocked after merge, drop from favorites
+    if ('favoritePresets' in payload || 'blockedPresets' in payload) {
+      const blocked = new Set(
+        (payload.blockedPresets as string[] | undefined) ??
+          (currentState.blockedPresets as string[] | undefined) ??
+          [],
+      );
+      if ('favoritePresets' in payload && blocked.size > 0) {
+        payload.favoritePresets = (payload.favoritePresets as string[]).filter(
+          (p) => !blocked.has(p),
+        );
+      }
+    }
+
+    // Merge customPacks by id — keep existing, auto-rename on name collision
+    if ('customPacks' in payload) {
+      const incoming = payload.customPacks as {
+        id: string;
+        name: string;
+        presets: string[];
+        createdAt: number;
+      }[];
+      const existing = (currentState.customPacks as typeof incoming | undefined) ?? [];
+      const existingIds = new Set(existing.map((p) => p.id));
+      const existingNames = new Set(existing.map((p) => p.name));
+      const newPacks = incoming
+        .filter((p) => !existingIds.has(p.id))
+        .map((p) => {
+          if (!existingNames.has(p.name)) return p;
+          // Auto-rename: append " (imported)", then " (2)", " (3)", etc.
+          let candidate = `${p.name} (imported)`;
+          let suffix = 2;
+          while (existingNames.has(candidate)) {
+            candidate = `${p.name} (${suffix++})`;
+          }
+          existingNames.add(candidate);
+          return { ...p, name: candidate.slice(0, 50) };
+        });
+      payload.customPacks = [...existing, ...newPacks].slice(0, 50);
+    }
+
+    // Merge importedPresets by name — keep existing, add new
+    if ('importedPresets' in payload) {
+      const incoming = payload.importedPresets as { name: string }[];
+      const existing = (currentState.importedPresets as typeof incoming | undefined) ?? [];
+      const existingNames = new Set(existing.map((p) => p.name));
+      payload.importedPresets = [
+        ...existing,
+        ...incoming.filter((p) => !existingNames.has(p.name)),
+      ];
+    }
+
+    // Merge importedTextures by name — keep existing, add new
+    if ('importedTextures' in payload) {
+      const incoming = payload.importedTextures as { name: string }[];
+      const existing = (currentState.importedTextures as typeof incoming | undefined) ?? [];
+      const existingNames = new Set(existing.map((p) => p.name));
+      payload.importedTextures = [
+        ...existing,
+        ...incoming.filter((p) => !existingNames.has(p.name)),
+      ];
     }
   }
 

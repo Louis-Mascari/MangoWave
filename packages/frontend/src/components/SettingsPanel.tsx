@@ -867,7 +867,11 @@ function DataTab() {
     if (!importResult) return;
     setIsImporting(true);
     try {
-      const { payload, warnings } = buildImportPayload(importResult.data, importSelected);
+      const { payload, warnings } = buildImportPayload(
+        importResult.data,
+        importSelected,
+        useSettingsStore.getState(),
+      );
       useSettingsStore.getState().importSettings(payload);
 
       // Restore embedded imported data if present
@@ -1005,6 +1009,9 @@ function DataTab() {
                   </label>
                 ))}
             </div>
+            <p className="text-[11px] leading-snug text-white/40">
+              {tm('settingsImport.mergeNote')}
+            </p>
             <div className="flex gap-2">
               <button
                 onClick={handleApplyImport}

@@ -44,7 +44,8 @@
     "fieldNotApplied": "\"{{field}}\" could not be applied",
     "importedWithWarnings": "Settings imported. Some settings could not be applied due to app changes",
     "importedSuccess": "Settings imported successfully",
-    "importedDataRestored": "Imported presets and textures restored"
+    "importedDataRestored": "Imported presets and textures restored",
+    "mergeNote": "Favorites, blocked presets, and packs will be merged with your existing ones."
   },
 
   "spotify": {

@@ -42,7 +42,8 @@
     "fieldNotApplied": "\"{{field}}\" लागू नहीं हो सका",
     "importedWithWarnings": "सेटिंग्स इम्पोर्ट हो गईं। ऐप बदलावों के कारण कुछ सेटिंग्स लागू नहीं हो सकीं",
     "importedSuccess": "सेटिंग्स सफलतापूर्वक इम्पोर्ट हो गईं",
-    "importedDataRestored": "आयातित प्रीसेट और टेक्सचर पुनर्स्थापित"
+    "importedDataRestored": "आयातित प्रीसेट और टेक्सचर पुनर्स्थापित",
+    "mergeNote": "पसंदीदा, ब्लॉक किए गए प्रीसेट और पैक आपके मौजूदा में मर्ज होंगे।"
   },
   "spotify": {
     "connectingToSpotify": "Spotify से कनेक्ट हो रहा है...",

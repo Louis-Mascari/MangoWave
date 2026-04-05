@@ -1323,6 +1323,7 @@ function DeviceSyncSection() {
     <>
       <h3 className="text-sm font-semibold text-white">{t('sync.deviceSync.title')}</h3>
       <p className="text-xs text-white/50">{t('sync.deviceSync.description')}</p>
+      <p className="text-[11px] leading-snug text-amber-400/60">{t('sync.deviceSync.audioTip')}</p>
 
       {status === 'error' && (
         <div className="flex flex-col gap-2">

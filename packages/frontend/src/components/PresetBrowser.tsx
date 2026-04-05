@@ -306,13 +306,24 @@ function PackAddPresets({
   return (
     <div className="flex min-h-0 flex-[1.5] flex-col border-t border-white/10 pt-2">
       <p className="mb-1 text-xs font-semibold text-white/50">{t('customPacks.addPresets')}</p>
-      <input
-        type="text"
-        placeholder={t('customPacks.searchPresets')}
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="mb-1 w-full rounded border-none bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
-      />
+      <div className="relative mb-1">
+        <input
+          type="text"
+          placeholder={t('customPacks.searchPresets')}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full rounded border-none bg-white/10 px-2 py-1 pr-6 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
+        />
+        <button
+          onClick={() => setSearch('')}
+          className={`absolute top-1/2 right-1.5 flex h-4 w-4 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-none bg-white/20 text-[10px] leading-none text-white/60 hover:bg-white/30 hover:text-white ${
+            search ? 'visible' : 'invisible'
+          }`}
+          aria-label={t('presetBrowser.clearSearch')}
+        >
+          ✕
+        </button>
+      </div>
       {addable.length === 0 ? (
         <p className="py-1 text-center text-xs text-white/30">{t('customPacks.allPresetsAdded')}</p>
       ) : (

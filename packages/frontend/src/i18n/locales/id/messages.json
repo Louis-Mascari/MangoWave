@@ -68,7 +68,8 @@
     "silenceDetected": "Tidak ada audio terdeteksi. Pastikan audio sedang diputar di layar, jendela, atau tab yang dibagikan, dan kamu telah mencentang \"Bagikan audio\" di dialog browser.",
     "silenceDetectedMic": "Tidak ada audio terdeteksi dari mikrofon. Pastikan mikrofon tidak di-mute dan menangkap suara.",
     "silenceDetectedLocal": "Tidak ada audio terdeteksi. Pastikan file berformat yang didukung dan volume perangkat sudah dinyalakan.",
-    "noPresetsAvailable": "Tidak ada preset yang tersedia. Pastikan setidaknya satu paket diaktifkan dan tidak semua preset diblokir."
+    "noPresetsAvailable": "Tidak ada preset yang tersedia. Pastikan setidaknya satu paket diaktifkan dan tidak semua preset diblokir.",
+    "presetNotFound": "Preset tidak ditemukan di perangkat ini: \"{{name}}\""
   },
   "playback": {
     "addSongsToQueue": "Tambahkan lagu ke antrean",

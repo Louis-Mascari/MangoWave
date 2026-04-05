@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useDeviceSyncStatusStore } from '../store/useDeviceSyncStatusStore.ts';
+import { useToastStore } from '../store/useToastStore.ts';
 import type { DeviceSyncService } from '../services/DeviceSyncService.ts';
 import { getDeviceSyncSnapshot, applyDeviceSyncSettings } from '../services/syncUtils.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { mobileBlockedSet } from '../data/excludedPresets.ts';
+import i18n from '../i18n/index.ts';
 import type { VisualizerRenderer } from '../engine/VisualizerRenderer.ts';
 
 const SETTINGS_DEBOUNCE_MS = 500;
@@ -97,6 +99,13 @@ export function useDeviceSync(
             }
             return;
           }
+        }
+
+        // Check if preset exists on this device (imported presets are local to IDB)
+        if (!renderer.presetList.includes(presetName)) {
+          const t = i18n.getFixedT(null, 'messages');
+          useToastStore.getState().show(t('toasts.presetNotFound', { name: presetName }));
+          return;
         }
 
         isRemotePresetRef.current = true;

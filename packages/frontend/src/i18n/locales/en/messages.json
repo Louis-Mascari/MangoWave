@@ -72,7 +72,8 @@
     "silenceDetected": "No audio detected. Make sure audio is playing in the shared screen, window, or tab, and that you checked \"Share audio\" in the browser dialog.",
     "silenceDetectedMic": "No audio detected from your microphone. Make sure your mic is not muted and is picking up sound.",
     "silenceDetectedLocal": "No audio detected. Make sure the file is a supported format and your device volume is up.",
-    "noPresetsAvailable": "No presets available. Check that at least one pack is enabled and not all presets are blocked."
+    "noPresetsAvailable": "No presets available. Check that at least one pack is enabled and not all presets are blocked.",
+    "presetNotFound": "Preset not found on this device: \"{{name}}\""
   },
 
   "playback": {

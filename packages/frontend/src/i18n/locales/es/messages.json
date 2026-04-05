@@ -68,7 +68,8 @@
     "silenceDetected": "No se detectó audio. Asegúrate de que haya audio reproduciéndose en la pantalla, ventana o pestaña compartida, y que hayas marcado \"Compartir audio\" en el diálogo del navegador.",
     "silenceDetectedMic": "No se detectó audio del micrófono. Asegúrate de que tu mic no esté silenciado y esté captando sonido.",
     "silenceDetectedLocal": "No se detectó audio. Asegúrate de que el archivo sea un formato compatible y de que el volumen de tu dispositivo esté activado.",
-    "noPresetsAvailable": "No hay presets disponibles. Verifica que al menos un pack esté habilitado y que no todos los presets estén bloqueados."
+    "noPresetsAvailable": "No hay presets disponibles. Verifica que al menos un pack esté habilitado y que no todos los presets estén bloqueados.",
+    "presetNotFound": "Preset no encontrado en este dispositivo: \"{{name}}\""
   },
   "playback": {
     "addSongsToQueue": "Agrega canciones a tu cola",

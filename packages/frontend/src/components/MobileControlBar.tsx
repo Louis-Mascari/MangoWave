@@ -102,8 +102,8 @@ export function MobileControlBar({
   }, []);
 
   // Landscape: wider ellipse shifted up to clear the PlaybackPanel
-  const circleRadiusX = isLandscape ? 150 : 110;
-  const circleRadiusY = isLandscape ? 80 : 110;
+  const circleRadiusX = isLandscape ? 160 : 110;
+  const circleRadiusY = isLandscape ? 100 : 110;
 
   // "Just revealed" guard: after controls appear, block button clicks for 400ms so the
   // touch that revealed controls doesn't accidentally trigger a button action.

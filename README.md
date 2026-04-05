@@ -91,7 +91,7 @@ The BYOC (bring your own client) PKCE flow is retained in the codebase (`spotify
 
 ## Project Structure
 
-NPM workspaces monorepo. Node >= 20 required.
+pnpm workspaces monorepo. Node >= 20, pnpm >= 10 required.
 
 ```
 MangoWave/
@@ -117,10 +117,10 @@ See each package's README for details.
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Start the frontend dev server
-npm run dev -w packages/frontend
+pnpm --filter @mangowave/frontend dev
 # Open http://localhost:5173
 ```
 
@@ -128,22 +128,22 @@ npm run dev -w packages/frontend
 
 ```bash
 # Development
-npm run dev -w packages/frontend     # Vite dev server (localhost:5173)
+pnpm --filter @mangowave/frontend dev     # Vite dev server (localhost:5173)
 
 # Testing
-npm run test -w packages/frontend    # Vitest (jsdom)
-npm run e2e -w packages/frontend     # Playwright (requires browser binaries)
-npm run test -w packages/backend     # Vitest
-npm run test -w infrastructure       # Jest (CDK assertions)
-npm test                             # All workspaces (unit only)
+pnpm --filter @mangowave/frontend test    # Vitest (jsdom)
+pnpm --filter @mangowave/frontend e2e     # Playwright (requires browser binaries)
+pnpm --filter @mangowave/backend test     # Vitest
+pnpm --filter @mangowave/infrastructure test  # Jest (CDK assertions)
+pnpm test                                 # All workspaces (unit only)
 
 # Linting & formatting
-npm run lint -w packages/frontend    # ESLint
-npm run format:check                 # Prettier check
-npm run format                       # Prettier fix
+pnpm --filter @mangowave/frontend lint    # ESLint
+pnpm run format:check                     # Prettier check
+pnpm run format                           # Prettier fix
 
 # Build
-npm run build -w packages/frontend   # tsc + vite build
+pnpm --filter @mangowave/frontend build   # tsc + vite build
 ```
 
 ## Shortcuts
@@ -195,7 +195,7 @@ See **[SELF-HOSTING.md](SELF-HOSTING.md)** for full instructions.
 
 ## Requirements
 
-- **Node >= 20** for local development
+- **Node >= 20** and **pnpm >= 10** for local development
 - **WebGL 2** and browser compatibility — see [Browser & Device Compatibility](#browser--device-compatibility) above
 
 ## Acknowledgments

@@ -46,7 +46,7 @@ Both scripts:
 3. Write `scripts/preset-classification.json` (intermediate, gitignored)
 4. With `--update`: regenerate `packages/frontend/src/data/presetThematicPacks.ts`
 
-After regenerating, run `npx prettier --write packages/frontend/src/data/presetThematicPacks.ts` to format.
+After regenerating, run `pnpm exec prettier --write packages/frontend/src/data/presetThematicPacks.ts` to format.
 
 ## How to Classify New Presets
 

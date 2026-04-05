@@ -5,14 +5,14 @@ The MangoWave visualizer app — a React 19 + Vite 8 + TypeScript SPA that plays
 ## Development
 
 ```bash
-npm run dev        # Vite dev server at localhost:5173
-npm run build      # tsc -b && vite build
-npm run test       # Vitest (jsdom)
-npm run test:watch # Vitest in watch mode
-npm run e2e        # Playwright E2E tests
-npm run e2e:ui     # Playwright with interactive UI
-npm run e2e:headed # Playwright in headed mode
-npm run lint       # ESLint (includes jsx-a11y)
+pnpm run dev        # Vite dev server at localhost:5173
+pnpm run build      # tsc -b && vite build
+pnpm run test       # Vitest (jsdom)
+pnpm run test:watch # Vitest in watch mode
+pnpm run e2e        # Playwright E2E tests
+pnpm run e2e:ui     # Playwright with interactive UI
+pnpm run e2e:headed # Playwright in headed mode
+pnpm run lint       # ESLint (includes jsx-a11y)
 ```
 
 ## Architecture

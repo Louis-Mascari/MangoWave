@@ -4,7 +4,7 @@
 
 ## How it works
 
-Raw JPG textures live in `textures/`. A build script converts them to base64 data URIs with dimensions in `src/textureData.json` (gitignored, generated on `npm install` via `prepare` script).
+Raw JPG textures live in `textures/`. A build script converts them to base64 data URIs with dimensions in `src/textureData.json` (gitignored, generated on `pnpm install` via `prepare` script).
 
 The exported `getImages()` returns textures keyed by both original case (`OIbeans1`) and lowercase (`oibeans1`) for case-insensitive compatibility — MilkDrop on Windows was case-insensitive, so presets reference textures in varying case.
 

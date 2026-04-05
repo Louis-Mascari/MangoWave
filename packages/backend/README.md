@@ -5,8 +5,8 @@ Lambda handlers for MangoWave's optional Spotify integration and cloud settings 
 ## Development
 
 ```bash
-npm run build   # tsc
-npm run test    # Vitest
+pnpm run build   # tsc
+pnpm run test    # Vitest
 ```
 
 Handlers are deployed via CDK (see `infrastructure/`). No local server — test with Vitest.

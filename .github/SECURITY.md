@@ -29,4 +29,4 @@ Use [GitHub's private vulnerability reporting](https://github.com/Louis-Mascari/
 
 ## Scope
 
-This policy covers the MangoWave web application at `play.mangowave.app` and the code in this repository. Third-party dependencies are managed via Dependabot and `npm audit`.
+This policy covers the MangoWave web application at `play.mangowave.app` and the code in this repository. Third-party dependencies are managed via Dependabot and `pnpm audit`.

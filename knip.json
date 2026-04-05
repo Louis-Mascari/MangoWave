@@ -17,7 +17,7 @@
     "packages/backend": {},
     "infrastructure": {
       "entry": ["bin/mangowave.ts"],
-      "ignoreDependencies": ["ts-node"]
+      "ignoreDependencies": ["esbuild", "ts-node"]
     }
   }
 }

@@ -7,7 +7,7 @@
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "dependencies": {
-    "hlslparser-wasm": "*",
+    "hlslparser-wasm": "workspace:*",
     "lodash": "^4.17.21",
     "milkdrop-preset-utils": "^0.1.0"
   }

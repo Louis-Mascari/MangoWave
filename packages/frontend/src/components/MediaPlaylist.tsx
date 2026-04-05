@@ -7,6 +7,7 @@ import {
   rejectionMessage,
   AUDIO_ACCEPT,
 } from '../utils/audioFileValidation.ts';
+import { CloseIcon, ArrowUpIcon, ArrowDownIcon } from './icons.tsx';
 
 function formatDuration(seconds: number): string {
   if (!seconds || !isFinite(seconds)) return '--:--';
@@ -74,7 +75,7 @@ export function MediaPlaylist({ onAddFiles, onClear, onClose }: MediaPlaylistPro
               aria-label={t('queue.closeQueue')}
               title={t('queue.closeQueue')}
             >
-              ✕
+              <CloseIcon className="h-3 w-3" />
             </button>
           )}
         </div>
@@ -115,7 +116,7 @@ export function MediaPlaylist({ onAddFiles, onClear, onClose }: MediaPlaylistPro
                   className="flex h-7 w-7 cursor-pointer items-center justify-center rounded border-none bg-white/10 text-xs text-white/30 hover:bg-white/20 hover:text-white/70 disabled:cursor-default disabled:bg-transparent disabled:text-white/10"
                   aria-label={t('queue.moveUp', { name: track.name })}
                 >
-                  ▲
+                  <ArrowUpIcon className="h-3 w-3" />
                 </button>
                 <button
                   onClick={(e) => {
@@ -126,7 +127,7 @@ export function MediaPlaylist({ onAddFiles, onClear, onClose }: MediaPlaylistPro
                   className="flex h-7 w-7 cursor-pointer items-center justify-center rounded border-none bg-white/10 text-xs text-white/30 hover:bg-white/20 hover:text-white/70 disabled:cursor-default disabled:bg-transparent disabled:text-white/10"
                   aria-label={t('queue.moveDown', { name: track.name })}
                 >
-                  ▼
+                  <ArrowDownIcon className="h-3 w-3" />
                 </button>
               </span>
             )}
@@ -138,7 +139,7 @@ export function MediaPlaylist({ onAddFiles, onClear, onClose }: MediaPlaylistPro
               className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:text-red-400"
               aria-label={t('queue.remove', { name: track.name })}
             >
-              ×
+              <CloseIcon className="h-3 w-3" />
             </button>
           </div>
         ))}

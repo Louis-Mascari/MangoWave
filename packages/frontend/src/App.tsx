@@ -32,6 +32,7 @@ import { ActionToast } from './components/ActionToast.tsx';
 import { ConfirmDialog } from './components/ConfirmDialog.tsx';
 import { ImportModal } from './components/ImportModal.tsx';
 import { OnboardingOverlay } from './components/OnboardingOverlay.tsx';
+import { CloseIcon } from './components/icons.tsx';
 import { useUnlockCheck } from './hooks/useUnlockCheck.ts';
 import { useSettingsStore } from './store/useSettingsStore.ts';
 import { useSpotifyStore } from './store/useSpotifyStore.ts';
@@ -619,7 +620,7 @@ function MainApp() {
                     className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-none bg-white/10 text-sm text-white/70 hover:bg-white/20"
                     aria-label={i18n.t('close', { ns: 'common' })}
                   >
-                    ✕
+                    <CloseIcon className="h-4 w-4" />
                   </button>
                 </div>
                 <div className="flex-1 overflow-y-auto p-3">

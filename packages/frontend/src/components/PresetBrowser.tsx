@@ -20,6 +20,7 @@ import {
 import { PACK_ORDER } from '../engine/VisualizerRenderer.ts';
 import { PACK_DESCRIPTIONS } from '../data/presetThematicPacks.ts';
 import { useImportModalStore } from '../store/useImportModalStore.ts';
+import { CloseIcon } from './icons.tsx';
 import type {
   CustomPack,
   ImportedPresetMeta,
@@ -321,7 +322,7 @@ function PackAddPresets({
           }`}
           aria-label={t('presetBrowser.clearSearch')}
         >
-          ✕
+          <CloseIcon className="h-2.5 w-2.5" />
         </button>
       </div>
       {addable.length === 0 ? (
@@ -1649,7 +1650,7 @@ export function PresetBrowser({
                 }`}
                 aria-label={t('presetBrowser.clearSearch')}
               >
-                ✕
+                <CloseIcon className="h-2.5 w-2.5" />
               </button>
             </div>
           )}
@@ -1925,7 +1926,7 @@ export function PresetBrowser({
             }`}
             aria-label={t('presetBrowser.clearSearch')}
           >
-            ✕
+            <CloseIcon className="h-2.5 w-2.5" />
           </button>
         </div>
       )}

@@ -5,6 +5,15 @@ import { SettingsPanel } from './SettingsPanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
 import { useFocusTrap } from '../hooks/useFocusTrap.ts';
 import type { PanelView } from './ControlBar.tsx';
+import {
+  ChevronRightIcon,
+  ChevronLeftIcon,
+  StarIcon,
+  GearIcon,
+  CloseIcon,
+  FullscreenIcon,
+  BlockIcon,
+} from './icons.tsx';
 
 // Module-level counter (not a ref) to avoid React Compiler refs-during-render lint
 let historyDepth = 0;
@@ -195,7 +204,7 @@ export function MobileControlBar({
     },
     {
       label: t('mobile.next'),
-      icon: '▶',
+      icon: <ChevronRightIcon className="h-5 w-5" />,
       action: () => {
         onNextPreset();
         resetIdle();
@@ -203,7 +212,7 @@ export function MobileControlBar({
     },
     {
       label: isFavorite ? t('mobile.unfavorite') : t('mobile.favorite'),
-      icon: '★',
+      icon: <StarIcon className="h-5 w-5" />,
       action: () => {
         onToggleFavorite();
         resetIdle();
@@ -213,17 +222,17 @@ export function MobileControlBar({
     },
     {
       label: tc('settings'),
-      icon: '⚙',
+      icon: <GearIcon className="h-5 w-5" />,
       action: () => openModal('settings'),
     },
     {
       label: tc('exit'),
-      icon: '✕',
+      icon: <CloseIcon className="h-5 w-5" />,
       action: onStop,
     },
     {
       label: isFullscreen ? t('controlBar.exitFS') : tc('fullscreen'),
-      icon: '⛶',
+      icon: <FullscreenIcon className="h-5 w-5" />,
       action: () => {
         onToggleFullscreen();
         resetIdle();
@@ -241,7 +250,7 @@ export function MobileControlBar({
     },
     {
       label: isBlocked ? t('mobile.unblock') : t('mobile.block'),
-      icon: '⊘',
+      icon: <BlockIcon className="h-5 w-5" />,
       action: () => {
         onToggleBlock();
         resetIdle();
@@ -251,7 +260,7 @@ export function MobileControlBar({
     },
     {
       label: tc('previous'),
-      icon: '◀',
+      icon: <ChevronLeftIcon className="h-5 w-5" />,
       action: () => {
         onPreviousPreset?.();
         resetIdle();
@@ -367,7 +376,7 @@ export function MobileControlBar({
                 className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-none bg-white/10 text-sm text-white/70 hover:bg-white/20"
                 aria-label={tc('close')}
               >
-                ✕
+                <CloseIcon className="h-4 w-4" />
               </button>
             </div>
             <div

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { useFocusTrap } from '../hooks/useFocusTrap.ts';
+import { NextTrackIcon, PaletteIcon, GearIcon, KeyboardIcon } from './icons.tsx';
 interface OnboardingOverlayProps {
   onComplete: () => void;
 }
@@ -16,22 +17,22 @@ const DESKTOP_TIPS: Tip[] = [
   {
     titleKey: 'onboarding.desktop.skipPresetsTitle',
     descKey: 'onboarding.desktop.skipPresetsDesc',
-    icon: '⏭',
+    icon: <NextTrackIcon className="h-8 w-8" />,
   },
   {
     titleKey: 'onboarding.desktop.curateTitle',
     descKey: 'onboarding.desktop.curateDesc',
-    icon: '🎨',
+    icon: <PaletteIcon className="h-8 w-8" />,
   },
   {
     titleKey: 'onboarding.desktop.tuneTitle',
     descKey: 'onboarding.desktop.tuneDesc',
-    icon: '⚙',
+    icon: <GearIcon className="h-8 w-8" />,
   },
   {
     titleKey: 'onboarding.desktop.shortcutsTitle',
     descKey: 'onboarding.desktop.shortcutsDesc',
-    icon: '⌨',
+    icon: <KeyboardIcon className="h-8 w-8" />,
   },
 ];
 
@@ -71,12 +72,12 @@ const MOBILE_TIPS: Tip[] = [
   {
     titleKey: 'onboarding.mobile.curateTitle',
     descKey: 'onboarding.mobile.curateDesc',
-    icon: '🎨',
+    icon: <PaletteIcon className="h-8 w-8" />,
   },
   {
     titleKey: 'onboarding.mobile.autopilotTitle',
     descKey: 'onboarding.mobile.autopilotDesc',
-    icon: '⚙',
+    icon: <GearIcon className="h-8 w-8" />,
   },
 ];
 

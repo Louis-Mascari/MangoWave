@@ -28,8 +28,11 @@ export default class Renderer {
     this.time = 0;
     this.presetTime = 0;
     this.lastTime = performance.now();
-    this.timeHist = [0];
-    this.timeHistMax = 120;
+    /* [MW-PATCH: ring buffer for FPS history] */
+    this.timeHistBuf = new Float64Array(120);
+    this.timeHistBuf[0] = 0;
+    this.timeHistHead = 0;
+    this.timeHistLen = 1;
     this.blending = false;
     this.blendStartTime = 0;
     this.blendProgress = 0;
@@ -248,12 +251,15 @@ export default class Renderer {
 
     if (this.texsizeX !== oldTexsizeX || this.texsizeY !== oldTexsizeY) {
       // copy target texture, because we flip prev/target at start of render
+      /* [MW-PATCH: fix targetTexture leak on resize] */
+      const oldTexture = this.targetTexture;
       const targetTextureNew = this.gl.createTexture();
       this.bindFrameBufferTexture(this.targetFrameBuffer, targetTextureNew);
       this.bindFrambufferAndSetViewport(this.targetFrameBuffer, this.texsizeX, this.texsizeY);
 
-      this.resampleShader.renderQuadTexture(this.targetTexture);
+      this.resampleShader.renderQuadTexture(oldTexture);
 
+      this.gl.deleteTexture(oldTexture);
       this.targetTexture = targetTextureNew;
 
       this.bindFrameBufferTexture(this.prevFrameBuffer, this.prevTexture);
@@ -323,7 +329,8 @@ export default class Renderer {
     } else {
       const newTime = performance.now();
       elapsed = (newTime - this.lastTime) / 1000.0;
-      if (elapsed > 1.0 || elapsed < 0.0 || this.frame < 2) {
+      /* [MW-PATCH: fix frame reference in calcTimeAndFPS — was this.frame (undefined)] */
+      if (elapsed > 1.0 || elapsed < 0.0 || this.frameNum < 2) {
         elapsed = 1.0 / 30.0;
       }
       this.lastTime = newTime;
@@ -338,14 +345,22 @@ export default class Renderer {
       }
     }
 
-    const newHistTime = this.timeHist[this.timeHist.length - 1] + elapsed;
-    this.timeHist.push(newHistTime);
-    if (this.timeHist.length > this.timeHistMax) {
-      this.timeHist.shift();
+    /* [MW-PATCH: ring buffer for FPS history] */
+    const bufLen = this.timeHistBuf.length;
+    const newestIdx = (this.timeHistHead + this.timeHistLen - 1) % bufLen;
+    const newHistTime = this.timeHistBuf[newestIdx] + elapsed;
+    if (this.timeHistLen < bufLen) {
+      const writeIdx = (this.timeHistHead + this.timeHistLen) % bufLen;
+      this.timeHistBuf[writeIdx] = newHistTime;
+      this.timeHistLen += 1;
+    } else {
+      this.timeHistBuf[this.timeHistHead] = newHistTime;
+      this.timeHistHead = (this.timeHistHead + 1) % bufLen;
     }
+    const oldestTime = this.timeHistBuf[this.timeHistHead];
 
-    const newFPS = this.timeHist.length / (newHistTime - this.timeHist[0]);
-    if (Math.abs(newFPS - this.fps) > 3.0 && this.frame > this.timeHistMax) {
+    const newFPS = this.timeHistLen / (newHistTime - oldestTime);
+    if (Math.abs(newFPS - this.fps) > 3.0 && this.frameNum > bufLen) {
       this.fps = newFPS;
     } else {
       const damping = 0.93;
@@ -539,7 +554,8 @@ export default class Renderer {
     mixedFrame.invert = mix < snapPoint ? mdVSFramePrev.invert : mdVSFrame.invert;
     mixedFrame.brighten = mix < snapPoint ? mdVSFramePrev.brighten : mdVSFrame.brighten;
     mixedFrame.darken = mix < snapPoint ? mdVSFramePrev.darken : mdVSFrame.darken;
-    mixedFrame.solarize = mix < snapPoint ? mdVSFramePrev.brighten : mdVSFrame.solarize;
+    /* [MW-PATCH: fix solarize mixing bug — was reading brighten instead of solarize] */
+    mixedFrame.solarize = mix < snapPoint ? mdVSFramePrev.solarize : mdVSFrame.solarize;
     mixedFrame.b1n = mix * mdVSFrame.b1n + mix2 * mdVSFramePrev.b1n;
     mixedFrame.b2n = mix * mdVSFrame.b2n + mix2 * mdVSFramePrev.b2n;
     mixedFrame.b3n = mix * mdVSFrame.b3n + mix2 * mdVSFramePrev.b3n;

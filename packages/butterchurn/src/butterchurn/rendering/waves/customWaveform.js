@@ -269,14 +269,15 @@ export default class CustomWaveform {
         numVerts = this.samples;
       }
 
+      /* [MW-PATCH: DYNAMIC_DRAW for per-frame buffers] */
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionVertexBuf);
-      this.gl.bufferData(this.gl.ARRAY_BUFFER, positions, this.gl.STATIC_DRAW);
+      this.gl.bufferData(this.gl.ARRAY_BUFFER, positions, this.gl.DYNAMIC_DRAW);
 
       this.gl.vertexAttribPointer(this.aPosLocation, 3, this.gl.FLOAT, false, 0, 0);
       this.gl.enableVertexAttribArray(this.aPosLocation);
 
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorVertexBuf);
-      this.gl.bufferData(this.gl.ARRAY_BUFFER, colors, this.gl.STATIC_DRAW);
+      this.gl.bufferData(this.gl.ARRAY_BUFFER, colors, this.gl.DYNAMIC_DRAW);
 
       this.gl.vertexAttribPointer(this.aColorLocation, 4, this.gl.FLOAT, false, 0, 0);
       this.gl.enableVertexAttribArray(this.aColorLocation);

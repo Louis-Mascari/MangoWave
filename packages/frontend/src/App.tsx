@@ -338,6 +338,23 @@ function MainApp() {
       );
   }, [renderPaused]);
 
+  const unpauseRendering = useCallback(() => {
+    if (!renderPaused) return;
+    const renderer = rendererRef.current;
+    if (!renderer) return;
+    setRenderPaused(false);
+    renderer.start();
+    useToastStore.getState().show(i18n.t('toasts.renderingResumed', { ns: 'messages' }));
+  }, [renderPaused]);
+
+  const handleSelectPresetWithUnpause = useCallback(
+    (name: string) => {
+      unpauseRendering();
+      handleSelectPreset(name);
+    },
+    [unpauseRendering, handleSelectPreset],
+  );
+
   const handleTogglePanel = useCallback((panel: PanelView) => {
     setActivePanel((current) => (current === panel ? 'none' : panel));
   }, []);
@@ -521,7 +538,7 @@ function MainApp() {
             onNextPreset={handleNextPreset}
             onPreviousPreset={handlePreviousPreset}
             canGoBack={canGoBack}
-            onSelectPreset={handleSelectPreset}
+            onSelectPreset={handleSelectPresetWithUnpause}
             onStop={handleStop}
             onToggleFullscreen={handleToggleFullscreen}
             isFullscreen={isFullscreen}
@@ -546,6 +563,7 @@ function MainApp() {
             presetsLoading={presetsLoading}
             renderPaused={renderPaused}
             onTogglePause={handleTogglePause}
+            onUnpause={unpauseRendering}
           />
           <PlaybackPanel
             adapter={playbackAdapter}

@@ -472,23 +472,24 @@ export default class WarpShader {
   ) {
     this.gl.useProgram(this.shaderProgram);
 
+    /* [MW-PATCH: DYNAMIC_DRAW for per-frame buffers] */
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuf);
-    this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, this.indices, this.gl.STATIC_DRAW);
+    this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, this.indices, this.gl.DYNAMIC_DRAW);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionVertexBuf);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, this.vertices, this.gl.STATIC_DRAW);
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, this.vertices, this.gl.DYNAMIC_DRAW);
 
     this.gl.vertexAttribPointer(this.positionLocation, 3, this.gl.FLOAT, false, 0, 0);
     this.gl.enableVertexAttribArray(this.positionLocation);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.warpUvVertexBuf);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, warpUVs, this.gl.STATIC_DRAW);
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, warpUVs, this.gl.DYNAMIC_DRAW);
 
     this.gl.vertexAttribPointer(this.warpUvLocation, 2, this.gl.FLOAT, false, 0, 0);
     this.gl.enableVertexAttribArray(this.warpUvLocation);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.warpColorVertexBuf);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, warpColor, this.gl.STATIC_DRAW);
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, warpColor, this.gl.DYNAMIC_DRAW);
 
     this.gl.vertexAttribPointer(this.warpColorLocation, 4, this.gl.FLOAT, false, 0, 0);
     this.gl.enableVertexAttribArray(this.warpColorLocation);

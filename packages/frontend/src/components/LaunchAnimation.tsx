@@ -30,8 +30,8 @@ export function LaunchAnimation({ onComplete }: LaunchAnimationProps) {
       <div
         className="pointer-events-none absolute"
         style={{
-          width: '70vw',
-          height: '70vh',
+          width: 'min(70vw, 70vh)',
+          height: 'min(70vw, 70vh)',
           animation: `launch-glow ${LAUNCH_DURATION_MS}ms ease-in-out forwards`,
           background:
             'radial-gradient(ellipse at center, rgba(255,140,50,0.5) 0%, transparent 60%), ' +

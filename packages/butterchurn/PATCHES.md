@@ -143,3 +143,91 @@ Replaced entirely with the actual ES6 source from jberg/butterchurn v2.6.7 (comm
 `lib/butterchurn.js` and `lib/butterchurn.min.js` have been deleted. `lib/butterchurnExtraImages.min.js` is retained (static texture data, not part of the source fork).
 
 The `ecma-proposal-math-extensions` dependency (upstream uses `Math.clamp`) is replaced with an inline polyfill in `src/butterchurn/index.js`.
+
+---
+
+## 7. Fix `targetTexture` Leak on Resize
+
+### Problem
+
+`setRendererSize` creates a new texture when the canvas dimensions change, but never deletes the old `targetTexture`. Each resize leaks one GPU texture object.
+
+### Solution
+
+Save `oldTexture` before creating the replacement, use it as the resample source, then `gl.deleteTexture(oldTexture)` after resampling.
+
+### Location
+
+`src/butterchurn/rendering/renderer.js` — search for `[MW-PATCH: fix targetTexture leak on resize]`.
+
+---
+
+## 8. Fix `solarize` Mixing Bug
+
+### Problem
+
+`mixFrameEquations` reads `mdVSFramePrev.brighten` instead of `mdVSFramePrev.solarize` for the solarize blend. During preset transitions, the solarize effect snaps to the previous preset's brighten value.
+
+### Solution
+
+Change `mdVSFramePrev.brighten` → `mdVSFramePrev.solarize` on the solarize mixing line.
+
+### Location
+
+`src/butterchurn/rendering/renderer.js` — search for `[MW-PATCH: fix solarize mixing bug]`.
+
+---
+
+## 9. Fix `this.frame` Reference in `calcTimeAndFPS`
+
+### Problem
+
+`calcTimeAndFPS` references `this.frame` (undefined) instead of `this.frameNum` to clamp the first two frames' elapsed time to 1/30s. Since `this.frame` is always undefined, the guard `this.frame < 2` always evaluates to false after the first check, meaning the elapsed-time clamping never fires on the first two frames.
+
+### Solution
+
+Replace both `this.frame` references with `this.frameNum`.
+
+### Location
+
+`src/butterchurn/rendering/renderer.js` — search for `[MW-PATCH: fix frame reference in calcTimeAndFPS]`.
+
+---
+
+## 10. Ring Buffer for FPS History
+
+### Problem
+
+`timeHist` is a plain JS array with `push`/`shift` for a 120-element sliding window. `shift()` copies all elements on every frame — O(N) per frame.
+
+### Solution
+
+Pre-allocated `Float64Array(120)` ring buffer with head/length tracking. All operations (push, oldest, newest) are O(1).
+
+### Location
+
+`src/butterchurn/rendering/renderer.js` — search for `[MW-PATCH: ring buffer for FPS history]`.
+
+---
+
+## 11. `DYNAMIC_DRAW` for Per-Frame Buffers
+
+### Problem
+
+All `bufferData` calls use `STATIC_DRAW`, even for buffers updated every frame (warp UVs, warp colors, comp colors, waveform positions, motion vectors). `STATIC_DRAW` hints to the driver that data won't change, potentially causing suboptimal memory placement.
+
+### Solution
+
+Changed per-frame `bufferData` calls to `DYNAMIC_DRAW` in:
+
+- `rendering/shaders/warp.js` (4 calls)
+- `rendering/shaders/comp.js` (3 calls)
+- `rendering/waves/basicWaveform.js` (2 calls)
+- `rendering/waves/customWaveform.js` (2 calls)
+- `rendering/motionVectors/motionVectors.js` (1 call)
+
+Init-time or infrequent buffers (resample, output, blur, darkenCenter, border, titleText) left as `STATIC_DRAW`.
+
+### Location
+
+Search for `[MW-PATCH: DYNAMIC_DRAW for per-frame buffers]` in the files above.

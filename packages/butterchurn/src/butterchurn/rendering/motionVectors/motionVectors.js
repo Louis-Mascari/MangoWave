@@ -182,8 +182,9 @@ export default class MotionVectors {
     if (this.generateMotionVectors(mdVSFrame, warpUVs)) {
       this.gl.useProgram(this.shaderProgram);
 
+      /* [MW-PATCH: DYNAMIC_DRAW for per-frame buffers] */
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionVertexBuf);
-      this.gl.bufferData(this.gl.ARRAY_BUFFER, this.positions, this.gl.STATIC_DRAW);
+      this.gl.bufferData(this.gl.ARRAY_BUFFER, this.positions, this.gl.DYNAMIC_DRAW);
 
       this.gl.vertexAttribPointer(this.aPosLoc, 3, this.gl.FLOAT, false, 0, 0);
       this.gl.enableVertexAttribArray(this.aPosLoc);

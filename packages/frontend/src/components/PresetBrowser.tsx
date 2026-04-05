@@ -32,6 +32,7 @@ interface PresetBrowserProps {
   presetPackMap: Map<string, string>;
   onSelectPreset: (name: string) => void;
   onNextPreset: () => void;
+  onUnpause?: () => void;
 }
 
 const QUARANTINE_REASONS: Record<string, { labelKey: string; color: string }> = {
@@ -59,6 +60,7 @@ function PresetRow({
   onToggleBlock,
   onDelete,
   customPacks,
+  missingTextures,
 }: {
   name: string;
   isCurrent: boolean;
@@ -69,6 +71,7 @@ function PresetRow({
   onToggleBlock: () => void;
   onDelete?: () => void;
   customPacks?: CustomPack[];
+  missingTextures?: string[];
 }) {
   const { t } = useTranslation('messages');
 
@@ -88,7 +91,14 @@ function PresetRow({
         isCurrent ? 'bg-orange-500/30 text-white' : 'text-white/70 hover:bg-white/10'
       }`}
     >
-      <span className="min-w-0 flex-1 truncate text-left">{name}</span>
+      <span className="min-w-0 flex-1 truncate text-left">
+        {missingTextures && missingTextures.length > 0 && (
+          <span className="mr-1 inline-block text-amber-400" title={missingTextures.join(', ')}>
+            ⚠
+          </span>
+        )}
+        {name}
+      </span>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
         <button
@@ -374,6 +384,7 @@ export function PresetBrowser({
   presetPackMap,
   onSelectPreset,
   onNextPreset,
+  onUnpause,
 }: PresetBrowserProps) {
   const { t } = useTranslation('messages');
   const { t: tc } = useTranslation('common');
@@ -429,6 +440,22 @@ export function PresetBrowser({
     () => new Set(importedPresets.map((p) => p.name)),
     [importedPresets],
   );
+
+  const importedTextureNames = useMemo(() => {
+    const set = new Set<string>();
+    for (const t of importedTextures) set.add(t.name);
+    return set;
+  }, [importedTextures]);
+
+  const missingTexturesByName = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const p of importedPresets) {
+      if (!p.missingTextures?.length) continue;
+      const effective = p.missingTextures.filter((tex) => !importedTextureNames.has(tex));
+      if (effective.length > 0) map.set(p.name, effective);
+    }
+    return map;
+  }, [importedPresets, importedTextureNames]);
 
   const allPacks = useMemo(
     () => (importedPresets.length > 0 ? [...PACK_ORDER, 'Imported'] : PACK_ORDER),
@@ -798,6 +825,7 @@ export function PresetBrowser({
                     : undefined
                 }
                 customPacks={customPacks}
+                missingTextures={missingTexturesByName.get(name)}
               />
             );
           }}
@@ -832,6 +860,7 @@ export function PresetBrowser({
         onToggleFavorite={() => handleToggleFavorite(name)}
         onToggleBlock={() => handleToggleBlock(name)}
         customPacks={customPacks}
+        missingTextures={missingTexturesByName.get(name)}
       />
     );
 
@@ -1149,6 +1178,7 @@ export function PresetBrowser({
       }
       // Auto-advance if current preset isn't in the activated pack
       if (id !== null) {
+        onUnpause?.();
         const pack = useSettingsStore.getState().customPacks.find((p) => p.id === id);
         if (pack && !pack.presets.includes(currentPreset)) {
           // Delay to let pool recompute after store change
@@ -1156,7 +1186,7 @@ export function PresetBrowser({
         }
       }
     },
-    [setActiveCustomPackId, t, currentPreset, onNextPreset],
+    [setActiveCustomPackId, t, currentPreset, onNextPreset, onUnpause],
   );
 
   const handleImportPack = useCallback(async () => {
@@ -1670,6 +1700,7 @@ export function PresetBrowser({
                       onToggleBlock={() => handleToggleBlock(preset.name)}
                       onDelete={() => handleDeleteImportedPreset(preset)}
                       customPacks={customPacks}
+                      missingTextures={missingTexturesByName.get(preset.name)}
                     />
                   );
                 }}

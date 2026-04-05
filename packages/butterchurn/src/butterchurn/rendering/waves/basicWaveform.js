@@ -533,8 +533,9 @@ export default class BasicWaveform {
     if (this.generateWaveform(blending, blendProgress, timeArrayL, timeArrayR, mdVSFrame)) {
       this.gl.useProgram(this.shaderProgram);
 
+      /* [MW-PATCH: DYNAMIC_DRAW for per-frame buffers] */
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuf);
-      this.gl.bufferData(this.gl.ARRAY_BUFFER, this.smoothedPositions, this.gl.STATIC_DRAW);
+      this.gl.bufferData(this.gl.ARRAY_BUFFER, this.smoothedPositions, this.gl.DYNAMIC_DRAW);
 
       this.gl.vertexAttribPointer(this.aPosLoc, 3, this.gl.FLOAT, false, 0, 0);
       this.gl.enableVertexAttribArray(this.aPosLoc);
@@ -573,7 +574,7 @@ export default class BasicWaveform {
       const waveMode = Math.floor(mdVSFrame.wave_mode) % 8;
       if (waveMode === 7) {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuf);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.smoothedPositions2, this.gl.STATIC_DRAW);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.smoothedPositions2, this.gl.DYNAMIC_DRAW);
 
         this.gl.vertexAttribPointer(this.aPosLoc, 3, this.gl.FLOAT, false, 0, 0);
         this.gl.enableVertexAttribArray(this.aPosLoc);

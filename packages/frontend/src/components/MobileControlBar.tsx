@@ -32,6 +32,7 @@ interface MobileControlBarProps {
   forceIdle: () => void;
   resetIdle: () => void;
   presetsLoading?: boolean;
+  onUnpause?: () => void;
 }
 
 // Circular layout: 9 items evenly spaced around a 360° circle.
@@ -71,6 +72,7 @@ export function MobileControlBar({
   forceIdle,
   resetIdle,
   presetsLoading,
+  onUnpause,
 }: MobileControlBarProps) {
   const { t } = useTranslation('messages');
   const { t: tc } = useTranslation('common');
@@ -379,6 +381,7 @@ export function MobileControlBar({
                   currentPreset={currentPreset}
                   onSelectPreset={onSelectPreset}
                   onNextPreset={onNextPreset}
+                  onUnpause={onUnpause}
                 />
               )}
             </div>

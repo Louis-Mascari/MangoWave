@@ -36,6 +36,7 @@ interface ControlBarProps {
   presetsLoading?: boolean;
   renderPaused?: boolean;
   onTogglePause?: () => void;
+  onUnpause?: () => void;
 }
 
 export function ControlBar(props: ControlBarProps) {
@@ -64,6 +65,7 @@ export function ControlBar(props: ControlBarProps) {
         forceIdle={props.forceIdle}
         resetIdle={props.resetIdle}
         presetsLoading={props.presetsLoading}
+        onUnpause={props.onUnpause}
       />
     );
   }
@@ -98,6 +100,7 @@ function DesktopControlBar({
   presetsLoading,
   renderPaused,
   onTogglePause,
+  onUnpause,
 }: ControlBarProps) {
   const { t } = useTranslation('messages');
   const { t: tc } = useTranslation('common');
@@ -135,6 +138,7 @@ function DesktopControlBar({
               currentPreset={currentPreset}
               onSelectPreset={onSelectPreset}
               onNextPreset={onNextPreset}
+              onUnpause={onUnpause}
             />
           )}
           {activePanel === 'playlist' && onAddLocalFiles && onClearPlaylist && (

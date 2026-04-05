@@ -35,6 +35,7 @@ export interface ImportedPresetMeta {
   name: string; // display name (de-duplicated at import time)
   fileName: string; // original filename
   addedAt: number; // Date.now()
+  missingTextures?: string[]; // texture names not found at import time
 }
 
 export interface ImportedTextureMeta {
@@ -609,9 +610,11 @@ export const useSettingsStore = create<SettingsState>()(
         if ((version ?? 0) < 13) {
           state.brightness = state.brightness ?? 1.0;
         }
+        // v13 → v14: Add missingTextures to ImportedPresetMeta (no transform needed —
+        // existing entries without missingTextures treated as no missing textures via ??)
         return state as unknown as SettingsState;
       },
-      version: 13,
+      version: 14,
     },
   ),
 );

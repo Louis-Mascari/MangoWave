@@ -71,6 +71,7 @@ export async function processPresetImport(
         name,
         fileName: file.name,
         addedAt: Date.now(),
+        missingTextures: warnings.length > 0 ? warnings : undefined,
       });
 
       result = {

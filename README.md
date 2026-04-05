@@ -22,7 +22,7 @@
 
 ## Features
 
-- **833 MilkDrop presets** (395 butterchurn + 437 MilkDrop-Original) across 4 thematic packs (Ambient, Reactive, Psychedelic, Ethereal) with virtualized browsing
+- **832 MilkDrop presets** (395 butterchurn + 437 MilkDrop-Original) across 4 thematic packs (Ambient, Reactive, Psychedelic, Ethereal) with virtualized browsing
 - **Import .milk presets** — add community MilkDrop presets (PS1, PS2, and PS3) from the thousands available online. Raw files stored in IndexedDB, converted at import time in a Web Worker via a forked `milkdrop-preset-converter` (GLSL ES 3.0 shaders) with EEL equations compiled to WebAssembly at load time via `eel-wasm`
 - **Import custom textures** — upload JPEG/PNG/WebP images for MilkDrop presets that reference `sampler_<name>`. 66 standard MilkDrop textures bundled from the [projectM texture pack](https://github.com/projectM-visualizer/presets-milkdrop-texture-pack), plus 6 built-in butterchurn textures — covers all canonical presets. Additional author-specific textures can be uploaded manually
 - **Custom packs** — create, edit, import/export preset collections; start a pack to lock autopilot and navigation to its presets only

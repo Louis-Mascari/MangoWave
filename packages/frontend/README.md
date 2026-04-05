@@ -99,7 +99,7 @@ Zustand with `localStorage` persistence. Key sections:
 | `customPacks`            | `CustomPack[]` (`id`, `name`, `presets[]`, `createdAt`)                                 | []                          |
 | `activeCustomPackId`     | `string \| null`                                                                        | null                        |
 | `excludedOverrides`      | string[]                                                                                | []                          |
-| `importedPresets`        | `ImportedPresetMeta[]` (`name`, `fileName`, `addedAt`)                                  | []                          |
+| `importedPresets`        | `ImportedPresetMeta[]` (`name`, `fileName`, `addedAt`, `missingTextures?`)              | []                          |
 | `importedTextures`       | `ImportedTextureMeta[]` (`name`, `fileName`, `width`, `height`, `sizeBytes`, `addedAt`) | []                          |
 | `windowSyncEnabled`      | boolean                                                                                 | false                       |
 | `deviceSyncEnabled`      | boolean                                                                                 | false                       |

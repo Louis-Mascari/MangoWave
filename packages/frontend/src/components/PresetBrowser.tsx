@@ -988,7 +988,7 @@ export function PresetBrowser({
 
   // Render history tab
   const renderHistory = () => (
-    <div className="flex flex-col gap-0.5 overflow-y-auto max-md:min-h-0 max-md:flex-1 md:max-h-[400px]">
+    <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto">
       {historyList.map((name, i) => (
         <HistoryRow
           key={`${name}-${i}`}
@@ -1009,7 +1009,7 @@ export function PresetBrowser({
 
   // Render excluded tab (quarantined + mobile-blocked)
   const renderExcluded = () => (
-    <div className="flex flex-col gap-0.5 overflow-y-auto max-md:min-h-0 max-md:flex-1 md:max-h-[400px]">
+    <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto">
       <p className="mb-1 text-xs leading-snug text-white/40">
         {t('presetBrowser.excludedDescription')}
       </p>
@@ -1925,8 +1925,12 @@ export function PresetBrowser({
       >
         {renderGroupedAll()}
       </div>
-      {filter === 'excluded' && renderExcluded()}
-      {filter === 'history' && renderHistory()}
+      {filter === 'excluded' && (
+        <div className="flex min-h-0 flex-1 flex-col">{renderExcluded()}</div>
+      )}
+      {filter === 'history' && (
+        <div className="flex min-h-0 flex-1 flex-col">{renderHistory()}</div>
+      )}
       {filter === 'packs' && <div className="flex min-h-0 flex-1 flex-col">{renderPacks()}</div>}
       {filter === 'import' && <div className="flex min-h-0 flex-1 flex-col">{renderImport()}</div>}
       {(filter === 'favorites' || filter === 'blocked' || (deferredSearch && filter === 'all')) &&

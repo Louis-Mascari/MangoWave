@@ -92,19 +92,5 @@
       "autopilotTitle": "Autopilot & Settings",
       "autopilotDesc": "Toggle Autopilot (A) to cycle through presets automatically. Open Settings (⚙) to adjust the equalizer and rendering."
     }
-  },
-
-  "landing": {
-    "title": "MangoWave | Audio Visualizer",
-    "metaDescription": "Free audio-reactive visualizer inspired by Winamp and MilkDrop. 400+ visuals — no signup, no install, no ads. Every beat, every drop. Just hit launch.",
-    "tagline": "Your music, visualized.",
-    "taglineSub": "Every beat, every drop. Just hit launch.",
-    "feature400": "400+ Visuals",
-    "featureAnySource": "Any Audio Source",
-    "featureDesktopMobile": "Desktop & Mobile",
-    "featureNoSignup": "No Signup",
-    "featureNoInstall": "No Install",
-    "featureNoAds": "No Ads",
-    "launch": "Launch"
   }
 }

@@ -85,18 +85,5 @@
       "autopilotTitle": "オートパイロットと設定",
       "autopilotDesc": "オートパイロット（A）をオンにすると、プリセットが自動的に切り替わります。設定（⚙）でイコライザーやレンダリングを調整できます。"
     }
-  },
-  "landing": {
-    "title": "MangoWave | オーディオビジュアライザー",
-    "metaDescription": "400以上のビジュアルを備えた無料の音声リアクティブビジュアライザー。登録不要、インストール不要、広告なし。すべてのビート、すべてのドロップ。ローンチボタンを押すだけ。",
-    "tagline": "あなたの音楽を、ビジュアライズ。",
-    "taglineSub": "すべてのビート、すべてのドロップ。ローンチボタンを押すだけ。",
-    "feature400": "400以上のビジュアル",
-    "featureAnySource": "あらゆる音声ソース",
-    "featureDesktopMobile": "デスクトップ＆モバイル",
-    "featureNoSignup": "登録不要",
-    "featureNoInstall": "インストール不要",
-    "featureNoAds": "広告なし",
-    "launch": "ローンチ"
   }
 }

@@ -40,5 +40,6 @@
   "today": "Today",
   "yesterday": "Yesterday",
   "collapseAll": "Collapse all",
-  "expandAll": "Expand all"
+  "expandAll": "Expand all",
+  "copy": "Copy"
 }

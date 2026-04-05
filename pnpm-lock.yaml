@@ -121,9 +121,15 @@ importers:
       music-metadata:
         specifier: ^11.12.3
         version: 11.12.3
+      peerjs:
+        specifier: ^1.5.5
+        version: 1.5.5
       posthog-js:
         specifier: ^1.363.3
         version: 1.364.7
+      qrcode-generator:
+        specifier: ^2.0.4
+        version: 2.0.4
       react:
         specifier: ^19.2.0
         version: 19.2.4
@@ -1438,6 +1444,13 @@ packages:
       {
         integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==,
       }
+
+  '@msgpack/msgpack@2.8.0':
+    resolution:
+      {
+        integrity: sha512-h9u4u/jiIRKbq25PM+zymTyW6bhTzELvOoUd+AvYriWOAKpLGnIamaET3pnHYoI5iYphAHBI4ayx0MehR+VVPQ==,
+      }
+    engines: { node: '>= 10' }
 
   '@napi-rs/wasm-runtime@0.2.12':
     resolution:
@@ -4394,6 +4407,12 @@ packages:
       }
     engines: { node: '>=0.10.0' }
 
+  eventemitter3@4.0.7:
+    resolution:
+      {
+        integrity: sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==,
+      }
+
   eventemitter3@5.0.4:
     resolution:
       {
@@ -6135,6 +6154,20 @@ packages:
         integrity: sha512-WUjGcAqP1gQacoQe+OBJsFA7Ld4DyXuUIjZ5cc75cLHvJ7dtNsTugphxIADwspS+AraAUePCKrSVtPLFj/F88w==,
       }
 
+  peerjs-js-binarypack@2.1.0:
+    resolution:
+      {
+        integrity: sha512-YIwCC+pTzp3Bi8jPI9UFKO0t0SLo6xALnHkiNt/iUFmUUZG0fEEmEyFKvjsDKweiFitzHRyhuh6NvyJZ4nNxMg==,
+      }
+    engines: { node: '>= 14.0.0' }
+
+  peerjs@1.5.5:
+    resolution:
+      {
+        integrity: sha512-viMUCPDL6CSfOu0ZqVcFqbWRXNHIbv2lPqNbrBIjbFYrflebOjItJ4hPfhjnuUCstqciHVu9vVJ7jFqqKi/EuQ==,
+      }
+    engines: { node: '>= 14' }
+
   picocolors@1.1.1:
     resolution:
       {
@@ -6278,6 +6311,12 @@ packages:
     resolution:
       {
         integrity: sha512-oTUZM/NAZS8p7ANR3SHh30kXB+zK2r2BPcEn/awJIbOvq82WoMN4p62AWWp3Hhw50G0xMsw1mhIBLqHw64EcNQ==,
+      }
+
+  qrcode-generator@2.0.4:
+    resolution:
+      {
+        integrity: sha512-mZSiP6RnbHl4xL2Ap5HfkjLnmxfKcPWpWe/c+5XxCuetEenqmNFf1FH/ftXPCtFG5/TDobjsjz6sSNL0Sr8Z9g==,
       }
 
   query-selector-shadow-dom@1.0.1:
@@ -6476,6 +6515,12 @@ packages:
     resolution:
       {
         integrity: sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==,
+      }
+
+  sdp@3.2.1:
+    resolution:
+      {
+        integrity: sha512-lwsAIzOPlH8/7IIjjz3K0zYBk7aBVVcvjMwt3M4fLxpjMYyy7i3I97SLHebgn4YBjirkzfp3RvRDWSKsh/+WFw==,
       }
 
   secure-json-parse@4.1.0:
@@ -7282,6 +7327,13 @@ packages:
         integrity: sha512-BMhLD/Sw+GbJC21C/UgyaZX41nPt8bUTg+jWyDeg7e7YN4xOM05YPSIXceACnXVtqyEw/LMClUQMtMZ+PGGpqQ==,
       }
     engines: { node: '>=20' }
+
+  webrtc-adapter@9.0.4:
+    resolution:
+      {
+        integrity: sha512-5ZZY1+lGq8LEKuDlg9M2RPJHlH3R7OVwyHqMcUsLKCgd9Wvf+QrFTCItkXXYPmrJn8H6gRLXbSgxLLdexiqHxw==,
+      }
+    engines: { node: '>=6.0.0', npm: '>=3.10.0' }
 
   whatwg-mimetype@5.0.0:
     resolution:
@@ -8522,6 +8574,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@msgpack/msgpack@2.8.0': {}
 
   '@napi-rs/wasm-runtime@0.2.12':
     dependencies:
@@ -10317,6 +10371,8 @@ snapshots:
 
   esutils@2.0.3: {}
 
+  eventemitter3@4.0.7: {}
+
   eventemitter3@5.0.4: {}
 
   execa@5.1.1:
@@ -11536,6 +11592,15 @@ snapshots:
 
   pathe@2.0.3: {}
 
+  peerjs-js-binarypack@2.1.0: {}
+
+  peerjs@1.5.5:
+    dependencies:
+      '@msgpack/msgpack': 2.8.0
+      eventemitter3: 4.0.7
+      peerjs-js-binarypack: 2.1.0
+      webrtc-adapter: 9.0.4
+
   picocolors@1.1.1: {}
 
   picomatch@2.3.2: {}
@@ -11624,6 +11689,8 @@ snapshots:
   punycode@2.3.1: {}
 
   pure-rand@7.0.1: {}
+
+  qrcode-generator@2.0.4: {}
 
   query-selector-shadow-dom@1.0.1: {}
 
@@ -11785,6 +11852,8 @@ snapshots:
       xmlchars: 2.2.0
 
   scheduler@0.27.0: {}
+
+  sdp@3.2.1: {}
 
   secure-json-parse@4.1.0: {}
 
@@ -12275,6 +12344,10 @@ snapshots:
   webidl-conversions@3.0.1: {}
 
   webidl-conversions@8.0.1: {}
+
+  webrtc-adapter@9.0.4:
+    dependencies:
+      sdp: 3.2.1
 
   whatwg-mimetype@5.0.0: {}
 

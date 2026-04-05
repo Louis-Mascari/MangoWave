@@ -12,6 +12,7 @@ import { useSettingsSync } from './hooks/useSettingsSync.ts';
 import { useNowPlaying } from './hooks/useNowPlaying.ts';
 import { useAutopilot } from './hooks/useAutopilot.ts';
 import { useWindowSync } from './hooks/useWindowSync.ts';
+import { useDeviceSync } from './hooks/useDeviceSync.ts';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.ts';
 import { useHideCursor } from './hooks/useHideCursor.ts';
 import { useFullscreen } from './hooks/useFullscreen.ts';
@@ -36,6 +37,7 @@ import { useSettingsStore } from './store/useSettingsStore.ts';
 import { useSpotifyStore } from './store/useSpotifyStore.ts';
 import { usePresetHistoryStore } from './store/usePresetHistoryStore.ts';
 import { useToastStore } from './store/useToastStore.ts';
+import { useDeviceSyncStatusStore } from './store/useDeviceSyncStatusStore.ts';
 import { PlaybackPanel } from './components/PlaybackPanel.tsx';
 import { MediaPlaylist } from './components/MediaPlaylist.tsx';
 import { isWebGL2Supported, isLikelyGpuCrash } from './engine/isWebGL2Supported.ts';
@@ -122,6 +124,13 @@ function MainApp() {
     rendererRef,
     currentPreset,
   );
+  const resetAutopilotRef = useRef<() => void>(() => {});
+  const {
+    isHost: isDeviceSyncHost,
+    broadcastPreset: broadcastDevicePreset,
+    isRemotePresetRef: isRemoteDevicePresetRef,
+  } = useDeviceSync(rendererRef, resetAutopilotRef);
+  const deviceSyncStatus = useDeviceSyncStatusStore((s) => s.status);
   const autopilot = useSettingsStore((s) => s.autopilot);
   const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
   const presetNameDisplay = useSettingsStore((s) => s.presetNameDisplay);
@@ -138,7 +147,6 @@ function MainApp() {
   const brightness = useSettingsStore((s) => s.brightness);
   const silenceCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const setOnboardingShown = useSettingsStore((s) => s.setOnboardingShown);
-  const resetAutopilotRef = useRef<() => void>(() => {});
 
   const startLaunch = useCallback(() => {
     setShowLaunchAnimation(true);
@@ -184,13 +192,24 @@ function MainApp() {
     (name: string) => {
       setCurrentPreset(name);
       usePresetHistoryStore.getState().push(name);
-      if (isRemotePresetRef.current) {
+      const isRemoteWindow = isRemotePresetRef.current;
+      const isRemoteDevice = isRemoteDevicePresetRef.current;
+      if (isRemoteWindow) {
         isRemotePresetRef.current = false;
-      } else {
-        broadcastPreset(name, useSettingsStore.getState().transitionTime);
+      }
+      if (isRemoteDevice) {
+        isRemoteDevicePresetRef.current = false;
+      }
+      const tt = useSettingsStore.getState().transitionTime;
+      // Fan out: local changes go to both, remote changes bridge across sync systems
+      if (!isRemoteWindow) {
+        broadcastPreset(name, tt);
+      }
+      if (!isRemoteDevice) {
+        broadcastDevicePreset(name, tt);
       }
     },
-    [broadcastPreset, isRemotePresetRef],
+    [broadcastPreset, broadcastDevicePreset, isRemotePresetRef, isRemoteDevicePresetRef],
   );
 
   const presetsLoadedCountRef = useRef(0);
@@ -369,8 +388,12 @@ function MainApp() {
   }, [pickNextPreset]);
 
   const windowSyncEnabled = useSettingsStore((s) => s.windowSyncEnabled);
+  const deviceSyncConnected = deviceSyncStatus === 'connected';
   const { reset: resetAutopilot } = useAutopilot(handleAutopilotAdvance, {
-    suppress: renderPaused || (windowSyncEnabled && !isLeader),
+    suppress:
+      renderPaused ||
+      (windowSyncEnabled && !isLeader) ||
+      (deviceSyncConnected && !isDeviceSyncHost),
   });
   useEffect(() => {
     resetAutopilotRef.current = resetAutopilot;

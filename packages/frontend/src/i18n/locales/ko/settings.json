@@ -119,8 +119,9 @@
   },
 
   "sync": {
-    "title": "다중 창 동기화",
-    "description": "같은 기기의 여러 브라우저 창에서 프리셋과 설정을 동기화합니다. 여러 모니터에서 시각화하려면 여러 창에서 MangoWave를 여세요. 시스템 오디오 또는 마이크에 최적화되어 있습니다 — 각 창이 동일한 소스를 캡처합니다. 로컬 파일 재생은 창별로 독립적입니다.",
+    "title": "동기화",
+    "windowSyncTitle": "창 동기화",
+    "windowSyncDescription": "같은 기기의 여러 브라우저 창에서 프리셋과 설정을 동기화합니다. 여러 모니터에서 시각화하려면 여러 창에서 MangoWave를 여세요. 시스템 오디오 또는 마이크에 최적화되어 있습니다 — 각 창이 동일한 소스를 캡처합니다. 로컬 파일 재생은 창별로 독립적입니다.",
     "enabled": "창 동기화",
     "unavailable": "이 브라우저에서는 다중 창 동기화가 지원되지 않습니다.",
     "noPeers": "연결된 피어 없음",
@@ -128,7 +129,31 @@
     "peerCount_other": "{{count}}개의 다른 창이 연결됨",
     "autoSyncNote": "프리셋, EQ, 오토파일럿, 즐겨찾기 및 기타 모든 설정이 창 간에 자동으로 동기화됩니다. 하나의 창에서 변경하면 나머지도 업데이트됩니다. 각 창에서 창 동기화를 개별적으로 켜거나 끄세요.",
     "syncPerformance": "렌더링 설정 동기화",
-    "syncPerformanceHint": "프레임 레이트, 해상도, 메시, 텍스처 품질 및 안티앨리어싱. 모니터마다 다른 성능 설정이 필요한 경우 체크 해제하세요."
+    "syncPerformanceHint": "프레임 레이트, 해상도, 메시, 텍스처 품질 및 안티앨리어싱. 모니터마다 다른 성능 설정이 필요한 경우 체크 해제하세요.",
+    "deviceSync": {
+      "title": "기기 동기화",
+      "description": "P2P WebRTC를 통해 서로 다른 기기(스마트폰, 노트북, TV) 간에 프리셋을 동기화합니다. 한 기기가 방을 만들고 다른 기기가 방 코드로 참여합니다. 방을 만든 기기가 자동 전환을 제어합니다.",
+      "createRoom": "방 만들기",
+      "joinRoom": "방 참여",
+      "roomCode": "방 코드",
+      "enterCode": "기존 방에 참여",
+      "connect": "연결",
+      "leaveRoom": "방 나가기",
+      "connecting": "연결 중...",
+      "connected": "연결됨",
+      "disconnected": "연결 끊김",
+      "error": "연결 오류",
+      "tryAgain": "다시 시도",
+      "peerCount_one": "{{count}}대의 기기 연결됨",
+      "peerCount_other": "{{count}}대의 기기 연결됨",
+      "hostDisconnected": "방 호스트의 연결이 끊겼습니다. 방이 닫혔습니다.",
+      "invalidCode": "잘못된 방 코드입니다. 형식: MANGO-XXXX (영문 4자, I와 O 제외)",
+      "roomNotFound": "방을 찾을 수 없습니다. 코드를 확인하고 다시 시도하세요.",
+      "syncSettings": "EQ 및 렌더링 설정 동기화",
+      "syncSettingsHint": "기기 간에 EQ, 프리앰프, 오디오 분석 및 렌더링 설정을 공유합니다. 기기마다 다른 성능 설정이 필요한 경우 체크 해제하세요.",
+      "copiedToClipboard": "복사됨!",
+      "autopilotNote": "자동 전환 설정은 항상 동기화됩니다 — 어떤 기기에서든 자동 전환을 켜고 끌 수 있지만, 타이머는 방을 만든 기기에서만 작동합니다."
+    }
   },
 
   "language": {

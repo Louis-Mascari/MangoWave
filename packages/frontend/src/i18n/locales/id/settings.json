@@ -119,8 +119,9 @@
   },
 
   "sync": {
-    "title": "Sinkronisasi Multi-Jendela",
-    "description": "Sinkronkan preset dan pengaturan di beberapa jendela browser pada perangkat yang sama. Buka MangoWave di beberapa jendela untuk visualisasi di beberapa monitor. Paling cocok dengan audio sistem atau mikrofon — setiap jendela menangkap sumber yang sama. Pemutaran file lokal bersifat per-jendela.",
+    "title": "Sinkronisasi",
+    "windowSyncTitle": "Sinkronisasi Jendela",
+    "windowSyncDescription": "Sinkronkan preset dan pengaturan di beberapa jendela browser pada perangkat yang sama. Buka MangoWave di beberapa jendela untuk visualisasi di beberapa monitor. Paling cocok dengan audio sistem atau mikrofon — setiap jendela menangkap sumber yang sama. Pemutaran file lokal bersifat per-jendela.",
     "enabled": "Sinkronisasi Jendela",
     "unavailable": "Sinkronisasi multi-jendela tidak didukung di browser ini.",
     "noPeers": "Tidak ada peer yang terhubung",
@@ -128,7 +129,31 @@
     "peerCount_other": "{{count}} jendela lain terhubung",
     "autoSyncNote": "Preset, EQ, autopilot, favorit, dan semua pengaturan lainnya otomatis tersinkronisasi antar jendela. Ubah sesuatu di satu jendela dan yang lain akan terupdate. Aktifkan atau nonaktifkan Sinkronisasi Jendela di setiap jendela secara terpisah.",
     "syncPerformance": "Sinkronkan pengaturan rendering",
-    "syncPerformanceHint": "Frame rate, resolusi, mesh, kualitas tekstur, dan anti-aliasing. Hapus centang jika monitor Anda memerlukan pengaturan performa yang berbeda."
+    "syncPerformanceHint": "Frame rate, resolusi, mesh, kualitas tekstur, dan anti-aliasing. Hapus centang jika monitor Anda memerlukan pengaturan performa yang berbeda.",
+    "deviceSync": {
+      "title": "Sinkronisasi Perangkat",
+      "description": "Sinkronkan preset antar perangkat berbeda (ponsel, laptop, TV) melalui WebRTC peer-to-peer. Satu perangkat membuat ruangan, yang lain bergabung dengan kode ruangan. Pembuat ruangan mengontrol autopilot.",
+      "createRoom": "Buat Ruangan",
+      "joinRoom": "Gabung Ruangan",
+      "roomCode": "Kode Ruangan",
+      "enterCode": "Gabung ke ruangan yang sudah ada",
+      "connect": "Hubungkan",
+      "leaveRoom": "Tinggalkan Ruangan",
+      "connecting": "Menghubungkan...",
+      "connected": "Terhubung",
+      "disconnected": "Terputus",
+      "error": "Kesalahan koneksi",
+      "tryAgain": "Coba Lagi",
+      "peerCount_one": "{{count}} perangkat terhubung",
+      "peerCount_other": "{{count}} perangkat terhubung",
+      "hostDisconnected": "Host ruangan terputus. Ruangan telah ditutup.",
+      "invalidCode": "Kode ruangan tidak valid. Format: MANGO-XXXX (4 huruf, tanpa I atau O)",
+      "roomNotFound": "Ruangan tidak ditemukan. Periksa kode dan coba lagi.",
+      "syncSettings": "Sinkronkan EQ & pengaturan rendering",
+      "syncSettingsHint": "Bagikan pengaturan EQ, pre-amp, analisis audio, dan rendering antar perangkat. Hapus centang jika perangkat memerlukan pengaturan performa yang berbeda.",
+      "copiedToClipboard": "Tersalin!",
+      "autopilotNote": "Pengaturan autopilot selalu tersinkronisasi — perangkat mana pun bisa mengaktifkan autopilot, tapi hanya timer pembuat ruangan yang berjalan."
+    }
   },
 
   "language": {

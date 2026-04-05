@@ -58,14 +58,17 @@ src/
 │                  # useIdleTimer, useHideCursor, useFullscreen, useFocusTrap, useSpotifyAuth,
 │                  # useNowPlaying, useSpotifyPlayback, useSpotifyProgress (smooth seek via rAF),
 │                  # usePlaybackAdapter, usePresetNavigation, useUnlockCheck, useSettingsSync,
-│                  # useWindowSync (multi-window sync bridge)
+│                  # useWindowSync (multi-window sync bridge),
+│                  # useDeviceSync (cross-device PeerJS WebRTC sync bridge)
 ├── lib/           # PostHog & Sentry init (no-op when env vars absent)
 ├── services/      # Spotify Web API client (owner-mode OAuth + PKCE utilities for self-hosters),
-│                  # WindowSyncService (BroadcastChannel-based multi-window sync)
+│                  # WindowSyncService (BroadcastChannel-based multi-window sync),
+│                  # DeviceSyncService (PeerJS WebRTC cross-device sync),
+│                  # syncTypes (shared sync type definitions), syncUtils (shared sync utilities)
 ├── store/         # Zustand stores: useSettingsStore, useSpotifyStore, useMediaPlayerStore,
 │                  #     usePresetHistoryStore, usePresetBrowserStore, useImportedPresetsStore,
 │                  #     useImportedTexturesStore, useToastStore, useConfirmStore, useImportModalStore,
-│                  #     useWindowSyncStatusStore
+│                  #     useWindowSyncStatusStore, useDeviceSyncStatusStore
 ├── utils/         # Shared utilities (isMobileDevice, browserInfo, settingsPortability, audioFileValidation)
 ├── types/         # music-metadata.d.ts, getDisplayMedia.d.ts, eel-wasm.d.ts (type declarations for untyped APIs)
 └── test/          # Vitest global setup
@@ -79,28 +82,30 @@ e2e/                 # Playwright E2E tests (separate from Vitest, own tsconfig)
 
 Zustand with `localStorage` persistence. Key sections:
 
-| Section              | Fields                                                                                  | Defaults                    |
-| -------------------- | --------------------------------------------------------------------------------------- | --------------------------- |
-| `performance`        | `fpsCap`, `resolutionScale`, `meshWidth`, `meshHeight`, `textureRatio`, `fxaa`          | 60, 1.0, 48, 36, 1.0, false |
-| `audio`              | `smoothingConstant`, `fftSize`                                                          | 0.3, 1024                   |
-| `autopilot`          | `enabled`, `interval`, `mode`, `favoriteWeight`                                         | true, 15s, `'all'`, 2       |
-| `eq`                 | `preAmpGain`, `bandGains[10]`                                                           | 1.5, all 0dB                |
-| `blockedPresets`     | string[]                                                                                | []                          |
-| `favoritePresets`    | string[]                                                                                | []                          |
-| `presetNameDisplay`  | `'off' \| 'always' \| number`                                                           | 5                           |
-| `songInfoDisplay`    | `'off' \| number` (on/off toggle, hardcoded 5s when on)                                 | 5                           |
-| `transitionTime`     | number (seconds)                                                                        | 2.0                         |
-| `volume`             | number (0.0–1.0)                                                                        | 0.5                         |
-| `brightness`         | number (0.1–1.0)                                                                        | 1.0                         |
-| `enabledPacks`       | string[]                                                                                | all packs                   |
-| `customPacks`        | `CustomPack[]` (`id`, `name`, `presets[]`, `createdAt`)                                 | []                          |
-| `activeCustomPackId` | `string \| null`                                                                        | null                        |
-| `excludedOverrides`  | string[]                                                                                | []                          |
-| `importedPresets`    | `ImportedPresetMeta[]` (`name`, `fileName`, `addedAt`)                                  | []                          |
-| `importedTextures`   | `ImportedTextureMeta[]` (`name`, `fileName`, `width`, `height`, `sizeBytes`, `addedAt`) | []                          |
-| `windowSyncEnabled`  | boolean                                                                                 | false                       |
-| `syncPerformance`    | boolean                                                                                 | true                        |
-| `onboardingShown`    | boolean                                                                                 | false                       |
+| Section                  | Fields                                                                                  | Defaults                    |
+| ------------------------ | --------------------------------------------------------------------------------------- | --------------------------- |
+| `performance`            | `fpsCap`, `resolutionScale`, `meshWidth`, `meshHeight`, `textureRatio`, `fxaa`          | 60, 1.0, 48, 36, 1.0, false |
+| `audio`                  | `smoothingConstant`, `fftSize`                                                          | 0.3, 1024                   |
+| `autopilot`              | `enabled`, `interval`, `mode`, `favoriteWeight`                                         | true, 15s, `'all'`, 2       |
+| `eq`                     | `preAmpGain`, `bandGains[10]`                                                           | 1.5, all 0dB                |
+| `blockedPresets`         | string[]                                                                                | []                          |
+| `favoritePresets`        | string[]                                                                                | []                          |
+| `presetNameDisplay`      | `'off' \| 'always' \| number`                                                           | 5                           |
+| `songInfoDisplay`        | `'off' \| number` (on/off toggle, hardcoded 5s when on)                                 | 5                           |
+| `transitionTime`         | number (seconds)                                                                        | 2.0                         |
+| `volume`                 | number (0.0–1.0)                                                                        | 0.5                         |
+| `brightness`             | number (0.1–1.0)                                                                        | 1.0                         |
+| `enabledPacks`           | string[]                                                                                | all packs                   |
+| `customPacks`            | `CustomPack[]` (`id`, `name`, `presets[]`, `createdAt`)                                 | []                          |
+| `activeCustomPackId`     | `string \| null`                                                                        | null                        |
+| `excludedOverrides`      | string[]                                                                                | []                          |
+| `importedPresets`        | `ImportedPresetMeta[]` (`name`, `fileName`, `addedAt`)                                  | []                          |
+| `importedTextures`       | `ImportedTextureMeta[]` (`name`, `fileName`, `width`, `height`, `sizeBytes`, `addedAt`) | []                          |
+| `windowSyncEnabled`      | boolean                                                                                 | false                       |
+| `deviceSyncEnabled`      | boolean                                                                                 | false                       |
+| `deviceSyncSettingsSync` | boolean                                                                                 | false                       |
+| `syncPerformance`        | boolean                                                                                 | true                        |
+| `onboardingShown`        | boolean                                                                                 | false                       |
 
 Blocked and favorited presets are mutually exclusive.
 
@@ -153,6 +158,19 @@ Key details:
 - **Polling** — 5s interval via `useNowPlaying`, only active when visualizer is running (`isSpotifyConnected && isActive`). No API calls on the start screen
 - **Auth mode** — UI branches on `authMode === 'owner'` (not `isSpotifyUnlocked`)
 - **Connect button** — click guard (`isConnecting` state) prevents double-auth
+
+### Cross-Device Sync
+
+PeerJS-based P2P sync via WebRTC DataChannel (`DeviceSyncService`). Complements the existing same-browser `WindowSyncService` (BroadcastChannel).
+
+- **Star topology** — room creator is the host. All peers connect to the host, host relays messages. Room code (`MANGO-XXXX`) is the host's PeerJS peer ID
+- **Autopilot** — host runs autopilot, non-host peers suppress theirs. Any device can manually change presets — broadcasts to all and resets host's autopilot timer
+- **Settings sync** — autopilot settings always sync across devices. EQ, performance, brightness, and audio settings sync optionally (`deviceSyncSettingsSync` toggle). Inbound WebRTC data is type-validated and range-clamped (unlike BroadcastChannel which is same-origin)
+- **Mobile** — blocked presets automatically substituted with a random available preset; `preset-redirect` message informs other devices. Desktops ignore redirects to prevent loops
+- **Cross-sync bridging** — window sync and device sync fan out independently in `handlePresetChange`: a preset from window sync broadcasts to device sync and vice versa. `isRemotePresetRef` flags prevent echo loops
+- **Dynamic imports** — PeerJS and qrcode-generator loaded on demand, zero main bundle cost
+- **Lifecycle** — `useDeviceSync` hook manages service creation/destruction, operation mutex (`operationInFlightRef`), unmount cleanup, and stale action cleanup on the ephemeral `useDeviceSyncStatusStore`
+- **UI** — Sync tab visible on all platforms. Window sync section (desktop only) + device sync section (everywhere). Create/join room, QR code, room code copy, status dot, peer count, settings sync toggle
 
 ### PlaybackPanel
 

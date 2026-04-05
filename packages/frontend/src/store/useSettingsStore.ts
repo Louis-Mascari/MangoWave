@@ -135,6 +135,12 @@ export interface SettingsState {
   syncPerformance: boolean;
   setSyncPerformance: (enabled: boolean) => void;
 
+  // Device sync
+  deviceSyncEnabled: boolean;
+  setDeviceSyncEnabled: (enabled: boolean) => void;
+  deviceSyncSettingsSync: boolean;
+  setDeviceSyncSettingsSync: (enabled: boolean) => void;
+
   // Imported presets (metadata only — raw .milk text lives in IDB)
   importedPresets: ImportedPresetMeta[];
   addImportedPresetMeta: (meta: ImportedPresetMeta) => void;
@@ -425,6 +431,12 @@ export const useSettingsStore = create<SettingsState>()(
       syncPerformance: true,
       setSyncPerformance: (enabled) => set({ syncPerformance: enabled }),
 
+      // Device sync
+      deviceSyncEnabled: false,
+      setDeviceSyncEnabled: (enabled) => set({ deviceSyncEnabled: enabled }),
+      deviceSyncSettingsSync: false,
+      setDeviceSyncSettingsSync: (enabled) => set({ deviceSyncSettingsSync: enabled }),
+
       // Imported presets
       importedPresets: [],
       addImportedPresetMeta: (meta) =>
@@ -612,9 +624,14 @@ export const useSettingsStore = create<SettingsState>()(
         }
         // v13 → v14: Add missingTextures to ImportedPresetMeta (no transform needed —
         // existing entries without missingTextures treated as no missing textures via ??)
+        // v14 → v15: Add device sync settings
+        if ((version ?? 0) < 15) {
+          state.deviceSyncEnabled = state.deviceSyncEnabled ?? false;
+          state.deviceSyncSettingsSync = state.deviceSyncSettingsSync ?? false;
+        }
         return state as unknown as SettingsState;
       },
-      version: 14,
+      version: 15,
     },
   ),
 );

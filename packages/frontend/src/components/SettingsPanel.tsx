@@ -9,6 +9,7 @@ import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { Tooltip } from './Tooltip.tsx';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { useWindowSyncStatusStore } from '../store/useWindowSyncStatusStore.ts';
+import { useDeviceSyncStatusStore } from '../store/useDeviceSyncStatusStore.ts';
 import { quarantinedSet, mobileBlockedSet } from '../data/excludedPresets.ts';
 import { SHORTCUTS } from '../constants/shortcuts.ts';
 import {
@@ -79,7 +80,7 @@ export function SettingsPanel() {
   const sessionId = useSpotifyStore((s) => s.sessionId);
   const authMode = getAuthMode();
   const showSpotifyTab = !isMobileDevice && (authMode !== 'locked' || !!(accessToken || sessionId));
-  const showSyncTab = !isMobileDevice;
+  const showSyncTab = true;
 
   return (
     <div className="flex flex-col gap-3 overflow-hidden rounded-lg bg-black/60 p-4 backdrop-blur-sm md:h-[38rem]">
@@ -1141,6 +1142,22 @@ function SpotifyTab() {
 }
 
 function SyncTab() {
+  return (
+    <>
+      {/* Window Sync — desktop only */}
+      {!isMobileDevice && <WindowSyncSection />}
+
+      {/* Device Sync — all platforms */}
+      {!isMobileDevice && <hr className="border-white/10" />}
+      <DeviceSyncSection />
+
+      {/* Spacer to prevent invisible text below */}
+      <div className="pb-1" />
+    </>
+  );
+}
+
+function WindowSyncSection() {
   const { t } = useTranslation('settings');
   const { t: tc } = useTranslation('common');
   const windowSyncEnabled = useSettingsStore((s) => s.windowSyncEnabled);
@@ -1151,8 +1168,8 @@ function SyncTab() {
 
   return (
     <>
-      <h3 className="text-sm font-semibold text-white">{t('sync.title')}</h3>
-      <p className="text-xs text-white/50">{t('sync.description')}</p>
+      <h3 className="text-sm font-semibold text-white">{t('sync.windowSyncTitle')}</h3>
+      <p className="text-xs text-white/50">{t('sync.windowSyncDescription')}</p>
 
       {!isSyncAvailable ? (
         <p className="text-xs text-white/40">{t('sync.unavailable')}</p>
@@ -1199,6 +1216,244 @@ function SyncTab() {
               </label>
             </>
           )}
+        </>
+      )}
+    </>
+  );
+}
+
+/** Validate MANGO-XXXX room code format. */
+function isValidRoomCode(code: string): boolean {
+  return /^MANGO-[A-HJ-NP-Z]{4}$/.test(code);
+}
+
+function DeviceSyncSection() {
+  const { t } = useTranslation('settings');
+  const { t: tc } = useTranslation('common');
+  const setDeviceSyncEnabled = useSettingsStore((s) => s.setDeviceSyncEnabled);
+  const deviceSyncSettingsSync = useSettingsStore((s) => s.deviceSyncSettingsSync);
+  const setDeviceSyncSettingsSync = useSettingsStore((s) => s.setDeviceSyncSettingsSync);
+  const { status, peerCount, roomCode, isHost, errorMessage, actions } = useDeviceSyncStatusStore();
+
+  const [joinCode, setJoinCode] = useState('');
+  const [joinError, setJoinError] = useState('');
+  const [qrDataUrl, setQrDataUrl] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [isOperating, setIsOperating] = useState(false);
+
+  // Generate QR code when room code is available (host only)
+  useEffect(() => {
+    if (!roomCode || !isHost) {
+      setQrDataUrl('');
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const qrgen = await import('qrcode-generator');
+      if (cancelled) return;
+      const qr = qrgen.default(0, 'M');
+      qr.addData(roomCode);
+      qr.make();
+      setQrDataUrl(qr.createDataURL(6, 2));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [roomCode, isHost]);
+
+  const handleCreateRoom = async () => {
+    if (isOperating) return;
+    setIsOperating(true);
+    setDeviceSyncEnabled(true);
+    try {
+      await actions.createRoom();
+    } catch {
+      // Error handled via status store
+    } finally {
+      setIsOperating(false);
+    }
+  };
+
+  const handleJoinRoom = async () => {
+    if (isOperating) return;
+    const code = joinCode.trim().toUpperCase();
+    if (!isValidRoomCode(code)) {
+      setJoinError(t('sync.deviceSync.invalidCode'));
+      return;
+    }
+    setJoinError('');
+    setIsOperating(true);
+    setDeviceSyncEnabled(true);
+    try {
+      await actions.joinRoom(code);
+    } catch {
+      // Error handled via status store
+    } finally {
+      setIsOperating(false);
+    }
+  };
+
+  const handleLeaveRoom = () => {
+    actions.leaveRoom();
+    setDeviceSyncEnabled(false);
+  };
+
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(roomCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard API failed silently
+    }
+  };
+
+  const statusDotColor =
+    status === 'connected'
+      ? 'bg-green-400'
+      : status === 'connecting'
+        ? 'bg-yellow-400'
+        : status === 'error' || status === 'disconnected'
+          ? 'bg-red-400'
+          : 'bg-white/30';
+
+  const isConnectedOrConnecting = status === 'connected' || status === 'connecting';
+
+  return (
+    <>
+      <h3 className="text-sm font-semibold text-white">{t('sync.deviceSync.title')}</h3>
+      <p className="text-xs text-white/50">{t('sync.deviceSync.description')}</p>
+
+      {status === 'error' && (
+        <div className="flex flex-col gap-2">
+          <p className="text-xs text-red-400">{errorMessage || t('sync.deviceSync.error')}</p>
+          <button
+            onClick={() => {
+              actions.leaveRoom();
+              setDeviceSyncEnabled(false);
+              setJoinCode('');
+              setJoinError('');
+            }}
+            className="cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
+          >
+            {t('sync.deviceSync.tryAgain')}
+          </button>
+        </div>
+      )}
+
+      {status === 'disconnected' && (
+        <div className="flex flex-col gap-2">
+          <p className="text-xs text-yellow-400">{t('sync.deviceSync.hostDisconnected')}</p>
+          <button
+            onClick={handleLeaveRoom}
+            className="cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
+          >
+            {t('sync.deviceSync.leaveRoom')}
+          </button>
+        </div>
+      )}
+
+      {status === 'idle' && (
+        <div className="flex flex-col gap-3">
+          <div className="flex gap-2">
+            <button
+              onClick={handleCreateRoom}
+              disabled={isOperating}
+              className="cursor-pointer rounded border-none bg-orange-500 px-3 py-1 text-xs text-white hover:bg-orange-400 disabled:cursor-default disabled:opacity-40"
+            >
+              {t('sync.deviceSync.createRoom')}
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs text-white/60">{t('sync.deviceSync.enterCode')}</span>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={joinCode}
+                onChange={(e) => {
+                  setJoinCode(e.target.value.toUpperCase());
+                  setJoinError('');
+                }}
+                placeholder="MANGO-XXXX"
+                maxLength={10}
+                className="w-32 rounded border border-white/20 bg-white/5 px-2 py-1 font-mono text-xs text-white placeholder-white/30 outline-none focus:border-orange-500"
+              />
+              <button
+                onClick={handleJoinRoom}
+                disabled={!joinCode.trim() || isOperating}
+                className="cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20 disabled:cursor-default disabled:opacity-40"
+              >
+                {t('sync.deviceSync.connect')}
+              </button>
+            </div>
+            {joinError && <p className="text-xs text-red-400">{joinError}</p>}
+          </div>
+        </div>
+      )}
+
+      {status === 'connecting' && (
+        <p className="text-xs text-white/60">{t('sync.deviceSync.connecting')}</p>
+      )}
+
+      {status === 'connected' && (
+        <div className="flex flex-col gap-3">
+          {/* Room code display */}
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-lg font-bold tracking-wider text-white">
+              {roomCode}
+            </span>
+            <button
+              onClick={handleCopyCode}
+              className="cursor-pointer rounded border-none bg-white/10 px-2 py-0.5 text-xs text-white/70 hover:bg-white/20"
+              aria-label={copied ? t('sync.deviceSync.copiedToClipboard') : tc('copy')}
+            >
+              {copied ? t('sync.deviceSync.copiedToClipboard') : tc('copy')}
+            </button>
+          </div>
+
+          {/* QR code (host only) */}
+          {isHost && qrDataUrl && (
+            <img
+              src={qrDataUrl}
+              alt={`QR code for room ${roomCode}`}
+              className="h-28 w-28 rounded bg-white p-1"
+            />
+          )}
+
+          {/* Status + peer count */}
+          <div className="flex items-center gap-2">
+            <span className={`inline-block h-2 w-2 rounded-full ${statusDotColor}`} />
+            <span className="text-xs text-white/60">
+              {t('sync.deviceSync.connected')}
+              {peerCount > 0 ? ` — ${t('sync.deviceSync.peerCount', { count: peerCount })}` : ''}
+            </span>
+          </div>
+
+          {/* Leave room */}
+          <button
+            onClick={handleLeaveRoom}
+            className="cursor-pointer self-start rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
+          >
+            {t('sync.deviceSync.leaveRoom')}
+          </button>
+        </div>
+      )}
+
+      {/* Settings sync toggle — visible when connected or connecting */}
+      {isConnectedOrConnecting && (
+        <>
+          <label className="flex items-center gap-1.5 text-xs text-white/70">
+            <input
+              type="checkbox"
+              checked={deviceSyncSettingsSync}
+              onChange={(e) => setDeviceSyncSettingsSync(e.target.checked)}
+              className="accent-orange-500"
+            />
+            {t('sync.deviceSync.syncSettings')}
+            <Tooltip text={t('sync.deviceSync.syncSettingsHint')} />
+          </label>
+          <p className="text-xs text-white/40">{t('sync.deviceSync.autopilotNote')}</p>
         </>
       )}
     </>

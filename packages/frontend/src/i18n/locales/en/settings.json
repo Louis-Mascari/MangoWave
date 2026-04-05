@@ -119,8 +119,9 @@
   },
 
   "sync": {
-    "title": "Multi-Window Sync",
-    "description": "Sync presets and settings across multiple browser windows on the same device. Open MangoWave in multiple windows to visualize on multiple monitors. Works best with system audio or microphone — each window captures the same source. Local file playback is per-window.",
+    "title": "Sync",
+    "windowSyncTitle": "Window Sync",
+    "windowSyncDescription": "Sync presets and settings across multiple browser windows on the same device. Open MangoWave in multiple windows to visualize on multiple monitors. Works best with system audio or microphone — each window captures the same source. Local file playback is per-window.",
     "enabled": "Window Sync",
     "unavailable": "Multi-window sync is not supported in this browser.",
     "noPeers": "No peers connected",
@@ -128,7 +129,31 @@
     "peerCount_other": "{{count}} other windows connected",
     "autoSyncNote": "Presets, EQ, autopilot, favorites, and all other settings automatically sync across windows. Change something on one and the others will update. Turn Window Sync on or off in each window separately.",
     "syncPerformance": "Sync rendering settings",
-    "syncPerformanceHint": "Frame rate, resolution, mesh, texture quality, and anti-aliasing. Uncheck if your monitors need different performance settings."
+    "syncPerformanceHint": "Frame rate, resolution, mesh, texture quality, and anti-aliasing. Uncheck if your monitors need different performance settings.",
+    "deviceSync": {
+      "title": "Device Sync",
+      "description": "Sync presets across different devices (phone, laptop, TV) via peer-to-peer WebRTC. One device creates a room, others join with the room code. The room creator controls autopilot.",
+      "createRoom": "Create Room",
+      "joinRoom": "Join Room",
+      "roomCode": "Room Code",
+      "enterCode": "Join an existing room",
+      "connect": "Connect",
+      "leaveRoom": "Leave Room",
+      "connecting": "Connecting...",
+      "connected": "Connected",
+      "disconnected": "Disconnected",
+      "error": "Connection error",
+      "tryAgain": "Try Again",
+      "peerCount_one": "{{count}} device connected",
+      "peerCount_other": "{{count}} devices connected",
+      "hostDisconnected": "The room host disconnected. The room has been closed.",
+      "invalidCode": "Invalid room code. Format: MANGO-XXXX (4 letters, no I or O)",
+      "roomNotFound": "Room not found. Check the code and try again.",
+      "syncSettings": "Sync EQ & rendering settings",
+      "syncSettingsHint": "Share EQ, pre-amp, audio analysis, and rendering settings across devices. Uncheck if devices need different performance settings.",
+      "copiedToClipboard": "Copied!",
+      "autopilotNote": "Autopilot settings always sync — any device can toggle autopilot, but only the room creator's timer fires."
+    }
   },
 
   "language": {

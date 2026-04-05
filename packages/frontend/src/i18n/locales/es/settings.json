@@ -119,8 +119,9 @@
   },
 
   "sync": {
-    "title": "Sincronización multi-ventana",
-    "description": "Sincroniza presets y configuración entre múltiples ventanas del navegador en el mismo dispositivo. Abre MangoWave en múltiples ventanas para visualizar en múltiples monitores. Funciona mejor con audio del sistema o micrófono — cada ventana captura la misma fuente. La reproducción de archivos locales es por ventana.",
+    "title": "Sincronización",
+    "windowSyncTitle": "Sincronización de ventanas",
+    "windowSyncDescription": "Sincroniza presets y configuración entre múltiples ventanas del navegador en el mismo dispositivo. Abre MangoWave en múltiples ventanas para visualizar en múltiples monitores. Funciona mejor con audio del sistema o micrófono — cada ventana captura la misma fuente. La reproducción de archivos locales es por ventana.",
     "enabled": "Sincronización de ventanas",
     "unavailable": "La sincronización multi-ventana no es compatible con este navegador.",
     "noPeers": "Sin pares conectados",
@@ -128,7 +129,31 @@
     "peerCount_other": "{{count}} otras ventanas conectadas",
     "autoSyncNote": "Los presets, EQ, autopilot, favoritos y todas las demás configuraciones se sincronizan automáticamente entre ventanas. Cambia algo en una y las demás se actualizarán. Activa o desactiva la sincronización de ventanas en cada ventana por separado.",
     "syncPerformance": "Sincronizar configuración de renderizado",
-    "syncPerformanceHint": "Tasa de cuadros, resolución, malla, calidad de texturas y anti-aliasing. Desmarca si tus monitores necesitan configuraciones de rendimiento diferentes."
+    "syncPerformanceHint": "Tasa de cuadros, resolución, malla, calidad de texturas y anti-aliasing. Desmarca si tus monitores necesitan configuraciones de rendimiento diferentes.",
+    "deviceSync": {
+      "title": "Sincronización de dispositivos",
+      "description": "Sincroniza presets entre distintos dispositivos (teléfono, portátil, TV) mediante WebRTC punto a punto. Un dispositivo crea una sala, los demás se unen con el código. El creador de la sala controla el autopilot.",
+      "createRoom": "Crear sala",
+      "joinRoom": "Unirse a sala",
+      "roomCode": "Código de sala",
+      "enterCode": "Unirse a una sala existente",
+      "connect": "Conectar",
+      "leaveRoom": "Salir de la sala",
+      "connecting": "Conectando...",
+      "connected": "Conectado",
+      "disconnected": "Desconectado",
+      "error": "Error de conexión",
+      "tryAgain": "Reintentar",
+      "peerCount_one": "{{count}} dispositivo conectado",
+      "peerCount_other": "{{count}} dispositivos conectados",
+      "hostDisconnected": "El anfitrión se desconectó. La sala se ha cerrado.",
+      "invalidCode": "Código de sala no válido. Formato: MANGO-XXXX (4 letras, sin I ni O)",
+      "roomNotFound": "Sala no encontrada. Verifica el código e inténtalo de nuevo.",
+      "syncSettings": "Sincronizar EQ y renderizado",
+      "syncSettingsHint": "Comparte EQ, pre-amp, análisis de audio y renderizado entre dispositivos. Desmarca si los dispositivos necesitan configuraciones de rendimiento diferentes.",
+      "copiedToClipboard": "¡Copiado!",
+      "autopilotNote": "La configuración del autopilot siempre se sincroniza — cualquier dispositivo puede activarlo, pero solo el temporizador del creador de la sala se ejecuta."
+    }
   },
 
   "language": {

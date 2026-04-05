@@ -249,7 +249,8 @@
     "packActive": "Memutar dari: {{name}}",
     "deactivatePack": "Hentikan paket",
     "packOverridesFilters": "Autopilot dan preset berikutnya menggunakan paket aktif. Filter hanya memengaruhi daftar ini.",
-    "favoritesAutoSwitch": "Beralih dari favorit ke mode semua"
+    "favoritesAutoSwitch": "Beralih dari favorit ke mode semua",
+    "newPack": "Paket Baru"
   },
 
   "importModal": {

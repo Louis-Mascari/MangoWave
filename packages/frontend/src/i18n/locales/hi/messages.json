@@ -249,7 +249,8 @@
     "packActive": "चल रहा है: {{name}}",
     "deactivatePack": "पैक रोकें",
     "packOverridesFilters": "ऑटोपायलट और अगला प्रीसेट सक्रिय पैक का उपयोग करते हैं। फ़िल्टर केवल इस सूची को प्रभावित करते हैं।",
-    "favoritesAutoSwitch": "फ़ेवरिट से ऑल मोड पर स्विच हो गया"
+    "favoritesAutoSwitch": "फ़ेवरिट से ऑल मोड पर स्विच हो गया",
+    "newPack": "नया पैक"
   },
 
   "importModal": {

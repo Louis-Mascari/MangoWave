@@ -249,7 +249,8 @@
     "packActive": "Reproduciendo de: {{name}}",
     "deactivatePack": "Parar pack",
     "packOverridesFilters": "El piloto automático y el siguiente preset usan el pack activo. Los filtros solo afectan esta lista.",
-    "favoritesAutoSwitch": "Cambiado de favoritos al modo todo"
+    "favoritesAutoSwitch": "Cambiado de favoritos al modo todo",
+    "newPack": "Nuevo Pack"
   },
 
   "importModal": {

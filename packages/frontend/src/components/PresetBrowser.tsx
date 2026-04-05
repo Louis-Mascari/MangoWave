@@ -388,16 +388,26 @@ function AddToPackButton({
     return () => document.removeEventListener('mousedown', handler);
   }, [showDropdown]);
 
-  const handleClick = () => {
-    if (customPacks.length === 0) {
-      useToastStore.getState().show(t('presetBrowser.createPackFirst'));
+  const createCustomPack = useSettingsStore((s) => s.createCustomPack);
+
+  const handleCreateAndAdd = () => {
+    if (customPacks.length >= 50) {
+      useToastStore.getState().show(t('customPacks.maxPacksReached'));
       return;
     }
-    if (customPacks.length === 1) {
-      addPresetToCustomPack(customPacks[0].id, presetName);
-      useToastStore.getState().show(t('presetBrowser.addedToPack', { pack: customPacks[0].name }), {
-        maskValue: customPacks[0].name,
-      });
+    const name = `Pack ${customPacks.length + 1}`;
+    const id = createCustomPack(name, [presetName]);
+    if (id) {
+      useToastStore
+        .getState()
+        .show(t('presetBrowser.addedToPack', { pack: name }), { maskValue: name });
+    }
+    setShowDropdown(false);
+  };
+
+  const handleClick = () => {
+    if (customPacks.length === 0) {
+      handleCreateAndAdd();
       return;
     }
     if (showDropdown) {
@@ -437,6 +447,13 @@ function AddToPackButton({
             className="fixed z-[100] min-w-[140px] rounded bg-black/90 py-1 shadow-lg ring-1 ring-white/20"
             style={dropdownStyle}
           >
+            <button
+              onClick={handleCreateAndAdd}
+              className="block w-full cursor-pointer border-none bg-transparent px-3 py-1 text-left text-xs text-green-400/70 hover:bg-white/10 hover:text-green-400"
+            >
+              + {t('customPacks.newPack')}
+            </button>
+            {customPacks.length > 0 && <div className="my-0.5 border-t border-white/10" />}
             {customPacks.map((pack) => (
               <button
                 key={pack.id}

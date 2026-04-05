@@ -249,7 +249,8 @@
     "packActive": "播放自：{{name}}",
     "deactivatePack": "停止播放包",
     "packOverridesFilters": "自动切换和下一个预设使用当前合集。筛选仅影响此列表。",
-    "favoritesAutoSwitch": "已从收藏模式切换到全部模式"
+    "favoritesAutoSwitch": "已从收藏模式切换到全部模式",
+    "newPack": "新建包"
   },
 
   "importModal": {

@@ -258,7 +258,8 @@
     "packActive": "Playing from: {{name}}",
     "deactivatePack": "Stop pack",
     "packOverridesFilters": "Autopilot and next preset use the active pack. Filters only affect this list.",
-    "favoritesAutoSwitch": "Switched from favorites to all mode"
+    "favoritesAutoSwitch": "Switched from favorites to all mode",
+    "newPack": "New Pack"
   },
 
   "importModal": {

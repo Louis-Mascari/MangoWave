@@ -249,7 +249,8 @@
     "packActive": "재생 중: {{name}}",
     "deactivatePack": "팩 중지",
     "packOverridesFilters": "자동 전환 및 다음 프리셋은 활성 팩을 사용합니다. 필터는 이 목록에만 적용됩니다.",
-    "favoritesAutoSwitch": "즐겨찾기 모드에서 전체 모드로 전환됨"
+    "favoritesAutoSwitch": "즐겨찾기 모드에서 전체 모드로 전환됨",
+    "newPack": "새 팩"
   },
 
   "importModal": {

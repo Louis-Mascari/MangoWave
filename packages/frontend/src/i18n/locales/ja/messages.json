@@ -249,7 +249,8 @@
     "packActive": "再生中：{{name}}",
     "deactivatePack": "パック停止",
     "packOverridesFilters": "オートパイロットと次のプリセットはアクティブなパックを使用します。フィルターはこのリストにのみ影響します。",
-    "favoritesAutoSwitch": "お気に入りモードからすべてモードに切り替えました"
+    "favoritesAutoSwitch": "お気に入りモードからすべてモードに切り替えました",
+    "newPack": "新しいパック"
   },
 
   "importModal": {

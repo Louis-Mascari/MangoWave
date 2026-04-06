@@ -3,6 +3,8 @@
   "reset": "重置",
   "cancel": "取消",
   "apply": "应用",
+  "exporting": "导出中...",
+  "importing": "导入中...",
   "on": "开",
   "off": "关",
   "back": "返回",
@@ -32,5 +34,12 @@
   "default": "默认",
   "high": "高",
   "ultra": "超高",
-  "controls": "控件"
+  "pause": "Pause",
+  "loadingPresets": "Loading presets…",
+  "controls": "控件",
+  "today": "今天",
+  "yesterday": "昨天",
+  "collapseAll": "全部折叠",
+  "expandAll": "全部展开",
+  "copy": "复制"
 }

@@ -1,47 +1,11 @@
-import type {
-  PerformanceSettings,
-  EQSettings,
-  AudioSettings,
-  AutopilotSettings,
-  CustomPack,
-} from '../store/useSettingsStore.ts';
+import type { SyncableSettings, SyncMessage, SyncMessagePayload } from './syncTypes.ts';
+import { isValidSyncMessage } from './syncTypes.ts';
+
+export type { SyncableSettings };
 
 const CHANNEL_NAME = 'mangowave-sync';
 const HEARTBEAT_INTERVAL_MS = 2000;
 const PEER_TIMEOUT_MS = 4000;
-
-export interface SyncableSettings {
-  performance?: PerformanceSettings;
-  eq?: EQSettings;
-  audio?: AudioSettings;
-  autopilot?: AutopilotSettings;
-  transitionTime?: number;
-  blockedPresets?: string[];
-  favoritePresets?: string[];
-  enabledPacks?: string[];
-  excludedOverrides?: string[];
-  presetNameDisplay?: 'off' | 'always' | number;
-  songInfoDisplay?: 'off' | number;
-  volume?: number;
-  syncPerformance?: boolean;
-  customPacks?: CustomPack[];
-  activeCustomPackId?: string | null;
-}
-
-interface SyncMessageBase {
-  senderId: string;
-  timestamp: number;
-}
-
-type SyncMessagePayload =
-  | { type: 'preset-change'; presetName: string; transitionTime: number }
-  | { type: 'settings-change'; settings: SyncableSettings }
-  | { type: 'heartbeat'; isLeader: boolean }
-  | { type: 'join' }
-  | { type: 'welcome'; currentPreset: string }
-  | { type: 'leave' };
-
-type SyncMessage = SyncMessageBase & SyncMessagePayload;
 
 type PresetChangeHandler = (presetName: string, transitionTime: number) => void;
 type SettingsChangeHandler = (settings: SyncableSettings) => void;
@@ -49,28 +13,6 @@ type JoinHandler = () => void;
 type WelcomeHandler = (currentPreset: string) => void;
 type LeaderChangeHandler = (isLeader: boolean) => void;
 type PeerCountChangeHandler = (count: number) => void;
-
-/** Validate that a message looks like a SyncMessage (guard against malformed data). */
-function isValidSyncMessage(data: unknown): data is SyncMessage {
-  if (!data || typeof data !== 'object' || Array.isArray(data)) return false;
-  const msg = data as Record<string, unknown>;
-  if (typeof msg.senderId !== 'string' || typeof msg.timestamp !== 'number') return false;
-  switch (msg.type) {
-    case 'preset-change':
-      return typeof msg.presetName === 'string' && typeof msg.transitionTime === 'number';
-    case 'settings-change':
-      return msg.settings !== null && typeof msg.settings === 'object';
-    case 'heartbeat':
-      return typeof msg.isLeader === 'boolean';
-    case 'join':
-    case 'leave':
-      return true;
-    case 'welcome':
-      return typeof (msg as Record<string, unknown>).currentPreset === 'string';
-    default:
-      return false;
-  }
-}
 
 /**
  * BroadcastChannel-based service for syncing preset changes and settings
@@ -228,6 +170,9 @@ export class WindowSyncService {
         break;
       case 'welcome':
         this._onWelcome?.(msg.currentPreset);
+        break;
+      case 'preset-redirect':
+        // Window sync ignores preset-redirect (only used for device sync)
         break;
     }
   }

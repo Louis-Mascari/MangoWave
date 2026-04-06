@@ -85,18 +85,5 @@
       "autopilotTitle": "Autopilot & Pengaturan",
       "autopilotDesc": "Aktifkan Autopilot (A) untuk beralih preset secara otomatis. Buka Pengaturan (⚙) untuk menyesuaikan equalizer dan rendering."
     }
-  },
-  "landing": {
-    "title": "MangoWave | Audio Visualizer",
-    "metaDescription": "Visualizer audio-reaktif gratis dengan 400+ visual. Tanpa daftar akun, tanpa install, tanpa iklan. Setiap ketukan, setiap dentuman. Langsung mulai.",
-    "tagline": "Musikmu, divisualisasikan.",
-    "taglineSub": "Setiap ketukan, setiap dentuman. Langsung mulai.",
-    "feature400": "400+ Visual",
-    "featureAnySource": "Sumber Audio Apa Saja",
-    "featureDesktopMobile": "Desktop & Mobile",
-    "featureNoSignup": "Tanpa Daftar Akun",
-    "featureNoInstall": "Tanpa Install",
-    "featureNoAds": "Tanpa Iklan",
-    "launch": "Mulai"
   }
 }

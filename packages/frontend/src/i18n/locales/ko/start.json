@@ -85,18 +85,5 @@
       "autopilotTitle": "자동 전환 & 설정",
       "autopilotDesc": "자동 전환(A)을 켜면 프리셋이 자동으로 순환합니다. 설정(⚙)을 열어 이퀄라이저와 렌더링을 조절하세요."
     }
-  },
-  "landing": {
-    "title": "MangoWave | 오디오 비주얼라이저",
-    "metaDescription": "400개 이상의 비주얼을 갖춘 무료 오디오 반응형 비주얼라이저. 가입 없이, 설치 없이, 광고 없이. 모든 비트, 모든 드롭. 시작만 누르세요.",
-    "tagline": "당신의 음악을 눈으로 느끼세요.",
-    "taglineSub": "모든 비트, 모든 드롭. 시작만 누르세요.",
-    "feature400": "400+ 비주얼",
-    "featureAnySource": "모든 오디오 소스",
-    "featureDesktopMobile": "데스크톱 & 모바일",
-    "featureNoSignup": "가입 불필요",
-    "featureNoInstall": "설치 불필요",
-    "featureNoAds": "광고 없음",
-    "launch": "시작"
   }
 }

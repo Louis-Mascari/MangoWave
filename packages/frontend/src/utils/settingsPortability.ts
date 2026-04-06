@@ -1,11 +1,12 @@
 import posthog from 'posthog-js';
 import * as Sentry from '@sentry/react';
 import sjson from 'secure-json-parse';
+import { get as idbGet, keys as idbKeys, set as idbSet } from 'idb-keyval';
 import type { SettingsState } from '../store/useSettingsStore.ts';
 import i18n from '../i18n/index.ts';
 
 const EXPORT_VERSION = 1;
-const MAX_IMPORT_SIZE = 1_000_000; // 1MB
+const MAX_IMPORT_SIZE = 50_000_000; // 50MB (accommodates exported texture data)
 
 export interface ExportCategory {
   key: string;
@@ -37,7 +38,7 @@ export const EXPORT_CATEGORIES: ExportCategory[] = [
   {
     key: 'display',
     labelKey: 'data.categoryDisplay',
-    fields: ['presetNameDisplay', 'songInfoDisplay', 'transitionTime', 'volume'],
+    fields: ['presetNameDisplay', 'songInfoDisplay', 'transitionTime', 'volume', 'brightness'],
   },
   {
     key: 'favorites',
@@ -87,6 +88,122 @@ export function buildExport(state: SettingsState, selectedCategories: Set<string
     },
     ...data,
   };
+}
+
+/**
+ * Build an export with optional embedded imported preset/texture data from IDB.
+ * When includeImported is true, raw .milk texts and texture data URIs are embedded
+ * alongside their metadata, enabling cross-device transfer.
+ */
+export async function buildExportWithImportedData(
+  state: SettingsState,
+  selectedCategories: Set<string>,
+  includeImported: boolean,
+): Promise<ExportData> {
+  const data = buildExport(state, selectedCategories);
+
+  if (!includeImported) return data;
+
+  const allIdbKeys = await idbKeys();
+  const presetData: Record<string, string> = {};
+  const textureData: Record<string, unknown> = {};
+
+  for (const key of allIdbKeys as string[]) {
+    if (key.startsWith('mw-milk:')) {
+      const name = key.slice(8);
+      const text = await idbGet<string>(key);
+      if (text) presetData[name] = text;
+    } else if (key.startsWith('mw-tex:')) {
+      const name = key.slice(7);
+      const val = await idbGet(key);
+      if (val) textureData[name] = val;
+    }
+  }
+
+  data.importedPresets = state.importedPresets;
+  data.importedTextures = state.importedTextures;
+  data._importedData = { presets: presetData, textures: textureData };
+
+  return data;
+}
+
+/** Estimate the byte size of all imported preset and texture data in IDB. */
+export async function estimateImportedDataSize(): Promise<number> {
+  const allIdbKeys = await idbKeys();
+  let total = 0;
+
+  for (const key of allIdbKeys as string[]) {
+    if (key.startsWith('mw-milk:')) {
+      const text = await idbGet<string>(key);
+      if (text) total += new Blob([text]).size;
+    } else if (key.startsWith('mw-tex:')) {
+      const val = await idbGet(key);
+      if (val) total += new Blob([JSON.stringify(val)]).size;
+    }
+  }
+
+  return total;
+}
+
+/**
+ * Restore imported preset and texture data from a settings export.
+ * Writes raw .milk texts to IDB, converts each via Worker, and restores texture data.
+ */
+export async function restoreImportedData(
+  data: Record<string, unknown>,
+  _state: SettingsState,
+): Promise<void> {
+  const imported = data._importedData as {
+    presets?: Record<string, string>;
+    textures?: Record<string, unknown>;
+  };
+  if (!imported) return;
+
+  const { convertInWorker } = await import('../engine/conversionWorkerManager.ts');
+
+  // Restore presets
+  if (imported.presets) {
+    for (const [name, text] of Object.entries(imported.presets)) {
+      if (typeof text !== 'string') continue;
+      await idbSet(`mw-milk:${name}`, text);
+      try {
+        const converted = await convertInWorker(name, text);
+        await idbSet(`mw-conv:${name}`, converted);
+      } catch {
+        // Conversion failure is non-fatal — user can trigger re-conversion on selection
+      }
+    }
+  }
+
+  // Restore textures — validate shape matches what textureLoader produces
+  if (imported.textures) {
+    for (const [name, val] of Object.entries(imported.textures)) {
+      if (
+        !val ||
+        typeof val !== 'object' ||
+        typeof (val as Record<string, unknown>).data !== 'string' ||
+        typeof (val as Record<string, unknown>).width !== 'number' ||
+        typeof (val as Record<string, unknown>).height !== 'number'
+      )
+        continue;
+      await idbSet(`mw-tex:${name}`, val);
+    }
+  }
+
+  // Restore metadata to settings store
+  const { useSettingsStore } = await import('../store/useSettingsStore.ts');
+  const metaPayload: Record<string, unknown> = {};
+  if (data.importedPresets) {
+    const sanitized = SANITIZERS.importedPresets(data.importedPresets);
+    if (sanitized) metaPayload.importedPresets = sanitized;
+  }
+  if (data.importedTextures) {
+    const sanitized = SANITIZERS.importedTextures(data.importedTextures);
+    if (sanitized) metaPayload.importedTextures = sanitized;
+  }
+  if (Object.keys(metaPayload).length > 0) {
+    useSettingsStore.getState().importSettings(metaPayload as Partial<SettingsState>);
+  }
 }
 
 export function downloadExport(data: ExportData): void {
@@ -146,6 +263,10 @@ export function parseImportFile(file: File): Promise<ParseResult> {
         for (const category of EXPORT_CATEGORIES) {
           const hasAny = category.fields.some((field) => field in parsed);
           if (hasAny) detected.push(category.key);
+        }
+        // Detect embedded imported data (cross-device transfer)
+        if ('_importedData' in parsed) {
+          if (!detected.includes('packs')) detected.push('packs');
         }
 
         const versionWarning =
@@ -260,6 +381,7 @@ const SANITIZERS: Record<string, (val: unknown) => unknown> = {
   },
   transitionTime: (v) => clamp(v, 0, 10, 2.0),
   volume: (v) => clamp(v, 0, 1, 0.5),
+  brightness: (v) => clamp(v, 0.1, 1, 1.0),
   customPacks: (v) => {
     if (!Array.isArray(v)) return undefined;
     return v
@@ -278,6 +400,36 @@ const SANITIZERS: Record<string, (val: unknown) => unknown> = {
       }));
   },
   activeCustomPackId: (v) => (typeof v === 'string' || v === null ? v : null),
+  importedPresets: (v) => {
+    if (!Array.isArray(v)) return undefined;
+    return v
+      .filter(
+        (p): p is Record<string, unknown> =>
+          !!p && typeof p === 'object' && !Array.isArray(p) && typeof p.name === 'string',
+      )
+      .map((p) => ({
+        name: (p.name as string).slice(0, 200),
+        fileName: typeof p.fileName === 'string' ? (p.fileName as string).slice(0, 200) : '',
+        addedAt: typeof p.addedAt === 'number' ? p.addedAt : Date.now(),
+      }));
+  },
+  importedTextures: (v) => {
+    if (!Array.isArray(v)) return undefined;
+    return v
+      .filter(
+        (p): p is Record<string, unknown> =>
+          !!p && typeof p === 'object' && !Array.isArray(p) && typeof p.name === 'string',
+      )
+      .map((p) => ({
+        name: (p.name as string).slice(0, 200),
+        fileName: typeof p.fileName === 'string' ? (p.fileName as string).slice(0, 200) : '',
+        width: typeof p.width === 'number' && isFinite(p.width as number) ? p.width : 0,
+        height: typeof p.height === 'number' && isFinite(p.height as number) ? p.height : 0,
+        sizeBytes:
+          typeof p.sizeBytes === 'number' && isFinite(p.sizeBytes as number) ? p.sizeBytes : 0,
+        addedAt: typeof p.addedAt === 'number' ? p.addedAt : Date.now(),
+      }));
+  },
   windowSyncEnabled: (v) => (typeof v === 'boolean' ? v : false),
   syncPerformance: (v) => (typeof v === 'boolean' ? v : true),
 };
@@ -287,9 +439,18 @@ export interface ImportResult {
   warnings: string[];
 }
 
+/** Fields that should be union-merged (not replaced) with current state on import. */
+const MERGE_STRING_ARRAYS: (keyof SettingsState)[] = [
+  'favoritePresets',
+  'blockedPresets',
+  'enabledPacks',
+  'excludedOverrides',
+];
+
 export function buildImportPayload(
   data: ExportData,
   selectedCategories: Set<string>,
+  currentState?: Partial<SettingsState>,
 ): ImportResult {
   const payload: Record<string, unknown> = {};
   const warnings: string[] = [];
@@ -306,6 +467,81 @@ export function buildImportPayload(
           warnings.push(i18n.t('settingsImport.fieldNotApplied', { field, ns: 'messages' }));
         }
       }
+    }
+  }
+
+  // Merge string arrays with current state (union, deduplicated)
+  if (currentState) {
+    for (const field of MERGE_STRING_ARRAYS) {
+      if (field in payload) {
+        const incoming = payload[field] as string[];
+        const existing = (currentState[field] as string[] | undefined) ?? [];
+        const merged = [...new Set([...existing, ...incoming])];
+        payload[field] = merged;
+      }
+    }
+
+    // Block wins: if a preset is in both favorites and blocked after merge, drop from favorites
+    if ('favoritePresets' in payload || 'blockedPresets' in payload) {
+      const blocked = new Set(
+        (payload.blockedPresets as string[] | undefined) ??
+          (currentState.blockedPresets as string[] | undefined) ??
+          [],
+      );
+      if ('favoritePresets' in payload && blocked.size > 0) {
+        payload.favoritePresets = (payload.favoritePresets as string[]).filter(
+          (p) => !blocked.has(p),
+        );
+      }
+    }
+
+    // Merge customPacks by id — keep existing, auto-rename on name collision
+    if ('customPacks' in payload) {
+      const incoming = payload.customPacks as {
+        id: string;
+        name: string;
+        presets: string[];
+        createdAt: number;
+      }[];
+      const existing = (currentState.customPacks as typeof incoming | undefined) ?? [];
+      const existingIds = new Set(existing.map((p) => p.id));
+      const existingNames = new Set(existing.map((p) => p.name));
+      const newPacks = incoming
+        .filter((p) => !existingIds.has(p.id))
+        .map((p) => {
+          if (!existingNames.has(p.name)) return p;
+          // Auto-rename: append " (imported)", then " (2)", " (3)", etc.
+          let candidate = `${p.name} (imported)`;
+          let suffix = 2;
+          while (existingNames.has(candidate)) {
+            candidate = `${p.name} (${suffix++})`;
+          }
+          existingNames.add(candidate);
+          return { ...p, name: candidate.slice(0, 50) };
+        });
+      payload.customPacks = [...existing, ...newPacks].slice(0, 50);
+    }
+
+    // Merge importedPresets by name — keep existing, add new
+    if ('importedPresets' in payload) {
+      const incoming = payload.importedPresets as { name: string }[];
+      const existing = (currentState.importedPresets as typeof incoming | undefined) ?? [];
+      const existingNames = new Set(existing.map((p) => p.name));
+      payload.importedPresets = [
+        ...existing,
+        ...incoming.filter((p) => !existingNames.has(p.name)),
+      ];
+    }
+
+    // Merge importedTextures by name — keep existing, add new
+    if ('importedTextures' in payload) {
+      const incoming = payload.importedTextures as { name: string }[];
+      const existing = (currentState.importedTextures as typeof incoming | undefined) ?? [];
+      const existingNames = new Set(existing.map((p) => p.name));
+      payload.importedTextures = [
+        ...existing,
+        ...incoming.filter((p) => !existingNames.has(p.name)),
+      ];
     }
   }
 

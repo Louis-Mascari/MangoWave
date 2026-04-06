@@ -8,7 +8,7 @@ export interface VisualizerInstance {
     opts?: { meshWidth?: number; meshHeight?: number; textureRatio?: number },
   ): void;
   setOutputAA(useAA: boolean): void;
-  render(): void;
+  render(opts?: { audioLevels?: unknown; elapsedTime?: number }): void;
 }
 
 declare const butterchurn: {
@@ -28,3 +28,7 @@ declare const butterchurn: {
 };
 
 export default butterchurn;
+
+export declare const butterchurnExtraImages: {
+  getImages(): Record<string, { data: string; width: number; height: number }>;
+};

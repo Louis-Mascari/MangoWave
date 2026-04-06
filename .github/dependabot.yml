@@ -13,9 +13,9 @@ updates:
           - minor
           - patch
 
-  # npm — all workspaces managed from root (npm workspaces share a single
-  # package-lock.json; per-workspace entries produce PRs without lockfile
-  # updates, which always fail npm ci)
+  # npm ecosystem (covers pnpm) — all workspaces managed from root
+  # (pnpm workspaces share a single pnpm-lock.yaml; per-workspace
+  # entries produce PRs without lockfile updates, which always fail)
   - package-ecosystem: npm
     directory: /
     schedule:

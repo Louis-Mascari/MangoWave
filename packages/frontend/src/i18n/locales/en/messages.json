@@ -19,6 +19,8 @@
     "noAudioUnknown": "On Windows and ChromeOS, all sharing modes support audio. On macOS 14.2+, screen and window sharing support audio in Chrome. On Linux, only tab sharing supports audio.",
     "webgl2NotSupported": "WebGL 2 Not Supported",
     "webgl2NotSupportedDesc": "MangoWave requires WebGL 2 to render visualizations. Please try a modern browser such as Chrome, Firefox, or Edge.",
+    "webgl2GpuCrash": "WebGL 2 Temporarily Unavailable",
+    "webgl2GpuCrashDesc": "Your browser's GPU process may need to recover. Try closing other tabs or restarting your browser.",
     "webglContextLost": "Visualizer Lost Graphics Context",
     "webglContextLostDesc": "Your device's graphics system was interrupted. This can happen when your device is under heavy load, the GPU is shared with other applications, or the display configuration changed. Reloading the page will restore the visualizer.",
     "renderingError": "A rendering error occurred, possibly a WebGL or Web Audio issue.",
@@ -41,7 +43,9 @@
     "invalidFile": "Invalid settings file",
     "fieldNotApplied": "\"{{field}}\" could not be applied",
     "importedWithWarnings": "Settings imported. Some settings could not be applied due to app changes",
-    "importedSuccess": "Settings imported successfully"
+    "importedSuccess": "Settings imported successfully",
+    "importedDataRestored": "Imported presets and textures restored",
+    "mergeNote": "Favorites, blocked presets, and packs will be merged with your existing ones."
   },
 
   "spotify": {
@@ -56,6 +60,8 @@
   "toasts": {
     "autopilotOn": "Autopilot on",
     "autopilotOff": "Autopilot off",
+    "renderingPaused": "Rendering paused",
+    "renderingResumed": "Rendering resumed",
     "addedToFavorites": "Added to favorites",
     "removedFromFavorites": "Removed from favorites",
     "presetBlocked": "Preset blocked",
@@ -66,7 +72,9 @@
     "favoritePresetsCleared": "Favorite presets cleared",
     "silenceDetected": "No audio detected. Make sure audio is playing in the shared screen, window, or tab, and that you checked \"Share audio\" in the browser dialog.",
     "silenceDetectedMic": "No audio detected from your microphone. Make sure your mic is not muted and is picking up sound.",
-    "silenceDetectedLocal": "No audio detected. Make sure the file is a supported format and your device volume is up."
+    "silenceDetectedLocal": "No audio detected. Make sure the file is a supported format and your device volume is up.",
+    "noPresetsAvailable": "No presets available. Check that at least one pack is enabled and not all presets are blocked.",
+    "presetNotFound": "Preset not found on this device: \"{{name}}\""
   },
 
   "playback": {
@@ -119,6 +127,8 @@
     "removeFromFavorites": "Remove from favorites (S)",
     "toggleAutopilot": "Toggle autopilot (A)",
     "toggleFullscreen": "Toggle fullscreen (F)",
+    "togglePause": "Pause rendering (V)",
+    "resumeRendering": "Resume rendering (V)",
     "exitFS": "Exit FS"
   },
 
@@ -136,10 +146,12 @@
       "favorites": "favorites",
       "blocked": "blocked",
       "excluded": "excluded",
-      "history": "history"
+      "history": "history",
+      "import": "import"
     },
-    "noPacksSelected": "No packs selected. Autopilot paused",
+    "noPacksSelected": "No packs selected",
     "packsActive": "{{active}}/{{total}} packs active",
+    "packsHint": "Selected packs set the pool for autopilot and next preset",
     "searchPlaceholder": "Search presets...",
     "clearSearch": "Clear search",
     "noPresetsVisible": "No presets visible",
@@ -160,10 +172,61 @@
     "createPackFirst": "Create a custom pack first"
   },
 
+  "importedPresets": {
+    "sectionTitle": "Imported Presets",
+    "description": "Add community MilkDrop presets (.milk) and the textures they reference. MilkDrop was designed as a native desktop application, so some presets may not render perfectly in the browser due to differences in shader translation.",
+    "emptyState": "No imported presets. Use \"Import .milk\" to add community MilkDrop presets.",
+    "importMilk": "Import .milk",
+    "importingPresets": "Importing presets...",
+    "importSuccess": "Imported {{count}} preset(s)",
+    "importPartial": "Imported {{success}} of {{total}} presets. {{failed}} failed.",
+    "importAllFailed": "All {{count}} preset(s) failed to import",
+    "fileTooLarge": "Too large (max 500KB)",
+    "invalidFileType": "Not a .milk file",
+    "emptyFile": "File is empty",
+    "duplicateName": "Already exists",
+    "conversionFailed": "Conversion failed",
+    "securityBlocked": "Contains blocked content",
+    "nativeNameCollision": "Already exists in built-in presets",
+    "missingTextures": "Missing textures (will render as noise until uploaded): {{textures}}",
+    "deletePreset": "Delete imported preset",
+    "deleteConfirm": "Delete \"{{name}}\"? The .milk file will need to be re-imported.",
+    "clearAll": "Clear All",
+    "clearAllConfirm": "Delete all {{count}} imported presets? The .milk files will need to be re-imported.",
+    "cleared": "All imported presets cleared",
+    "idbUnavailable": "Imported presets require storage access, which is unavailable in private browsing mode.",
+    "imported": "Imported",
+    "importInProgress": "Importing... {{count}} preset(s) so far"
+  },
+
+  "importedTextures": {
+    "sectionTitle": "Imported Textures",
+    "importTextures": "Import Textures",
+    "importSuccess": "Imported {{count}} texture(s)",
+    "importPartial": "Imported {{success}} of {{total}} textures. {{failed}} failed.",
+    "importAllFailed": "All {{count}} texture(s) failed to import",
+    "fileTooLarge": "Too large (max 2MB)",
+    "invalidFileType": "Not a supported image (JPEG, PNG, or WebP)",
+    "builtinTextureShadow": "Built-in texture, cannot be replaced",
+    "readFailed": "Failed to read file",
+    "decodeFailed": "Failed to decode image",
+    "deleteTexture": "Delete imported texture",
+    "deleteConfirm": "Delete \"{{name}}\"? The image file will need to be re-imported. Already-loaded presets will keep using it until the page is reloaded.",
+    "clearAll": "Clear All Textures",
+    "clearAllConfirm": "Delete all {{count}} imported textures? The image files will need to be re-imported.",
+    "cleared": "All imported textures cleared",
+    "gpuNote": "Textures loaded on the GPU persist until the page is reloaded.",
+    "idbUnavailable": "Imported textures require storage access, which is unavailable in private browsing mode.",
+    "duplicateName": "Already exists",
+    "emptyStateTextures": "No imported textures. Use \"Import Textures\" to add custom texture images.",
+    "importInProgress": "Importing... {{count}} texture(s) so far"
+  },
+
   "customPacks": {
     "tabs": {
       "packs": "packs"
     },
+    "description": "Build custom collections from any presets \u2014 bundled or imported.",
     "createPack": "Create Custom Pack",
     "importPack": "Import Pack",
     "exportPack": "Export Pack",
@@ -189,12 +252,42 @@
     "packDeleted": "Pack deleted",
     "packImported": "Pack \"{{name}}\" imported with {{count}} presets",
     "notPackFile": "Not a MangoWave pack file",
-    "settingsFileNotPack": "This is a settings file — use Settings › Data to import custom packs",
+    "settingsFileNotPack": "This is a settings file. Use Settings › Data to import custom packs",
     "packImportedPartial": "Pack \"{{name}}\" imported with {{count}} presets ({{skipped}} not found and skipped)",
     "maxPacksReached": "Maximum of 50 custom packs reached",
     "packActive": "Playing from: {{name}}",
     "deactivatePack": "Stop pack",
-    "packOverridesFilters": "These filters don't apply while a custom pack is active",
-    "favoritesAutoSwitch": "Switched from favorites to all mode"
+    "packOverridesFilters": "Autopilot and next preset use the active pack. Filters only affect this list.",
+    "favoritesAutoSwitch": "Switched from favorites to all mode",
+    "newPack": "New Pack"
+  },
+
+  "importModal": {
+    "titlePresets": "Import Presets",
+    "titleTextures": "Import Textures",
+    "descriptionPresets": "Add community MilkDrop presets (.milk files).\nMilkDrop presets were designed for a native Windows application. MangoWave translates them to run in the browser, but some presets may not render correctly due to differences in how shaders are processed. Complex presets are more likely to have visual differences.\nSome presets require custom textures — you'll be notified of any missing textures after import.",
+    "descriptionTextures": "Upload texture images (JPEG, PNG, or WebP) used by imported presets.\nPresets reference textures by name: for example, a preset using sampler_fire needs a texture named \"fire\".",
+    "storageNotePresets": "Presets are stored in your browser. Clearing site data will remove them, so keep your original .milk files.",
+    "storageNoteTextures": "Textures are stored in your browser. Clearing site data will remove them, so keep your original image files.",
+    "dropZonePresets": "Drop .milk files here or click to browse",
+    "dropZoneTextures": "Drop image files here or click to browse",
+    "browseFiles": "Browse Files",
+    "importingProgress": "Importing {{current}} of {{total}}...",
+    "summaryAllSuccess": "Successfully imported {{count}} {{type}}",
+    "summaryPartial": "Imported {{success}} of {{total}} {{type}}. {{failed}} failed, {{warnings}} with warnings.",
+    "summaryAllFailed": "All {{count}} {{type}} failed to import",
+    "uploadMissingTextures": "Upload Missing Textures",
+    "missingTexturesSection": "Missing Textures ({{remaining}} remaining)",
+    "missingTexturesAllResolved": "All missing textures uploaded",
+    "missingTexturesHint": "Presets with missing textures will render with visual noise where the texture should appear. Upload the matching image files to fix this.",
+    "dropTexturesHere": "Drop texture images here or browse (JPEG, PNG, WebP)",
+    "importMore": "Import More",
+    "presets": "presets",
+    "textures": "textures",
+    "idbUnavailable": "Storage access is unavailable in private browsing mode.",
+    "filterAll": "All",
+    "statusSuccess": "Imported",
+    "statusWarning": "Warnings",
+    "statusFailed": "Failed"
   }
 }

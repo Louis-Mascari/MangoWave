@@ -5,6 +5,15 @@ import { SettingsPanel } from './SettingsPanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
 import { useFocusTrap } from '../hooks/useFocusTrap.ts';
 import type { PanelView } from './ControlBar.tsx';
+import {
+  ChevronRightIcon,
+  ChevronLeftIcon,
+  StarIcon,
+  GearIcon,
+  CloseIcon,
+  FullscreenIcon,
+  BlockIcon,
+} from './icons.tsx';
 
 // Module-level counter (not a ref) to avoid React Compiler refs-during-render lint
 let historyDepth = 0;
@@ -31,6 +40,8 @@ interface MobileControlBarProps {
   isIdle: boolean;
   forceIdle: () => void;
   resetIdle: () => void;
+  presetsLoading?: boolean;
+  onUnpause?: () => void;
 }
 
 // Circular layout: 9 items evenly spaced around a 360° circle.
@@ -69,6 +80,8 @@ export function MobileControlBar({
   isIdle,
   forceIdle,
   resetIdle,
+  presetsLoading,
+  onUnpause,
 }: MobileControlBarProps) {
   const { t } = useTranslation('messages');
   const { t: tc } = useTranslation('common');
@@ -89,8 +102,8 @@ export function MobileControlBar({
   }, []);
 
   // Landscape: wider ellipse shifted up to clear the PlaybackPanel
-  const circleRadiusX = isLandscape ? 150 : 110;
-  const circleRadiusY = isLandscape ? 80 : 110;
+  const circleRadiusX = isLandscape ? 160 : 110;
+  const circleRadiusY = isLandscape ? 100 : 110;
 
   // "Just revealed" guard: after controls appear, block button clicks for 400ms so the
   // touch that revealed controls doesn't accidentally trigger a button action.
@@ -172,43 +185,57 @@ export function MobileControlBar({
   const circleItems = [
     {
       label: tc('presets'),
-      icon: 'P',
+      icon: presetsLoading ? (
+        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="3"
+            className="opacity-25"
+          />
+          <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        </svg>
+      ) : (
+        'P'
+      ),
       action: () => openModal('presets'),
     },
     {
       label: t('mobile.next'),
-      icon: '▶',
+      icon: <ChevronRightIcon className="h-5 w-5" />,
       action: () => {
         onNextPreset();
-        forceIdle();
+        resetIdle();
       },
     },
     {
       label: isFavorite ? t('mobile.unfavorite') : t('mobile.favorite'),
-      icon: '★',
+      icon: <StarIcon className="h-5 w-5" />,
       action: () => {
         onToggleFavorite();
-        forceIdle();
+        resetIdle();
       },
       active: isFavorite,
       activeColor: 'yellow' as const,
     },
     {
       label: tc('settings'),
-      icon: '⚙',
+      icon: <GearIcon className="h-5 w-5" />,
       action: () => openModal('settings'),
     },
     {
       label: tc('exit'),
-      icon: '✕',
+      icon: <CloseIcon className="h-5 w-5" />,
       action: onStop,
     },
     {
       label: isFullscreen ? t('controlBar.exitFS') : tc('fullscreen'),
-      icon: '⛶',
+      icon: <FullscreenIcon className="h-5 w-5" />,
       action: () => {
         onToggleFullscreen();
-        forceIdle();
+        resetIdle();
       },
       active: isFullscreen,
     },
@@ -217,26 +244,26 @@ export function MobileControlBar({
       icon: 'A',
       action: () => {
         onToggleAutopilot();
-        forceIdle();
+        resetIdle();
       },
       active: autopilotEnabled,
     },
     {
       label: isBlocked ? t('mobile.unblock') : t('mobile.block'),
-      icon: '⊘',
+      icon: <BlockIcon className="h-5 w-5" />,
       action: () => {
         onToggleBlock();
-        forceIdle();
+        resetIdle();
       },
       active: isBlocked,
       activeColor: 'red' as const,
     },
     {
       label: tc('previous'),
-      icon: '◀',
+      icon: <ChevronLeftIcon className="h-5 w-5" />,
       action: () => {
         onPreviousPreset?.();
-        forceIdle();
+        resetIdle();
       },
       disabled: !canGoBack,
     },
@@ -349,7 +376,7 @@ export function MobileControlBar({
                 className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-none bg-white/10 text-sm text-white/70 hover:bg-white/20"
                 aria-label={tc('close')}
               >
-                ✕
+                <CloseIcon className="h-4 w-4" />
               </button>
             </div>
             <div
@@ -363,6 +390,7 @@ export function MobileControlBar({
                   currentPreset={currentPreset}
                   onSelectPreset={onSelectPreset}
                   onNextPreset={onNextPreset}
+                  onUnpause={onUnpause}
                 />
               )}
             </div>

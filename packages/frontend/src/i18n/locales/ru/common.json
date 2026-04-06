@@ -3,6 +3,8 @@
   "reset": "Сбросить",
   "cancel": "Отмена",
   "apply": "Применить",
+  "exporting": "Экспорт...",
+  "importing": "Импорт...",
   "on": "Вкл",
   "off": "Выкл",
   "back": "Назад",
@@ -32,5 +34,12 @@
   "default": "Стандарт",
   "high": "Высокое",
   "ultra": "Ультра",
-  "controls": "Управление"
+  "pause": "Pause",
+  "loadingPresets": "Loading presets…",
+  "controls": "Управление",
+  "today": "Сегодня",
+  "yesterday": "Вчера",
+  "collapseAll": "Свернуть все",
+  "expandAll": "Развернуть все",
+  "copy": "Копировать"
 }

@@ -3,3 +3,5 @@ dist
 build
 *.min.js
 package-lock.json
+packages/milkdrop-presets/lib/presets.json
+packages/milkdrop-textures/src/textureData.json

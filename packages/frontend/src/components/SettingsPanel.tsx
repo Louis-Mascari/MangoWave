@@ -9,14 +9,17 @@ import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { Tooltip } from './Tooltip.tsx';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { useWindowSyncStatusStore } from '../store/useWindowSyncStatusStore.ts';
+import { useDeviceSyncStatusStore } from '../store/useDeviceSyncStatusStore.ts';
 import { quarantinedSet, mobileBlockedSet } from '../data/excludedPresets.ts';
 import { SHORTCUTS } from '../constants/shortcuts.ts';
 import {
   EXPORT_CATEGORIES,
-  buildExport,
+  buildExportWithImportedData,
   downloadExport,
   parseImportFile,
   buildImportPayload,
+  restoreImportedData,
+  estimateImportedDataSize,
 } from '../utils/settingsPortability.ts';
 import type { ParseResult } from '../utils/settingsPortability.ts';
 
@@ -32,6 +35,12 @@ function rangeFillStyle(value: number, min: number, max: number) {
 function rangeFillVerticalStyle(value: number, min: number, max: number) {
   const pct = ((value - min) / (max - min)) * 100;
   return { '--fill-inv': `${100 - pct}%` } as React.CSSProperties;
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 const FPS_QUICK_PICKS = [30, 60, 120, 144, 240];
@@ -71,10 +80,10 @@ export function SettingsPanel() {
   const sessionId = useSpotifyStore((s) => s.sessionId);
   const authMode = getAuthMode();
   const showSpotifyTab = !isMobileDevice && (authMode !== 'locked' || !!(accessToken || sessionId));
-  const showSyncTab = !isMobileDevice;
+  const showSyncTab = true;
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg bg-black/60 p-4 backdrop-blur-sm">
+    <div className="flex flex-col gap-3 overflow-hidden rounded-lg bg-black/60 p-4 backdrop-blur-sm md:h-[38rem]">
       <div className="flex flex-wrap gap-2 border-b border-white/10 pb-2">
         <TabButton active={activeTab === 'equalizer'} onClick={() => setActiveTab('equalizer')}>
           {t('tabs.equalizer')}
@@ -103,15 +112,17 @@ export function SettingsPanel() {
         )}
       </div>
 
-      {activeTab === 'equalizer' && <EqualizerTab />}
-      {activeTab === 'rendering' && <RenderingTab />}
-      {activeTab === 'presets' && <PresetsTab />}
-      {activeTab === 'shortcuts' && <ShortcutsTab />}
-      {activeTab === 'data' && <DataTab />}
-      {activeTab === 'sync' && showSyncTab && <SyncTab />}
-      {activeTab === 'spotify' && showSpotifyTab && <SpotifyTab />}
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
+        {activeTab === 'equalizer' && <EqualizerTab />}
+        {activeTab === 'rendering' && <RenderingTab />}
+        {activeTab === 'presets' && <PresetsTab />}
+        {activeTab === 'shortcuts' && <ShortcutsTab />}
+        {activeTab === 'data' && <DataTab />}
+        {activeTab === 'sync' && showSyncTab && <SyncTab />}
+        {activeTab === 'spotify' && showSpotifyTab && <SpotifyTab />}
+      </div>
 
-      <div className="mt-2 border-t border-white/10 pt-2">
+      <div className="border-t border-white/10 pt-2">
         <a
           href="https://github.com/Louis-Mascari/MangoWave/issues/new/choose"
           target="_blank"
@@ -175,8 +186,19 @@ function EqualizerTab() {
         </h3>
         <button
           onClick={resetEQ}
-          className="cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-xs text-white/70 hover:bg-white/20"
+          className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs text-orange-400 hover:bg-orange-500/30"
         >
+          <svg
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className="mr-1 -mt-0.5 inline-block h-3 w-3"
+          >
+            <path
+              fillRule="evenodd"
+              d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+              clipRule="evenodd"
+            />
+          </svg>
           {tc('reset')}
         </button>
       </div>
@@ -253,6 +275,8 @@ function RenderingTab() {
   const setMeshSize = useSettingsStore((s) => s.setMeshSize);
   const setTextureRatio = useSettingsStore((s) => s.setTextureRatio);
   const setFxaa = useSettingsStore((s) => s.setFxaa);
+  const brightness = useSettingsStore((s) => s.brightness);
+  const setBrightness = useSettingsStore((s) => s.setBrightness);
   const audio = useSettingsStore((s) => s.audio);
   const setSmoothingConstant = useSettingsStore((s) => s.setSmoothingConstant);
   const setFftSize = useSettingsStore((s) => s.setFftSize);
@@ -278,8 +302,19 @@ function RenderingTab() {
         <h3 className="text-sm font-semibold text-white">{t('rendering.title')}</h3>
         <button
           onClick={resetRendering}
-          className="cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-xs text-white/70 hover:bg-white/20"
+          className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs text-orange-400 hover:bg-orange-500/30"
         >
+          <svg
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className="mr-1 -mt-0.5 inline-block h-3 w-3"
+          >
+            <path
+              fillRule="evenodd"
+              d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+              clipRule="evenodd"
+            />
+          </svg>
           {tc('reset')}
         </button>
       </div>
@@ -426,6 +461,30 @@ function RenderingTab() {
         </div>
       </div>
 
+      <div className="flex flex-col gap-1">
+        <span className="flex items-center text-xs text-white/60">
+          {t('rendering.brightness', { value: Math.round(brightness * 100) })}
+          <Tooltip text={t('rendering.brightnessTooltip')} />
+        </span>
+        <div className="flex items-center gap-2">
+          <input
+            type="range"
+            min="0.1"
+            max="1"
+            step="0.05"
+            value={brightness}
+            onChange={(e) => setBrightness(parseFloat(e.target.value))}
+            aria-label={t('rendering.brightness', { value: Math.round(brightness * 100) })}
+            aria-valuetext={`${Math.round(brightness * 100)}%`}
+            className="range-fill flex-1"
+            style={rangeFillStyle(brightness, 0.1, 1)}
+          />
+          <span className="w-8 text-right text-xs text-white/50">
+            {Math.round(brightness * 100)}%
+          </span>
+        </div>
+      </div>
+
       <div className="mt-1 border-t border-white/10 pt-3">
         <label className="text-xs font-semibold text-white/80">{t('rendering.analysis')}</label>
       </div>
@@ -503,8 +562,19 @@ function PresetsTab() {
         </h3>
         <button
           onClick={resetPresets}
-          className="cursor-pointer rounded border-none bg-white/10 px-2 py-1 text-xs text-white/70 hover:bg-white/20"
+          className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs text-orange-400 hover:bg-orange-500/30"
         >
+          <svg
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className="mr-1 -mt-0.5 inline-block h-3 w-3"
+          >
+            <path
+              fillRule="evenodd"
+              d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+              clipRule="evenodd"
+            />
+          </svg>
           {tc('reset')}
         </button>
       </div>
@@ -735,10 +805,18 @@ function DataTab() {
   const [exportSelected, setExportSelected] = useState<Set<string>>(
     () => new Set(categories.map((c) => c.key)),
   );
+  const [includeImported, setIncludeImported] = useState(false);
+  const [estimatedSize, setEstimatedSize] = useState<number | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
   const [importResult, setImportResult] = useState<(ParseResult & { ok: true }) | null>(null);
   const [importSelected, setImportSelected] = useState<Set<string>>(new Set());
+  const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const showToast = useToastStore((s) => s.show);
+
+  const importedPresets = useSettingsStore((s) => s.importedPresets);
+  const importedTextures = useSettingsStore((s) => s.importedTextures);
+  const hasImportedData = importedPresets.length > 0 || importedTextures.length > 0;
 
   const toggleExportCategory = (key: string) => {
     setExportSelected((prev) => {
@@ -749,10 +827,25 @@ function DataTab() {
     });
   };
 
-  const handleExport = () => {
-    const state = useSettingsStore.getState();
-    const data = buildExport(state, exportSelected);
-    downloadExport(data);
+  const handleToggleIncludeImported = async (checked: boolean) => {
+    setIncludeImported(checked);
+    if (checked) {
+      const size = await estimateImportedDataSize();
+      setEstimatedSize(size);
+    } else {
+      setEstimatedSize(null);
+    }
+  };
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const state = useSettingsStore.getState();
+      const data = await buildExportWithImportedData(state, exportSelected, includeImported);
+      downloadExport(data);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -770,21 +863,37 @@ function DataTab() {
     setImportSelected(new Set(result.categories));
   };
 
-  const handleApplyImport = () => {
+  const handleApplyImport = async () => {
     if (!importResult) return;
-    const { payload, warnings } = buildImportPayload(importResult.data, importSelected);
-    useSettingsStore.getState().importSettings(payload);
-    setImportResult(null);
-    const allWarnings = importResult.versionWarning
-      ? [importResult.versionWarning, ...warnings]
-      : warnings;
-    if (allWarnings.length > 0) {
-      showToast(tm('settingsImport.importedWithWarnings'), {
-        type: 'warning',
-        durationMs: 6000,
-      });
-    } else {
-      showToast(tm('settingsImport.importedSuccess'));
+    setIsImporting(true);
+    try {
+      const { payload, warnings } = buildImportPayload(
+        importResult.data,
+        importSelected,
+        useSettingsStore.getState(),
+      );
+      useSettingsStore.getState().importSettings(payload);
+
+      // Restore embedded imported data if present
+      if ('_importedData' in importResult.data) {
+        await restoreImportedData(importResult.data, useSettingsStore.getState());
+        showToast(tm('settingsImport.importedDataRestored'));
+      }
+
+      setImportResult(null);
+      const allWarnings = importResult.versionWarning
+        ? [importResult.versionWarning, ...warnings]
+        : warnings;
+      if (allWarnings.length > 0) {
+        showToast(tm('settingsImport.importedWithWarnings'), {
+          type: 'warning',
+          durationMs: 6000,
+        });
+      } else {
+        showToast(tm('settingsImport.importedSuccess'));
+      }
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -833,12 +942,42 @@ function DataTab() {
             {tc('deselectAll')}
           </button>
         </div>
+        {hasImportedData && (
+          <div className="flex flex-col gap-1">
+            <label className="flex items-center gap-1.5 text-xs text-white/70">
+              <input
+                type="checkbox"
+                checked={includeImported}
+                onChange={(e) => handleToggleIncludeImported(e.target.checked)}
+                className="accent-orange-500"
+              />
+              {t('data.includeImported')}
+            </label>
+            <p className="pl-5 text-[10px] text-white/40">{t('data.includeImportedHint')}</p>
+            {includeImported && estimatedSize !== null && (
+              <p className="pl-5 text-[10px] text-white/40">
+                {t('data.estimatedSize', { size: formatBytes(estimatedSize) })}
+              </p>
+            )}
+          </div>
+        )}
         <button
           onClick={handleExport}
-          disabled={exportSelected.size === 0}
+          disabled={exportSelected.size === 0 || isExporting}
           className="w-fit cursor-pointer rounded border-none bg-orange-500/20 px-3 py-1 text-xs text-orange-400 hover:bg-orange-500/30 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {t('data.exportSettings')}
+          <svg
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className="mr-1 -mt-0.5 inline-block h-3 w-3"
+          >
+            <path
+              fillRule="evenodd"
+              d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+          {isExporting ? tc('exporting') : t('data.exportSettings')}
         </button>
       </div>
 
@@ -870,13 +1009,16 @@ function DataTab() {
                   </label>
                 ))}
             </div>
+            <p className="text-[11px] leading-snug text-white/40">
+              {tm('settingsImport.mergeNote')}
+            </p>
             <div className="flex gap-2">
               <button
                 onClick={handleApplyImport}
-                disabled={importSelected.size === 0}
+                disabled={importSelected.size === 0 || isImporting}
                 className="cursor-pointer rounded border-none bg-orange-500/20 px-3 py-1 text-xs text-orange-400 hover:bg-orange-500/30 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {tc('apply')}
+                {isImporting ? tc('importing') : tc('apply')}
               </button>
               <button
                 onClick={() => setImportResult(null)}
@@ -891,8 +1033,19 @@ function DataTab() {
             <p className="text-xs text-white/50">{t('data.loadFileDescription')}</p>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-fit cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
+              className="w-fit cursor-pointer rounded border-none bg-orange-500/20 px-3 py-1 text-xs text-orange-400 hover:bg-orange-500/30"
             >
+              <svg
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="mr-1 -mt-0.5 inline-block h-3 w-3"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
               {t('data.importSettings')}
             </button>
           </>
@@ -996,6 +1149,22 @@ function SpotifyTab() {
 }
 
 function SyncTab() {
+  return (
+    <>
+      {/* Window Sync — desktop only */}
+      {!isMobileDevice && <WindowSyncSection />}
+
+      {/* Device Sync — all platforms */}
+      {!isMobileDevice && <hr className="border-white/10" />}
+      <DeviceSyncSection />
+
+      {/* Spacer to prevent invisible text below */}
+      <div className="pb-1" />
+    </>
+  );
+}
+
+function WindowSyncSection() {
   const { t } = useTranslation('settings');
   const { t: tc } = useTranslation('common');
   const windowSyncEnabled = useSettingsStore((s) => s.windowSyncEnabled);
@@ -1006,8 +1175,8 @@ function SyncTab() {
 
   return (
     <>
-      <h3 className="text-sm font-semibold text-white">{t('sync.title')}</h3>
-      <p className="text-xs text-white/50">{t('sync.description')}</p>
+      <h3 className="text-sm font-semibold text-white">{t('sync.windowSyncTitle')}</h3>
+      <p className="text-xs text-white/50">{t('sync.windowSyncDescription')}</p>
 
       {!isSyncAvailable ? (
         <p className="text-xs text-white/40">{t('sync.unavailable')}</p>
@@ -1054,6 +1223,245 @@ function SyncTab() {
               </label>
             </>
           )}
+        </>
+      )}
+    </>
+  );
+}
+
+/** Validate MANGO-XXXX room code format. */
+function isValidRoomCode(code: string): boolean {
+  return /^MANGO-[A-HJ-NP-Z]{4}$/.test(code);
+}
+
+function DeviceSyncSection() {
+  const { t } = useTranslation('settings');
+  const { t: tc } = useTranslation('common');
+  const setDeviceSyncEnabled = useSettingsStore((s) => s.setDeviceSyncEnabled);
+  const deviceSyncSettingsSync = useSettingsStore((s) => s.deviceSyncSettingsSync);
+  const setDeviceSyncSettingsSync = useSettingsStore((s) => s.setDeviceSyncSettingsSync);
+  const { status, peerCount, roomCode, isHost, errorMessage, actions } = useDeviceSyncStatusStore();
+
+  const [joinCode, setJoinCode] = useState('');
+  const [joinError, setJoinError] = useState('');
+  const [qrDataUrl, setQrDataUrl] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [isOperating, setIsOperating] = useState(false);
+
+  // Generate QR code when room code is available (host only)
+  useEffect(() => {
+    if (!roomCode || !isHost) {
+      setQrDataUrl('');
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const qrgen = await import('qrcode-generator');
+      if (cancelled) return;
+      const qr = qrgen.default(0, 'M');
+      qr.addData(roomCode);
+      qr.make();
+      setQrDataUrl(qr.createDataURL(6, 2));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [roomCode, isHost]);
+
+  const handleCreateRoom = async () => {
+    if (isOperating) return;
+    setIsOperating(true);
+    setDeviceSyncEnabled(true);
+    try {
+      await actions.createRoom();
+    } catch {
+      // Error handled via status store
+    } finally {
+      setIsOperating(false);
+    }
+  };
+
+  const handleJoinRoom = async () => {
+    if (isOperating) return;
+    const code = joinCode.trim().toUpperCase();
+    if (!isValidRoomCode(code)) {
+      setJoinError(t('sync.deviceSync.invalidCode'));
+      return;
+    }
+    setJoinError('');
+    setIsOperating(true);
+    setDeviceSyncEnabled(true);
+    try {
+      await actions.joinRoom(code);
+    } catch {
+      // Error handled via status store
+    } finally {
+      setIsOperating(false);
+    }
+  };
+
+  const handleLeaveRoom = () => {
+    actions.leaveRoom();
+    setDeviceSyncEnabled(false);
+  };
+
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(roomCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard API failed silently
+    }
+  };
+
+  const statusDotColor =
+    status === 'connected'
+      ? 'bg-green-400'
+      : status === 'connecting'
+        ? 'bg-yellow-400'
+        : status === 'error' || status === 'disconnected'
+          ? 'bg-red-400'
+          : 'bg-white/30';
+
+  const isConnectedOrConnecting = status === 'connected' || status === 'connecting';
+
+  return (
+    <>
+      <h3 className="text-sm font-semibold text-white">{t('sync.deviceSync.title')}</h3>
+      <p className="text-xs text-white/50">{t('sync.deviceSync.description')}</p>
+      <p className="text-[11px] leading-snug text-amber-400/60">{t('sync.deviceSync.audioTip')}</p>
+
+      {status === 'error' && (
+        <div className="flex flex-col gap-2">
+          <p className="text-xs text-red-400">{errorMessage || t('sync.deviceSync.error')}</p>
+          <button
+            onClick={() => {
+              actions.leaveRoom();
+              setDeviceSyncEnabled(false);
+              setJoinCode('');
+              setJoinError('');
+            }}
+            className="cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
+          >
+            {t('sync.deviceSync.tryAgain')}
+          </button>
+        </div>
+      )}
+
+      {status === 'disconnected' && (
+        <div className="flex flex-col gap-2">
+          <p className="text-xs text-yellow-400">{t('sync.deviceSync.hostDisconnected')}</p>
+          <button
+            onClick={handleLeaveRoom}
+            className="cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
+          >
+            {t('sync.deviceSync.leaveRoom')}
+          </button>
+        </div>
+      )}
+
+      {status === 'idle' && (
+        <div className="flex flex-col gap-3">
+          <div className="flex gap-2">
+            <button
+              onClick={handleCreateRoom}
+              disabled={isOperating}
+              className="cursor-pointer rounded border-none bg-orange-500 px-3 py-1 text-xs text-white hover:bg-orange-400 disabled:cursor-default disabled:opacity-40"
+            >
+              {t('sync.deviceSync.createRoom')}
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs text-white/60">{t('sync.deviceSync.enterCode')}</span>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={joinCode}
+                onChange={(e) => {
+                  setJoinCode(e.target.value.toUpperCase());
+                  setJoinError('');
+                }}
+                placeholder="MANGO-XXXX"
+                maxLength={10}
+                className="w-32 rounded border border-white/20 bg-white/5 px-2 py-1 font-mono text-xs text-white placeholder-white/30 outline-none focus:border-orange-500"
+              />
+              <button
+                onClick={handleJoinRoom}
+                disabled={!joinCode.trim() || isOperating}
+                className="cursor-pointer rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20 disabled:cursor-default disabled:opacity-40"
+              >
+                {t('sync.deviceSync.connect')}
+              </button>
+            </div>
+            {joinError && <p className="text-xs text-red-400">{joinError}</p>}
+          </div>
+        </div>
+      )}
+
+      {status === 'connecting' && (
+        <p className="text-xs text-white/60">{t('sync.deviceSync.connecting')}</p>
+      )}
+
+      {status === 'connected' && (
+        <div className="flex flex-col gap-3">
+          {/* Room code display */}
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-lg font-bold tracking-wider text-white">
+              {roomCode}
+            </span>
+            <button
+              onClick={handleCopyCode}
+              className="cursor-pointer rounded border-none bg-white/10 px-2 py-0.5 text-xs text-white/70 hover:bg-white/20"
+              aria-label={copied ? t('sync.deviceSync.copiedToClipboard') : tc('copy')}
+            >
+              {copied ? t('sync.deviceSync.copiedToClipboard') : tc('copy')}
+            </button>
+          </div>
+
+          {/* QR code (host only) */}
+          {isHost && qrDataUrl && (
+            <img
+              src={qrDataUrl}
+              alt={`QR code for room ${roomCode}`}
+              className="h-28 w-28 rounded bg-white p-1"
+            />
+          )}
+
+          {/* Status + peer count */}
+          <div className="flex items-center gap-2">
+            <span className={`inline-block h-2 w-2 rounded-full ${statusDotColor}`} />
+            <span className="text-xs text-white/60">
+              {t('sync.deviceSync.connected')}
+              {peerCount > 0 ? ` — ${t('sync.deviceSync.peerCount', { count: peerCount })}` : ''}
+            </span>
+          </div>
+
+          {/* Leave room */}
+          <button
+            onClick={handleLeaveRoom}
+            className="cursor-pointer self-start rounded border-none bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20"
+          >
+            {t('sync.deviceSync.leaveRoom')}
+          </button>
+        </div>
+      )}
+
+      {/* Settings sync toggle — visible when connected or connecting */}
+      {isConnectedOrConnecting && (
+        <>
+          <label className="flex items-center gap-1.5 text-xs text-white/70">
+            <input
+              type="checkbox"
+              checked={deviceSyncSettingsSync}
+              onChange={(e) => setDeviceSyncSettingsSync(e.target.checked)}
+              className="accent-orange-500"
+            />
+            {t('sync.deviceSync.syncSettings')}
+            <Tooltip text={t('sync.deviceSync.syncSettingsHint')} />
+          </label>
+          <p className="text-xs text-white/40">{t('sync.deviceSync.autopilotNote')}</p>
         </>
       )}
     </>

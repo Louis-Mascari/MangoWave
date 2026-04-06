@@ -5,13 +5,24 @@ import { sentryVitePlugin } from '@sentry/vite-plugin';
 
 // https://vite.dev/config/
 export default defineConfig({
-  build: {
-    sourcemap: 'hidden',
-  },
   optimizeDeps: {
     // Workspace packages containing vendored CJS bundles — force pre-bundling
     // so Vite's dev server converts them to ESM instead of serving raw CJS.
-    include: ['butterchurn', 'butterchurn-presets'],
+    include: [
+      'butterchurn',
+      'butterchurn-presets',
+      'milkdrop-preset-converter > milkdrop-preset-utils',
+      'milkdrop-preset-converter > lodash',
+      'milkdrop-presets',
+      'milkdrop-presets/names',
+      'milkdrop-textures',
+    ],
+  },
+  worker: {
+    format: 'es',
+  },
+  build: {
+    sourcemap: 'hidden',
   },
   plugins: [
     react(),
@@ -34,5 +45,9 @@ export default defineConfig({
     globals: true,
     setupFiles: './src/test/setup.ts',
     exclude: ['e2e/**', 'node_modules/**'],
+  },
+  server: {
+    host: true,
+    allowedHosts: true,
   },
 });

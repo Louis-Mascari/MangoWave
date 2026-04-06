@@ -3,6 +3,8 @@
   "reset": "Reset",
   "cancel": "Batal",
   "apply": "Terapkan",
+  "exporting": "Mengekspor...",
+  "importing": "Mengimpor...",
   "on": "Aktif",
   "off": "Nonaktif",
   "back": "Kembali",
@@ -32,5 +34,12 @@
   "default": "Default",
   "high": "Tinggi",
   "ultra": "Ultra",
-  "controls": "Kontrol"
+  "pause": "Pause",
+  "loadingPresets": "Loading presets…",
+  "controls": "Kontrol",
+  "today": "Hari ini",
+  "yesterday": "Kemarin",
+  "collapseAll": "Ciutkan semua",
+  "expandAll": "Perluas semua",
+  "copy": "Salin"
 }

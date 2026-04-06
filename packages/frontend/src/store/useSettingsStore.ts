@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { EQ_BANDS } from '../engine/AudioEngine.ts';
 import { quarantinedSet, mobileBlockedSet } from '../data/excludedPresets.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
+import { THEMATIC_PACKS } from '../data/presetThematicPacks.ts';
 
 export interface PerformanceSettings {
   fpsCap: number; // 0 = uncapped, 15–300
@@ -26,8 +27,24 @@ export interface AudioSettings {
 export interface CustomPack {
   id: string; // crypto.randomUUID()
   name: string; // max 50 chars
-  presets: string[]; // preset names (no duplicates), max 395
+  presets: string[]; // preset names (no duplicates)
   createdAt: number; // Date.now()
+}
+
+export interface ImportedPresetMeta {
+  name: string; // display name (de-duplicated at import time)
+  fileName: string; // original filename
+  addedAt: number; // Date.now()
+  missingTextures?: string[]; // texture names not found at import time
+}
+
+export interface ImportedTextureMeta {
+  name: string; // texture name (lowercased filename stem)
+  fileName: string; // original filename
+  width: number;
+  height: number;
+  sizeBytes: number;
+  addedAt: number; // Date.now()
 }
 
 export type AutopilotMode = 'all' | 'favorites';
@@ -100,6 +117,10 @@ export interface SettingsState {
   songInfoDisplay: 'off' | number; // 'off' or duration in seconds (hardcoded to 5)
   setSongInfoDisplay: (value: 'off' | number) => void;
 
+  // Visual
+  brightness: number; // 0.1 to 1.0 (1.0 = full brightness, no dimming)
+  setBrightness: (value: number) => void;
+
   // Transitions
   transitionTime: number; // seconds for preset blend
   setTransitionTime: (seconds: number) => void;
@@ -113,6 +134,24 @@ export interface SettingsState {
   setWindowSyncEnabled: (enabled: boolean) => void;
   syncPerformance: boolean;
   setSyncPerformance: (enabled: boolean) => void;
+
+  // Device sync
+  deviceSyncEnabled: boolean;
+  setDeviceSyncEnabled: (enabled: boolean) => void;
+  deviceSyncSettingsSync: boolean;
+  setDeviceSyncSettingsSync: (enabled: boolean) => void;
+
+  // Imported presets (metadata only — raw .milk text lives in IDB)
+  importedPresets: ImportedPresetMeta[];
+  addImportedPresetMeta: (meta: ImportedPresetMeta) => void;
+  removeImportedPresetMeta: (name: string) => void;
+  clearImportedPresetsMeta: () => void;
+
+  // Imported textures (metadata only — raw image data lives in IDB)
+  importedTextures: ImportedTextureMeta[];
+  addImportedTextureMeta: (meta: ImportedTextureMeta) => void;
+  removeImportedTextureMeta: (name: string) => void;
+  clearImportedTexturesMeta: () => void;
 
   // Volume (persisted for local file playback)
   volume: number; // 0.0 to 1.0
@@ -163,10 +202,13 @@ const IMPORTABLE_KEYS: (keyof SettingsState)[] = [
   'excludedOverrides',
   'presetNameDisplay',
   'songInfoDisplay',
+  'brightness',
   'transitionTime',
   'volume',
   'customPacks',
   'activeCustomPackId',
+  'importedPresets',
+  'importedTextures',
   'windowSyncEnabled',
   'syncPerformance',
 ];
@@ -375,6 +417,10 @@ export const useSettingsStore = create<SettingsState>()(
       songInfoDisplay: 5,
       setSongInfoDisplay: (value) => set({ songInfoDisplay: value }),
 
+      // Visual
+      brightness: 1.0,
+      setBrightness: (value) => set({ brightness: Math.min(1, Math.max(0.1, value)) }),
+
       // Transitions
       transitionTime: 2.0,
       setTransitionTime: (seconds) => set({ transitionTime: seconds }),
@@ -384,6 +430,50 @@ export const useSettingsStore = create<SettingsState>()(
       setWindowSyncEnabled: (enabled) => set({ windowSyncEnabled: enabled }),
       syncPerformance: true,
       setSyncPerformance: (enabled) => set({ syncPerformance: enabled }),
+
+      // Device sync
+      deviceSyncEnabled: false,
+      setDeviceSyncEnabled: (enabled) => set({ deviceSyncEnabled: enabled }),
+      deviceSyncSettingsSync: false,
+      setDeviceSyncSettingsSync: (enabled) => set({ deviceSyncSettingsSync: enabled }),
+
+      // Imported presets
+      importedPresets: [],
+      addImportedPresetMeta: (meta) =>
+        set((state) => ({
+          importedPresets: [...state.importedPresets, meta],
+        })),
+      removeImportedPresetMeta: (name) =>
+        set((state) => ({
+          importedPresets: state.importedPresets.filter((p) => p.name !== name),
+          customPacks: state.customPacks.map((pack) => ({
+            ...pack,
+            presets: pack.presets.filter((n) => n !== name),
+          })),
+        })),
+      clearImportedPresetsMeta: () =>
+        set((state) => {
+          const importedNames = new Set(state.importedPresets.map((p) => p.name));
+          return {
+            importedPresets: [],
+            customPacks: state.customPacks.map((pack) => ({
+              ...pack,
+              presets: pack.presets.filter((n) => !importedNames.has(n)),
+            })),
+          };
+        }),
+
+      // Imported textures
+      importedTextures: [],
+      addImportedTextureMeta: (meta) =>
+        set((state) => ({
+          importedTextures: [...state.importedTextures, meta],
+        })),
+      removeImportedTextureMeta: (name) =>
+        set((state) => ({
+          importedTextures: state.importedTextures.filter((t) => t.name !== name),
+        })),
+      clearImportedTexturesMeta: () => set({ importedTextures: [] }),
 
       // Volume
       volume: 0.5,
@@ -501,9 +591,47 @@ export const useSettingsStore = create<SettingsState>()(
           state.customPacks = state.customPacks ?? [];
           state.activeCustomPackId = state.activeCustomPackId ?? null;
         }
+        // v8 → v9: Add imported presets metadata
+        if ((version ?? 0) < 9) {
+          state.importedPresets = state.importedPresets ?? [];
+        }
+        // v9 → v10: Add imported textures metadata
+        if ((version ?? 0) < 10) {
+          state.importedTextures = state.importedTextures ?? [];
+        }
+        // v10 → v11: Add 'MilkDrop' pack to enabledPacks for existing users
+        if ((version ?? 0) < 11) {
+          const packs = (state.enabledPacks as string[]) ?? [];
+          if (packs.length > 0 && !packs.includes('MilkDrop')) {
+            state.enabledPacks = [...packs, 'MilkDrop'];
+          }
+        }
+        // v11 → v12: Remap old source-based enabledPacks to thematic pack names
+        if ((version ?? 0) < 12) {
+          const OLD_PACKS = ['Minimal', 'Non-Minimal', 'Extra', 'Extra 2', 'MD1', 'MilkDrop'];
+          const packs = (state.enabledPacks as string[]) ?? [];
+          if (packs.length > 0 && packs.some((p) => OLD_PACKS.includes(p))) {
+            // Old pack names are non-descriptive — no meaningful 1:1 mapping possible.
+            // Enable all thematic packs; preserve 'Imported' if present.
+            const newPacks: string[] = [...THEMATIC_PACKS];
+            if (packs.includes('Imported')) newPacks.push('Imported');
+            state.enabledPacks = newPacks;
+          }
+        }
+        // v12 → v13: Add brightness setting
+        if ((version ?? 0) < 13) {
+          state.brightness = state.brightness ?? 1.0;
+        }
+        // v13 → v14: Add missingTextures to ImportedPresetMeta (no transform needed —
+        // existing entries without missingTextures treated as no missing textures via ??)
+        // v14 → v15: Add device sync settings
+        if ((version ?? 0) < 15) {
+          state.deviceSyncEnabled = state.deviceSyncEnabled ?? false;
+          state.deviceSyncSettingsSync = state.deviceSyncSettingsSync ?? false;
+        }
         return state as unknown as SettingsState;
       },
-      version: 8,
+      version: 15,
     },
   ),
 );

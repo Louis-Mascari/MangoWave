@@ -6,9 +6,9 @@ import { usePresetBrowserStore } from '../../store/usePresetBrowserStore.ts';
 
 const PRESETS = ['Alpha Wave', 'Beta Pulse', 'Gamma Storm'];
 const PACK_MAP = new Map([
-  ['Alpha Wave', 'Minimal'],
-  ['Beta Pulse', 'Minimal'],
-  ['Gamma Storm', 'Extra'],
+  ['Alpha Wave', 'Reactive'],
+  ['Beta Pulse', 'Reactive'],
+  ['Gamma Storm', 'Psychedelic'],
 ]);
 
 describe('PresetBrowser', () => {
@@ -37,6 +37,7 @@ describe('PresetBrowser', () => {
     expect(screen.getByText('favorites')).toBeInTheDocument();
     expect(screen.getByText('blocked')).toBeInTheDocument();
     expect(screen.getByText('history')).toBeInTheDocument();
+    expect(screen.getByText('import')).toBeInTheDocument();
   });
 
   it('renders search input', () => {
@@ -119,9 +120,38 @@ describe('PresetBrowser', () => {
       />,
     );
 
-    // Pack filter buttons come from PACK_ORDER (all 5 packs shown)
-    expect(screen.getByText('Minimal')).toBeInTheDocument();
-    expect(screen.getByText('Extra')).toBeInTheDocument();
+    // Pack filter buttons come from PACK_ORDER (all 5 thematic packs shown)
+    expect(screen.getByText('Reactive')).toBeInTheDocument();
+    expect(screen.getByText('Psychedelic')).toBeInTheDocument();
+  });
+
+  it('shows import tab with buttons and empty state', async () => {
+    const user = userEvent.setup();
+    render(
+      <PresetBrowser
+        presetList={PRESETS}
+        presetPackMap={PACK_MAP}
+        currentPreset=""
+        onSelectPreset={vi.fn()}
+        onNextPreset={vi.fn()}
+      />,
+    );
+
+    await user.click(screen.getByText('import'));
+    // Presets sub-tab is selected by default
+    expect(screen.getByText('Import .milk')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'No imported presets. Use "Import .milk" to add community MilkDrop presets.',
+      ),
+    ).toBeInTheDocument();
+    // Import Textures button is in the textures sub-tab (not visible by default)
+    expect(screen.queryByText('Import Textures')).not.toBeInTheDocument();
+    // Switch to textures sub-tab
+    await user.click(screen.getByText(/Imported Textures/));
+    expect(screen.getByText('Import Textures')).toBeInTheDocument();
+    // Search bar should be hidden on import tab
+    expect(screen.queryByPlaceholderText('Search presets...')).not.toBeInTheDocument();
   });
 
   it('shows history tab', async () => {

@@ -85,18 +85,5 @@
       "autopilotTitle": "Autopilot y Configuración",
       "autopilotDesc": "Activa Autopilot (A) para recorrer presets automáticamente. Abre Configuración (⚙) para ajustar el ecualizador y el renderizado."
     }
-  },
-  "landing": {
-    "title": "MangoWave | Visualizador de audio",
-    "metaDescription": "Visualizador reactivo al audio gratuito con más de 400 visuales. Sin registro, sin instalación, sin anuncios. Cada beat, cada drop. Solo dale a iniciar.",
-    "tagline": "Tu música, visualizada.",
-    "taglineSub": "Cada beat, cada drop. Solo dale a iniciar.",
-    "feature400": "400+ visuales",
-    "featureAnySource": "Cualquier fuente de audio",
-    "featureDesktopMobile": "Escritorio y móvil",
-    "featureNoSignup": "Sin registro",
-    "featureNoInstall": "Sin instalación",
-    "featureNoAds": "Sin anuncios",
-    "launch": "Iniciar"
   }
 }

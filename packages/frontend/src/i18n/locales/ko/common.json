@@ -3,6 +3,8 @@
   "reset": "초기화",
   "cancel": "취소",
   "apply": "적용",
+  "exporting": "내보내는 중...",
+  "importing": "가져오는 중...",
   "on": "켜기",
   "off": "끄기",
   "back": "뒤로",
@@ -32,5 +34,12 @@
   "default": "기본",
   "high": "높음",
   "ultra": "울트라",
-  "controls": "컨트롤"
+  "pause": "Pause",
+  "loadingPresets": "Loading presets…",
+  "controls": "컨트롤",
+  "today": "오늘",
+  "yesterday": "어제",
+  "collapseAll": "모두 접기",
+  "expandAll": "모두 펼치기",
+  "copy": "복사"
 }

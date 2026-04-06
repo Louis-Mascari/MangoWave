@@ -3,6 +3,8 @@
   "reset": "Reset",
   "cancel": "Cancel",
   "apply": "Apply",
+  "exporting": "Exporting...",
+  "importing": "Importing...",
   "on": "On",
   "off": "Off",
   "back": "Back",
@@ -32,5 +34,12 @@
   "default": "Default",
   "high": "High",
   "ultra": "Ultra",
-  "controls": "Controls"
+  "pause": "Pause",
+  "loadingPresets": "Loading presets…",
+  "controls": "Controls",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "collapseAll": "Collapse all",
+  "expandAll": "Expand all",
+  "copy": "Copy"
 }

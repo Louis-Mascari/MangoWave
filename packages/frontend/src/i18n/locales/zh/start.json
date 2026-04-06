@@ -85,18 +85,5 @@
       "autopilotTitle": "自动播放和设置",
       "autopilotDesc": "开启自动播放 (A) 自动循环预设。打开设置 (⚙) 调整均衡器和渲染效果。"
     }
-  },
-  "landing": {
-    "title": "MangoWave | 音频可视化工具",
-    "metaDescription": "免费音频响应可视化工具，拥有 400+ 视觉效果。无需注册、无需安装、没有广告。每一个节拍，每一次律动。立即启动。",
-    "tagline": "你的音乐，可视化。",
-    "taglineSub": "每一个节拍，每一次律动。立即启动。",
-    "feature400": "400+ 视觉效果",
-    "featureAnySource": "任何音频来源",
-    "featureDesktopMobile": "桌面端和移动端",
-    "featureNoSignup": "无需注册",
-    "featureNoInstall": "无需安装",
-    "featureNoAds": "没有广告",
-    "launch": "启动"
   }
 }

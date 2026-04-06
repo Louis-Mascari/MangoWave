@@ -19,6 +19,8 @@
     "noAudioUnknown": "No Windows e ChromeOS, todos os modos de compartilhamento suportam áudio. No macOS 14.2+, compartilhamento de tela e janela suportam áudio no Chrome. No Linux, apenas o compartilhamento de aba suporta áudio.",
     "webgl2NotSupported": "WebGL 2 Não Suportado",
     "webgl2NotSupportedDesc": "MangoWave requer WebGL 2 para renderizar visualizações. Por favor, tente um navegador moderno como Chrome, Firefox ou Edge.",
+    "webgl2GpuCrash": "WebGL 2 Temporarily Unavailable",
+    "webgl2GpuCrashDesc": "Your browser's GPU process may need to recover. Try closing other tabs or restarting your browser.",
     "webglContextLost": "O Visualizador Perdeu o Contexto Gráfico",
     "webglContextLostDesc": "O sistema gráfico do seu dispositivo foi interrompido. Isso pode acontecer quando seu dispositivo está sob carga pesada, a GPU é compartilhada com outros aplicativos ou a configuração de exibição mudou. Recarregar a página restaurará o visualizador.",
     "renderingError": "Ocorreu um erro de renderização, possivelmente um problema de WebGL ou Web Audio.",
@@ -39,7 +41,9 @@
     "invalidFile": "Arquivo de configurações inválido",
     "fieldNotApplied": "\"{{field}}\" não pôde ser aplicado",
     "importedWithWarnings": "Configurações importadas. Algumas configurações não puderam ser aplicadas devido a mudanças no aplicativo",
-    "importedSuccess": "Configurações importadas com sucesso"
+    "importedSuccess": "Configurações importadas com sucesso",
+    "importedDataRestored": "Presets e texturas importados restaurados",
+    "mergeNote": "Favoritos, presets bloqueados e pacotes serão mesclados com os existentes."
   },
   "spotify": {
     "connectingToSpotify": "Conectando ao Spotify...",
@@ -52,6 +56,8 @@
   "toasts": {
     "autopilotOn": "Piloto automático ligado",
     "autopilotOff": "Piloto automático desligado",
+    "renderingPaused": "Rendering paused",
+    "renderingResumed": "Rendering resumed",
     "addedToFavorites": "Adicionado aos favoritos",
     "removedFromFavorites": "Removido dos favoritos",
     "presetBlocked": "Preset bloqueado",
@@ -62,7 +68,9 @@
     "favoritePresetsCleared": "Presets favoritos limpos",
     "silenceDetected": "Nenhum áudio detectado. Certifique-se de que o áudio está tocando na tela, janela ou aba compartilhada, e que você marcou \"Compartilhar áudio\" na caixa de diálogo do navegador.",
     "silenceDetectedMic": "Nenhum áudio detectado do microfone. Certifique-se de que seu mic não está mutado e está captando som.",
-    "silenceDetectedLocal": "Nenhum áudio detectado. Certifique-se de que o arquivo é um formato suportado e que o volume do dispositivo está ligado."
+    "silenceDetectedLocal": "Nenhum áudio detectado. Certifique-se de que o arquivo é um formato suportado e que o volume do dispositivo está ligado.",
+    "noPresetsAvailable": "Nenhum preset disponível. Verifique se pelo menos um pacote está ativado e se nem todos os presets estão bloqueados.",
+    "presetNotFound": "Preset não encontrado neste dispositivo: \"{{name}}\""
   },
   "playback": {
     "addSongsToQueue": "Adicione músicas à sua fila",
@@ -112,6 +120,8 @@
     "removeFromFavorites": "Remover dos favoritos (S)",
     "toggleAutopilot": "Alternar piloto automático (A)",
     "toggleFullscreen": "Alternar tela cheia (F)",
+    "togglePause": "Pause rendering (V)",
+    "resumeRendering": "Resume rendering (V)",
     "exitFS": "Sair TC"
   },
   "mobile": {
@@ -127,10 +137,12 @@
       "favorites": "favoritos",
       "blocked": "bloqueados",
       "excluded": "excluídos",
-      "history": "histórico"
+      "history": "histórico",
+      "import": "importar"
     },
-    "noPacksSelected": "Nenhum pacote selecionado. Piloto automático pausado",
+    "noPacksSelected": "Nenhum pacote selecionado",
     "packsActive": "{{active}}/{{total}} pacotes ativos",
+    "packsHint": "Os pacotes selecionados definem o grupo para piloto automático e próximo preset",
     "searchPlaceholder": "Buscar presets...",
     "clearSearch": "Limpar busca",
     "noPresetsVisible": "Nenhum preset visível",
@@ -150,10 +162,62 @@
     "addedToPack": "Adicionado a \"{{pack}}\"",
     "createPackFirst": "Crie um pacote personalizado primeiro"
   },
+
+  "importedPresets": {
+    "sectionTitle": "Presets Importados",
+    "description": "Adicione presets comunitários do MilkDrop (.milk) e as texturas que eles referenciam. O MilkDrop foi projetado como um aplicativo nativo de desktop, então alguns presets podem não ser renderizados perfeitamente no navegador devido a diferenças na tradução de shaders.",
+    "emptyState": "Nenhum preset importado. Use \"Import .milk\" para adicionar presets comunitários do MilkDrop.",
+    "importMilk": "Importar .milk",
+    "importingPresets": "Importando presets...",
+    "importSuccess": "{{count}} preset(s) importado(s)",
+    "importPartial": "Importados {{success}} de {{total}} presets. {{failed}} falharam.",
+    "importAllFailed": "Todos os {{count}} preset(s) falharam ao importar",
+    "fileTooLarge": "Muito grande (máx. 500KB)",
+    "invalidFileType": "Não é um arquivo .milk",
+    "emptyFile": "Arquivo vazio",
+    "duplicateName": "Já existe",
+    "conversionFailed": "Falha na conversão",
+    "securityBlocked": "Contém conteúdo bloqueado",
+    "nativeNameCollision": "Já existe nos presets integrados",
+    "missingTextures": "Texturas ausentes (serão exibidas como ruído até serem enviadas): {{textures}}",
+    "deletePreset": "Excluir preset importado",
+    "deleteConfirm": "Excluir \"{{name}}\"? O arquivo .milk precisará ser reimportado.",
+    "clearAll": "Excluir tudo",
+    "clearAllConfirm": "Excluir todos os {{count}} presets importados? Os arquivos .milk precisarão ser reimportados.",
+    "cleared": "Todos os presets importados foram excluídos",
+    "idbUnavailable": "Presets importados requerem acesso ao armazenamento, que não está disponível no modo de navegação privada.",
+    "imported": "Importados",
+    "importInProgress": "Importando... {{count}} preset(s) até agora"
+  },
+
+  "importedTextures": {
+    "sectionTitle": "Texturas importadas",
+    "importTextures": "Importar texturas",
+    "importSuccess": "{{count}} textura(s) importada(s)",
+    "importPartial": "{{success}} de {{total}} texturas importadas. {{failed}} falharam.",
+    "importAllFailed": "Todas as {{count}} textura(s) falharam ao importar",
+    "fileTooLarge": "Muito grande (máx. 2MB)",
+    "invalidFileType": "Não é uma imagem compatível (JPEG, PNG ou WebP)",
+    "builtinTextureShadow": "Textura integrada, não pode ser substituída",
+    "readFailed": "Falha ao ler o arquivo",
+    "decodeFailed": "Falha ao decodificar a imagem",
+    "deleteTexture": "Excluir textura importada",
+    "deleteConfirm": "Excluir \"{{name}}\"? O arquivo de imagem precisará ser reimportado. Presets já carregados continuarão usando até a página ser recarregada.",
+    "clearAll": "Limpar todas as texturas",
+    "clearAllConfirm": "Excluir todas as {{count}} texturas importadas? Os arquivos de imagem precisarão ser reimportados.",
+    "cleared": "Todas as texturas importadas foram removidas",
+    "gpuNote": "Texturas carregadas na GPU persistem até a página ser recarregada.",
+    "idbUnavailable": "Texturas importadas requerem acesso ao armazenamento, que não está disponível no modo de navegação privada.",
+    "duplicateName": "Já existe",
+    "emptyStateTextures": "Nenhuma textura importada. Use \"Importar Texturas\" para adicionar imagens de texturas.",
+    "importInProgress": "Importando... {{count}} textura(s) até agora"
+  },
+
   "customPacks": {
     "tabs": {
       "packs": "pacotes"
     },
+    "description": "Crie coleções personalizadas com qualquer preset — incluídos ou importados.",
     "createPack": "Criar Pacote Personalizado",
     "importPack": "Importar Pacote",
     "exportPack": "Exportar Pacote",
@@ -179,12 +243,42 @@
     "packDeleted": "Pacote excluído",
     "packImported": "Pacote \"{{name}}\" importado com {{count}} presets",
     "notPackFile": "Não é um arquivo de pacote do MangoWave",
-    "settingsFileNotPack": "Este é um arquivo de configurações — use Configurações › Dados para importar pacotes personalizados",
+    "settingsFileNotPack": "Este é um arquivo de configurações. Use Configurações › Dados para importar pacotes personalizados",
     "packImportedPartial": "Pacote \"{{name}}\" importado com {{count}} presets ({{skipped}} não encontrados e ignorados)",
     "maxPacksReached": "Limite máximo de 50 pacotes personalizados atingido",
     "packActive": "Reproduzindo de: {{name}}",
     "deactivatePack": "Parar pacote",
-    "packOverridesFilters": "Estes filtros não se aplicam enquanto um pacote personalizado está ativo",
-    "favoritesAutoSwitch": "Alternado de favoritos para o modo todos"
+    "packOverridesFilters": "O piloto automático e o próximo preset usam o pacote ativo. Os filtros afetam apenas esta lista.",
+    "favoritesAutoSwitch": "Alternado de favoritos para o modo todos",
+    "newPack": "Novo Pacote"
+  },
+
+  "importModal": {
+    "titlePresets": "Importar presets",
+    "titleTextures": "Importar texturas",
+    "descriptionPresets": "Adicione presets comunitários do MilkDrop (arquivos .milk).\nOs presets do MilkDrop foram projetados para um aplicativo nativo do Windows. O MangoWave os traduz para rodar no navegador, mas alguns presets podem não ser renderizados corretamente devido a diferenças no processamento de shaders. Presets mais complexos têm maior probabilidade de apresentar diferenças visuais.\nAlguns presets requerem texturas personalizadas — você será notificado sobre texturas faltantes após a importação.",
+    "descriptionTextures": "Envie imagens de textura (JPEG, PNG ou WebP) usadas pelos presets importados.\nPresets referenciam texturas pelo nome: por exemplo, um preset usando sampler_fire precisa de uma textura chamada \"fire\".",
+    "storageNotePresets": "Os presets são armazenados no seu navegador. Limpar os dados do site os removerá, então guarde seus arquivos .milk originais.",
+    "storageNoteTextures": "As texturas são armazenadas no seu navegador. Limpar os dados do site as removerá, então guarde seus arquivos de imagem originais.",
+    "dropZonePresets": "Arraste arquivos .milk aqui ou clique para procurar",
+    "dropZoneTextures": "Arraste arquivos de imagem aqui ou clique para procurar",
+    "browseFiles": "Procurar arquivos",
+    "importingProgress": "Importando {{current}} de {{total}}...",
+    "summaryAllSuccess": "{{count}} {{type}} importados com sucesso",
+    "summaryPartial": "Importados {{success}} de {{total}} {{type}}. {{failed}} falharam, {{warnings}} com avisos.",
+    "summaryAllFailed": "Todos os {{count}} {{type}} falharam ao importar",
+    "uploadMissingTextures": "Enviar texturas faltantes",
+    "missingTexturesSection": "Texturas faltantes ({{remaining}} restantes)",
+    "missingTexturesAllResolved": "Todas as texturas faltantes enviadas",
+    "missingTexturesHint": "Presets com texturas faltantes exibirão ruído visual onde a textura deveria aparecer. Envie os arquivos de imagem correspondentes para corrigir.",
+    "dropTexturesHere": "Arraste imagens de textura aqui ou procure (JPEG, PNG, WebP)",
+    "importMore": "Importar mais",
+    "presets": "presets",
+    "textures": "texturas",
+    "idbUnavailable": "O armazenamento não está disponível no modo de navegação privada.",
+    "filterAll": "Todos",
+    "statusSuccess": "Importados",
+    "statusWarning": "Avisos",
+    "statusFailed": "Falhas"
   }
 }

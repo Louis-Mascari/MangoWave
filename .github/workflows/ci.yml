@@ -16,12 +16,14 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+
       - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: 20
-          cache: npm
+          cache: pnpm
 
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
 
       - name: Security audit
         # Audit level set to critical (not high) to work around GHSA-8gc5-j5rx-235r:
@@ -29,37 +31,37 @@ jobs:
         # here — fast-xml-parser only processes AWS service responses, never user input.
         # AWS SDK hasn't published a fix yet. Restore --audit-level=high once Dependabot
         # bumps @aws-sdk/* to a version that uses fast-xml-parser@5.5.6+.
-        run: npm audit --audit-level=critical
+        run: pnpm audit --audit-level=critical
 
       - name: Prettier check
-        run: npm run format:check
+        run: pnpm run format:check
 
       - name: Dead code check (Knip)
-        run: npx knip
+        run: pnpm exec knip
 
       - name: ESLint (frontend)
-        run: npm run lint --workspace=packages/frontend
+        run: pnpm --filter @mangowave/frontend run lint
 
       - name: Typecheck (frontend)
-        run: npx tsc -b --noEmit
+        run: pnpm exec tsc -b --noEmit
         working-directory: packages/frontend
 
       - name: Typecheck (backend)
-        run: npx tsc --noEmit
+        run: pnpm exec tsc --noEmit
         working-directory: packages/backend
 
       - name: Typecheck (infrastructure)
-        run: npx tsc --noEmit
+        run: pnpm exec tsc --noEmit
         working-directory: infrastructure
 
       - name: Test (frontend)
-        run: npm run test --workspace=packages/frontend
+        run: pnpm --filter @mangowave/frontend run test
 
       - name: Test (backend)
-        run: npm run test --workspace=packages/backend
+        run: pnpm --filter @mangowave/backend run test
 
       - name: Test (infrastructure)
-        run: npm run test --workspace=infrastructure
+        run: pnpm --filter infrastructure run test
 
   e2e:
     needs: lint-and-test
@@ -67,16 +69,18 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+
       - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: 20
-          cache: npm
+          cache: pnpm
 
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
 
       - name: Get Playwright version
         id: playwright-version
-        run: echo "version=$(npx playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
         working-directory: packages/frontend
 
       - name: Restore Playwright browser cache
@@ -88,16 +92,16 @@ jobs:
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps
+        run: pnpm exec playwright install --with-deps
         working-directory: packages/frontend
 
       - name: Install Playwright system deps (cache hit)
         if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps
+        run: pnpm exec playwright install-deps
         working-directory: packages/frontend
 
       - name: Run E2E tests
-        run: npx playwright test
+        run: pnpm exec playwright test
         working-directory: packages/frontend
 
       - name: Upload test report

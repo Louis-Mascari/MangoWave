@@ -1,0 +1,17 @@
+{
+  "name": "milkdrop-textures",
+  "version": "1.0.0",
+  "description": "66 standard MilkDrop textures from the projectM texture pack",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build:textures": "node scripts/build-texture-data.cjs",
+    "prepare": "node scripts/build-texture-data.cjs"
+  },
+  "devDependencies": {
+    "image-size": "^2.0.2"
+  }
+}

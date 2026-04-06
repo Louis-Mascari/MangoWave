@@ -5,8 +5,8 @@ Lambda handlers for MangoWave's optional Spotify integration and cloud settings 
 ## Development
 
 ```bash
-npm run build   # tsc
-npm run test    # Vitest
+pnpm run build   # tsc
+pnpm run test    # Vitest
 ```
 
 Handlers are deployed via CDK (see `infrastructure/`). No local server — test with Vitest.
@@ -75,6 +75,8 @@ Authenticated users can sync all visualizer settings to the cloud via `settings-
 - **volume** — local file playback volume (0–1)
 - **customPacks** — user-created preset collections (up to 50 packs, each with id, name, presets list, createdAt)
 - **activeCustomPackId** — currently active custom pack ID, or null
+- **importedPresets** — imported .milk preset metadata (name, fileName, addedAt). Metadata only — raw .milk text stored in client-side IndexedDB, not synced
+- **importedTextures** — imported texture metadata (name, fileName, width, height, sizeBytes, addedAt). Metadata only — raw image data stored in client-side IndexedDB, not synced
 
 Settings are keyed to the user's Spotify ID (resolved from their session). Spotify credentials are never included in settings sync.
 

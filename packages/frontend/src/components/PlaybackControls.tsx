@@ -1,5 +1,14 @@
 import { useTranslation } from 'react-i18next';
 import type { RepeatMode } from '../store/useMediaPlayerStore.ts';
+import {
+  PlayIcon,
+  PauseIcon,
+  PreviousTrackIcon,
+  NextTrackIcon,
+  ShuffleIcon,
+  RepeatIcon,
+  RepeatOneIcon,
+} from './icons.tsx';
 
 export interface PlaybackAdapter {
   source: 'spotify' | 'local' | 'mic' | 'system' | 'none';
@@ -48,7 +57,7 @@ export function PlaybackControls({ adapter }: PlaybackControlsProps) {
           label={adapter.shuffle ? t('playback.disableShuffle') : t('playback.enableShuffle')}
           title={adapter.shuffle ? t('playback.shuffleOn') : t('playback.shuffleOff')}
         >
-          🔀
+          <ShuffleIcon className="h-3.5 w-3.5" />
         </ToggleButton>
       )}
       <PlaybackButton
@@ -57,7 +66,7 @@ export function PlaybackControls({ adapter }: PlaybackControlsProps) {
         label={t('playback.previousTrack')}
         title={isDisabled ? disabledTooltip : t('playback.previousTrackShortcut')}
       >
-        ⏮
+        <PreviousTrackIcon className="h-3.5 w-3.5" />
       </PlaybackButton>
       <PlaybackButton
         onClick={adapter.isPlaying ? adapter.onPause : adapter.onPlay}
@@ -71,7 +80,11 @@ export function PlaybackControls({ adapter }: PlaybackControlsProps) {
               : t('playback.playShortcut')
         }
       >
-        {adapter.isPlaying ? '⏸' : '▶'}
+        {adapter.isPlaying ? (
+          <PauseIcon className="h-3.5 w-3.5" />
+        ) : (
+          <PlayIcon className="h-3.5 w-3.5" />
+        )}
       </PlaybackButton>
       <PlaybackButton
         onClick={adapter.onNext}
@@ -79,7 +92,7 @@ export function PlaybackControls({ adapter }: PlaybackControlsProps) {
         label={t('playback.nextTrack')}
         title={isDisabled ? disabledTooltip : t('playback.nextTrackShortcut')}
       >
-        ⏭
+        <NextTrackIcon className="h-3.5 w-3.5" />
       </PlaybackButton>
       {adapter.onCycleRepeat != null && (
         <ToggleButton
@@ -88,7 +101,11 @@ export function PlaybackControls({ adapter }: PlaybackControlsProps) {
           label={t(repeatLabelKeys[adapter.repeatMode ?? 'off'])}
           title={t(repeatLabelKeys[adapter.repeatMode ?? 'off'])}
         >
-          {adapter.repeatMode === 'one' ? '🔂' : '🔁'}
+          {adapter.repeatMode === 'one' ? (
+            <RepeatOneIcon className="h-3.5 w-3.5" />
+          ) : (
+            <RepeatIcon className="h-3.5 w-3.5" />
+          )}
         </ToggleButton>
       )}
     </div>

@@ -1,7 +1,8 @@
 {
   "$schema": "https://unpkg.com/knip@latest/schema.json",
-  "ignoreBinaries": ["tsc", "prettier", "eslint"],
+  "ignoreBinaries": ["tsc"],
   "exclude": ["types"],
+  "ignore": ["scripts/**", "infrastructure/lib/**"],
   "workspaces": {
     "packages/frontend": {
       "entry": ["e2e/**/*.spec.ts"],
@@ -9,14 +10,14 @@
       "ignore": ["src/types/**/*.d.ts"],
       "ignoreDependencies": ["tailwindcss"]
     },
-    "packages/butterchurn": {
-      "ignore": ["lib/butterchurnExtraImages.min.js"]
-    },
+    "packages/butterchurn": {},
     "packages/butterchurn-presets": {},
+    "packages/milkdrop-presets": {},
+    "packages/milkdrop-textures": {},
     "packages/backend": {},
     "infrastructure": {
       "entry": ["bin/mangowave.ts"],
-      "ignoreDependencies": ["ts-node"]
+      "ignoreDependencies": ["esbuild", "ts-node"]
     }
   }
 }

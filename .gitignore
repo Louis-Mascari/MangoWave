@@ -2,11 +2,14 @@
 node_modules/
 .npm
 npm-debug.log*
+pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
 # Build outputs
 dist/
+# Exception: hlslparser-wasm built artifact checked in (CI doesn't need Emscripten)
+!packages/hlslparser-wasm/dist/
 build/
 .vite/
 *.tsbuildinfo
@@ -38,6 +41,14 @@ Thumbs.db
 # Test coverage
 coverage/
 .nyc_output/
+
+# Test output artifacts
+mw-import-errors.json
+
+# Classification script intermediate output
+scripts/preset-classification.json
+scripts/preset-classification-heuristic.json
+scripts/llm-classification-partial.json
 
 # Playwright
 playwright-report/

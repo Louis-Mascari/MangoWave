@@ -7,7 +7,7 @@
 <p align="center">
   Browser-based audio-reactive visualizer inspired by Winamp/MilkDrop.<br>
   Plays local files, captures system audio, or listens via microphone — feeds real-time FFT data into
-  <a href="https://github.com/jberg/butterchurn">butterchurn</a> (a WebGL 2 MilkDrop port) with 400+ presets.
+  <a href="https://github.com/jberg/butterchurn">butterchurn</a> (a WebGL 2 MilkDrop port) with 832 presets across 4 thematic packs.
 </p>
 
 <p align="center">
@@ -22,10 +22,12 @@
 
 ## Features
 
-- **400+ MilkDrop presets** from 5 butterchurn packs, organized by source pack with virtualized browsing
+- **832 MilkDrop presets** (395 butterchurn + 437 MilkDrop-Original) across 4 thematic packs (Ambient, Reactive, Psychedelic, Ethereal) with virtualized browsing
+- **Import .milk presets** — add community MilkDrop presets (PS1, PS2, and PS3) from the thousands available online. Raw files stored in IndexedDB, converted at import time in a Web Worker via a forked `milkdrop-preset-converter` (GLSL ES 3.0 shaders) with EEL equations compiled to WebAssembly at load time via `eel-wasm`
+- **Import custom textures** — upload JPEG/PNG/WebP images for MilkDrop presets that reference `sampler_<name>`. 66 standard MilkDrop textures bundled from the [projectM texture pack](https://github.com/projectM-visualizer/presets-milkdrop-texture-pack), plus 6 built-in butterchurn textures — covers all canonical presets. Additional author-specific textures can be uploaded manually
 - **Custom packs** — create, edit, import/export preset collections; start a pack to lock autopilot and navigation to its presets only
 - **Pack filtering** — enable/disable built-in packs to control which presets appear and which autopilot draws from
-- **Excluded presets** — quarantined presets (broken or inappropriate content) and mobile-blocked presets (27 GPU-heavy presets identified via device testing) collected in a unified Excluded tab with reason badges and per-preset overrides
+- **Excluded presets** — quarantined presets (broken or inappropriate content) and mobile-blocked presets (36 GPU-heavy presets identified via device testing) collected in a unified Excluded tab with reason badges and per-preset overrides
 - **Multiple audio sources** — system/tab audio, local files, or microphone input
 - **Local file playback** with queue, shuffle, repeat, seek, volume controls, and ID3 metadata display (title, artist, album, album art)
 - **10-band EQ** that shapes which frequencies drive the visuals
@@ -33,10 +35,11 @@
 - **Autopilot** with shuffle-style rounds (no repeats), all or favorites-only mode, proportional favorite weighting (1–10x)
 - **Preset history** with previous/next navigation and browseable history tab
 - **Shortcuts** — keyboard and mouse shortcuts for preset navigation, fullscreen, favorites, and more
-- **Mobile-optimized UI** with tap-to-reveal circular controls, full-screen modal panels, and automatic filtering of 27 GPU-heavy presets on mobile devices
+- **Mobile-optimized UI** with tap-to-reveal circular controls, full-screen modal panels, and automatic filtering of 36 GPU-heavy presets on mobile devices
 - **Optional Spotify integration** — Now Playing metadata for all authorized users; seek, shuffle, and repeat controls for Premium users. Cloud-synced settings. Owner-mode only due to Spotify's dev mode policy (1 Client ID per developer, max 5 authorized users, Premium required to register the app). Self-hosters can set up their own Spotify developer app via the included PKCE code
 - **Visual quality controls** — mesh resolution, texture quality, FXAA anti-aliasing, plus FPS cap, resolution scaling, FFT size, smoothing
 - **Multi-window sync** — sync presets and settings across browser windows on the same device via BroadcastChannel. Any window can make changes; automatic leader election drives autopilot from one window
+- **Cross-device sync** — sync presets and settings across phones, laptops, and TVs via peer-to-peer WebRTC (PeerJS). Create a room to get a `MANGO-XXXX` code + QR code, join from another device. Star topology with host-controlled autopilot. Any device can manually change presets. Mobile-blocked presets automatically substituted. Zero backend — connections are peer-to-peer
 - **Settings export/import** — transfer settings between browsers or devices via JSON file
 - **First-time onboarding** — guided tips overlay for new visitors (separate desktop and mobile variants)
 - **9-language i18n** — English, Spanish, Chinese, Hindi, Japanese, Korean, Russian, Indonesian, Brazilian Portuguese. Browser language auto-detected with manual override on the start screen. Non-English translations are AI-generated — if you spot an error, please [open an issue](https://github.com/Louis-Mascari/MangoWave/issues/new/choose)
@@ -89,20 +92,24 @@ The BYOC (bring your own client) PKCE flow is retained in the codebase (`spotify
 
 ## Project Structure
 
-NPM workspaces monorepo. Node >= 20 required.
+pnpm workspaces monorepo. Node >= 20, pnpm >= 10 required.
 
 ```
 MangoWave/
-├── packages/frontend/          # React 19 + Vite 8 + TypeScript — the visualizer app
-├── packages/butterchurn/       # Vendored butterchurn with ESM wrapper + types
-├── packages/butterchurn-presets/ # Vendored preset packs with ESM wrapper + types
-├── packages/backend/           # Lambda handlers for Spotify OAuth & settings sync
-├── packages/landing/           # Static landing page (HTML + CSS, no JS)
-├── infrastructure/             # AWS CDK v2 — DynamoDB, Lambda, API Gateway, S3, CloudFront, CloudWatch
-├── .github/                # CI, deploy, dependabot, issue templates, PR template, CODEOWNERS, SECURITY
-├── SELF-HOSTING.md        # Guide for deploying your own instance
-├── knip.json              # Knip config (unused code detection)
-└── LICENSE                # AGPL-3.0
+├── packages/frontend/                   # React 19 + Vite 8 + TypeScript — the visualizer app
+├── packages/butterchurn/                # Vendored butterchurn with ESM wrapper + types
+├── packages/butterchurn-presets/        # Vendored preset packs with ESM wrapper + types
+├── packages/milkdrop-preset-converter/  # Forked .milk → butterchurn JSON converter (hlslparser-wasm + EEL preprocessor)
+├── packages/milkdrop-presets/           # 437 MilkDrop-Original presets (lazy-loaded, WASM-compiled on demand)
+├── packages/milkdrop-textures/          # 66 standard MilkDrop textures (projectM texture pack)
+├── packages/hlslparser-wasm/            # HLSL → GLSL ES 3.0 compiler (projectM fork, WASM)
+├── packages/backend/                    # Lambda handlers for Spotify OAuth & settings sync
+├── packages/landing/                    # Static landing page (HTML + CSS, no JS)
+├── infrastructure/                      # AWS CDK v2 — DynamoDB, Lambda, API Gateway, S3, CloudFront
+├── .github/                             # CI, deploy, dependabot, issue templates, PR template
+├── SELF-HOSTING.md                      # Guide for deploying your own instance
+├── knip.json                            # Knip config (unused code detection)
+└── LICENSE                              # AGPL-3.0
 ```
 
 See each package's README for details.
@@ -111,10 +118,10 @@ See each package's README for details.
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Start the frontend dev server
-npm run dev -w packages/frontend
+pnpm --filter @mangowave/frontend dev
 # Open http://localhost:5173
 ```
 
@@ -122,22 +129,22 @@ npm run dev -w packages/frontend
 
 ```bash
 # Development
-npm run dev -w packages/frontend     # Vite dev server (localhost:5173)
+pnpm --filter @mangowave/frontend dev     # Vite dev server (localhost:5173)
 
 # Testing
-npm run test -w packages/frontend    # Vitest (jsdom)
-npm run e2e -w packages/frontend     # Playwright (requires browser binaries)
-npm run test -w packages/backend     # Vitest
-npm run test -w infrastructure       # Jest (CDK assertions)
-npm test                             # All workspaces (unit only)
+pnpm --filter @mangowave/frontend test    # Vitest (jsdom)
+pnpm --filter @mangowave/frontend e2e     # Playwright (requires browser binaries)
+pnpm --filter @mangowave/backend test     # Vitest
+pnpm --filter @mangowave/infrastructure test  # Jest (CDK assertions)
+pnpm test                                 # All workspaces (unit only)
 
 # Linting & formatting
-npm run lint -w packages/frontend    # ESLint
-npm run format:check                 # Prettier check
-npm run format                       # Prettier fix
+pnpm --filter @mangowave/frontend lint    # ESLint
+pnpm run format:check                     # Prettier check
+pnpm run format                           # Prettier fix
 
 # Build
-npm run build -w packages/frontend   # tsc + vite build
+pnpm --filter @mangowave/frontend build   # tsc + vite build
 ```
 
 ## Shortcuts
@@ -149,6 +156,7 @@ npm run build -w packages/frontend   # tsc + vite build
 | F / Double-click | Toggle fullscreen          |
 | A                | Toggle autopilot           |
 | S                | Toggle favorite            |
+| V                | Toggle pause rendering     |
 | B                | Toggle block               |
 | Q                | Toggle queue (local files) |
 | J                | Previous track             |
@@ -159,7 +167,7 @@ npm run build -w packages/frontend   # tsc + vite build
 
 ## Tech Stack
 
-- **Frontend:** React 19, Vite 8, TypeScript 6, Tailwind CSS 4, Zustand, react-i18next
+- **Frontend:** React 19, Vite 8, TypeScript 6, Tailwind CSS 4, Zustand, react-i18next, PeerJS (WebRTC)
 - **Visual engine:** butterchurn (WebGL 2 MilkDrop port)
 - **Audio:** Web Audio API (`getDisplayMedia`, `HTMLAudioElement`, `getUserMedia`), music-metadata (ID3 parsing)
 - **Backend:** AWS Lambda (Node.js/TypeScript), API Gateway, DynamoDB
@@ -188,12 +196,15 @@ See **[SELF-HOSTING.md](SELF-HOSTING.md)** for full instructions.
 
 ## Requirements
 
-- **Node >= 20** for local development
+- **Node >= 20** and **pnpm >= 10** for local development
 - **WebGL 2** and browser compatibility — see [Browser & Device Compatibility](#browser--device-compatibility) above
 
 ## Acknowledgments
 
-- [butterchurn](https://github.com/jberg/butterchurn) — WebGL 2 implementation of the MilkDrop visualizer
+- [butterchurn](https://github.com/jberg/butterchurn) — WebGL 2 implementation of the MilkDrop visualizer by Jordan Berg
+- [milkdrop-preset-converter](https://github.com/jberg/milkdrop-preset-converter), [milkdrop-preset-utils](https://github.com/jberg/milkdrop-preset-utils) — MilkDrop toolchain by Jordan Berg
+- [eel-wasm](https://github.com/captbaritone/eel-wasm) — EEL2 → WebAssembly compiler by Jordan Eldredge (captbaritone)
+- [projectM](https://github.com/projectM-visualizer/projectm) — open-source MilkDrop reimplementation; hlslparser fork (GLSL ES 3.0) vendored in `packages/hlslparser-wasm`; [standard texture pack](https://github.com/projectM-visualizer/presets-milkdrop-texture-pack) bundled in `packages/milkdrop-textures`
 - [MilkDrop](https://en.wikipedia.org/wiki/MilkDrop) — original visualizer by Ryan Geiss
 - [Winamp](https://en.wikipedia.org/wiki/Winamp) — created by Nullsoft
 

@@ -5,6 +5,7 @@ export const SHORTCUTS = [
   { key: 'A', actionKey: 'toggleAutopilot' },
   { key: 'S', actionKey: 'toggleFavorite' },
   { key: 'B', actionKey: 'toggleBlock' },
+  { key: 'V', actionKey: 'togglePause' },
   { key: 'Q', actionKey: 'toggleQueue' },
   { key: 'K', actionKey: 'playPause' },
   { key: 'J', actionKey: 'previousTrack' },

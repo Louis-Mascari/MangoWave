@@ -1,5 +1,7 @@
-import _butterchurn from '../lib/butterchurn.min.js';
+import butterchurn from './butterchurn/index.js';
+import _butterchurnExtraImages from '../lib/butterchurnExtraImages.min.js';
 
-const butterchurn = _butterchurn.default ?? _butterchurn;
+const butterchurnExtraImages = _butterchurnExtraImages.default ?? _butterchurnExtraImages;
 
+export { butterchurnExtraImages };
 export default butterchurn;

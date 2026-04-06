@@ -19,6 +19,8 @@
     "noAudioUnknown": "Windows와 ChromeOS에서는 모든 공유 모드가 오디오를 지원합니다. macOS 14.2 이상에서는 Chrome에서 화면 및 창 공유가 오디오를 지원합니다. Linux에서는 탭 공유만 오디오를 지원합니다.",
     "webgl2NotSupported": "WebGL 2 미지원",
     "webgl2NotSupportedDesc": "MangoWave는 시각화 렌더링에 WebGL 2가 필요합니다. Chrome, Firefox 또는 Edge 등의 최신 브라우저를 사용해 주세요.",
+    "webgl2GpuCrash": "WebGL 2 Temporarily Unavailable",
+    "webgl2GpuCrashDesc": "Your browser's GPU process may need to recover. Try closing other tabs or restarting your browser.",
     "webglContextLost": "비주얼라이저 그래픽 컨텍스트 손실",
     "webglContextLostDesc": "기기의 그래픽 시스템이 중단되었습니다. 기기에 부하가 많거나, GPU를 다른 애플리케이션과 공유하고 있거나, 디스플레이 설정이 변경되었을 때 발생할 수 있습니다. 페이지를 새로고침하면 비주얼라이저가 복원됩니다.",
     "renderingError": "렌더링 오류가 발생했습니다. WebGL 또는 Web Audio 관련 문제일 수 있습니다.",
@@ -39,7 +41,9 @@
     "invalidFile": "잘못된 설정 파일입니다",
     "fieldNotApplied": "\"{{field}}\"을(를) 적용할 수 없습니다",
     "importedWithWarnings": "설정을 가져왔습니다. 앱 변경으로 인해 일부 설정을 적용할 수 없었습니다",
-    "importedSuccess": "설정을 성공적으로 가져왔습니다"
+    "importedSuccess": "설정을 성공적으로 가져왔습니다",
+    "importedDataRestored": "가져온 프리셋 및 텍스처가 복원되었습니다",
+    "mergeNote": "즐겨찾기, 차단된 프리셋, 팩은 기존 항목과 병합됩니다."
   },
   "spotify": {
     "connectingToSpotify": "Spotify에 연결하는 중...",
@@ -52,6 +56,8 @@
   "toasts": {
     "autopilotOn": "자동 전환 켜짐",
     "autopilotOff": "자동 전환 꺼짐",
+    "renderingPaused": "Rendering paused",
+    "renderingResumed": "Rendering resumed",
     "addedToFavorites": "즐겨찾기에 추가됨",
     "removedFromFavorites": "즐겨찾기에서 제거됨",
     "presetBlocked": "프리셋 차단됨",
@@ -62,7 +68,9 @@
     "favoritePresetsCleared": "즐겨찾기가 모두 해제됨",
     "silenceDetected": "오디오가 감지되지 않습니다. 공유한 화면, 창 또는 탭에서 오디오가 재생 중인지, 그리고 브라우저 대화상자에서 \"오디오 공유\"를 체크했는지 확인하세요.",
     "silenceDetectedMic": "마이크에서 오디오가 감지되지 않습니다. 마이크가 음소거되지 않았는지, 소리를 잘 잡고 있는지 확인하세요.",
-    "silenceDetectedLocal": "오디오가 감지되지 않습니다. 파일이 지원되는 형식인지, 기기 볼륨이 켜져 있는지 확인하세요."
+    "silenceDetectedLocal": "오디오가 감지되지 않습니다. 파일이 지원되는 형식인지, 기기 볼륨이 켜져 있는지 확인하세요.",
+    "noPresetsAvailable": "사용 가능한 프리셋이 없습니다. 팩이 하나 이상 활성화되어 있고 모든 프리셋이 차단되지 않았는지 확인하세요.",
+    "presetNotFound": "이 기기에서 프리셋을 찾을 수 없습니다: \"{{name}}\""
   },
   "playback": {
     "addSongsToQueue": "재생 목록에 곡 추가",
@@ -112,6 +120,8 @@
     "removeFromFavorites": "즐겨찾기에서 제거 (S)",
     "toggleAutopilot": "자동 전환 켜기/끄기 (A)",
     "toggleFullscreen": "전체 화면 전환 (F)",
+    "togglePause": "Pause rendering (V)",
+    "resumeRendering": "Resume rendering (V)",
     "exitFS": "전체 화면 종료"
   },
   "mobile": {
@@ -127,10 +137,12 @@
       "favorites": "즐겨찾기",
       "blocked": "차단됨",
       "excluded": "제외됨",
-      "history": "기록"
+      "history": "기록",
+      "import": "가져오기"
     },
-    "noPacksSelected": "선택된 팩 없음. 자동 전환 일시정지됨",
+    "noPacksSelected": "선택된 팩 없음",
     "packsActive": "{{active}}/{{total}} 팩 활성",
+    "packsHint": "선택한 팩이 자동 전환 및 다음 프리셋 범위를 결정합니다",
     "searchPlaceholder": "프리셋 검색...",
     "clearSearch": "검색 지우기",
     "noPresetsVisible": "표시할 프리셋 없음",
@@ -150,10 +162,62 @@
     "addedToPack": "\"{{pack}}\"에 추가됨",
     "createPackFirst": "먼저 커스텀 팩을 만드세요"
   },
+
+  "importedPresets": {
+    "sectionTitle": "가져온 프리셋",
+    "description": "커뮤니티 MilkDrop 프리셋(.milk)과 참조하는 텍스처를 추가하세요. MilkDrop은 네이티브 데스크톱 애플리케이션으로 설계되었습니다. 셰이더 변환 차이로 인해 일부 프리셋은 브라우저에서 완벽하게 렌더링되지 않을 수 있습니다.",
+    "emptyState": "가져온 프리셋이 없습니다. \"Import .milk\"를 사용하여 커뮤니티 MilkDrop 프리셋을 추가하세요.",
+    "importMilk": ".milk 가져오기",
+    "importingPresets": "프리셋 가져오는 중...",
+    "importSuccess": "{{count}}개의 프리셋을 가져왔습니다",
+    "importPartial": "{{total}}개 중 {{success}}개의 프리셋을 가져왔습니다. {{failed}}개 실패.",
+    "importAllFailed": "{{count}}개의 프리셋을 모두 가져오지 못했습니다",
+    "fileTooLarge": "너무 큽니다 (최대 500KB)",
+    "invalidFileType": ".milk 파일이 아닙니다",
+    "emptyFile": "파일이 비어 있습니다",
+    "duplicateName": "이미 존재합니다",
+    "conversionFailed": "변환 실패",
+    "securityBlocked": "차단된 콘텐츠가 포함되어 있습니다",
+    "nativeNameCollision": "기본 제공 프리셋에 이미 존재합니다",
+    "missingTextures": "누락된 텍스처 (업로드할 때까지 노이즈로 표시됩니다): {{textures}}",
+    "deletePreset": "가져온 프리셋 삭제",
+    "deleteConfirm": "\"{{name}}\"을(를) 삭제하시겠습니까? .milk 파일을 다시 가져와야 합니다.",
+    "clearAll": "모두 삭제",
+    "clearAllConfirm": "가져온 프리셋 {{count}}개를 모두 삭제하시겠습니까? .milk 파일을 다시 가져와야 합니다.",
+    "cleared": "가져온 모든 프리셋이 삭제되었습니다",
+    "idbUnavailable": "가져온 프리셋은 저장소 접근이 필요하며, 시크릿 모드에서는 사용할 수 없습니다.",
+    "imported": "가져옴",
+    "importInProgress": "가져오는 중... 현재 {{count}}개 프리셋"
+  },
+
+  "importedTextures": {
+    "sectionTitle": "가져온 텍스처",
+    "importTextures": "텍스처 가져오기",
+    "importSuccess": "{{count}}개의 텍스처를 가져왔습니다",
+    "importPartial": "{{total}}개 중 {{success}}개의 텍스처를 가져왔습니다. {{failed}}개 실패.",
+    "importAllFailed": "{{count}}개의 텍스처 모두 가져오기 실패",
+    "fileTooLarge": "너무 큽니다 (최대 2MB)",
+    "invalidFileType": "지원되는 이미지가 아닙니다 (JPEG, PNG 또는 WebP)",
+    "builtinTextureShadow": "기본 제공 텍스처이므로 교체할 수 없습니다",
+    "readFailed": "파일 읽기 실패",
+    "decodeFailed": "이미지 디코딩 실패",
+    "deleteTexture": "가져온 텍스처 삭제",
+    "deleteConfirm": "\"{{name}}\"을(를) 삭제하시겠습니까? 이미지 파일을 다시 가져와야 합니다. 이미 로드된 프리셋은 페이지를 새로고침할 때까지 계속 사용합니다.",
+    "clearAll": "모든 텍스처 삭제",
+    "clearAllConfirm": "가져온 텍스처 {{count}}개를 모두 삭제하시겠습니까? 이미지 파일을 다시 가져와야 합니다.",
+    "cleared": "가져온 텍스처가 모두 삭제되었습니다",
+    "gpuNote": "GPU에 로드된 텍스처는 페이지를 새로고침할 때까지 유지됩니다.",
+    "idbUnavailable": "가져온 텍스처에는 저장소 접근이 필요하며, 시크릿 모드에서는 사용할 수 없습니다.",
+    "duplicateName": "이미 존재합니다",
+    "emptyStateTextures": "가져온 텍스처가 없습니다. \"텍스처 가져오기\"를 사용하여 사용자 정의 텍스처 이미지를 추가하세요.",
+    "importInProgress": "가져오는 중... 현재 {{count}}개 텍스처"
+  },
+
   "customPacks": {
     "tabs": {
       "packs": "팩"
     },
+    "description": "번들 또는 가져온 프리셋으로 커스텀 컬렉션을 만드세요.",
     "createPack": "커스텀 팩 만들기",
     "importPack": "팩 가져오기",
     "exportPack": "팩 내보내기",
@@ -179,12 +243,42 @@
     "packDeleted": "팩이 삭제됨",
     "packImported": "팩 \"{{name}}\"을(를) {{count}}개의 프리셋과 함께 가져왔습니다",
     "notPackFile": "MangoWave 팩 파일이 아닙니다",
-    "settingsFileNotPack": "이것은 설정 파일입니다 — 커스텀 팩을 가져오려면 설정 › 데이터를 사용하세요",
+    "settingsFileNotPack": "이것은 설정 파일입니다. 커스텀 팩을 가져오려면 설정 › 데이터를 사용하세요",
     "packImportedPartial": "팩 \"{{name}}\"을(를) {{count}}개의 프리셋과 함께 가져왔습니다 ({{skipped}}개를 찾을 수 없어 건너뜀)",
     "maxPacksReached": "커스텀 팩은 최대 50개까지 만들 수 있습니다",
     "packActive": "재생 중: {{name}}",
     "deactivatePack": "팩 중지",
-    "packOverridesFilters": "커스텀 팩이 활성화된 동안에는 이 필터가 적용되지 않습니다",
-    "favoritesAutoSwitch": "즐겨찾기 모드에서 전체 모드로 전환됨"
+    "packOverridesFilters": "자동 전환 및 다음 프리셋은 활성 팩을 사용합니다. 필터는 이 목록에만 적용됩니다.",
+    "favoritesAutoSwitch": "즐겨찾기 모드에서 전체 모드로 전환됨",
+    "newPack": "새 팩"
+  },
+
+  "importModal": {
+    "titlePresets": "프리셋 가져오기",
+    "titleTextures": "텍스처 가져오기",
+    "descriptionPresets": "커뮤니티 MilkDrop 프리셋(.milk 파일)을 추가하세요.\nMilkDrop 프리셋은 네이티브 Windows 애플리케이션용으로 설계되었습니다. MangoWave는 이를 브라우저에서 실행할 수 있도록 변환하지만, 셰이더 처리 방식의 차이로 인해 일부 프리셋이 올바르게 렌더링되지 않을 수 있습니다. 복잡한 프리셋일수록 시각적 차이가 나타날 가능성이 높습니다.\n일부 프리셋은 커스텀 텍스처가 필요합니다. 가져오기 후 누락된 텍스처가 알림됩니다.",
+    "descriptionTextures": "가져온 프리셋에서 사용하는 텍스처 이미지(JPEG, PNG 또는 WebP)를 업로드하세요.\n프리셋은 이름으로 텍스처를 참조합니다. 예를 들어 sampler_fire를 사용하는 프리셋에는 \"fire\"라는 이름의 텍스처가 필요합니다.",
+    "storageNotePresets": "프리셋은 브라우저에 저장됩니다. 사이트 데이터를 삭제하면 함께 삭제되므로 원본 .milk 파일을 보관하세요.",
+    "storageNoteTextures": "텍스처는 브라우저에 저장됩니다. 사이트 데이터를 삭제하면 함께 삭제되므로 원본 이미지 파일을 보관하세요.",
+    "dropZonePresets": ".milk 파일을 여기에 끌어다 놓거나 클릭하여 찾아보기",
+    "dropZoneTextures": "이미지 파일을 여기에 끌어다 놓거나 클릭하여 찾아보기",
+    "browseFiles": "파일 찾아보기",
+    "importingProgress": "{{total}}개 중 {{current}}개 가져오는 중...",
+    "summaryAllSuccess": "{{count}}개의 {{type}}을(를) 성공적으로 가져왔습니다",
+    "summaryPartial": "{{total}}개의 {{type}} 중 {{success}}개를 가져왔습니다. {{failed}}개 실패, {{warnings}}개 경고.",
+    "summaryAllFailed": "{{count}}개의 {{type}} 모두 가져오기 실패",
+    "uploadMissingTextures": "누락된 텍스처 업로드",
+    "missingTexturesSection": "누락된 텍스처 ({{remaining}}개 남음)",
+    "missingTexturesAllResolved": "누락된 텍스처 모두 업로드 완료",
+    "missingTexturesHint": "텍스처가 누락된 프리셋은 텍스처 위치에 노이즈가 표시됩니다. 해당 이미지 파일을 업로드하면 해결됩니다.",
+    "dropTexturesHere": "텍스처 이미지를 여기에 끌어다 놓거나 찾아보기 (JPEG, PNG, WebP)",
+    "importMore": "더 가져오기",
+    "presets": "프리셋",
+    "textures": "텍스처",
+    "idbUnavailable": "개인정보 보호 모드에서는 저장소를 사용할 수 없습니다.",
+    "filterAll": "전체",
+    "statusSuccess": "가져옴",
+    "statusWarning": "경고",
+    "statusFailed": "실패"
   }
 }

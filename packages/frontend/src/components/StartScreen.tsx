@@ -12,6 +12,7 @@ import {
 } from '../utils/audioFileValidation.ts';
 import { useFocusTrap } from '../hooks/useFocusTrap.ts';
 import { supportedLanguages, type SupportedLanguage } from '../i18n/index.ts';
+import { CloseIcon } from './icons.tsx';
 import logoSrc from '../assets/logo.png';
 
 interface StartScreenProps {
@@ -716,7 +717,7 @@ function Modal({
           className="absolute right-4 top-4 cursor-pointer border-none bg-transparent text-lg text-white/40 hover:text-white/80"
           aria-label={tc('close')}
         >
-          ✕
+          <CloseIcon className="h-5 w-5" />
         </button>
         <h2 className="mb-4 text-xl font-bold text-white">{title}</h2>
         {children}

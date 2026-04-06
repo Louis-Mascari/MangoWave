@@ -5,6 +5,18 @@ import { useSpotifyProgress } from '../hooks/useSpotifyProgress.ts';
 import { useMediaPlayerStore } from '../store/useMediaPlayerStore.ts';
 import type { PlaybackAdapter } from './PlaybackControls.tsx';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
+import {
+  PlayIcon,
+  PauseIcon,
+  PreviousTrackIcon,
+  NextTrackIcon,
+  ShuffleIcon,
+  RepeatIcon,
+  RepeatOneIcon,
+  VolumeMuteIcon,
+  VolumeHighIcon,
+  NowPlayingIcon,
+} from './icons.tsx';
 
 function formatTime(s: number): string {
   const m = Math.floor(s / 60);
@@ -135,7 +147,7 @@ export function PlaybackPanel({
       label={t('playback.previousTrack')}
       title={isDisabled ? (adapter.tooltip ?? '') : t('playback.previousTrackShortcut')}
     >
-      ⏮
+      <PreviousTrackIcon className="h-3.5 w-3.5" />
     </TransportButton>
   );
 
@@ -153,7 +165,11 @@ export function PlaybackPanel({
       }
       primary
     >
-      {adapter.isPlaying ? '⏸' : '▶'}
+      {adapter.isPlaying ? (
+        <PauseIcon className="h-3.5 w-3.5" />
+      ) : (
+        <PlayIcon className="h-3.5 w-3.5" />
+      )}
     </TransportButton>
   );
 
@@ -164,7 +180,7 @@ export function PlaybackPanel({
       label={t('playback.nextTrack')}
       title={isDisabled ? (adapter.tooltip ?? '') : t('playback.nextTrackShortcut')}
     >
-      ⏭
+      <NextTrackIcon className="h-3.5 w-3.5" />
     </TransportButton>
   );
 
@@ -174,7 +190,7 @@ export function PlaybackPanel({
       active={adapter.shuffle ?? false}
       label={adapter.shuffle ? t('playback.shuffleOn') : t('playback.shuffleOff')}
     >
-      🔀
+      <ShuffleIcon className="h-3.5 w-3.5" />
     </TransportToggle>
   ) : null;
 
@@ -190,7 +206,11 @@ export function PlaybackPanel({
             : t('playback.repeatOff')
       }
     >
-      {adapter.repeatMode === 'one' ? '🔂' : '🔁'}
+      {adapter.repeatMode === 'one' ? (
+        <RepeatOneIcon className="h-3.5 w-3.5" />
+      ) : (
+        <RepeatIcon className="h-3.5 w-3.5" />
+      )}
     </TransportToggle>
   ) : null;
 
@@ -200,16 +220,7 @@ export function PlaybackPanel({
       active={nowPlayingEnabled}
       label={nowPlayingEnabled ? t('playback.nowPlayingOn') : t('playback.nowPlayingOff')}
     >
-      <svg
-        viewBox="0 0 20 20"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        className="h-4 w-4"
-      >
-        <path d="M7 4v12l10-6z" />
-        <rect x="1" y="6" width="4" height="8" rx="0.5" />
-      </svg>
+      <NowPlayingIcon className="h-4 w-4" />
     </TransportToggle>
   );
 
@@ -241,7 +252,11 @@ export function PlaybackPanel({
         title={isMuted ? t('playback.unmute') : t('playback.mute')}
         aria-label={isMuted ? t('playback.unmute') : t('playback.mute')}
       >
-        {isMuted ? '🔇' : '🔊'}
+        {isMuted ? (
+          <VolumeMuteIcon className="h-3.5 w-3.5" />
+        ) : (
+          <VolumeHighIcon className="h-3.5 w-3.5" />
+        )}
       </button>
       <input
         type="range"

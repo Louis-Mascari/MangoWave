@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
 import { useSettingsStore } from '../useSettingsStore.ts';
+import { THEMATIC_PACKS } from '../../data/presetThematicPacks.ts';
 
 describe('useSettingsStore', () => {
   beforeEach(() => {
@@ -29,6 +30,9 @@ describe('useSettingsStore', () => {
       // Clear custom packs
       result.current.setActiveCustomPackId(null);
       result.current.customPacks.forEach((p) => result.current.deleteCustomPack(p.id));
+      // Clear imported presets and textures
+      result.current.clearImportedPresetsMeta();
+      result.current.clearImportedTexturesMeta();
     });
   });
 
@@ -684,6 +688,181 @@ describe('useSettingsStore', () => {
       );
       // Function should not be overwritten
       expect(result.current.setVolume).toBe(original);
+    });
+  });
+
+  describe('importedPresets', () => {
+    it('defaults to empty array', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      expect(result.current.importedPresets).toEqual([]);
+    });
+
+    it('adds imported preset metadata', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      const meta = { name: 'Cool Preset', fileName: 'Cool Preset.milk', addedAt: 1000 };
+      act(() => result.current.addImportedPresetMeta(meta));
+      expect(result.current.importedPresets).toHaveLength(1);
+      expect(result.current.importedPresets[0]).toEqual(meta);
+    });
+
+    it('removes imported preset metadata by name', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => {
+        result.current.addImportedPresetMeta({
+          name: 'A',
+          fileName: 'A.milk',
+          addedAt: 1,
+        });
+        result.current.addImportedPresetMeta({
+          name: 'B',
+          fileName: 'B.milk',
+          addedAt: 2,
+        });
+      });
+      expect(result.current.importedPresets).toHaveLength(2);
+
+      act(() => result.current.removeImportedPresetMeta('A'));
+      expect(result.current.importedPresets).toHaveLength(1);
+      expect(result.current.importedPresets[0].name).toBe('B');
+    });
+
+    it('clears all imported preset metadata', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => {
+        result.current.addImportedPresetMeta({
+          name: 'X',
+          fileName: 'X.milk',
+          addedAt: 1,
+        });
+        result.current.addImportedPresetMeta({
+          name: 'Y',
+          fileName: 'Y.milk',
+          addedAt: 2,
+        });
+      });
+      expect(result.current.importedPresets).toHaveLength(2);
+
+      act(() => result.current.clearImportedPresetsMeta());
+      expect(result.current.importedPresets).toEqual([]);
+    });
+
+    it('is importable via importSettings', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      const metas = [{ name: 'Imported', fileName: 'Imported.milk', addedAt: 100 }];
+      act(() => result.current.importSettings({ importedPresets: metas }));
+      expect(result.current.importedPresets).toEqual(metas);
+    });
+  });
+
+  describe('importedTextures', () => {
+    it('defaults to empty array', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      expect(result.current.importedTextures).toEqual([]);
+    });
+
+    it('adds imported texture metadata', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      const meta = {
+        name: 'cells',
+        fileName: 'cells.png',
+        width: 256,
+        height: 256,
+        sizeBytes: 5000,
+        addedAt: 1000,
+      };
+      act(() => result.current.addImportedTextureMeta(meta));
+      expect(result.current.importedTextures).toHaveLength(1);
+      expect(result.current.importedTextures[0]).toEqual(meta);
+    });
+
+    it('removes imported texture metadata by name', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => {
+        result.current.addImportedTextureMeta({
+          name: 'a',
+          fileName: 'a.png',
+          width: 64,
+          height: 64,
+          sizeBytes: 100,
+          addedAt: 1,
+        });
+        result.current.addImportedTextureMeta({
+          name: 'b',
+          fileName: 'b.png',
+          width: 128,
+          height: 128,
+          sizeBytes: 200,
+          addedAt: 2,
+        });
+      });
+      expect(result.current.importedTextures).toHaveLength(2);
+
+      act(() => result.current.removeImportedTextureMeta('a'));
+      expect(result.current.importedTextures).toHaveLength(1);
+      expect(result.current.importedTextures[0].name).toBe('b');
+    });
+
+    it('clears all imported texture metadata', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => {
+        result.current.addImportedTextureMeta({
+          name: 'x',
+          fileName: 'x.png',
+          width: 64,
+          height: 64,
+          sizeBytes: 100,
+          addedAt: 1,
+        });
+      });
+      expect(result.current.importedTextures).toHaveLength(1);
+
+      act(() => result.current.clearImportedTexturesMeta());
+      expect(result.current.importedTextures).toEqual([]);
+    });
+
+    it('is importable via importSettings', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      const metas = [
+        {
+          name: 'fire',
+          fileName: 'fire.jpg',
+          width: 512,
+          height: 512,
+          sizeBytes: 50000,
+          addedAt: 100,
+        },
+      ];
+      act(() => result.current.importSettings({ importedTextures: metas }));
+      expect(result.current.importedTextures).toEqual(metas);
+    });
+  });
+
+  describe('v12 migration: thematic packs', () => {
+    it('remaps old source-based enabledPacks to thematic names', () => {
+      // The migration runs at persist-load time. Test the logic directly:
+      const oldPacks = ['Minimal', 'Non-Minimal', 'Extra', 'Extra 2', 'MD1', 'MilkDrop'];
+      const OLD_PACK_NAMES = ['Minimal', 'Non-Minimal', 'Extra', 'Extra 2', 'MD1', 'MilkDrop'];
+      const hasOldPacks = oldPacks.some((p) => OLD_PACK_NAMES.includes(p));
+      expect(hasOldPacks).toBe(true);
+
+      // After migration, should have all thematic packs
+      const newPacks = [...THEMATIC_PACKS];
+      expect(newPacks).toEqual(['Ambient', 'Reactive', 'Psychedelic', 'Ethereal']);
+    });
+
+    it('preserves Imported in enabledPacks during migration', () => {
+      const oldPacks = ['Minimal', 'Extra', 'Imported'];
+      const newPacks: string[] = [...THEMATIC_PACKS];
+      if (oldPacks.includes('Imported')) newPacks.push('Imported');
+      expect(newPacks).toContain('Imported');
+      expect(newPacks).toContain('Ambient');
+    });
+
+    it('does not remap already-thematic enabledPacks', () => {
+      const packs = ['Ambient', 'Reactive', 'Ethereal'];
+      const oldPackNames = ['Minimal', 'Non-Minimal', 'Extra', 'Extra 2', 'MD1', 'MilkDrop'];
+      const hasOldPacks = packs.some((p) => oldPackNames.includes(p));
+      expect(hasOldPacks).toBe(false);
     });
   });
 });

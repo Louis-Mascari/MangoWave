@@ -6,6 +6,8 @@ import { GroupedVirtuoso, Virtuoso, type GroupedVirtuosoHandle } from 'react-vir
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { usePresetHistoryStore } from '../store/usePresetHistoryStore.ts';
 import { usePresetBrowserStore } from '../store/usePresetBrowserStore.ts';
+import { useImportedPresetsStore } from '../store/useImportedPresetsStore.ts';
+import { useImportedTexturesStore } from '../store/useImportedTexturesStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import { useConfirmStore } from '../store/useConfirmStore.ts';
 import { quarantinedSet, mobileBlockedSet } from '../data/excludedPresets.ts';
@@ -16,7 +18,14 @@ import {
   parsePackImportFile,
 } from '../utils/settingsPortability.ts';
 import { PACK_ORDER } from '../engine/VisualizerRenderer.ts';
-import type { CustomPack } from '../store/useSettingsStore.ts';
+import { PACK_DESCRIPTIONS } from '../data/presetThematicPacks.ts';
+import { useImportModalStore } from '../store/useImportModalStore.ts';
+import { CloseIcon } from './icons.tsx';
+import type {
+  CustomPack,
+  ImportedPresetMeta,
+  ImportedTextureMeta,
+} from '../store/useSettingsStore.ts';
 
 interface PresetBrowserProps {
   presetList: string[];
@@ -24,6 +33,7 @@ interface PresetBrowserProps {
   presetPackMap: Map<string, string>;
   onSelectPreset: (name: string) => void;
   onNextPreset: () => void;
+  onUnpause?: () => void;
 }
 
 const QUARANTINE_REASONS: Record<string, { labelKey: string; color: string }> = {
@@ -49,7 +59,9 @@ function PresetRow({
   onSelect,
   onToggleFavorite,
   onToggleBlock,
+  onDelete,
   customPacks,
+  missingTextures,
 }: {
   name: string;
   isCurrent: boolean;
@@ -58,7 +70,9 @@ function PresetRow({
   onSelect: () => void;
   onToggleFavorite: () => void;
   onToggleBlock: () => void;
+  onDelete?: () => void;
   customPacks?: CustomPack[];
+  missingTextures?: string[];
 }) {
   const { t } = useTranslation('messages');
 
@@ -78,7 +92,14 @@ function PresetRow({
         isCurrent ? 'bg-orange-500/30 text-white' : 'text-white/70 hover:bg-white/10'
       }`}
     >
-      <span className="min-w-0 flex-1 truncate text-left">{name}</span>
+      <span className="min-w-0 flex-1 truncate text-left">
+        {missingTextures && missingTextures.length > 0 && (
+          <span className="mr-1 inline-block text-amber-400" title={missingTextures.join(', ')}>
+            ⚠
+          </span>
+        )}
+        {name}
+      </span>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
         <button
@@ -117,6 +138,22 @@ function PresetRow({
           </svg>
         </button>
         {customPacks && <AddToPackButton presetName={name} customPacks={customPacks} />}
+        {onDelete && (
+          <button
+            onClick={onDelete}
+            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-red-500/20 hover:text-red-400"
+            title={t('importedPresets.deletePreset')}
+            aria-label={t('importedPresets.deletePreset')}
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
+              <path
+                fillRule="evenodd"
+                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );
@@ -129,6 +166,7 @@ function HistoryRow({
   onSelect,
   onToggleFavorite,
   onToggleBlock,
+  customPacks,
 }: {
   name: string;
   isFavorite: boolean;
@@ -136,6 +174,7 @@ function HistoryRow({
   onSelect: () => void;
   onToggleFavorite: () => void;
   onToggleBlock: () => void;
+  customPacks?: CustomPack[];
 }) {
   const { t } = useTranslation('messages');
 
@@ -191,6 +230,7 @@ function HistoryRow({
             <line x1="5" y1="5" x2="15" y2="15" />
           </svg>
         </button>
+        {customPacks && <AddToPackButton presetName={name} customPacks={customPacks} />}
       </div>
     </div>
   );
@@ -236,6 +276,100 @@ function PackNameInput({
   );
 }
 
+/** Isolated child component so pack-search keystrokes don't re-render the entire PresetBrowser. */
+function PackAddPresets({
+  packId,
+  packPresets,
+  presetList,
+  currentPreset,
+  onSelectPreset,
+}: {
+  packId: string;
+  packPresets: string[];
+  presetList: string[];
+  currentPreset: string;
+  onSelectPreset: (name: string) => void;
+}) {
+  const { t } = useTranslation('messages');
+  const [search, setSearch] = useState('');
+  const deferredSearch = useDeferredValue(search);
+
+  const addable = useMemo(() => {
+    const inPack = new Set(packPresets);
+    const lower = deferredSearch.toLowerCase();
+    return presetList.filter((name) => {
+      if (inPack.has(name)) return false;
+      if (deferredSearch && !name.toLowerCase().includes(lower)) return false;
+      return true;
+    });
+  }, [packPresets, presetList, deferredSearch]);
+
+  return (
+    <div className="flex min-h-0 flex-[1.5] flex-col border-t border-white/10 pt-2">
+      <p className="mb-1 text-xs font-semibold text-white/50">{t('customPacks.addPresets')}</p>
+      <div className="relative mb-1">
+        <input
+          type="text"
+          placeholder={t('customPacks.searchPresets')}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full rounded border-none bg-white/10 px-2 py-1 pr-6 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
+        />
+        <button
+          onClick={() => setSearch('')}
+          className={`absolute top-1/2 right-1.5 flex h-4 w-4 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-none bg-white/20 text-[10px] leading-none text-white/60 hover:bg-white/30 hover:text-white ${
+            search ? 'visible' : 'invisible'
+          }`}
+          aria-label={t('presetBrowser.clearSearch')}
+        >
+          <CloseIcon className="h-2.5 w-2.5" />
+        </button>
+      </div>
+      {addable.length === 0 ? (
+        <p className="py-1 text-center text-xs text-white/30">{t('customPacks.allPresetsAdded')}</p>
+      ) : (
+        <div className="min-h-0 flex-1 overflow-hidden">
+          <Virtuoso
+            data={addable}
+            style={{ height: isMobileDevice ? 'max(200px, calc(100dvh - 420px))' : '100%' }}
+            itemContent={(_index, name) => (
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => onSelectPreset(name)}
+                onKeyDown={(e) => {
+                  if (e.currentTarget !== e.target) return;
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelectPreset(name);
+                  }
+                }}
+                className={`flex shrink-0 cursor-pointer items-center justify-between rounded px-2 py-0.5 text-xs ${
+                  name === currentPreset
+                    ? 'bg-orange-500/30 text-white'
+                    : 'text-white/60 hover:bg-white/10'
+                }`}
+              >
+                <span className="min-w-0 flex-1 truncate text-left">{name}</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    useSettingsStore.getState().addPresetToCustomPack(packId, name);
+                  }}
+                  className="flex h-5 w-5 cursor-pointer items-center justify-center rounded border-none bg-transparent text-sm leading-none text-green-500/60 hover:bg-white/10 hover:text-green-400"
+                  aria-label={`${t('presetBrowser.addToPack')} ${name}`}
+                >
+                  +
+                </button>
+              </div>
+            )}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AddToPackButton({
   presetName,
   customPacks,
@@ -266,16 +400,26 @@ function AddToPackButton({
     return () => document.removeEventListener('mousedown', handler);
   }, [showDropdown]);
 
-  const handleClick = () => {
-    if (customPacks.length === 0) {
-      useToastStore.getState().show(t('presetBrowser.createPackFirst'));
+  const createCustomPack = useSettingsStore((s) => s.createCustomPack);
+
+  const handleCreateAndAdd = () => {
+    if (customPacks.length >= 50) {
+      useToastStore.getState().show(t('customPacks.maxPacksReached'));
       return;
     }
-    if (customPacks.length === 1) {
-      addPresetToCustomPack(customPacks[0].id, presetName);
-      useToastStore.getState().show(t('presetBrowser.addedToPack', { pack: customPacks[0].name }), {
-        maskValue: customPacks[0].name,
-      });
+    const name = `Pack ${customPacks.length + 1}`;
+    const id = createCustomPack(name, [presetName]);
+    if (id) {
+      useToastStore
+        .getState()
+        .show(t('presetBrowser.addedToPack', { pack: name }), { maskValue: name });
+    }
+    setShowDropdown(false);
+  };
+
+  const handleClick = () => {
+    if (customPacks.length === 0) {
+      handleCreateAndAdd();
       return;
     }
     if (showDropdown) {
@@ -315,6 +459,13 @@ function AddToPackButton({
             className="fixed z-[100] min-w-[140px] rounded bg-black/90 py-1 shadow-lg ring-1 ring-white/20"
             style={dropdownStyle}
           >
+            <button
+              onClick={handleCreateAndAdd}
+              className="block w-full cursor-pointer border-none bg-transparent px-3 py-1 text-left text-xs text-green-400/70 hover:bg-white/10 hover:text-green-400"
+            >
+              + {t('customPacks.newPack')}
+            </button>
+            {customPacks.length > 0 && <div className="my-0.5 border-t border-white/10" />}
             {customPacks.map((pack) => (
               <button
                 key={pack.id}
@@ -345,6 +496,7 @@ export function PresetBrowser({
   presetPackMap,
   onSelectPreset,
   onNextPreset,
+  onUnpause,
 }: PresetBrowserProps) {
   const { t } = useTranslation('messages');
   const { t: tc } = useTranslation('common');
@@ -366,11 +518,20 @@ export function PresetBrowser({
   const deleteCustomPack = useSettingsStore((s) => s.deleteCustomPack);
   const removePresetFromCustomPack = useSettingsStore((s) => s.removePresetFromCustomPack);
   const setActiveCustomPackId = useSettingsStore((s) => s.setActiveCustomPackId);
+  const importedPresets = useSettingsStore((s) => s.importedPresets);
+  const removeImportedPresetMeta = useSettingsStore((s) => s.removeImportedPresetMeta);
+  const clearImportedPresetsMeta = useSettingsStore((s) => s.clearImportedPresetsMeta);
+  const importedTextures = useSettingsStore((s) => s.importedTextures);
+  const removeImportedTextureMeta = useSettingsStore((s) => s.removeImportedTextureMeta);
+  const clearImportedTexturesMeta = useSettingsStore((s) => s.clearImportedTexturesMeta);
 
   const activePackName = useMemo(
     () => customPacks.find((p) => p.id === activeCustomPackId)?.name ?? null,
     [customPacks, activeCustomPackId],
   );
+
+  const isImportModalOpen = useImportModalStore((s) => s.isOpen);
+  const importModalMode = useImportModalStore((s) => s.mode);
 
   const presetHistory = usePresetHistoryStore((s) => s.history);
 
@@ -387,8 +548,31 @@ export function PresetBrowser({
   const blockedSet = useMemo(() => new Set(blockedPresets), [blockedPresets]);
   const favoriteSet = useMemo(() => new Set(favoritePresets), [favoritePresets]);
   const overrideSet = useMemo(() => new Set(excludedOverrides), [excludedOverrides]);
+  const importedNameSet = useMemo(
+    () => new Set(importedPresets.map((p) => p.name)),
+    [importedPresets],
+  );
 
-  const allPacks = PACK_ORDER;
+  const importedTextureNames = useMemo(() => {
+    const set = new Set<string>();
+    for (const t of importedTextures) set.add(t.name);
+    return set;
+  }, [importedTextures]);
+
+  const missingTexturesByName = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const p of importedPresets) {
+      if (!p.missingTextures?.length) continue;
+      const effective = p.missingTextures.filter((tex) => !importedTextureNames.has(tex));
+      if (effective.length > 0) map.set(p.name, effective);
+    }
+    return map;
+  }, [importedPresets, importedTextureNames]);
+
+  const allPacks = useMemo(
+    () => (importedPresets.length > 0 ? [...PACK_ORDER, 'Imported'] : PACK_ORDER),
+    [importedPresets.length],
+  );
 
   // Initialize enabledPacks on first load (only if never set before).
   const didInitPacks = useRef(false);
@@ -403,6 +587,17 @@ export function PresetBrowser({
       setEnabledPacks(allPacks);
     }
   }, [allPacks, enabledPacks.length, setEnabledPacks]);
+
+  // Auto-add "Imported" to enabledPacks when user first imports presets.
+  // Uses a ref to avoid re-adding if the user deliberately unchecks "Imported" and imports more.
+  const prevImportedCount = useRef(importedPresets.length);
+  useEffect(() => {
+    const wasEmpty = prevImportedCount.current === 0;
+    prevImportedCount.current = importedPresets.length;
+    if (wasEmpty && importedPresets.length > 0 && !enabledPacks.includes('Imported')) {
+      setEnabledPacks([...enabledPacks, 'Imported']);
+    }
+  }, [importedPresets.length, enabledPacks, setEnabledPacks]);
 
   const enabledPackSet = useMemo(() => new Set(enabledPacks), [enabledPacks]);
 
@@ -618,21 +813,23 @@ export function PresetBrowser({
   const renderGroupedAll = () => (
     <>
       {/* Pack filter checkboxes */}
+      <p className="mb-1 text-xs text-white/50">{t('presetBrowser.packsHint')}</p>
       {activeCustomPackId && (
-        <p className="mb-1 text-[9px] text-orange-400/50">
+        <p className="mb-1 text-[10px] text-orange-400/50">
           {t('customPacks.packOverridesFilters')}
         </p>
       )}
-      <div
-        className={`mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 ${activeCustomPackId ? 'pointer-events-none opacity-40' : ''}`}
-      >
+      <div className="mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
         {allPacks.map((pack) => (
-          <label key={pack} className="flex cursor-pointer items-center gap-1 text-[10px]">
+          <label
+            key={pack}
+            title={PACK_DESCRIPTIONS[pack]}
+            className="flex cursor-pointer items-center gap-1 text-xs"
+          >
             <input
               type="checkbox"
               checked={enabledPackSet.has(pack)}
               onChange={() => togglePack(pack)}
-              disabled={!!activeCustomPackId}
               className="h-3 w-3 accent-orange-500"
             />
             <span className={enabledPackSet.has(pack) ? 'text-white/70' : 'text-white/30'}>
@@ -641,22 +838,20 @@ export function PresetBrowser({
           </label>
         ))}
       </div>
-      <div
-        className={`mb-1.5 flex items-center gap-2 ${activeCustomPackId ? 'pointer-events-none opacity-40' : ''}`}
-      >
+      <div className="mb-1.5 flex items-center gap-2">
         <button
           onClick={handleSelectAll}
-          className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
+          className="cursor-pointer border-none bg-transparent p-0 text-xs text-white/40 underline hover:text-orange-400"
         >
           {tc('selectAll')}
         </button>
         <button
           onClick={handleDeselectAll}
-          className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
+          className="cursor-pointer border-none bg-transparent p-0 text-xs text-white/40 underline hover:text-orange-400"
         >
           {tc('deselectAll')}
         </button>
-        <span className="text-[9px] text-white/25">
+        <span className="text-[10px] text-white/25">
           {enabledPacks.length === 0
             ? t('presetBrowser.noPacksSelected')
             : t('presetBrowser.packsActive', {
@@ -667,56 +862,88 @@ export function PresetBrowser({
       </div>
 
       {groupNames.length > 0 ? (
-        <GroupedVirtuoso
-          ref={virtuosoRef}
-          style={{ height: isMobileDevice ? 'max(280px, calc(100dvh - 320px))' : '280px' }}
-          initialScrollTop={initialScrollTop.current}
-          onScroll={(e) => {
-            scrollTopRef.current = (e.target as HTMLElement).scrollTop;
-          }}
-          groupCounts={groupCounts}
-          groupContent={(index) => {
-            const raw = groupNames[index];
-            const [packName, countStr] = raw.split('|||');
-            const isCollapsed = collapsedPacks.has(packName);
-            return (
-              <div
-                role="button"
-                tabIndex={0}
-                onClick={() => toggleCollapsePack(packName)}
-                onKeyDown={(e) => {
-                  if (e.currentTarget !== e.target) return;
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    toggleCollapsePack(packName);
+        <div className="min-h-0 flex-1">
+          <GroupedVirtuoso
+            ref={virtuosoRef}
+            style={{ height: isMobileDevice ? 'max(280px, calc(100dvh - 320px))' : '100%' }}
+            initialScrollTop={initialScrollTop.current}
+            onScroll={(e) => {
+              scrollTopRef.current = (e.target as HTMLElement).scrollTop;
+            }}
+            groupCounts={groupCounts}
+            groupContent={(index) => {
+              const raw = groupNames[index];
+              const [packName, countStr] = raw.split('|||');
+              const isCollapsed = collapsedPacks.has(packName);
+              return (
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => toggleCollapsePack(packName)}
+                  onKeyDown={(e) => {
+                    if (e.currentTarget !== e.target) return;
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      toggleCollapsePack(packName);
+                    }
+                  }}
+                  className="sticky top-0 z-[1] flex cursor-pointer items-center justify-between bg-black/80 px-2 py-1 backdrop-blur-sm"
+                >
+                  <span className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-orange-400">
+                    <svg
+                      viewBox="0 0 10 10"
+                      fill="currentColor"
+                      className={`h-2.5 w-2.5 transition-transform duration-150 ${isCollapsed ? '' : 'rotate-90'}`}
+                    >
+                      <path d="M3 1l5 4-5 4V1z" />
+                    </svg>
+                    {packName}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    {packName === 'Imported' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleClearAllImported();
+                        }}
+                        className="cursor-pointer rounded border-none bg-red-500/20 px-1.5 py-0.5 text-[9px] text-red-400/70 hover:bg-red-500/30 hover:text-red-400"
+                      >
+                        {t('importedPresets.clearAll')}
+                      </button>
+                    )}
+                    <span className="text-xs text-white/40">{countStr}</span>
+                  </span>
+                </div>
+              );
+            }}
+            itemContent={(index) => {
+              const name = flatPresets[index];
+              if (!name) return <div style={{ height: 1 }} />;
+              const isImported = importedNameSet.has(name);
+              return (
+                <PresetRow
+                  name={name}
+                  isCurrent={name === currentPreset}
+                  isFavorite={favoriteSet.has(name)}
+                  isBlocked={blockedSet.has(name)}
+                  onSelect={() => handleSelectPreset(name)}
+                  onToggleFavorite={() => handleToggleFavorite(name)}
+                  onToggleBlock={() => handleToggleBlock(name)}
+                  onDelete={
+                    isImported
+                      ? () => {
+                          const meta = importedPresets.find((p) => p.name === name);
+                          if (meta) handleDeleteImportedPreset(meta);
+                        }
+                      : undefined
                   }
-                }}
-                className="sticky top-0 z-[1] flex cursor-pointer items-center justify-between bg-black/80 px-2 py-1 backdrop-blur-sm"
-              >
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-orange-400">
-                  {isCollapsed ? '▶' : '▼'} {packName}
-                </span>
-                <span className="text-[10px] text-white/40">{countStr}</span>
-              </div>
-            );
-          }}
-          itemContent={(index) => {
-            const name = flatPresets[index];
-            if (!name) return <div style={{ height: 1 }} />;
-            return (
-              <PresetRow
-                name={name}
-                isCurrent={name === currentPreset}
-                isFavorite={favoriteSet.has(name)}
-                isBlocked={blockedSet.has(name)}
-                onSelect={() => handleSelectPreset(name)}
-                onToggleFavorite={() => handleToggleFavorite(name)}
-                onToggleBlock={() => handleToggleBlock(name)}
-                customPacks={customPacks}
-              />
-            );
-          }}
-        />
+                  customPacks={customPacks}
+                  missingTextures={missingTexturesByName.get(name)}
+                />
+              );
+            }}
+          />
+        </div>
       ) : (
         <p className="py-2 text-center text-xs text-white/40">
           {t('presetBrowser.noPresetsVisible')}
@@ -747,30 +974,33 @@ export function PresetBrowser({
         onToggleFavorite={() => handleToggleFavorite(name)}
         onToggleBlock={() => handleToggleBlock(name)}
         customPacks={customPacks}
+        missingTextures={missingTexturesByName.get(name)}
       />
     );
 
     if (filteredPresets.length < 50) {
       return (
-        <div className="flex flex-col gap-0.5 overflow-y-auto max-md:min-h-0 max-md:flex-1 md:max-h-[400px]">
-          {filteredPresets.map(row)}
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className="flex flex-col gap-0.5">{filteredPresets.map(row)}</div>
         </div>
       );
     }
 
     return (
-      <Virtuoso
-        data={filteredPresets}
-        className="max-md:min-h-0 max-md:flex-1"
-        style={isMobileDevice ? undefined : { height: 400 }}
-        itemContent={(_index, name) => row(name)}
-      />
+      <div className="min-h-0 flex-1">
+        <Virtuoso
+          data={filteredPresets}
+          className="max-md:min-h-0 max-md:flex-1"
+          style={{ height: isMobileDevice ? undefined : '100%' }}
+          itemContent={(_index, name) => row(name)}
+        />
+      </div>
     );
   };
 
   // Render history tab
   const renderHistory = () => (
-    <div className="flex flex-col gap-0.5 overflow-y-auto max-md:min-h-0 max-md:flex-1 md:max-h-[400px]">
+    <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto">
       {historyList.map((name, i) => (
         <HistoryRow
           key={`${name}-${i}`}
@@ -780,6 +1010,7 @@ export function PresetBrowser({
           onSelect={() => handleSelectPreset(name)}
           onToggleFavorite={() => handleToggleFavorite(name)}
           onToggleBlock={() => handleToggleBlock(name)}
+          customPacks={customPacks}
         />
       ))}
       {historyList.length === 0 && (
@@ -790,8 +1021,8 @@ export function PresetBrowser({
 
   // Render excluded tab (quarantined + mobile-blocked)
   const renderExcluded = () => (
-    <div className="flex flex-col gap-0.5 overflow-y-auto max-md:min-h-0 max-md:flex-1 md:max-h-[400px]">
-      <p className="mb-1 text-[10px] leading-snug text-white/40">
+    <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto">
+      <p className="mb-1 text-xs leading-snug text-white/40">
         {t('presetBrowser.excludedDescription')}
       </p>
       {excludedPresets.map(({ name, reason }) => (
@@ -810,7 +1041,7 @@ export function PresetBrowser({
           className="flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs text-white/70 hover:bg-white/10"
         >
           <span className="min-w-0 flex-1 truncate text-left">
-            <span className={`mr-1.5 text-[10px] font-medium ${reason.color}`}>
+            <span className={`mr-1.5 text-xs font-medium ${reason.color}`}>
               {t(reason.labelKey)}
             </span>
             {name}
@@ -842,26 +1073,175 @@ export function PresetBrowser({
     </div>
   );
 
-  // Pack detail search state
-  const [packSearch, setPackSearch] = useState('');
-  const deferredPackSearch = useDeferredValue(packSearch);
+  // Pack detail search state moved to PackAddPresets child component
+
+  // Import tab state
+  const [importSubTab, setImportSubTab] = useState<'presets' | 'textures'>('presets');
+  const [importSearch, setImportSearch] = useState('');
+  const deferredImportSearch = useDeferredValue(importSearch);
+
+  const filteredImportedPresets = useMemo(() => {
+    if (!deferredImportSearch) return importedPresets;
+    const q = deferredImportSearch.toLowerCase();
+    return importedPresets.filter((p) => p.name.toLowerCase().includes(q));
+  }, [importedPresets, deferredImportSearch]);
+
+  const [collapsedImportGroups, setCollapsedImportGroups] = useState<Set<string>>(new Set());
+  const toggleImportGroup = useCallback((key: string) => {
+    setCollapsedImportGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }, []);
+
+  const { importGroupCounts, importGroupLabels, importFlatPresets } = useMemo(() => {
+    if (filteredImportedPresets.length === 0) {
+      return { importGroupCounts: [], importGroupLabels: [], importFlatPresets: [] };
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const todayMs = today.getTime();
+    const yesterdayMs = yesterday.getTime();
+
+    // Sort by addedAt descending (most recent first), alpha within same date
+    const sorted = [...filteredImportedPresets].sort((a, b) => {
+      const dayA = new Date(a.addedAt);
+      dayA.setHours(0, 0, 0, 0);
+      const dayB = new Date(b.addedAt);
+      dayB.setHours(0, 0, 0, 0);
+      if (dayA.getTime() !== dayB.getTime()) return dayB.getTime() - dayA.getTime();
+      return a.name.localeCompare(b.name);
+    });
+
+    // Group by date
+    const groups: { key: string; label: string; presets: ImportedPresetMeta[] }[] = [];
+    for (const preset of sorted) {
+      const d = new Date(preset.addedAt);
+      d.setHours(0, 0, 0, 0);
+      const ms = d.getTime();
+      let label: string;
+      if (ms >= todayMs) {
+        label = tc('today');
+      } else if (ms >= yesterdayMs) {
+        label = tc('yesterday');
+      } else {
+        label = d.toLocaleDateString(undefined, {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        });
+      }
+      const key = String(ms);
+      const last = groups[groups.length - 1];
+      if (last && last.key === key) {
+        last.presets.push(preset);
+      } else {
+        groups.push({ key, label, presets: [preset] });
+      }
+    }
+
+    const counts: number[] = [];
+    const labels: string[] = [];
+    const flat: ImportedPresetMeta[] = [];
+    for (const group of groups) {
+      const isCollapsed = collapsedImportGroups.has(group.key);
+      labels.push(`${group.key}|||${group.label}|||${group.presets.length}`);
+      if (isCollapsed) {
+        counts.push(0);
+      } else {
+        counts.push(group.presets.length);
+        flat.push(...group.presets);
+      }
+    }
+
+    return { importGroupCounts: counts, importGroupLabels: labels, importFlatPresets: flat };
+  }, [filteredImportedPresets, collapsedImportGroups, tc]);
 
   const selectedPack = useMemo(
     () => customPacks.find((p) => p.id === selectedPackId) ?? null,
     [customPacks, selectedPackId],
   );
 
-  // Presets available to add to selected pack (not already in it)
-  const addablePresets = useMemo(() => {
-    if (!selectedPack) return [];
-    const inPack = new Set(selectedPack.presets);
-    const lowerSearch = deferredPackSearch.toLowerCase();
-    return presetList.filter((name) => {
-      if (inPack.has(name)) return false;
-      if (deferredPackSearch && !name.toLowerCase().includes(lowerSearch)) return false;
-      return true;
+  // addablePresets filtering moved to PackAddPresets child component
+
+  // --- Imported presets ---
+
+  const handleImportMilk = useCallback(() => {
+    useImportModalStore.getState().open('preset', presetPackMap);
+  }, [presetPackMap]);
+
+  const handleDeleteImportedPreset = useCallback(
+    (preset: ImportedPresetMeta) => {
+      useConfirmStore.getState().show({
+        title: t('importedPresets.deletePreset'),
+        message: t('importedPresets.deleteConfirm', { name: preset.name }),
+        destructive: true,
+        onConfirm: async () => {
+          await useImportedPresetsStore.getState().removePreset(preset.name);
+          removeImportedPresetMeta(preset.name);
+          // Defer so React's useEffect in Visualizer unregisters the preset from
+          // the renderer before pickNextPreset reads the preset list.
+          if (preset.name === currentPreset) requestAnimationFrame(onNextPreset);
+        },
+      });
+    },
+    [t, removeImportedPresetMeta, currentPreset, onNextPreset],
+  );
+
+  const handleClearAllImported = useCallback(() => {
+    useConfirmStore.getState().show({
+      title: t('importedPresets.clearAll'),
+      message: t('importedPresets.clearAllConfirm', { count: importedPresets.length }),
+      destructive: true,
+      onConfirm: async () => {
+        const importedNames = new Set(importedPresets.map((p) => p.name));
+        const shouldAdvance = importedNames.has(currentPreset);
+        await useImportedPresetsStore.getState().removeAllPresets();
+        clearImportedPresetsMeta();
+        useToastStore.getState().show(t('importedPresets.cleared'));
+        // Defer so React's useEffect in Visualizer unregisters the presets from
+        // the renderer before pickNextPreset reads the preset list.
+        if (shouldAdvance) requestAnimationFrame(onNextPreset);
+      },
     });
-  }, [selectedPack, presetList, deferredPackSearch]);
+  }, [t, importedPresets, clearImportedPresetsMeta, currentPreset, onNextPreset]);
+
+  const handleImportTextures = useCallback(() => {
+    useImportModalStore.getState().open('texture');
+  }, []);
+
+  const handleDeleteTexture = useCallback(
+    (texture: ImportedTextureMeta) => {
+      useConfirmStore.getState().show({
+        title: t('importedTextures.deleteTexture'),
+        message: t('importedTextures.deleteConfirm', { name: texture.name }),
+        destructive: true,
+        onConfirm: async () => {
+          await useImportedTexturesStore.getState().removeTexture(texture.name);
+          removeImportedTextureMeta(texture.name);
+        },
+      });
+    },
+    [t, removeImportedTextureMeta],
+  );
+
+  const handleClearAllTextures = useCallback(() => {
+    useConfirmStore.getState().show({
+      title: t('importedTextures.clearAll'),
+      message: t('importedTextures.clearAllConfirm', { count: importedTextures.length }),
+      destructive: true,
+      onConfirm: async () => {
+        await useImportedTexturesStore.getState().removeAllTextures();
+        clearImportedTexturesMeta();
+        useToastStore.getState().show(t('importedTextures.cleared'));
+      },
+    });
+  }, [t, importedTextures.length, clearImportedTexturesMeta]);
 
   const handleCreatePack = useCallback(() => {
     if (customPacks.length >= 50) {
@@ -902,6 +1282,7 @@ export function PresetBrowser({
       }
       // Auto-advance if current preset isn't in the activated pack
       if (id !== null) {
+        onUnpause?.();
         const pack = useSettingsStore.getState().customPacks.find((p) => p.id === id);
         if (pack && !pack.presets.includes(currentPreset)) {
           // Delay to let pool recompute after store change
@@ -909,7 +1290,7 @@ export function PresetBrowser({
         }
       }
     },
-    [setActiveCustomPackId, t, currentPreset, onNextPreset],
+    [setActiveCustomPackId, t, currentPreset, onNextPreset, onUnpause],
   );
 
   const handleImportPack = useCallback(async () => {
@@ -963,7 +1344,6 @@ export function PresetBrowser({
             <button
               onClick={() => {
                 setSelectedPackId(null);
-                setPackSearch('');
               }}
               className="cursor-pointer border-none bg-transparent p-0 text-white/60 hover:text-white"
               aria-label={t('customPacks.back')}
@@ -981,7 +1361,7 @@ export function PresetBrowser({
               name={selectedPack.name}
               onRename={renameCustomPack}
             />
-            <span className="shrink-0 text-[10px] text-white/40">
+            <span className="shrink-0 text-xs text-white/40">
               {t('customPacks.presetCount', { count: selectedPack.presets.length })}
             </span>
           </div>
@@ -1015,17 +1395,17 @@ export function PresetBrowser({
                     <span className="flex min-w-0 flex-1 items-center gap-1.5 text-left">
                       <span className="truncate">{name}</span>
                       {isBlocked && (
-                        <span className="shrink-0 rounded bg-red-500/20 px-1 py-px text-[8px] text-red-400/80">
+                        <span className="shrink-0 rounded bg-red-500/20 px-1 py-px text-[9px] text-red-400/80">
                           {t('customPacks.tagBlocked')}
                         </span>
                       )}
                       {isExcluded && (
-                        <span className="shrink-0 rounded bg-yellow-500/20 px-1 py-px text-[8px] text-yellow-400/80">
+                        <span className="shrink-0 rounded bg-yellow-500/20 px-1 py-px text-[9px] text-yellow-400/80">
                           {t('customPacks.tagExcluded')}
                         </span>
                       )}
                       {isMobileSkipped && (
-                        <span className="shrink-0 rounded bg-blue-500/20 px-1 py-px text-[8px] text-blue-400/80">
+                        <span className="shrink-0 rounded bg-blue-500/20 px-1 py-px text-[9px] text-blue-400/80">
                           {t('customPacks.tagMobileSkipped')}
                         </span>
                       )}
@@ -1049,62 +1429,14 @@ export function PresetBrowser({
             </div>
           )}
 
-          {/* Add presets — header + search stay pinned, list scrolls */}
-          <div className="flex min-h-0 flex-[1.5] flex-col border-t border-white/10 pt-2">
-            <p className="mb-1 text-[10px] font-semibold text-white/50">
-              {t('customPacks.addPresets')}
-            </p>
-            <input
-              type="text"
-              placeholder={t('customPacks.searchPresets')}
-              value={packSearch}
-              onChange={(e) => setPackSearch(e.target.value)}
-              className="mb-1 w-full rounded border-none bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
-            />
-            {addablePresets.length === 0 ? (
-              <p className="py-1 text-center text-[10px] text-white/30">
-                {t('customPacks.allPresetsAdded')}
-              </p>
-            ) : (
-              <div className="min-h-0 flex-1 overflow-hidden">
-                <Virtuoso
-                  data={addablePresets}
-                  style={{ height: isMobileDevice ? 'max(200px, calc(100dvh - 420px))' : '100%' }}
-                  itemContent={(_index, name) => (
-                    <div
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => onSelectPreset(name)}
-                      onKeyDown={(e) => {
-                        if (e.currentTarget !== e.target) return;
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          onSelectPreset(name);
-                        }
-                      }}
-                      className={`flex shrink-0 cursor-pointer items-center justify-between rounded px-2 py-0.5 text-xs ${
-                        name === currentPreset
-                          ? 'bg-orange-500/30 text-white'
-                          : 'text-white/60 hover:bg-white/10'
-                      }`}
-                    >
-                      <span className="min-w-0 flex-1 truncate text-left">{name}</span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          useSettingsStore.getState().addPresetToCustomPack(selectedPack.id, name);
-                        }}
-                        className="flex h-5 w-5 cursor-pointer items-center justify-center rounded border-none bg-transparent text-sm leading-none text-green-500/60 hover:bg-white/10 hover:text-green-400"
-                        aria-label={`${t('presetBrowser.addToPack')} ${name}`}
-                      >
-                        +
-                      </button>
-                    </div>
-                  )}
-                />
-              </div>
-            )}
-          </div>
+          {/* Add presets — search state isolated in child to avoid re-rendering parent */}
+          <PackAddPresets
+            packId={selectedPack.id}
+            packPresets={selectedPack.presets}
+            presetList={presetList}
+            currentPreset={currentPreset}
+            onSelectPreset={onSelectPreset}
+          />
         </div>
       );
     }
@@ -1113,17 +1445,40 @@ export function PresetBrowser({
     return (
       <div className="flex flex-col gap-2 max-md:min-h-0 max-md:flex-1">
         <div className="border-t border-white/10" />
+        <p className="text-xs text-white/40">{t('customPacks.description')}</p>
         <div className="flex gap-2">
           <button
             onClick={handleCreatePack}
-            className="cursor-pointer rounded border border-white/10 bg-white/10 px-2 py-1 text-[10px] font-medium text-white/60 hover:bg-white/20"
+            className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
           >
+            <svg
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              className="mr-1 -mt-0.5 inline-block h-3 w-3"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                clipRule="evenodd"
+              />
+            </svg>
             {t('customPacks.createPack')}
           </button>
           <button
             onClick={handleImportPack}
-            className="cursor-pointer rounded border border-white/10 bg-white/10 px-2 py-1 text-[10px] font-medium text-white/60 hover:bg-white/20"
+            className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
           >
+            <svg
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              className="mr-1 -mt-0.5 inline-block h-3 w-3"
+            >
+              <path
+                fillRule="evenodd"
+                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
+                clipRule="evenodd"
+              />
+            </svg>
             {t('customPacks.importPack')}
           </button>
         </div>
@@ -1152,7 +1507,7 @@ export function PresetBrowser({
                     >
                       {pack.name}
                     </span>
-                    <span className="text-[9px] text-white/30">
+                    <span className="text-[10px] text-white/30">
                       {t('customPacks.presetCount', { count: pack.presets.length })}
                     </span>
                   </div>
@@ -1162,7 +1517,7 @@ export function PresetBrowser({
                   {(isActive || pack.presets.length > 0) && (
                     <button
                       onClick={() => handleActivatePack(isActive ? null : pack.id)}
-                      className={`cursor-pointer rounded border-none px-1.5 py-0.5 text-[9px] ${
+                      className={`cursor-pointer rounded border-none px-1.5 py-0.5 text-[10px] ${
                         isActive
                           ? 'bg-orange-500/30 text-orange-300 hover:bg-orange-500/40'
                           : 'bg-white/10 text-white/50 hover:bg-white/20'
@@ -1173,13 +1528,20 @@ export function PresetBrowser({
                   )}
                   <button
                     onClick={() => setSelectedPackId(pack.id)}
-                    className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[9px] text-white/50 hover:bg-white/20"
+                    className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[10px] text-white/50 hover:bg-white/20"
                   >
+                    <svg
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className="mr-0.5 -mt-0.5 inline-block h-2.5 w-2.5"
+                    >
+                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                    </svg>
                     {t('customPacks.edit')}
                   </button>
                   <button
                     onClick={() => handleExportPack(pack)}
-                    className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[9px] text-white/50 hover:bg-white/20"
+                    className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[10px] text-white/50 hover:bg-white/20"
                     title={t('customPacks.exportPack')}
                   >
                     <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
@@ -1192,7 +1554,7 @@ export function PresetBrowser({
                   </button>
                   <button
                     onClick={() => handleDeletePack(pack)}
-                    className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[9px] text-red-400/60 hover:bg-red-500/20 hover:text-red-400"
+                    className="cursor-pointer rounded border-none bg-white/10 px-1.5 py-0.5 text-[10px] text-red-400/60 hover:bg-red-500/20 hover:text-red-400"
                     title={t('customPacks.deletePack')}
                   >
                     <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
@@ -1212,9 +1574,298 @@ export function PresetBrowser({
     );
   };
 
+  // Render import tab
+  const renderImport = () => (
+    <div className="flex min-h-0 flex-1 flex-col gap-3 max-md:min-h-0">
+      <p className="text-xs text-white/40">{t('importedPresets.description')}</p>
+
+      {/* Sub-tab radio buttons */}
+      <div className="flex gap-3">
+        <label className="flex cursor-pointer items-center gap-1 text-[11px] text-white/70">
+          <input
+            type="radio"
+            name="importSubTab"
+            checked={importSubTab === 'presets'}
+            onChange={() => setImportSubTab('presets')}
+            className="accent-orange-500"
+          />
+          {t('importedPresets.sectionTitle')} ({importedPresets.length})
+        </label>
+        <label className="flex cursor-pointer items-center gap-1 text-[11px] text-white/70">
+          <input
+            type="radio"
+            name="importSubTab"
+            checked={importSubTab === 'textures'}
+            onChange={() => setImportSubTab('textures')}
+            className="accent-orange-500"
+          />
+          {t('importedTextures.sectionTitle')} ({importedTextures.length})
+        </label>
+      </div>
+
+      {/* Presets sub-tab */}
+      {importSubTab === 'presets' && (
+        <div className="flex min-h-0 flex-1 flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleImportMilk}
+              className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
+            >
+              <svg
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="mr-1 -mt-0.5 inline-block h-3 w-3"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              {t('importedPresets.importMilk')}
+            </button>
+            {importedPresets.length > 0 && (
+              <button
+                onClick={handleClearAllImported}
+                className="cursor-pointer rounded border-none bg-red-500/20 px-1.5 py-0.5 text-[9px] text-red-400/70 hover:bg-red-500/30 hover:text-red-400"
+              >
+                {t('importedPresets.clearAll')}
+              </button>
+            )}
+          </div>
+          {importedPresets.length > 0 && (
+            <div className="relative">
+              <input
+                type="text"
+                placeholder={t('presetBrowser.searchPlaceholder')}
+                aria-label={t('presetBrowser.searchPlaceholder')}
+                value={importSearch}
+                onChange={(e) => setImportSearch(e.target.value)}
+                className="w-full rounded border-none bg-white/10 px-2 py-1 pr-7 text-xs text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-orange-500"
+              />
+              <button
+                onClick={() => setImportSearch('')}
+                className={`absolute top-1/2 right-1.5 flex h-4 w-4 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-none bg-white/20 text-[10px] leading-none text-white/60 hover:bg-white/30 hover:text-white ${
+                  importSearch ? 'visible' : 'invisible'
+                }`}
+                aria-label={t('presetBrowser.clearSearch')}
+              >
+                <CloseIcon className="h-2.5 w-2.5" />
+              </button>
+            </div>
+          )}
+          {isImportModalOpen && importModalMode === 'preset' ? (
+            <div className="flex flex-col items-center gap-2 py-6">
+              <svg className="h-5 w-5 animate-spin text-orange-400" viewBox="0 0 24 24" fill="none">
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  className="opacity-25"
+                />
+                <path
+                  d="M4 12a8 8 0 018-8"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <p className="text-xs text-white/50">
+                {t('importedPresets.importInProgress', { count: importedPresets.length })}
+              </p>
+            </div>
+          ) : importedPresets.length === 0 ? (
+            <p className="py-2 text-center text-xs text-white/30">
+              {t('importedPresets.emptyState')}
+            </p>
+          ) : (
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+              {importGroupLabels.length > 1 && (
+                <div className="mb-1 flex items-center gap-2">
+                  <button
+                    onClick={() =>
+                      setCollapsedImportGroups(
+                        new Set(importGroupLabels.map((l) => l.split('|||')[0])),
+                      )
+                    }
+                    className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
+                  >
+                    {tc('collapseAll')}
+                  </button>
+                  <button
+                    onClick={() => setCollapsedImportGroups(new Set())}
+                    className="cursor-pointer border-none bg-transparent p-0 text-[10px] text-white/40 underline hover:text-orange-400"
+                  >
+                    {tc('expandAll')}
+                  </button>
+                </div>
+              )}
+              <div className="min-h-0 flex-1">
+                <GroupedVirtuoso
+                  style={{
+                    height: isMobileDevice ? 'max(280px, calc(100dvh - 380px))' : '100%',
+                  }}
+                  groupCounts={importGroupCounts}
+                  groupContent={(index) => {
+                    const raw = importGroupLabels[index];
+                    const [key, label, countStr] = raw.split('|||');
+                    const isCollapsed = collapsedImportGroups.has(key);
+                    return (
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => toggleImportGroup(key)}
+                        onKeyDown={(e) => {
+                          if (e.currentTarget !== e.target) return;
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleImportGroup(key);
+                          }
+                        }}
+                        className="sticky top-0 z-[1] flex cursor-pointer items-center justify-between bg-black/80 px-2 py-1 backdrop-blur-sm"
+                      >
+                        <span className="flex items-center gap-1 text-xs font-semibold text-orange-400">
+                          <svg
+                            viewBox="0 0 10 10"
+                            fill="currentColor"
+                            className={`h-2.5 w-2.5 transition-transform duration-150 ${isCollapsed ? '' : 'rotate-90'}`}
+                          >
+                            <path d="M3 1l5 4-5 4V1z" />
+                          </svg>
+                          {label}
+                        </span>
+                        <span className="text-xs text-white/40">{countStr}</span>
+                      </div>
+                    );
+                  }}
+                  itemContent={(index) => {
+                    const preset = importFlatPresets[index];
+                    if (!preset) return <div style={{ height: 1 }} />;
+                    return (
+                      <PresetRow
+                        name={preset.name}
+                        isCurrent={preset.name === currentPreset}
+                        isFavorite={favoriteSet.has(preset.name)}
+                        isBlocked={blockedSet.has(preset.name)}
+                        onSelect={() => handleSelectPreset(preset.name)}
+                        onToggleFavorite={() => handleToggleFavorite(preset.name)}
+                        onToggleBlock={() => handleToggleBlock(preset.name)}
+                        onDelete={() => handleDeleteImportedPreset(preset)}
+                        customPacks={customPacks}
+                        missingTextures={missingTexturesByName.get(preset.name)}
+                      />
+                    );
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Textures sub-tab */}
+      {importSubTab === 'textures' && (
+        <div className="flex min-h-0 flex-1 flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleImportTextures}
+              className="cursor-pointer rounded border-none bg-orange-500/20 px-2 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/30"
+            >
+              <svg
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="mr-1 -mt-0.5 inline-block h-3 w-3"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              {t('importedTextures.importTextures')}
+            </button>
+            {importedTextures.length > 0 && (
+              <button
+                onClick={handleClearAllTextures}
+                className="cursor-pointer rounded border-none bg-red-500/20 px-1.5 py-0.5 text-[9px] text-red-400/70 hover:bg-red-500/30 hover:text-red-400"
+              >
+                {t('importedTextures.clearAll')}
+              </button>
+            )}
+          </div>
+          {importedTextures.length > 0 && (
+            <p className="text-[10px] text-white/30">{t('importedTextures.gpuNote')}</p>
+          )}
+          {isImportModalOpen && importModalMode === 'texture' ? (
+            <div className="flex flex-col items-center gap-2 py-6">
+              <svg className="h-5 w-5 animate-spin text-orange-400" viewBox="0 0 24 24" fill="none">
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  className="opacity-25"
+                />
+                <path
+                  d="M4 12a8 8 0 018-8"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <p className="text-xs text-white/50">
+                {t('importedTextures.importInProgress', { count: importedTextures.length })}
+              </p>
+            </div>
+          ) : importedTextures.length === 0 ? (
+            <p className="py-2 text-center text-xs text-white/30">
+              {t('importedTextures.emptyStateTextures')}
+            </p>
+          ) : (
+            <div className="min-h-0 flex-1">
+              <Virtuoso
+                data={importedTextures}
+                style={{
+                  height: isMobileDevice ? Math.min(importedTextures.length * 40, 320) : '100%',
+                }}
+                itemContent={(_index, tex) => (
+                  <div className="flex items-center justify-between rounded bg-white/5 px-2 py-1">
+                    <div className="flex min-w-0 flex-1 items-baseline gap-1.5">
+                      <span className="truncate text-xs text-white/70">{tex.name}</span>
+                      <span className="shrink-0 text-[10px] text-white/30">
+                        {tex.width}×{tex.height} · {(tex.sizeBytes / 1024).toFixed(0)}KB
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteTexture(tex)}
+                      className="ml-1 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent text-white/30 hover:bg-red-500/20 hover:text-red-400"
+                      title={t('importedTextures.deleteTexture')}
+                      aria-label={t('importedTextures.deleteTexture')}
+                    >
+                      <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
+                        <path
+                          fillRule="evenodd"
+                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+              />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div
-      className={`relative flex flex-col gap-3 overflow-hidden rounded-lg bg-black/60 p-4 backdrop-blur-sm max-md:min-h-0 max-md:flex-1 ${selectedPack ? 'md:h-[36rem]' : 'md:max-h-[32rem]'}`}
+      className={`relative flex flex-col gap-3 overflow-hidden rounded-lg bg-black/60 p-4 backdrop-blur-sm max-md:min-h-0 max-md:flex-1 ${selectedPack ? 'md:h-[36rem]' : 'md:h-[38rem]'}`}
     >
       <div className="flex flex-col gap-2">
         {!isMobileDevice && (
@@ -1222,12 +1873,12 @@ export function PresetBrowser({
             <h3 className="text-sm font-semibold text-white">{tc('presets')}</h3>
             {activePackName && (
               <div className="mt-1 inline-flex w-fit items-center gap-1.5 rounded bg-orange-500/15 px-2 py-0.5 ring-1 ring-orange-500/30">
-                <p className="min-w-0 truncate text-[10px] text-orange-400" data-ph-mask>
+                <p className="min-w-0 truncate text-xs text-orange-400" data-ph-mask>
                   {t('customPacks.packActive', { name: activePackName })}
                 </p>
                 <button
                   onClick={() => handleActivatePack(null)}
-                  className="shrink-0 cursor-pointer rounded-full border-none bg-red-500/80 px-2 py-0.5 text-[9px] font-semibold text-white hover:bg-red-500"
+                  className="shrink-0 cursor-pointer rounded-full border-none bg-red-500/80 px-2 py-0.5 text-[10px] font-semibold text-white hover:bg-red-500"
                   aria-label={t('customPacks.deactivatePack')}
                   title={t('customPacks.deactivatePack')}
                 >
@@ -1238,26 +1889,28 @@ export function PresetBrowser({
           </div>
         )}
         <div className="flex flex-wrap gap-1.5">
-          {(['all', 'favorites', 'blocked', 'excluded', 'history', 'packs'] as const).map((f) => (
-            <button
-              key={f}
-              onClick={() => {
-                setFilter(f);
-                if (f !== 'packs') setSelectedPackId(null);
-              }}
-              className={`cursor-pointer rounded border-none px-2 py-0.5 text-[10px] capitalize ${
-                filter === f
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-white/10 text-white/60 hover:bg-white/20'
-              }`}
-            >
-              {f === 'packs' ? t('customPacks.tabs.packs') : t(`presetBrowser.tabs.${f}`)}
-            </button>
-          ))}
+          {(['all', 'packs', 'favorites', 'blocked', 'excluded', 'history', 'import'] as const).map(
+            (f) => (
+              <button
+                key={f}
+                onClick={() => {
+                  setFilter(f);
+                  if (f !== 'packs') setSelectedPackId(null);
+                }}
+                className={`cursor-pointer rounded border-none px-2 py-0.5 text-xs capitalize ${
+                  filter === f
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-white/10 text-white/60 hover:bg-white/20'
+                }`}
+              >
+                {f === 'packs' ? t('customPacks.tabs.packs') : t(`presetBrowser.tabs.${f}`)}
+              </button>
+            ),
+          )}
         </div>
       </div>
 
-      {filter !== 'packs' && (
+      {filter !== 'packs' && filter !== 'import' && (
         <div className="relative">
           <input
             type="text"
@@ -1273,7 +1926,7 @@ export function PresetBrowser({
             }`}
             aria-label={t('presetBrowser.clearSearch')}
           >
-            ✕
+            <CloseIcon className="h-2.5 w-2.5" />
           </button>
         </div>
       )}
@@ -1284,9 +1937,14 @@ export function PresetBrowser({
       >
         {renderGroupedAll()}
       </div>
-      {filter === 'excluded' && renderExcluded()}
-      {filter === 'history' && renderHistory()}
+      {filter === 'excluded' && (
+        <div className="flex min-h-0 flex-1 flex-col">{renderExcluded()}</div>
+      )}
+      {filter === 'history' && (
+        <div className="flex min-h-0 flex-1 flex-col">{renderHistory()}</div>
+      )}
       {filter === 'packs' && <div className="flex min-h-0 flex-1 flex-col">{renderPacks()}</div>}
+      {filter === 'import' && <div className="flex min-h-0 flex-1 flex-col">{renderImport()}</div>}
       {(filter === 'favorites' || filter === 'blocked' || (deferredSearch && filter === 'all')) &&
         renderFlatList()}
     </div>

@@ -33,6 +33,8 @@
     "textureQualityTooltip": "内部レンダリング解像度の倍率です。低い = 高速、高い = スーパーサンプリング品質",
     "antiAliasing": "アンチエイリアシング",
     "antiAliasingTooltip": "FXAAでジャギーを滑らかにします。わずかなパフォーマンスコスト（約2-3%）",
+    "brightness": "Visual Brightness: {{value}}%",
+    "brightnessTooltip": "Dims the visualizer. Useful in dark rooms or when you want subtle ambient visuals",
     "analysis": "分析",
     "audioSmoothing": "オーディオスムージング: {{value}}",
     "audioSmoothingTooltip": "低い = ビートへの反応が速い、高い = 動きが滑らか。効果は微妙で、プリセットは独自の内部スムージングを適用します",
@@ -82,7 +84,10 @@
     "categoryFavorites": "お気に入り",
     "categoryBlocked": "ブロック済みプリセット",
     "categoryPacks": "パック、カスタムパックと除外設定",
-    "categorySync": "ウィンドウ同期"
+    "categorySync": "ウィンドウ同期",
+    "includeImported": "インポートしたプリセットとテクスチャを含める",
+    "includeImportedHint": "デバイス間転送用にプリセットとテクスチャのデータを埋め込みます",
+    "estimatedSize": "約{{size}}（インポートデータ含む）"
   },
 
   "spotifyTab": {
@@ -104,6 +109,7 @@
     "toggleAutopilot": "オートパイロット切り替え",
     "toggleFavorite": "お気に入り切り替え",
     "toggleBlock": "ブロック切り替え",
+    "togglePause": "Pause / resume rendering",
     "toggleQueue": "キュー切り替え（ローカルファイル）",
     "playPause": "再生 / 一時停止",
     "previousTrack": "前のトラック",
@@ -113,8 +119,9 @@
   },
 
   "sync": {
-    "title": "マルチウィンドウ同期",
-    "description": "同じデバイス上の複数のブラウザウィンドウ間でプリセットと設定を同期します。複数のモニターで表示するには、複数のウィンドウでMangoWaveを開いてください。システムオーディオまたはマイクに最適です — 各ウィンドウが同じソースをキャプチャします。ローカルファイルの再生はウィンドウごとに独立です。",
+    "title": "同期",
+    "windowSyncTitle": "ウィンドウ同期",
+    "windowSyncDescription": "同じデバイス上の複数のブラウザウィンドウ間でプリセットと設定を同期します。複数のモニターで表示するには、複数のウィンドウでMangoWaveを開いてください。システムオーディオまたはマイクに最適です — 各ウィンドウが同じソースをキャプチャします。ローカルファイルの再生はウィンドウごとに独立です。",
     "enabled": "ウィンドウ同期",
     "unavailable": "このブラウザではマルチウィンドウ同期はサポートされていません。",
     "noPeers": "接続されたピアなし",
@@ -122,7 +129,32 @@
     "peerCount_other": "{{count}} 個の他のウィンドウが接続中",
     "autoSyncNote": "プリセット、EQ、オートパイロット、お気に入り、その他すべての設定はウィンドウ間で自動的に同期されます。1つのウィンドウで変更すると、他のウィンドウも更新されます。ウィンドウ同期は各ウィンドウで個別にオン・オフしてください。",
     "syncPerformance": "レンダリング設定を同期",
-    "syncPerformanceHint": "フレームレート、解像度、メッシュ、テクスチャ品質、アンチエイリアシング。モニターごとに異なるパフォーマンス設定が必要な場合はオフにしてください。"
+    "syncPerformanceHint": "フレームレート、解像度、メッシュ、テクスチャ品質、アンチエイリアシング。モニターごとに異なるパフォーマンス設定が必要な場合はオフにしてください。",
+    "deviceSync": {
+      "title": "デバイス同期",
+      "description": "ピアツーピア WebRTC で異なるデバイス（スマホ、ノートPC、テレビ）間のプリセットを同期します。1台のデバイスがルームを作成し、他のデバイスがルームコードで参加します。ルーム作成者がオートパイロットを制御します。",
+      "createRoom": "ルームを作成",
+      "joinRoom": "ルームに参加",
+      "roomCode": "ルームコード",
+      "enterCode": "既存のルームに参加",
+      "connect": "接続",
+      "leaveRoom": "ルームを退出",
+      "connecting": "接続中...",
+      "connected": "接続済み",
+      "disconnected": "切断済み",
+      "error": "接続エラー",
+      "tryAgain": "再試行",
+      "peerCount_one": "{{count}} 台のデバイスが接続中",
+      "peerCount_other": "{{count}} 台のデバイスが接続中",
+      "hostDisconnected": "ルームホストが切断しました。ルームは閉鎖されました。",
+      "invalidCode": "ルームコードが無効です。形式: MANGO-XXXX（英字4文字、IとOは除く）",
+      "roomNotFound": "ルームが見つかりません。コードを確認して再試行してください。",
+      "syncSettings": "EQ とレンダリング設定を同期",
+      "syncSettingsHint": "デバイス間でEQ、プリアンプ、オーディオ分析、レンダリング設定を共有します。デバイスごとに異なるパフォーマンス設定が必要な場合はオフにしてください。",
+      "copiedToClipboard": "コピーしました！",
+      "autopilotNote": "オートパイロット設定は常に同期されます。どのデバイスからもオートパイロットを切り替えられますが、タイマーが動作するのはルーム作成者のデバイスのみです。",
+      "audioTip": "デバイス同期はビジュアルのみを同期します。各デバイスには独自のオーディオソースが必要です。最高の体験のために、同じ部屋のすべてのデバイスをマイク入力に設定し、共有スピーカーからの同じ音楽に反応するようにしてください。AmpMe、Easy Jam、BeatSyncなどのアプリで複数のスマホスピーカー間でオーディオ再生を同期することもできます。"
+    }
   },
 
   "language": {

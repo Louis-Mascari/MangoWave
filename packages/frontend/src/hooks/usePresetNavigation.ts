@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { usePresetHistoryStore } from '../store/usePresetHistoryStore.ts';
+import { useImportedPresetsStore } from '../store/useImportedPresetsStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import { pickPreset } from '../utils/pickPreset.ts';
 import { quarantinedSet, mobileBlockedSet } from '../data/excludedPresets.ts';
@@ -47,6 +48,7 @@ export function usePresetNavigation({
   const toggleFavoritePreset = useSettingsStore((s) => s.toggleFavoritePreset);
   const toggleBlockPreset = useSettingsStore((s) => s.toggleBlockPreset);
   const autopilotMode = useSettingsStore((s) => s.autopilot.mode);
+  const autopilotEnabled = useSettingsStore((s) => s.autopilot.enabled);
   const autopilotFavoriteWeight = useSettingsStore((s) => s.autopilot.favoriteWeight);
 
   const canGoBack = usePresetHistoryStore((s) => s.cursor > 0);
@@ -90,6 +92,39 @@ export function usePresetNavigation({
     return pack ? new Set(pack.presets) : null;
   }, [activeCustomPackId, customPacks]);
 
+  /**
+   * Lazily convert an imported preset (if needed), register it with the renderer,
+   * then load it. Falls back to next preset on failure.
+   */
+  const loadPresetWithLazyConvert = useCallback(
+    async (
+      renderer: VisualizerRenderer,
+      name: string,
+      blendTime: number,
+      fallbackToNext?: () => void,
+    ) => {
+      if (renderer.isEelPresetUnloaded(name)) {
+        let preset: object | null = null;
+        if (renderer.isImportedPreset(name)) {
+          preset = await useImportedPresetsStore.getState().getConvertedPreset(name);
+        } else if (renderer.isMilkdropPreset(name)) {
+          const { loadMilkdropPreset } = await import('../engine/milkdropPresetsLoader.ts');
+          preset = await loadMilkdropPreset(name);
+        }
+        if (!preset) {
+          useToastStore
+            .getState()
+            .show(i18n.t('importedPresets.conversionFailed', { name, ns: 'messages' }));
+          fallbackToNext?.();
+          return;
+        }
+        renderer.registerEelPreset(name, preset);
+      }
+      renderer.loadPreset(name, blendTime);
+    },
+    [],
+  );
+
   // Shared shuffle pick: used by both manual next and autopilot
   const pickNextPreset = useCallback(() => {
     const renderer = rendererRef.current;
@@ -118,6 +153,15 @@ export function usePresetNavigation({
       pool = pool.filter((p) => !mobileBlockedSet.has(p) || overrideSet.has(p));
     }
 
+    if (pool.length === 0) {
+      if (presetPackMap.size > 0) {
+        useToastStore
+          .getState()
+          .show(i18n.t('toasts.noPresetsAvailable', { ns: 'messages' }), { type: 'warning' });
+      }
+      return;
+    }
+
     const historyStore = usePresetHistoryStore.getState();
     const result = pickPreset(
       pool,
@@ -130,7 +174,10 @@ export function usePresetNavigation({
 
     if (result.roundReset) historyStore.resetRound();
     historyStore.markPlayed(result.pick);
-    renderer.loadPreset(result.pick, transitionTime);
+    loadPresetWithLazyConvert(renderer, result.pick, transitionTime, () => {
+      // On conversion failure, fall back to a random built-in preset
+      renderer.nextPreset(mergedBlockedSet, transitionTime);
+    });
   }, [
     rendererRef,
     mergedBlockedSet,
@@ -142,6 +189,7 @@ export function usePresetNavigation({
     autopilotMode,
     autopilotFavoriteWeight,
     transitionTime,
+    loadPresetWithLazyConvert,
   ]);
 
   const handleNextPreset = useCallback(() => {
@@ -161,18 +209,24 @@ export function usePresetNavigation({
     }
     if (name) {
       historyStore.markPlayed(name);
-      rendererRef.current?.loadPreset(name, transitionTime);
+      const renderer = rendererRef.current;
+      if (renderer) {
+        loadPresetWithLazyConvert(renderer, name, transitionTime);
+      }
       resetAutopilotRef.current();
     }
-  }, [rendererRef, transitionTime, resetAutopilotRef]);
+  }, [rendererRef, transitionTime, resetAutopilotRef, loadPresetWithLazyConvert]);
 
   const handleSelectPreset = useCallback(
     (name: string) => {
       usePresetHistoryStore.getState().markPlayed(name);
-      rendererRef.current?.loadPreset(name, transitionTime);
+      const renderer = rendererRef.current;
+      if (renderer) {
+        loadPresetWithLazyConvert(renderer, name, transitionTime);
+      }
       resetAutopilotRef.current();
     },
-    [rendererRef, transitionTime, resetAutopilotRef],
+    [rendererRef, transitionTime, resetAutopilotRef, loadPresetWithLazyConvert],
   );
 
   const handleToggleFavorite = useCallback(() => {
@@ -210,6 +264,13 @@ export function usePresetNavigation({
     resetAutopilotRef.current();
     usePresetHistoryStore.getState().resetRound();
   }, [autopilotMode, enabledPacks, activeCustomPackId, resetAutopilotRef]);
+
+  // Auto-disable autopilot when no packs are selected (and no custom pack active)
+  useEffect(() => {
+    if (enabledPacks.length === 0 && !activeCustomPackId && autopilotEnabled) {
+      useSettingsStore.getState().setAutopilotEnabled(false);
+    }
+  }, [enabledPacks, activeCustomPackId, autopilotEnabled]);
 
   // If initial preset isn't in an enabled pack, pick one that is.
   // Only runs once — the renderer's init() already filters blocked/quarantined.

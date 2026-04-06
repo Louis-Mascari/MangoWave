@@ -33,6 +33,8 @@
     "textureQualityTooltip": "内部渲染分辨率倍数。越低 = 越快，越高 = 超采样质量",
     "antiAliasing": "抗锯齿",
     "antiAliasingTooltip": "使用 FXAA 平滑锯齿边缘。性能开销较小（约 2-3%）",
+    "brightness": "Visual Brightness: {{value}}%",
+    "brightnessTooltip": "Dims the visualizer. Useful in dark rooms or when you want subtle ambient visuals",
     "analysis": "分析",
     "audioSmoothing": "音频平滑度：{{value}}",
     "audioSmoothingTooltip": "越低 = 对节拍的反应越灵敏，越高 = 运动越平滑。效果较细微：预设会应用自身的内部平滑",
@@ -82,7 +84,10 @@
     "categoryFavorites": "收藏",
     "categoryBlocked": "已屏蔽预设",
     "categoryPacks": "预设包、自定义合集与排除项",
-    "categorySync": "窗口同步"
+    "categorySync": "窗口同步",
+    "includeImported": "包含导入的预设和纹理",
+    "includeImportedHint": "嵌入原始预设和纹理数据，用于跨设备传输",
+    "estimatedSize": "约 {{size}}（含导入数据）"
   },
 
   "spotifyTab": {
@@ -104,6 +109,7 @@
     "toggleAutopilot": "切换自动播放",
     "toggleFavorite": "切换收藏",
     "toggleBlock": "切换屏蔽",
+    "togglePause": "Pause / resume rendering",
     "toggleQueue": "切换队列（本地文件）",
     "playPause": "播放 / 暂停",
     "previousTrack": "上一首",
@@ -113,8 +119,9 @@
   },
 
   "sync": {
-    "title": "多窗口同步",
-    "description": "在同一设备上的多个浏览器窗口之间同步预设和设置。在多个窗口中打开 MangoWave，可在多个显示器上进行可视化。最适合系统音频或麦克风——每个窗口捕获相同的音源。本地文件播放为各窗口独立。",
+    "title": "同步",
+    "windowSyncTitle": "窗口同步",
+    "windowSyncDescription": "在同一设备上的多个浏览器窗口之间同步预设和设置。在多个窗口中打开 MangoWave，可在多个显示器上进行可视化。最适合系统音频或麦克风——每个窗口捕获相同的音源。本地文件播放为各窗口独立。",
     "enabled": "窗口同步",
     "unavailable": "此浏览器不支持多窗口同步。",
     "noPeers": "无已连接的窗口",
@@ -122,7 +129,32 @@
     "peerCount_other": "已连接 {{count}} 个其他窗口",
     "autoSyncNote": "预设、均衡器、自动驾驶、收藏夹及所有其他设置会自动在窗口之间同步。在一个窗口中更改，其他窗口会自动更新。请在每个窗口中单独开启或关闭窗口同步。",
     "syncPerformance": "同步渲染设置",
-    "syncPerformanceHint": "帧率、分辨率、网格、纹理质量和抗锯齿。如果您的显示器需要不同的性能设置，请取消勾选。"
+    "syncPerformanceHint": "帧率、分辨率、网格、纹理质量和抗锯齿。如果您的显示器需要不同的性能设置，请取消勾选。",
+    "deviceSync": {
+      "title": "设备同步",
+      "description": "通过点对点 WebRTC 在不同设备（手机、笔记本、电视）之间同步预设。一台设备创建房间，其他设备使用房间代码加入。房间创建者控制自动播放。",
+      "createRoom": "创建房间",
+      "joinRoom": "加入房间",
+      "roomCode": "房间代码",
+      "enterCode": "加入已有房间",
+      "connect": "连接",
+      "leaveRoom": "离开房间",
+      "connecting": "连接中...",
+      "connected": "已连接",
+      "disconnected": "已断开",
+      "error": "连接错误",
+      "tryAgain": "重试",
+      "peerCount_one": "{{count}} 台设备已连接",
+      "peerCount_other": "{{count}} 台设备已连接",
+      "hostDisconnected": "房主已断开连接，房间已关闭。",
+      "invalidCode": "房间代码无效。格式：MANGO-XXXX（4个字母，不含 I 和 O）",
+      "roomNotFound": "未找到房间。请检查代码后重试。",
+      "syncSettings": "同步均衡器和渲染设置",
+      "syncSettingsHint": "在设备间共享均衡器、前置放大、音频分析和渲染设置。如果设备需要不同的性能设置，请取消勾选。",
+      "copiedToClipboard": "已复制！",
+      "autopilotNote": "自动播放设置始终同步。任何设备都可以切换自动播放，但只有房间创建者的计时器会触发。",
+      "audioTip": "设备同步仅同步视觉效果。每台设备需要自己的音频源。为获得最佳体验，将同一房间内的所有设备设置为麦克风输入，使它们对共享音箱播放的同一音乐做出反应。AmpMe、Easy Jam、BeatSync 等应用也可以在多个手机扬声器之间同步音频播放。"
+    }
   },
 
   "language": {

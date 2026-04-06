@@ -4,6 +4,7 @@ import { SettingsPanel } from './SettingsPanel.tsx';
 import { PresetBrowser } from './PresetBrowser.tsx';
 import { MediaPlaylist } from './MediaPlaylist.tsx';
 import { MobileControlBar } from './MobileControlBar.tsx';
+import { ChevronLeftIcon, ChevronRightIcon, BlockIcon, StarIcon } from './icons.tsx';
 
 export type PanelView = 'none' | 'settings' | 'presets' | 'playlist';
 
@@ -33,6 +34,10 @@ interface ControlBarProps {
   resetIdle: () => void;
   onPauseIdle: () => void;
   onResumeIdle: () => void;
+  presetsLoading?: boolean;
+  renderPaused?: boolean;
+  onTogglePause?: () => void;
+  onUnpause?: () => void;
 }
 
 export function ControlBar(props: ControlBarProps) {
@@ -60,6 +65,8 @@ export function ControlBar(props: ControlBarProps) {
         isIdle={props.isIdle}
         forceIdle={props.forceIdle}
         resetIdle={props.resetIdle}
+        presetsLoading={props.presetsLoading}
+        onUnpause={props.onUnpause}
       />
     );
   }
@@ -91,6 +98,10 @@ function DesktopControlBar({
   isIdle,
   onPauseIdle,
   onResumeIdle,
+  presetsLoading,
+  renderPaused,
+  onTogglePause,
+  onUnpause,
 }: ControlBarProps) {
   const { t } = useTranslation('messages');
   const { t: tc } = useTranslation('common');
@@ -128,6 +139,7 @@ function DesktopControlBar({
               currentPreset={currentPreset}
               onSelectPreset={onSelectPreset}
               onNextPreset={onNextPreset}
+              onUnpause={onUnpause}
             />
           )}
           {activePanel === 'playlist' && onAddLocalFiles && onClearPlaylist && (
@@ -149,6 +161,28 @@ function DesktopControlBar({
         <div className="flex items-center gap-2">
           <BarButton onClick={() => onTogglePanel('presets')} active={activePanel === 'presets'}>
             {tc('presets')}
+            {presetsLoading && (
+              <svg
+                className="ml-1.5 inline-block h-3 w-3 animate-spin text-white/40"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  className="opacity-25"
+                />
+                <path
+                  d="M4 12a8 8 0 018-8"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+            )}
           </BarButton>
 
           <IconButton
@@ -157,7 +191,7 @@ function DesktopControlBar({
             aria-label={ts('shortcutActions.previousPreset')}
             title={t('controlBar.previousPreset')}
           >
-            ◀
+            <ChevronLeftIcon className="h-3 w-3" />
           </IconButton>
 
           {currentPreset && (
@@ -170,16 +204,7 @@ function DesktopControlBar({
                   isBlocked ? 'text-red-400' : 'text-white/40 hover:bg-white/10 hover:text-red-400'
                 }`}
               >
-                <svg
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="h-4 w-4"
-                >
-                  <circle cx="10" cy="10" r="8" />
-                  <line x1="5" y1="5" x2="15" y2="15" />
-                </svg>
+                <BlockIcon className="h-4 w-4" />
               </button>
               <span className="w-56 truncate text-xs text-white/60" title={currentPreset}>
                 {currentPreset}
@@ -198,9 +223,7 @@ function DesktopControlBar({
                     : 'text-white/40 hover:bg-white/10 hover:text-yellow-400'
                 }`}
               >
-                <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
+                <StarIcon className="h-4 w-4" />
               </button>
             </div>
           )}
@@ -210,7 +233,7 @@ function DesktopControlBar({
             aria-label={ts('shortcutActions.nextPreset')}
             title={t('controlBar.nextPreset')}
           >
-            ▶
+            <ChevronRightIcon className="h-3 w-3" />
           </IconButton>
 
           <BarButton
@@ -228,6 +251,16 @@ function DesktopControlBar({
           <BarButton onClick={() => onTogglePanel('settings')} active={activePanel === 'settings'}>
             {tc('settings')}
           </BarButton>
+          {onTogglePause && (
+            <BarButton
+              onClick={onTogglePause}
+              active={renderPaused}
+              title={renderPaused ? t('controlBar.resumeRendering') : t('controlBar.togglePause')}
+              hotkey="V"
+            >
+              {tc('pause')}
+            </BarButton>
+          )}
           <BarButton
             onClick={onToggleFullscreen}
             active={isFullscreen}
@@ -290,10 +323,10 @@ function IconButton({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`rounded border-none px-2 py-1.5 text-xs ${
+      className={`flex h-7 items-center justify-center rounded border-none px-2 text-xs ${
         disabled
           ? 'cursor-not-allowed bg-white/5 text-white/20'
-          : 'cursor-pointer bg-white/10 text-white/80 hover:bg-white/20'
+          : 'cursor-pointer bg-white/10 text-orange-400/70 hover:bg-orange-500/20 hover:text-orange-400'
       }`}
       {...rest}
     >

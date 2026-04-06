@@ -5,10 +5,10 @@ AWS CDK v2 stack for MangoWave infrastructure (backend + frontend hosting).
 ## Development
 
 ```bash
-npm run build          # tsc
-npm run test           # Jest (CDK template assertion tests)
-npx cdk synth          # Synthesize CloudFormation template
-npx cdk deploy -c alertEmail=<email> -c acmCertArn=<arn> -c webAclArn=<arn>  # Deploy (alertEmail required)
+pnpm run build         # tsc
+pnpm run test          # Jest (CDK template assertion tests)
+pnpm exec cdk synth    # Synthesize CloudFormation template
+pnpm exec cdk deploy -c alertEmail=<email> -c acmCertArn=<arn> -c webAclArn=<arn>  # Deploy (alertEmail required)
 ```
 
 ## Resources
@@ -70,7 +70,7 @@ These resources must exist before running `cdk deploy`:
 Automated via GitHub Actions (`.github/workflows/deploy.yml`) using OIDC to assume an IAM role (pre-created outside this stack). Manual deploy:
 
 ```bash
-npx cdk deploy -c alertEmail=you@example.com -c acmCertArn=<arn> -c webAclArn=<arn>
+pnpm exec cdk deploy -c alertEmail=you@example.com -c acmCertArn=<arn> -c webAclArn=<arn>
 ```
 
 ### Required GitHub Secrets

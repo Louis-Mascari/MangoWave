@@ -2,21 +2,14 @@
   "name": "mangowave-monorepo",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "packages/butterchurn",
-    "packages/butterchurn-presets",
-    "packages/frontend",
-    "packages/backend",
-    "infrastructure"
-  ],
   "scripts": {
-    "test": "npm run test --workspaces --if-present",
-    "build": "npm run build --workspaces --if-present",
+    "test": "pnpm -r run test",
+    "build": "pnpm -r run build",
     "prepare": "husky",
-    "lint": "npm run lint --workspaces --if-present",
+    "lint": "pnpm -r run lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "prettier --check . && npm run lint && tsc -b packages/frontend --noEmit && npm test"
+    "check": "prettier --check . && pnpm run lint && tsc -b packages/frontend --noEmit && pnpm test"
   },
   "lint-staged": {
     "packages/frontend/**/*.{ts,tsx}": [
@@ -35,16 +28,39 @@
     "packages/butterchurn-presets/src/**/*.{js,ts}": [
       "prettier --write"
     ],
+    "packages/milkdrop-preset-converter/src/**/*.{js,ts}": [
+      "prettier --write"
+    ],
+    "packages/hlslparser-wasm/src/**/*.{js,ts}": [
+      "prettier --write"
+    ],
+    "packages/milkdrop-presets/src/**/*.{js,ts}": [
+      "prettier --write"
+    ],
+    "packages/milkdrop-textures/src/**/*.{js,ts}": [
+      "prettier --write"
+    ],
     "*.{json,md,yml,yaml}": [
       "prettier --write"
     ]
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@sentry/cli",
+      "esbuild",
+      "protobufjs",
+      "unrs-resolver"
+    ]
+  },
+  "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=20"
   },
   "devDependencies": {
+    "eslint": "^10.2.0",
     "husky": "^9.1.7",
     "knip": "^6.1.1",
-    "lint-staged": "^16.4.0"
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.1"
   }
 }

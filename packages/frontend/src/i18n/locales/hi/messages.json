@@ -19,6 +19,8 @@
     "noAudioUnknown": "Windows और ChromeOS पर, सभी शेयरिंग मोड ऑडियो सपोर्ट करते हैं। macOS 14.2+ पर, Chrome में स्क्रीन और विंडो शेयरिंग ऑडियो सपोर्ट करती है। Linux पर, सिर्फ़ टैब शेयरिंग ऑडियो सपोर्ट करती है।",
     "webgl2NotSupported": "WebGL 2 सपोर्टेड नहीं है",
     "webgl2NotSupportedDesc": "MangoWave को विज़ुअलाइज़ेशन रेंडर करने के लिए WebGL 2 चाहिए। कृपया Chrome, Firefox, या Edge जैसा मॉडर्न ब्राउज़र आज़माओ।",
+    "webgl2GpuCrash": "WebGL 2 Temporarily Unavailable",
+    "webgl2GpuCrashDesc": "Your browser's GPU process may need to recover. Try closing other tabs or restarting your browser.",
     "webglContextLost": "विज़ुअलाइज़र ने ग्राफ़िक्स कॉन्टेक्स्ट खो दिया",
     "webglContextLostDesc": "तुम्हारे डिवाइस का ग्राफ़िक्स सिस्टम बाधित हो गया। यह तब हो सकता है जब डिवाइस पर भारी लोड हो, GPU अन्य एप्लिकेशन के साथ शेयर हो रहा हो, या डिस्प्ले कॉन्फ़िगरेशन बदल गया हो। पेज रीलोड करने से विज़ुअलाइज़र फिर से चालू हो जाएगा।",
     "renderingError": "एक रेंडरिंग त्रुटि हुई, संभवतः WebGL या Web Audio समस्या।",
@@ -39,7 +41,9 @@
     "invalidFile": "अमान्य सेटिंग्स फ़ाइल",
     "fieldNotApplied": "\"{{field}}\" लागू नहीं हो सका",
     "importedWithWarnings": "सेटिंग्स इम्पोर्ट हो गईं। ऐप बदलावों के कारण कुछ सेटिंग्स लागू नहीं हो सकीं",
-    "importedSuccess": "सेटिंग्स सफलतापूर्वक इम्पोर्ट हो गईं"
+    "importedSuccess": "सेटिंग्स सफलतापूर्वक इम्पोर्ट हो गईं",
+    "importedDataRestored": "आयातित प्रीसेट और टेक्सचर पुनर्स्थापित",
+    "mergeNote": "पसंदीदा, ब्लॉक किए गए प्रीसेट और पैक आपके मौजूदा में मर्ज होंगे।"
   },
   "spotify": {
     "connectingToSpotify": "Spotify से कनेक्ट हो रहा है...",
@@ -52,6 +56,8 @@
   "toasts": {
     "autopilotOn": "ऑटोपायलट चालू",
     "autopilotOff": "ऑटोपायलट बंद",
+    "renderingPaused": "Rendering paused",
+    "renderingResumed": "Rendering resumed",
     "addedToFavorites": "फ़ेवरिट में जोड़ा गया",
     "removedFromFavorites": "फ़ेवरिट से हटाया गया",
     "presetBlocked": "प्रीसेट ब्लॉक किया",
@@ -62,7 +68,9 @@
     "favoritePresetsCleared": "फ़ेवरिट प्रीसेट साफ़ किए",
     "silenceDetected": "कोई ऑडियो नहीं मिला। सुनिश्चित करो कि शेयर की गई स्क्रीन, विंडो या टैब में ऑडियो चल रहा है, और ब्राउज़र डायलॉग में \"Share audio\" चेक किया है।",
     "silenceDetectedMic": "माइक्रोफ़ोन से कोई ऑडियो नहीं मिला। सुनिश्चित करो कि तुम्हारा mic म्यूट नहीं है और आवाज़ कैप्चर कर रहा है।",
-    "silenceDetectedLocal": "कोई ऑडियो नहीं मिला। सुनिश्चित करो कि फ़ाइल सपोर्टेड फ़ॉर्मेट में है और तुम्हारे डिवाइस का वॉल्यूम चालू है।"
+    "silenceDetectedLocal": "कोई ऑडियो नहीं मिला। सुनिश्चित करो कि फ़ाइल सपोर्टेड फ़ॉर्मेट में है और तुम्हारे डिवाइस का वॉल्यूम चालू है।",
+    "noPresetsAvailable": "कोई प्रीसेट उपलब्ध नहीं है। जांचें कि कम से कम एक पैक सक्रिय है और सभी प्रीसेट ब्लॉक नहीं हैं।",
+    "presetNotFound": "इस डिवाइस पर प्रीसेट नहीं मिला: \"{{name}}\""
   },
   "playback": {
     "addSongsToQueue": "क़तार में गाने जोड़ो",
@@ -112,6 +120,8 @@
     "removeFromFavorites": "फ़ेवरिट से हटाओ (S)",
     "toggleAutopilot": "ऑटोपायलट टॉगल (A)",
     "toggleFullscreen": "फ़ुलस्क्रीन टॉगल (F)",
+    "togglePause": "Pause rendering (V)",
+    "resumeRendering": "Resume rendering (V)",
     "exitFS": "FS बाहर"
   },
   "mobile": {
@@ -127,10 +137,12 @@
       "favorites": "फ़ेवरिट",
       "blocked": "ब्लॉक किए",
       "excluded": "एक्सक्लूडेड",
-      "history": "इतिहास"
+      "history": "इतिहास",
+      "import": "आयात"
     },
-    "noPacksSelected": "कोई पैक नहीं चुना। ऑटोपायलट रुका हुआ",
+    "noPacksSelected": "कोई पैक नहीं चुना",
     "packsActive": "{{active}}/{{total}} पैक सक्रिय",
+    "packsHint": "चयनित पैक ऑटोपायलट और अगले प्रीसेट का पूल तय करते हैं",
     "searchPlaceholder": "प्रीसेट खोजो...",
     "clearSearch": "खोज साफ़ करो",
     "noPresetsVisible": "कोई प्रीसेट दिख नहीं रहा",
@@ -150,10 +162,62 @@
     "addedToPack": "\"{{pack}}\" में जोड़ा गया",
     "createPackFirst": "पहले एक कस्टम पैक बनाओ"
   },
+
+  "importedPresets": {
+    "sectionTitle": "आयातित प्रीसेट",
+    "description": "समुदाय के MilkDrop प्रीसेट (.milk) और उनके द्वारा उपयोग की जाने वाली टेक्सचर जोड़ें। MilkDrop एक नेटिव डेस्कटॉप एप्लिकेशन के रूप में डिज़ाइन किया गया था, इसलिए शेडर ट्रांसलेशन में अंतर के कारण कुछ प्रीसेट ब्राउज़र में पूरी तरह से रेंडर नहीं हो सकते।",
+    "emptyState": "कोई आयातित प्रीसेट नहीं। सामुदायिक MilkDrop प्रीसेट जोड़ने के लिए \"Import .milk\" का उपयोग करें।",
+    "importMilk": ".milk आयात करें",
+    "importingPresets": "प्रीसेट आयात हो रहे हैं...",
+    "importSuccess": "{{count}} प्रीसेट आयात किए गए",
+    "importPartial": "{{total}} में से {{success}} प्रीसेट आयात किए गए। {{failed}} विफल।",
+    "importAllFailed": "सभी {{count}} प्रीसेट आयात करने में विफल",
+    "fileTooLarge": "बहुत बड़ा (अधिकतम 500KB)",
+    "invalidFileType": ".milk फ़ाइल नहीं है",
+    "emptyFile": "फ़ाइल खाली है",
+    "duplicateName": "पहले से मौजूद है",
+    "conversionFailed": "कनवर्शन विफल",
+    "securityBlocked": "अवरुद्ध सामग्री है",
+    "nativeNameCollision": "बिल्ट-इन प्रीसेट में पहले से मौजूद है",
+    "missingTextures": "अनुपलब्ध टेक्सचर (अपलोड होने तक शोर के रूप में दिखेंगे): {{textures}}",
+    "deletePreset": "आयातित प्रीसेट हटाएं",
+    "deleteConfirm": "\"{{name}}\" हटाएं? .milk फ़ाइल को फिर से आयात करना होगा।",
+    "clearAll": "सब हटाएं",
+    "clearAllConfirm": "सभी {{count}} आयातित प्रीसेट हटाएं? .milk फ़ाइलों को फिर से आयात करना होगा।",
+    "cleared": "सभी आयातित प्रीसेट हटा दिए गए",
+    "idbUnavailable": "आयातित प्रीसेट के लिए स्टोरेज एक्सेस आवश्यक है, जो निजी ब्राउज़िंग मोड में उपलब्ध नहीं है।",
+    "imported": "आयातित",
+    "importInProgress": "आयात हो रहा है... अब तक {{count}} प्रीसेट"
+  },
+
+  "importedTextures": {
+    "sectionTitle": "आयातित टेक्सचर",
+    "importTextures": "टेक्सचर आयात करें",
+    "importSuccess": "{{count}} टेक्सचर आयात किए गए",
+    "importPartial": "{{total}} में से {{success}} टेक्सचर आयात किए गए। {{failed}} विफल।",
+    "importAllFailed": "सभी {{count}} टेक्सचर आयात करने में विफल",
+    "fileTooLarge": "बहुत बड़ा (अधिकतम 2MB)",
+    "invalidFileType": "समर्थित छवि नहीं है (JPEG, PNG या WebP)",
+    "builtinTextureShadow": "अंतर्निहित टेक्सचर, बदला नहीं जा सकता",
+    "readFailed": "फ़ाइल पढ़ने में विफल",
+    "decodeFailed": "छवि डीकोड करने में विफल",
+    "deleteTexture": "आयातित टेक्सचर हटाएं",
+    "deleteConfirm": "\"{{name}}\" हटाएं? छवि फ़ाइल को फिर से आयात करना होगा। पहले से लोड किए गए प्रीसेट पेज रीलोड होने तक इसका उपयोग करते रहेंगे।",
+    "clearAll": "सभी टेक्सचर हटाएं",
+    "clearAllConfirm": "सभी {{count}} आयातित टेक्सचर हटाएं? छवि फ़ाइलों को फिर से आयात करना होगा।",
+    "cleared": "सभी आयातित टेक्सचर हटा दिए गए",
+    "gpuNote": "GPU पर लोड किए गए टेक्सचर पेज रीलोड होने तक बने रहते हैं।",
+    "idbUnavailable": "आयातित टेक्सचर के लिए स्टोरेज एक्सेस आवश्यक है, जो प्राइवेट ब्राउज़िंग मोड में उपलब्ध नहीं है।",
+    "duplicateName": "पहले से मौजूद है",
+    "emptyStateTextures": "कोई आयातित टेक्सचर नहीं। कस्टम टेक्सचर जोड़ने के लिए \"टेक्सचर आयात करें\" का उपयोग करें।",
+    "importInProgress": "आयात हो रहा है... अब तक {{count}} टेक्सचर"
+  },
+
   "customPacks": {
     "tabs": {
       "packs": "पैक"
     },
+    "description": "किसी भी प्रीसेट से कस्टम संग्रह बनाएं — बंडल किए गए या आयातित।",
     "createPack": "कस्टम पैक बनाओ",
     "importPack": "पैक इम्पोर्ट करो",
     "exportPack": "पैक एक्सपोर्ट करो",
@@ -179,12 +243,42 @@
     "packDeleted": "पैक हटाया गया",
     "packImported": "पैक \"{{name}}\" {{count}} प्रीसेट के साथ इम्पोर्ट हुआ",
     "notPackFile": "यह MangoWave पैक फ़ाइल नहीं है",
-    "settingsFileNotPack": "यह एक सेटिंग्स फ़ाइल है — कस्टम पैक इम्पोर्ट करने के लिए सेटिंग्स › डेटा का उपयोग करें",
+    "settingsFileNotPack": "यह एक सेटिंग्स फ़ाइल है। कस्टम पैक इम्पोर्ट करने के लिए सेटिंग्स › डेटा का उपयोग करें",
     "packImportedPartial": "पैक \"{{name}}\" {{count}} प्रीसेट के साथ इम्पोर्ट हुआ ({{skipped}} नहीं मिले और छोड़े गए)",
     "maxPacksReached": "अधिकतम 50 कस्टम पैक की सीमा पहुँच गई",
     "packActive": "चल रहा है: {{name}}",
     "deactivatePack": "पैक रोकें",
-    "packOverridesFilters": "जब कस्टम पैक सक्रिय है तो ये फ़िल्टर लागू नहीं होते",
-    "favoritesAutoSwitch": "फ़ेवरिट से ऑल मोड पर स्विच हो गया"
+    "packOverridesFilters": "ऑटोपायलट और अगला प्रीसेट सक्रिय पैक का उपयोग करते हैं। फ़िल्टर केवल इस सूची को प्रभावित करते हैं।",
+    "favoritesAutoSwitch": "फ़ेवरिट से ऑल मोड पर स्विच हो गया",
+    "newPack": "नया पैक"
+  },
+
+  "importModal": {
+    "titlePresets": "प्रीसेट इम्पोर्ट करें",
+    "titleTextures": "टेक्सचर इम्पोर्ट करें",
+    "descriptionPresets": "समुदाय के MilkDrop प्रीसेट (.milk फ़ाइलें) जोड़ें।\nMilkDrop प्रीसेट एक नेटिव Windows एप्लिकेशन के लिए डिज़ाइन किए गए थे। MangoWave उन्हें ब्राउज़र में चलाने के लिए ट्रांसलेट करता है, लेकिन शेडर प्रोसेसिंग में अंतर के कारण कुछ प्रीसेट सही ढंग से रेंडर नहीं हो सकते। जटिल प्रीसेट में विज़ुअल अंतर होने की संभावना अधिक है।\nकुछ प्रीसेट को कस्टम टेक्सचर की आवश्यकता होती है — आयात के बाद गायब टेक्सचर की सूचना दी जाएगी।",
+    "descriptionTextures": "आयातित प्रीसेट द्वारा उपयोग की जाने वाली टेक्सचर छवियाँ (JPEG, PNG, या WebP) अपलोड करें।\nप्रीसेट नाम से टेक्सचर को संदर्भित करते हैं: उदाहरण के लिए, sampler_fire का उपयोग करने वाले प्रीसेट को \"fire\" नामक टेक्सचर की आवश्यकता होती है।",
+    "storageNotePresets": "प्रीसेट आपके ब्राउज़र में संग्रहीत होते हैं। साइट डेटा साफ़ करने से वे हट जाएंगे, इसलिए अपनी मूल .milk फ़ाइलें रखें।",
+    "storageNoteTextures": "टेक्सचर आपके ब्राउज़र में संग्रहीत होते हैं। साइट डेटा साफ़ करने से वे हट जाएंगे, इसलिए अपनी मूल छवि फ़ाइलें रखें।",
+    "dropZonePresets": ".milk फ़ाइलें यहाँ ड्रॉप करें या ब्राउज़ करने के लिए क्लिक करें",
+    "dropZoneTextures": "इमेज फ़ाइलें यहाँ ड्रॉप करें या ब्राउज़ करने के लिए क्लिक करें",
+    "browseFiles": "फ़ाइलें ब्राउज़ करें",
+    "importingProgress": "{{total}} में से {{current}} इम्पोर्ट हो रहा है...",
+    "summaryAllSuccess": "{{count}} {{type}} सफलतापूर्वक इम्पोर्ट हुए",
+    "summaryPartial": "{{total}} {{type}} में से {{success}} इम्पोर्ट हुए। {{failed}} असफल, {{warnings}} चेतावनी के साथ।",
+    "summaryAllFailed": "सभी {{count}} {{type}} इम्पोर्ट करने में असफल",
+    "uploadMissingTextures": "अनुपलब्ध टेक्सचर अपलोड करें",
+    "missingTexturesSection": "अनुपलब्ध टेक्सचर ({{remaining}} शेष)",
+    "missingTexturesAllResolved": "सभी अनुपलब्ध टेक्सचर अपलोड हो गए",
+    "missingTexturesHint": "अनुपलब्ध टेक्सचर वाले प्रीसेट में टेक्सचर की जगह विज़ुअल नॉइज़ दिखेगा। इसे ठीक करने के लिए सही इमेज फ़ाइलें अपलोड करें।",
+    "dropTexturesHere": "टेक्सचर इमेज यहाँ ड्रॉप करें या ब्राउज़ करें (JPEG, PNG, WebP)",
+    "importMore": "और इम्पोर्ट करें",
+    "presets": "प्रीसेट",
+    "textures": "टेक्सचर",
+    "idbUnavailable": "प्राइवेट ब्राउज़िंग मोड में स्टोरेज उपलब्ध नहीं है।",
+    "filterAll": "सभी",
+    "statusSuccess": "इम्पोर्ट हुए",
+    "statusWarning": "चेतावनियाँ",
+    "statusFailed": "असफल"
   }
 }

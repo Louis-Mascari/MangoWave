@@ -14,6 +14,7 @@ const handlers = {
   onToggleAutopilot: vi.fn(),
   onToggleFavorite: vi.fn(),
   onToggleBlock: vi.fn(),
+  onTogglePause: vi.fn(),
   onToggleQueue: vi.fn(),
   onPlayPause: vi.fn(),
   onNextTrack: vi.fn(),
@@ -78,6 +79,12 @@ describe('useKeyboardShortcuts', () => {
     document.body.removeChild(input);
   });
 
+  it('V calls onTogglePause', () => {
+    renderHook(() => useKeyboardShortcuts(handlers));
+    act(() => fireKey('v'));
+    expect(handlers.onTogglePause).toHaveBeenCalledTimes(1);
+  });
+
   it('K calls onPlayPause', () => {
     renderHook(() => useKeyboardShortcuts(handlers));
     act(() => fireKey('k'));
@@ -105,6 +112,7 @@ describe('useKeyboardShortcuts', () => {
       onToggleAutopilot: vi.fn(),
       onToggleFavorite: vi.fn(),
       onToggleBlock: vi.fn(),
+      onTogglePause: vi.fn(),
       onToggleQueue: vi.fn(),
     };
     renderHook(() => useKeyboardShortcuts(minimalHandlers));

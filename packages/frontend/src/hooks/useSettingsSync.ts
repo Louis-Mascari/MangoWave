@@ -22,6 +22,8 @@ function getSettingsSnapshot(): CloudSettings {
     volume,
     customPacks,
     activeCustomPackId,
+    importedPresets,
+    importedTextures,
   } = useSettingsStore.getState();
   return {
     performance: { ...performance },
@@ -38,6 +40,8 @@ function getSettingsSnapshot(): CloudSettings {
     volume,
     customPacks: customPacks.map((p) => ({ ...p, presets: [...p.presets] })),
     activeCustomPackId,
+    importedPresets: importedPresets.map((p) => ({ ...p })),
+    importedTextures: importedTextures.map((t) => ({ ...t })),
   };
 }
 
@@ -62,6 +66,12 @@ function applyCloudSettings(cloud: CloudSettings): void {
     }),
     ...(cloud.activeCustomPackId !== undefined && {
       activeCustomPackId: cloud.activeCustomPackId,
+    }),
+    ...(cloud.importedPresets && {
+      importedPresets: cloud.importedPresets.map((p) => ({ ...p })),
+    }),
+    ...(cloud.importedTextures && {
+      importedTextures: cloud.importedTextures.map((t) => ({ ...t })),
     }),
   });
 }

@@ -177,4 +177,98 @@ describe('buildImportPayload', () => {
     const { warnings } = buildImportPayload(validExport, new Set(['eq', 'rendering', 'display']));
     expect(warnings).toEqual([]);
   });
+
+  describe('merge with current state', () => {
+    const meta = { version: 1, exportedAt: '2026-01-01T00:00:00Z', source: 'mangowave' as const };
+
+    it('unions favoritePresets with existing', () => {
+      const data = { _meta: meta, favoritePresets: ['B', 'C'] };
+      const current = { favoritePresets: ['A', 'B'] } as Partial<SettingsState>;
+      const { payload } = buildImportPayload(data, new Set(['favorites']), current);
+      expect(payload.favoritePresets).toEqual(['A', 'B', 'C']);
+    });
+
+    it('unions blockedPresets with existing', () => {
+      const data = { _meta: meta, blockedPresets: ['X', 'Y'] };
+      const current = { blockedPresets: ['Y', 'Z'] } as Partial<SettingsState>;
+      const { payload } = buildImportPayload(data, new Set(['blocked']), current);
+      expect(payload.blockedPresets).toEqual(['Y', 'Z', 'X']);
+    });
+
+    it('unions enabledPacks with existing', () => {
+      const data = { _meta: meta, enabledPacks: ['Pack2', 'Pack3'] };
+      const current = { enabledPacks: ['Pack1', 'Pack2'] } as Partial<SettingsState>;
+      const { payload } = buildImportPayload(data, new Set(['packs']), current);
+      expect(payload.enabledPacks).toEqual(['Pack1', 'Pack2', 'Pack3']);
+    });
+
+    it('merges customPacks by id — keeps existing, adds new', () => {
+      const data = {
+        _meta: meta,
+        customPacks: [
+          { id: 'existing-id', name: 'Imported Name', presets: ['p1'], createdAt: 100 },
+          { id: 'new-id', name: 'New Pack', presets: ['p2'], createdAt: 200 },
+        ],
+      };
+      const current = {
+        customPacks: [{ id: 'existing-id', name: 'Original Name', presets: ['p0'], createdAt: 50 }],
+      } as Partial<SettingsState>;
+      const { payload } = buildImportPayload(data, new Set(['packs']), current);
+      const packs = payload.customPacks as { id: string; name: string }[];
+      expect(packs).toHaveLength(2);
+      expect(packs[0].name).toBe('Original Name'); // existing preserved
+      expect(packs[1].name).toBe('New Pack'); // new added
+    });
+
+    it('replaces arrays when no currentState provided (backwards compat)', () => {
+      const data = { _meta: meta, favoritePresets: ['B', 'C'] };
+      const { payload } = buildImportPayload(data, new Set(['favorites']));
+      expect(payload.favoritePresets).toEqual(['B', 'C']);
+    });
+
+    it('block wins — removes blocked presets from merged favorites', () => {
+      const data = {
+        _meta: meta,
+        favoritePresets: ['A', 'B', 'C'],
+        blockedPresets: ['B', 'D'],
+      };
+      const current = {
+        favoritePresets: ['X'],
+        blockedPresets: ['E'],
+      } as Partial<SettingsState>;
+      const { payload } = buildImportPayload(data, new Set(['favorites', 'blocked']), current);
+      // B is blocked (imported) so removed from favorites
+      expect(payload.favoritePresets).toEqual(['X', 'A', 'C']);
+      expect(payload.blockedPresets).toEqual(['E', 'B', 'D']);
+    });
+
+    it('block wins — uses current blocked if only favorites imported', () => {
+      const data = { _meta: meta, favoritePresets: ['A', 'B'] };
+      const current = {
+        favoritePresets: [],
+        blockedPresets: ['B'],
+      } as Partial<SettingsState>;
+      const { payload } = buildImportPayload(data, new Set(['favorites']), current);
+      expect(payload.favoritePresets).toEqual(['A']);
+    });
+
+    it('auto-renames packs on name collision', () => {
+      const data = {
+        _meta: meta,
+        customPacks: [
+          { id: 'new-1', name: 'My Pack', presets: ['p1'], createdAt: 100 },
+          { id: 'new-2', name: 'Other', presets: ['p2'], createdAt: 200 },
+        ],
+      };
+      const current = {
+        customPacks: [{ id: 'old-1', name: 'My Pack', presets: ['p0'], createdAt: 50 }],
+      } as Partial<SettingsState>;
+      const { payload } = buildImportPayload(data, new Set(['packs']), current);
+      const packs = payload.customPacks as { id: string; name: string }[];
+      expect(packs).toHaveLength(3);
+      expect(packs[0].name).toBe('My Pack'); // existing kept
+      expect(packs[1].name).toBe('My Pack (imported)'); // renamed
+      expect(packs[2].name).toBe('Other'); // no collision
+    });
+  });
 });

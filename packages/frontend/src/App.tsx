@@ -12,6 +12,7 @@ import { useSettingsSync } from './hooks/useSettingsSync.ts';
 import { useNowPlaying } from './hooks/useNowPlaying.ts';
 import { useAutopilot } from './hooks/useAutopilot.ts';
 import { useWindowSync } from './hooks/useWindowSync.ts';
+import { useDeviceSync } from './hooks/useDeviceSync.ts';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.ts';
 import { useHideCursor } from './hooks/useHideCursor.ts';
 import { useFullscreen } from './hooks/useFullscreen.ts';
@@ -29,15 +30,18 @@ import { LaunchAnimation } from './components/LaunchAnimation.tsx';
 import { RateLimitToast } from './components/RateLimitToast.tsx';
 import { ActionToast } from './components/ActionToast.tsx';
 import { ConfirmDialog } from './components/ConfirmDialog.tsx';
+import { ImportModal } from './components/ImportModal.tsx';
 import { OnboardingOverlay } from './components/OnboardingOverlay.tsx';
+import { CloseIcon } from './components/icons.tsx';
 import { useUnlockCheck } from './hooks/useUnlockCheck.ts';
 import { useSettingsStore } from './store/useSettingsStore.ts';
 import { useSpotifyStore } from './store/useSpotifyStore.ts';
 import { usePresetHistoryStore } from './store/usePresetHistoryStore.ts';
 import { useToastStore } from './store/useToastStore.ts';
+import { useDeviceSyncStatusStore } from './store/useDeviceSyncStatusStore.ts';
 import { PlaybackPanel } from './components/PlaybackPanel.tsx';
 import { MediaPlaylist } from './components/MediaPlaylist.tsx';
-import { isWebGL2Supported } from './engine/isWebGL2Supported.ts';
+import { isWebGL2Supported, isLikelyGpuCrash } from './engine/isWebGL2Supported.ts';
 import { isMobileDevice } from './utils/isMobileDevice.ts';
 import {
   exitFullscreen,
@@ -46,6 +50,7 @@ import {
   supportsFullscreen,
 } from './utils/fullscreen.ts';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
+import { installShaderDiagnostics } from './engine/shaderDiagnostics.ts';
 
 /**
  * Minimal shell for OAuth popup callbacks.
@@ -59,6 +64,11 @@ function OAuthPopup() {
       {t('spotify.connectingToSpotify')}
     </div>
   );
+}
+
+// DEV-ONLY: shader diagnostics for QA (tree-shaken from production builds)
+if (import.meta.env.DEV) {
+  installShaderDiagnostics();
 }
 
 function App() {
@@ -77,6 +87,7 @@ function App() {
 
 function MainApp() {
   const webgl2 = useMemo(() => isWebGL2Supported(), []);
+  const gpuCrash = useMemo(() => !webgl2 && isLikelyGpuCrash(), [webgl2]);
   useUnlockCheck();
   useSpotifyAuth();
   useSettingsSync();
@@ -114,6 +125,13 @@ function MainApp() {
     rendererRef,
     currentPreset,
   );
+  const resetAutopilotRef = useRef<() => void>(() => {});
+  const {
+    isHost: isDeviceSyncHost,
+    broadcastPreset: broadcastDevicePreset,
+    isRemotePresetRef: isRemoteDevicePresetRef,
+  } = useDeviceSync(rendererRef, resetAutopilotRef);
+  const deviceSyncStatus = useDeviceSyncStatusStore((s) => s.status);
   const autopilot = useSettingsStore((s) => s.autopilot);
   const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
   const presetNameDisplay = useSettingsStore((s) => s.presetNameDisplay);
@@ -125,9 +143,11 @@ function MainApp() {
   const [showLaunchAnimation, setShowLaunchAnimation] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [webglContextLost, setWebglContextLost] = useState(false);
+  const [presetsLoading, setPresetsLoading] = useState(true);
+  const [renderPaused, setRenderPaused] = useState(false);
+  const brightness = useSettingsStore((s) => s.brightness);
   const silenceCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const setOnboardingShown = useSettingsStore((s) => s.setOnboardingShown);
-  const resetAutopilotRef = useRef<() => void>(() => {});
 
   const startLaunch = useCallback(() => {
     setShowLaunchAnimation(true);
@@ -173,18 +193,42 @@ function MainApp() {
     (name: string) => {
       setCurrentPreset(name);
       usePresetHistoryStore.getState().push(name);
-      if (isRemotePresetRef.current) {
+      const isRemoteWindow = isRemotePresetRef.current;
+      const isRemoteDevice = isRemoteDevicePresetRef.current;
+      if (isRemoteWindow) {
         isRemotePresetRef.current = false;
-      } else {
-        broadcastPreset(name, useSettingsStore.getState().transitionTime);
+      }
+      if (isRemoteDevice) {
+        isRemoteDevicePresetRef.current = false;
+      }
+      const tt = useSettingsStore.getState().transitionTime;
+      // Fan out: local changes go to both, remote changes bridge across sync systems
+      if (!isRemoteWindow) {
+        broadcastPreset(name, tt);
+      }
+      if (!isRemoteDevice) {
+        broadcastDevicePreset(name, tt);
       }
     },
-    [broadcastPreset, isRemotePresetRef],
+    [broadcastPreset, broadcastDevicePreset, isRemotePresetRef, isRemoteDevicePresetRef],
   );
 
+  const presetsLoadedCountRef = useRef(0);
   const handlePresetsLoaded = useCallback((presets: string[], packMap: Map<string, string>) => {
     setPresetList(presets);
     setPresetPackMap(packMap);
+    // First call = butterchurn packs only, second = milkdrop-presets registered (all loaded)
+    presetsLoadedCountRef.current += 1;
+    if (presetsLoadedCountRef.current >= 2) {
+      setPresetsLoading(false);
+    }
+  }, []);
+
+  // Fallback: clear presetsLoading after 10s even if milkdrop-presets name registration
+  // never fires (e.g., dynamic import failure). Presets button spinner shouldn't persist forever.
+  useEffect(() => {
+    const timer = setTimeout(() => setPresetsLoading(false), 10_000);
+    return () => clearTimeout(timer);
   }, []);
 
   const {
@@ -295,6 +339,42 @@ function MainApp() {
       );
   }, [autopilot.enabled, setAutopilotEnabled]);
 
+  const handleTogglePause = useCallback(() => {
+    const renderer = rendererRef.current;
+    if (!renderer) return;
+    const next = !renderPaused;
+    setRenderPaused(next);
+    if (next) {
+      renderer.stop();
+    } else {
+      renderer.start();
+    }
+    useToastStore
+      .getState()
+      .show(
+        next
+          ? i18n.t('toasts.renderingPaused', { ns: 'messages' })
+          : i18n.t('toasts.renderingResumed', { ns: 'messages' }),
+      );
+  }, [renderPaused]);
+
+  const unpauseRendering = useCallback(() => {
+    if (!renderPaused) return;
+    const renderer = rendererRef.current;
+    if (!renderer) return;
+    setRenderPaused(false);
+    renderer.start();
+    useToastStore.getState().show(i18n.t('toasts.renderingResumed', { ns: 'messages' }));
+  }, [renderPaused]);
+
+  const handleSelectPresetWithUnpause = useCallback(
+    (name: string) => {
+      unpauseRendering();
+      handleSelectPreset(name);
+    },
+    [unpauseRendering, handleSelectPreset],
+  );
+
   const handleTogglePanel = useCallback((panel: PanelView) => {
     setActivePanel((current) => (current === panel ? 'none' : panel));
   }, []);
@@ -309,8 +389,12 @@ function MainApp() {
   }, [pickNextPreset]);
 
   const windowSyncEnabled = useSettingsStore((s) => s.windowSyncEnabled);
+  const deviceSyncConnected = deviceSyncStatus === 'connected';
   const { reset: resetAutopilot } = useAutopilot(handleAutopilotAdvance, {
-    suppress: windowSyncEnabled && !isLeader,
+    suppress:
+      renderPaused ||
+      (windowSyncEnabled && !isLeader) ||
+      (deviceSyncConnected && !isDeviceSyncHost),
   });
   useEffect(() => {
     resetAutopilotRef.current = resetAutopilot;
@@ -384,6 +468,7 @@ function MainApp() {
     onToggleAutopilot: handleToggleAutopilot,
     onToggleFavorite: handleToggleFavorite,
     onToggleBlock: handleToggleBlock,
+    onTogglePause: handleTogglePause,
     onToggleQueue: handleToggleQueue,
     onPlayPause: handlePlayPause,
     onNextTrack: handleNextTrack,
@@ -394,11 +479,23 @@ function MainApp() {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-black font-sans text-white">
         <h1 className="mb-2 text-3xl font-bold text-red-500">
-          {i18n.t('errors.webgl2NotSupported', { ns: 'messages' })}
+          {gpuCrash
+            ? i18n.t('errors.webgl2GpuCrash', { ns: 'messages' })
+            : i18n.t('errors.webgl2NotSupported', { ns: 'messages' })}
         </h1>
         <p className="max-w-md text-center opacity-60">
-          {i18n.t('errors.webgl2NotSupportedDesc', { ns: 'messages' })}
+          {gpuCrash
+            ? i18n.t('errors.webgl2GpuCrashDesc', { ns: 'messages' })
+            : i18n.t('errors.webgl2NotSupportedDesc', { ns: 'messages' })}
         </p>
+        {gpuCrash && (
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-6 cursor-pointer rounded-lg border-none bg-orange-500 px-8 py-3 text-lg font-bold text-white hover:bg-orange-400"
+          >
+            {i18n.t('reloadPage', { ns: 'common' })}
+          </button>
+        )}
       </div>
     );
   }
@@ -414,7 +511,14 @@ function MainApp() {
             onPresetsLoaded={handlePresetsLoaded}
             onToggleFullscreen={handleToggleFullscreen}
             onContextLost={handleWebGLContextLost}
+            renderPaused={renderPaused}
           />
+          {brightness < 1 && (
+            <div
+              className="pointer-events-none fixed inset-0 z-[1] bg-black"
+              style={{ opacity: 1 - brightness }}
+            />
+          )}
           {webglContextLost && (
             <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/90 font-sans text-white">
               <h1 className="mb-2 text-2xl font-bold text-red-400">
@@ -443,7 +547,10 @@ function MainApp() {
             <LaunchAnimation
               onComplete={() => {
                 setShowLaunchAnimation(false);
-                resumePlaybackIdle();
+                // Mobile: longer initial grace period (8s) since there are no window-level
+                // touch listeners to reset the timer — controls would auto-hide in 5s before
+                // the user can orient. Subsequent reveal/idle cycles use the normal 5s timeout.
+                resumePlaybackIdle(isMobileDevice ? 8000 : undefined);
               }}
             />
           )}
@@ -458,7 +565,7 @@ function MainApp() {
             onNextPreset={handleNextPreset}
             onPreviousPreset={handlePreviousPreset}
             canGoBack={canGoBack}
-            onSelectPreset={handleSelectPreset}
+            onSelectPreset={handleSelectPresetWithUnpause}
             onStop={handleStop}
             onToggleFullscreen={handleToggleFullscreen}
             isFullscreen={isFullscreen}
@@ -480,6 +587,10 @@ function MainApp() {
             resetIdle={resetPlaybackIdle}
             onPauseIdle={pausePlaybackIdle}
             onResumeIdle={resumePlaybackIdle}
+            presetsLoading={presetsLoading}
+            renderPaused={renderPaused}
+            onTogglePause={handleTogglePause}
+            onUnpause={unpauseRendering}
           />
           <PlaybackPanel
             adapter={playbackAdapter}
@@ -509,7 +620,7 @@ function MainApp() {
                     className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-none bg-white/10 text-sm text-white/70 hover:bg-white/20"
                     aria-label={i18n.t('close', { ns: 'common' })}
                   >
-                    ✕
+                    <CloseIcon className="h-4 w-4" />
                   </button>
                 </div>
                 <div className="flex-1 overflow-y-auto p-3">
@@ -520,6 +631,7 @@ function MainApp() {
           )}
           <ActionToast />
           <ConfirmDialog />
+          <ImportModal />
           <ShortcutOverlay visible={showShortcutOverlay} onClose={toggleShortcutOverlay} />
         </>
       ) : (

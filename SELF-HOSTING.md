@@ -16,8 +16,8 @@ Settings sync is gated behind Spotify auth as a security measure (prevents anony
 The simplest path — no AWS account, no Spotify app, no environment variables needed.
 
 ```bash
-npm install
-npm run build -w packages/frontend
+pnpm install
+pnpm --filter @mangowave/frontend build
 ```
 
 Deploy the `packages/frontend/dist/` directory to any static host (Netlify, Vercel, S3 + CloudFront, GitHub Pages, etc.).
@@ -64,7 +64,7 @@ These resources must exist before running `cdk deploy`:
 
 ```bash
 cd infrastructure
-npx cdk deploy \
+pnpm exec cdk deploy \
   -c alertEmail=you@example.com \
   -c acmCertArn=arn:aws:acm:us-east-1:ACCOUNT:certificate/CERT-ID \
   -c webAclArn=arn:aws:wafv2:us-east-1:ACCOUNT:global/webacl/NAME/ID
@@ -83,7 +83,7 @@ export VITE_API_URL=https://your-api-id.execute-api.us-east-1.amazonaws.com
 export VITE_SPOTIFY_CLIENT_ID=your-spotify-client-id
 export VITE_SPOTIFY_REDIRECT_URI=https://play.yourdomain.com/callback
 
-npm run build -w packages/frontend
+pnpm --filter @mangowave/frontend build
 ```
 
 Deploy `packages/frontend/dist/` to your S3 bucket and invalidate the CloudFront cache. See `infrastructure/README.md` for the full list of GitHub secrets if using CI/CD.

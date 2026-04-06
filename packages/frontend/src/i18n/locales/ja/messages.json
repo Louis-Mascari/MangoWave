@@ -19,6 +19,8 @@
     "noAudioUnknown": "WindowsとChromeOSでは、すべての共有モードで音声がサポートされています。macOS 14.2以降では、Chromeで画面とウィンドウの共有が音声をサポートしています。Linuxでは、タブ共有のみが音声をサポートしています。",
     "webgl2NotSupported": "WebGL 2がサポートされていません",
     "webgl2NotSupportedDesc": "MangoWaveのビジュアライゼーションにはWebGL 2が必要です。Chrome、Firefox、Edgeなどのモダンブラウザをお試しください。",
+    "webgl2GpuCrash": "WebGL 2 Temporarily Unavailable",
+    "webgl2GpuCrashDesc": "Your browser's GPU process may need to recover. Try closing other tabs or restarting your browser.",
     "webglContextLost": "ビジュアライザーがグラフィックスコンテキストを失いました",
     "webglContextLostDesc": "デバイスのグラフィックスシステムが中断されました。デバイスの負荷が高い場合、GPUが他のアプリケーションと共有されている場合、またはディスプレイ設定が変更された場合に発生することがあります。ページを再読み込みするとビジュアライザーが復元されます。",
     "renderingError": "レンダリングエラーが発生しました。WebGLまたはWeb Audioの問題の可能性があります。",
@@ -39,7 +41,9 @@
     "invalidFile": "無効な設定ファイルです",
     "fieldNotApplied": "「{{field}}」を適用できませんでした",
     "importedWithWarnings": "設定をインポートしました。アプリの変更により一部の設定を適用できませんでした",
-    "importedSuccess": "設定のインポートが完了しました"
+    "importedSuccess": "設定のインポートが完了しました",
+    "importedDataRestored": "インポートしたプリセットとテクスチャを復元しました",
+    "mergeNote": "お気に入り、ブロック済みプリセット、パックは既存のものとマージされます。"
   },
   "spotify": {
     "connectingToSpotify": "Spotifyに接続中...",
@@ -52,6 +56,8 @@
   "toasts": {
     "autopilotOn": "オートパイロット オン",
     "autopilotOff": "オートパイロット オフ",
+    "renderingPaused": "Rendering paused",
+    "renderingResumed": "Rendering resumed",
     "addedToFavorites": "お気に入りに追加しました",
     "removedFromFavorites": "お気に入りから削除しました",
     "presetBlocked": "プリセットをブロックしました",
@@ -62,7 +68,9 @@
     "favoritePresetsCleared": "お気に入りプリセットをクリアしました",
     "silenceDetected": "音声が検出されません。共有している画面、ウィンドウ、またはタブで音声が再生されていること、およびブラウザのダイアログで「音声を共有」にチェックが入っていることを確認してください。",
     "silenceDetectedMic": "マイクからの音声が検出されません。マイクがミュートになっていないこと、音を拾っていることを確認してください。",
-    "silenceDetectedLocal": "音声が検出されません。ファイルが対応形式であること、デバイスの音量が上がっていることを確認してください。"
+    "silenceDetectedLocal": "音声が検出されません。ファイルが対応形式であること、デバイスの音量が上がっていることを確認してください。",
+    "noPresetsAvailable": "利用可能なプリセットがありません。少なくとも1つのパックが有効で、すべてのプリセットがブロックされていないか確認してください。",
+    "presetNotFound": "このデバイスにプリセットが見つかりません：「{{name}}」"
   },
   "playback": {
     "addSongsToQueue": "キューに曲を追加",
@@ -112,6 +120,8 @@
     "removeFromFavorites": "お気に入りから削除 (S)",
     "toggleAutopilot": "オートパイロット切り替え (A)",
     "toggleFullscreen": "フルスクリーン切り替え (F)",
+    "togglePause": "Pause rendering (V)",
+    "resumeRendering": "Resume rendering (V)",
     "exitFS": "FS終了"
   },
   "mobile": {
@@ -127,10 +137,12 @@
       "favorites": "お気に入り",
       "blocked": "ブロック済み",
       "excluded": "除外",
-      "history": "履歴"
+      "history": "履歴",
+      "import": "インポート"
     },
-    "noPacksSelected": "パックが選択されていません。オートパイロットを一時停止しました",
+    "noPacksSelected": "パックが選択されていません",
     "packsActive": "{{active}}/{{total}}パック有効",
+    "packsHint": "選択したパックがオートパイロットと次のプリセットの対象になります",
     "searchPlaceholder": "プリセットを検索...",
     "clearSearch": "検索をクリア",
     "noPresetsVisible": "表示可能なプリセットがありません",
@@ -150,10 +162,62 @@
     "addedToPack": "「{{pack}}」に追加しました",
     "createPackFirst": "まずカスタムパックを作成してください"
   },
+
+  "importedPresets": {
+    "sectionTitle": "インポート済みプリセット",
+    "description": "コミュニティのMilkDropプリセット（.milk）と参照するテクスチャを追加します。MilkDropはネイティブデスクトップアプリケーションとして設計されました。シェーダー変換の違いにより、一部のプリセットはブラウザで完全にレンダリングされない場合があります。",
+    "emptyState": "インポート済みのプリセットはありません。「Import .milk」でコミュニティのMilkDropプリセットを追加できます。",
+    "importMilk": ".milk をインポート",
+    "importingPresets": "プリセットをインポート中...",
+    "importSuccess": "{{count}} 件のプリセットをインポートしました",
+    "importPartial": "{{total}} 件中 {{success}} 件をインポートしました。{{failed}} 件が失敗しました。",
+    "importAllFailed": "{{count}} 件すべてのプリセットのインポートに失敗しました",
+    "fileTooLarge": "サイズが大きすぎます（最大 500KB）",
+    "invalidFileType": ".milk ファイルではありません",
+    "emptyFile": "ファイルが空です",
+    "duplicateName": "既に存在します",
+    "conversionFailed": "変換に失敗しました",
+    "securityBlocked": "ブロックされたコンテンツが含まれています",
+    "nativeNameCollision": "組み込みプリセットに既に存在します",
+    "missingTextures": "不足しているテクスチャ（アップロードされるまでノイズとして表示されます）: {{textures}}",
+    "deletePreset": "インポートしたプリセットを削除",
+    "deleteConfirm": "\"{{name}}\" を削除しますか？.milk ファイルを再インポートする必要があります。",
+    "clearAll": "すべて削除",
+    "clearAllConfirm": "インポートした {{count}} 件のプリセットをすべて削除しますか？.milk ファイルを再インポートする必要があります。",
+    "cleared": "インポートしたすべてのプリセットを削除しました",
+    "idbUnavailable": "インポートしたプリセットにはストレージアクセスが必要ですが、プライベートブラウジングモードでは利用できません。",
+    "imported": "インポート済み",
+    "importInProgress": "インポート中...{{count}}件のプリセットを処理済み"
+  },
+
+  "importedTextures": {
+    "sectionTitle": "インポート済みテクスチャ",
+    "importTextures": "テクスチャをインポート",
+    "importSuccess": "{{count}}個のテクスチャをインポートしました",
+    "importPartial": "{{total}}個中{{success}}個のテクスチャをインポートしました。{{failed}}個失敗。",
+    "importAllFailed": "{{count}}個のテクスチャすべてのインポートに失敗しました",
+    "fileTooLarge": "サイズが大きすぎます（最大2MB）",
+    "invalidFileType": "サポートされている画像ではありません（JPEG、PNG、またはWebP）",
+    "builtinTextureShadow": "ビルトインテクスチャのため置き換えできません",
+    "readFailed": "ファイルの読み込みに失敗しました",
+    "decodeFailed": "画像のデコードに失敗しました",
+    "deleteTexture": "インポートしたテクスチャを削除",
+    "deleteConfirm": "\"{{name}}\" を削除しますか？画像ファイルを再インポートする必要があります。既に読み込まれたプリセットはページをリロードするまで使用し続けます。",
+    "clearAll": "すべてのテクスチャを削除",
+    "clearAllConfirm": "{{count}}個のインポートしたテクスチャをすべて削除しますか？画像ファイルを再インポートする必要があります。",
+    "cleared": "インポートしたテクスチャをすべて削除しました",
+    "gpuNote": "GPUに読み込まれたテクスチャはページをリロードするまで保持されます。",
+    "idbUnavailable": "インポートしたテクスチャにはストレージアクセスが必要ですが、プライベートブラウジングモードでは利用できません。",
+    "duplicateName": "既に存在します",
+    "emptyStateTextures": "インポートされたテクスチャはありません。「テクスチャをインポート」でカスタムテクスチャ画像を追加できます。",
+    "importInProgress": "インポート中...{{count}}件のテクスチャを処理済み"
+  },
+
   "customPacks": {
     "tabs": {
       "packs": "パック"
     },
+    "description": "バンドルまたはインポートされたプリセットからカスタムコレクションを作成します。",
     "createPack": "カスタムパックを作成",
     "importPack": "パックをインポート",
     "exportPack": "パックをエクスポート",
@@ -179,12 +243,42 @@
     "packDeleted": "パックを削除しました",
     "packImported": "パック「{{name}}」を{{count}}件のプリセットとともにインポートしました",
     "notPackFile": "MangoWaveのパックファイルではありません",
-    "settingsFileNotPack": "これは設定ファイルです — カスタムパックをインポートするには設定 › データをご利用ください",
+    "settingsFileNotPack": "これは設定ファイルです。カスタムパックをインポートするには設定 › データをご利用ください",
     "packImportedPartial": "パック「{{name}}」を{{count}}件のプリセットとともにインポートしました（{{skipped}}件が見つからずスキップ）",
     "maxPacksReached": "カスタムパックの上限（50個）に達しました",
     "packActive": "再生中：{{name}}",
     "deactivatePack": "パック停止",
-    "packOverridesFilters": "カスタムパックが有効な間、これらのフィルターは適用されません",
-    "favoritesAutoSwitch": "お気に入りモードからすべてモードに切り替えました"
+    "packOverridesFilters": "オートパイロットと次のプリセットはアクティブなパックを使用します。フィルターはこのリストにのみ影響します。",
+    "favoritesAutoSwitch": "お気に入りモードからすべてモードに切り替えました",
+    "newPack": "新しいパック"
+  },
+
+  "importModal": {
+    "titlePresets": "プリセットをインポート",
+    "titleTextures": "テクスチャをインポート",
+    "descriptionPresets": "コミュニティのMilkDropプリセット（.milkファイル）を追加します。\nMilkDropプリセットはネイティブWindowsアプリケーション向けに設計されています。MangoWaveはブラウザで実行できるように変換しますが、シェーダー処理の違いにより、一部のプリセットは正しくレンダリングされない場合があります。複雑なプリセットほど視覚的な差異が生じやすくなります。\nカスタムテクスチャが必要なプリセットもあります。インポート後に不足しているテクスチャが通知されます。",
+    "descriptionTextures": "インポートされたプリセットで使用されるテクスチャ画像（JPEG、PNG、WebP）をアップロードします。\nプリセットは名前でテクスチャを参照します。例えば、sampler_fireを使用するプリセットには「fire」という名前のテクスチャが必要です。",
+    "storageNotePresets": "プリセットはブラウザに保存されます。サイトデータを消去すると削除されるため、元の.milkファイルを保管してください。",
+    "storageNoteTextures": "テクスチャはブラウザに保存されます。サイトデータを消去すると削除されるため、元の画像ファイルを保管してください。",
+    "dropZonePresets": ".milkファイルをここにドロップするか、クリックして参照",
+    "dropZoneTextures": "画像ファイルをここにドロップするか、クリックして参照",
+    "browseFiles": "ファイルを参照",
+    "importingProgress": "{{total}}件中{{current}}件をインポート中...",
+    "summaryAllSuccess": "{{count}}件の{{type}}を正常にインポートしました",
+    "summaryPartial": "{{total}}件の{{type}}中{{success}}件をインポートしました。{{failed}}件が失敗、{{warnings}}件に警告があります。",
+    "summaryAllFailed": "{{count}}件の{{type}}すべてのインポートに失敗しました",
+    "uploadMissingTextures": "不足しているテクスチャをアップロード",
+    "missingTexturesSection": "不足テクスチャ（残り {{remaining}} 件）",
+    "missingTexturesAllResolved": "不足テクスチャをすべてアップロードしました",
+    "missingTexturesHint": "テクスチャが不足しているプリセットは、テクスチャの部分にノイズが表示されます。対応する画像ファイルをアップロードすると修正できます。",
+    "dropTexturesHere": "テクスチャ画像をここにドロップするか参照（JPEG、PNG、WebP）",
+    "importMore": "さらにインポート",
+    "presets": "プリセット",
+    "textures": "テクスチャ",
+    "idbUnavailable": "プライベートブラウジングモードではストレージにアクセスできません。",
+    "filterAll": "すべて",
+    "statusSuccess": "インポート済み",
+    "statusWarning": "警告あり",
+    "statusFailed": "失敗"
   }
 }

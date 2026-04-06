@@ -7,10 +7,26 @@ vi.mock('butterchurn', () => ({
     createVisualizer: vi.fn(() => ({
       connectAudio: vi.fn(),
       loadPreset: vi.fn(),
+      loadExtraImages: vi.fn(),
       setRendererSize: vi.fn(),
       render: vi.fn(),
     })),
   },
+  butterchurnExtraImages: {
+    getImages: () => ({ cells: { data: 'data:image/png;base64,abc', width: 256, height: 256 } }),
+  },
+}));
+
+// Mock milkdrop-presets (empty for tests — MilkDrop presets load async)
+vi.mock('milkdrop-presets', () => ({
+  getPresets: () => ({}),
+  getPresetNames: () => [],
+  getPreset: () => undefined,
+}));
+
+// Mock milkdrop-presets/names (lightweight manifest loaded at init)
+vi.mock('milkdrop-presets/names', () => ({
+  getPresetNames: () => [],
 }));
 
 // Mock butterchurn-presets (Minimal pack provides test presets; others empty)
@@ -26,6 +42,17 @@ vi.mock('butterchurn-presets', () => ({
   presetsExtra: { getPresets: () => ({}) },
   presetsExtra2: { getPresets: () => ({}) },
   presetsMD1: { getPresets: () => ({}) },
+}));
+
+// Mock presetThematicMap — test presets map to known thematic packs
+vi.mock('../../data/presetThematicPacks.ts', () => ({
+  THEMATIC_PACKS: ['Ambient', 'Reactive', 'Psychedelic', 'Ethereal'],
+  presetThematicMap: {
+    'Preset A': 'Reactive',
+    'Preset B': 'Psychedelic',
+    'Preset C': 'Ethereal',
+  },
+  PACK_DESCRIPTIONS: {},
 }));
 
 describe('VisualizerRenderer', () => {
@@ -59,14 +86,14 @@ describe('VisualizerRenderer', () => {
       expect(onPresetChange).toHaveBeenCalledWith('Preset A');
     });
 
-    it('builds pack map tracking preset origins', () => {
+    it('builds pack map using thematic classification', () => {
       const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
       renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
 
       const packMap = renderer.presetPackMap;
-      expect(packMap.get('Preset A')).toBe('Minimal');
-      expect(packMap.get('Preset B')).toBe('Minimal');
-      expect(packMap.get('Preset C')).toBe('Minimal');
+      expect(packMap.get('Preset A')).toBe('Reactive');
+      expect(packMap.get('Preset B')).toBe('Psychedelic');
+      expect(packMap.get('Preset C')).toBe('Ethereal');
     });
 
     it('excludes mobile-blocked presets via excludedPresets set', () => {
@@ -161,6 +188,90 @@ describe('VisualizerRenderer', () => {
       expect(mockRaf).toHaveBeenCalledTimes(1);
 
       mockRaf.mockRestore();
+    });
+  });
+
+  describe('imported presets', () => {
+    it('registers imported preset names without objects', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+
+      renderer.registerImportedPresetNames(['Import A', 'Import B']);
+
+      expect(renderer.presetList).toContain('Import A');
+      expect(renderer.presetList).toContain('Import B');
+      expect(renderer.presetPackMap.get('Import A')).toBe('Imported');
+      expect(renderer.presetPackMap.get('Import B')).toBe('Imported');
+    });
+
+    it('marks imported preset as unloaded if no object registered', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+
+      renderer.registerImportedPresetNames(['Lazy Preset']);
+      expect(renderer.isEelPresetUnloaded('Lazy Preset')).toBe(true);
+      expect(renderer.isEelPresetUnloaded('Preset A')).toBe(false);
+    });
+
+    it('registers a converted imported preset object', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+
+      renderer.registerImportedPresetNames(['My Import']);
+      expect(renderer.isEelPresetUnloaded('My Import')).toBe(true);
+
+      renderer.registerEelPreset('My Import', { code: 'imported' });
+      expect(renderer.isEelPresetUnloaded('My Import')).toBe(false);
+    });
+
+    it('unregisters an imported preset', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+
+      renderer.registerImportedPresetNames(['To Remove']);
+      expect(renderer.presetList).toContain('To Remove');
+
+      renderer.unregisterImportedPreset('To Remove');
+      expect(renderer.presetList).not.toContain('To Remove');
+      expect(renderer.presetPackMap.has('To Remove')).toBe(false);
+    });
+
+    it('does not duplicate names when registering twice', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+
+      renderer.registerImportedPresetNames(['Dup']);
+      renderer.registerImportedPresetNames(['Dup']);
+
+      const count = renderer.presetList.filter((n) => n === 'Dup').length;
+      expect(count).toBe(1);
+    });
+
+    it('isImportedPreset returns true for imported, false for others', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+
+      renderer.registerImportedPresetNames(['Import A']);
+      expect(renderer.isImportedPreset('Import A')).toBe(true);
+      expect(renderer.isImportedPreset('Preset A')).toBe(false);
+    });
+
+    it('isMilkdropPreset returns false before MilkDrop names are registered', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+
+      expect(renderer.isMilkdropPreset('Preset A')).toBe(false);
+    });
+
+    it('unregisterImportedPreset removes from _importedPresetNames', () => {
+      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+
+      renderer.registerImportedPresetNames(['To Remove']);
+      expect(renderer.isImportedPreset('To Remove')).toBe(true);
+
+      renderer.unregisterImportedPreset('To Remove');
+      expect(renderer.isImportedPreset('To Remove')).toBe(false);
     });
   });
 

@@ -19,6 +19,8 @@
     "noAudioUnknown": "Di Windows dan ChromeOS, semua mode berbagi mendukung audio. Di macOS 14.2+, berbagi layar dan jendela mendukung audio di Chrome. Di Linux, hanya berbagi tab yang mendukung audio.",
     "webgl2NotSupported": "WebGL 2 Tidak Didukung",
     "webgl2NotSupportedDesc": "MangoWave memerlukan WebGL 2 untuk merender visualisasi. Silakan coba browser modern seperti Chrome, Firefox, atau Edge.",
+    "webgl2GpuCrash": "WebGL 2 Temporarily Unavailable",
+    "webgl2GpuCrashDesc": "Your browser's GPU process may need to recover. Try closing other tabs or restarting your browser.",
     "webglContextLost": "Visualizer Kehilangan Konteks Grafis",
     "webglContextLostDesc": "Sistem grafis perangkatmu terputus. Ini bisa terjadi saat perangkat dalam beban berat, GPU digunakan bersama aplikasi lain, atau konfigurasi layar berubah. Memuat ulang halaman akan memulihkan visualizer.",
     "renderingError": "Terjadi kesalahan rendering, kemungkinan masalah WebGL atau Web Audio.",
@@ -39,7 +41,9 @@
     "invalidFile": "File pengaturan tidak valid",
     "fieldNotApplied": "\"{{field}}\" tidak dapat diterapkan",
     "importedWithWarnings": "Pengaturan diimpor. Beberapa pengaturan tidak dapat diterapkan karena perubahan aplikasi",
-    "importedSuccess": "Pengaturan berhasil diimpor"
+    "importedSuccess": "Pengaturan berhasil diimpor",
+    "importedDataRestored": "Preset dan tekstur yang diimpor telah dipulihkan",
+    "mergeNote": "Favorit, preset yang diblokir, dan paket akan digabungkan dengan yang sudah ada."
   },
   "spotify": {
     "connectingToSpotify": "Menghubungkan ke Spotify...",
@@ -52,6 +56,8 @@
   "toasts": {
     "autopilotOn": "Autopilot aktif",
     "autopilotOff": "Autopilot nonaktif",
+    "renderingPaused": "Rendering paused",
+    "renderingResumed": "Rendering resumed",
     "addedToFavorites": "Ditambahkan ke favorit",
     "removedFromFavorites": "Dihapus dari favorit",
     "presetBlocked": "Preset diblokir",
@@ -62,7 +68,9 @@
     "favoritePresetsCleared": "Preset favorit dihapus",
     "silenceDetected": "Tidak ada audio terdeteksi. Pastikan audio sedang diputar di layar, jendela, atau tab yang dibagikan, dan kamu telah mencentang \"Bagikan audio\" di dialog browser.",
     "silenceDetectedMic": "Tidak ada audio terdeteksi dari mikrofon. Pastikan mikrofon tidak di-mute dan menangkap suara.",
-    "silenceDetectedLocal": "Tidak ada audio terdeteksi. Pastikan file berformat yang didukung dan volume perangkat sudah dinyalakan."
+    "silenceDetectedLocal": "Tidak ada audio terdeteksi. Pastikan file berformat yang didukung dan volume perangkat sudah dinyalakan.",
+    "noPresetsAvailable": "Tidak ada preset yang tersedia. Pastikan setidaknya satu paket diaktifkan dan tidak semua preset diblokir.",
+    "presetNotFound": "Preset tidak ditemukan di perangkat ini: \"{{name}}\""
   },
   "playback": {
     "addSongsToQueue": "Tambahkan lagu ke antrean",
@@ -112,6 +120,8 @@
     "removeFromFavorites": "Hapus dari favorit (S)",
     "toggleAutopilot": "Alihkan autopilot (A)",
     "toggleFullscreen": "Alihkan layar penuh (F)",
+    "togglePause": "Pause rendering (V)",
+    "resumeRendering": "Resume rendering (V)",
     "exitFS": "Keluar"
   },
   "mobile": {
@@ -127,10 +137,12 @@
       "favorites": "favorit",
       "blocked": "diblokir",
       "excluded": "dikecualikan",
-      "history": "riwayat"
+      "history": "riwayat",
+      "import": "impor"
     },
-    "noPacksSelected": "Tidak ada paket dipilih. Autopilot dijeda",
+    "noPacksSelected": "Tidak ada paket dipilih",
     "packsActive": "{{active}}/{{total}} paket aktif",
+    "packsHint": "Paket yang dipilih menentukan kumpulan untuk autopilot dan preset berikutnya",
     "searchPlaceholder": "Cari preset...",
     "clearSearch": "Hapus pencarian",
     "noPresetsVisible": "Tidak ada preset terlihat",
@@ -150,10 +162,62 @@
     "addedToPack": "Ditambahkan ke \"{{pack}}\"",
     "createPackFirst": "Buat paket kustom terlebih dahulu"
   },
+
+  "importedPresets": {
+    "sectionTitle": "Preset yang Diimpor",
+    "description": "Tambahkan preset MilkDrop komunitas (.milk) dan tekstur yang direferensikan. MilkDrop dirancang sebagai aplikasi desktop native, sehingga beberapa preset mungkin tidak ditampilkan sempurna di browser karena perbedaan dalam penerjemahan shader.",
+    "emptyState": "Belum ada preset yang diimpor. Gunakan \"Import .milk\" untuk menambahkan preset MilkDrop komunitas.",
+    "importMilk": "Impor .milk",
+    "importingPresets": "Mengimpor preset...",
+    "importSuccess": "{{count}} preset berhasil diimpor",
+    "importPartial": "{{success}} dari {{total}} preset berhasil diimpor. {{failed}} gagal.",
+    "importAllFailed": "Semua {{count}} preset gagal diimpor",
+    "fileTooLarge": "Terlalu besar (maks. 500KB)",
+    "invalidFileType": "Bukan file .milk",
+    "emptyFile": "File kosong",
+    "duplicateName": "Sudah ada",
+    "conversionFailed": "Konversi gagal",
+    "securityBlocked": "Mengandung konten yang diblokir",
+    "nativeNameCollision": "Sudah ada di preset bawaan",
+    "missingTextures": "Tekstur tidak ditemukan (akan ditampilkan sebagai noise sampai diunggah): {{textures}}",
+    "deletePreset": "Hapus preset impor",
+    "deleteConfirm": "Hapus \"{{name}}\"? File .milk perlu diimpor ulang.",
+    "clearAll": "Hapus Semua",
+    "clearAllConfirm": "Hapus semua {{count}} preset impor? File .milk perlu diimpor ulang.",
+    "cleared": "Semua preset impor dihapus",
+    "idbUnavailable": "Preset impor memerlukan akses penyimpanan, yang tidak tersedia dalam mode penjelajahan pribadi.",
+    "imported": "Diimpor",
+    "importInProgress": "Mengimpor... {{count}} preset sejauh ini"
+  },
+
+  "importedTextures": {
+    "sectionTitle": "Tekstur yang Diimpor",
+    "importTextures": "Impor Tekstur",
+    "importSuccess": "{{count}} tekstur berhasil diimpor",
+    "importPartial": "{{success}} dari {{total}} tekstur berhasil diimpor. {{failed}} gagal.",
+    "importAllFailed": "Semua {{count}} tekstur gagal diimpor",
+    "fileTooLarge": "Terlalu besar (maks. 2MB)",
+    "invalidFileType": "Bukan gambar yang didukung (JPEG, PNG, atau WebP)",
+    "builtinTextureShadow": "Tekstur bawaan, tidak dapat diganti",
+    "readFailed": "Gagal membaca file",
+    "decodeFailed": "Gagal mendekode gambar",
+    "deleteTexture": "Hapus tekstur yang diimpor",
+    "deleteConfirm": "Hapus \"{{name}}\"? File gambar perlu diimpor ulang. Preset yang sudah dimuat akan terus menggunakannya hingga halaman dimuat ulang.",
+    "clearAll": "Hapus Semua Tekstur",
+    "clearAllConfirm": "Hapus semua {{count}} tekstur yang diimpor? File gambar perlu diimpor ulang.",
+    "cleared": "Semua tekstur yang diimpor telah dihapus",
+    "gpuNote": "Tekstur yang dimuat di GPU tetap ada hingga halaman dimuat ulang.",
+    "idbUnavailable": "Tekstur yang diimpor memerlukan akses penyimpanan, yang tidak tersedia dalam mode penjelajahan pribadi.",
+    "duplicateName": "Sudah ada",
+    "emptyStateTextures": "Belum ada tekstur yang diimpor. Gunakan \"Impor Tekstur\" untuk menambahkan gambar tekstur.",
+    "importInProgress": "Mengimpor... {{count}} tekstur sejauh ini"
+  },
+
   "customPacks": {
     "tabs": {
       "packs": "paket"
     },
+    "description": "Buat koleksi kustom dari preset apa pun — bawaan atau yang diimpor.",
     "createPack": "Buat Paket Kustom",
     "importPack": "Impor Paket",
     "exportPack": "Ekspor Paket",
@@ -179,12 +243,42 @@
     "packDeleted": "Paket dihapus",
     "packImported": "Paket \"{{name}}\" diimpor dengan {{count}} preset",
     "notPackFile": "Bukan file paket MangoWave",
-    "settingsFileNotPack": "Ini adalah file pengaturan — gunakan Pengaturan › Data untuk mengimpor paket kustom",
+    "settingsFileNotPack": "Ini adalah file pengaturan. Gunakan Pengaturan › Data untuk mengimpor paket kustom",
     "packImportedPartial": "Paket \"{{name}}\" diimpor dengan {{count}} preset ({{skipped}} tidak ditemukan dan dilewati)",
     "maxPacksReached": "Maksimum 50 paket kustom telah tercapai",
     "packActive": "Memutar dari: {{name}}",
     "deactivatePack": "Hentikan paket",
-    "packOverridesFilters": "Filter ini tidak berlaku selama paket kustom aktif",
-    "favoritesAutoSwitch": "Beralih dari favorit ke mode semua"
+    "packOverridesFilters": "Autopilot dan preset berikutnya menggunakan paket aktif. Filter hanya memengaruhi daftar ini.",
+    "favoritesAutoSwitch": "Beralih dari favorit ke mode semua",
+    "newPack": "Paket Baru"
+  },
+
+  "importModal": {
+    "titlePresets": "Impor Preset",
+    "titleTextures": "Impor Tekstur",
+    "descriptionPresets": "Tambahkan preset MilkDrop komunitas (file .milk).\nPreset MilkDrop dirancang untuk aplikasi Windows native. MangoWave menerjemahkannya agar dapat berjalan di browser, tetapi beberapa preset mungkin tidak ditampilkan dengan benar karena perbedaan dalam pemrosesan shader. Preset yang lebih kompleks lebih mungkin memiliki perbedaan visual.\nBeberapa preset memerlukan tekstur kustom — Anda akan diberi tahu tentang tekstur yang hilang setelah impor.",
+    "descriptionTextures": "Unggah gambar tekstur (JPEG, PNG, atau WebP) yang digunakan oleh preset yang diimpor.\nPreset mereferensikan tekstur berdasarkan nama: misalnya, preset yang menggunakan sampler_fire memerlukan tekstur bernama \"fire\".",
+    "storageNotePresets": "Preset disimpan di browser Anda. Menghapus data situs akan menghapusnya, jadi simpan file .milk asli Anda.",
+    "storageNoteTextures": "Tekstur disimpan di browser Anda. Menghapus data situs akan menghapusnya, jadi simpan file gambar asli Anda.",
+    "dropZonePresets": "Seret file .milk ke sini atau klik untuk memilih",
+    "dropZoneTextures": "Seret file gambar ke sini atau klik untuk memilih",
+    "browseFiles": "Pilih File",
+    "importingProgress": "Mengimpor {{current}} dari {{total}}...",
+    "summaryAllSuccess": "Berhasil mengimpor {{count}} {{type}}",
+    "summaryPartial": "Berhasil mengimpor {{success}} dari {{total}} {{type}}. {{failed}} gagal, {{warnings}} dengan peringatan.",
+    "summaryAllFailed": "Semua {{count}} {{type}} gagal diimpor",
+    "uploadMissingTextures": "Unggah Tekstur yang Hilang",
+    "missingTexturesSection": "Tekstur yang Hilang ({{remaining}} tersisa)",
+    "missingTexturesAllResolved": "Semua tekstur yang hilang telah diunggah",
+    "missingTexturesHint": "Preset dengan tekstur yang hilang akan menampilkan noise visual di tempat tekstur seharusnya muncul. Unggah file gambar yang sesuai untuk memperbaikinya.",
+    "dropTexturesHere": "Seret gambar tekstur ke sini atau pilih (JPEG, PNG, WebP)",
+    "importMore": "Impor Lagi",
+    "presets": "preset",
+    "textures": "tekstur",
+    "idbUnavailable": "Penyimpanan tidak tersedia dalam mode penjelajahan pribadi.",
+    "filterAll": "Semua",
+    "statusSuccess": "Berhasil",
+    "statusWarning": "Peringatan",
+    "statusFailed": "Gagal"
   }
 }

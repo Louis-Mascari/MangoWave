@@ -3,6 +3,8 @@
   "reset": "リセット",
   "cancel": "キャンセル",
   "apply": "適用",
+  "exporting": "エクスポート中...",
+  "importing": "インポート中...",
   "on": "オン",
   "off": "オフ",
   "back": "戻る",
@@ -32,5 +34,12 @@
   "default": "デフォルト",
   "high": "高",
   "ultra": "ウルトラ",
-  "controls": "コントロール"
+  "pause": "Pause",
+  "loadingPresets": "Loading presets…",
+  "controls": "コントロール",
+  "today": "今日",
+  "yesterday": "昨日",
+  "collapseAll": "すべて折りたたむ",
+  "expandAll": "すべて展開",
+  "copy": "コピー"
 }

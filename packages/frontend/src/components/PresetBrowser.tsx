@@ -1041,7 +1041,11 @@ export function PresetBrowser({
               handleSelectPreset(name);
             }
           }}
-          className="flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs text-white/70 hover:bg-white/10"
+          className={`flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs ${
+            name === currentPreset
+              ? 'bg-orange-500/30 text-white'
+              : 'text-white/70 hover:bg-white/10'
+          }`}
         >
           <span className="min-w-0 flex-1 truncate text-left">
             <span className={`mr-1.5 text-xs font-medium ${reason.color}`}>

@@ -72,7 +72,9 @@ for (const [name, preset] of Object.entries(milkdropPresets)) {
   }
 }
 
-console.log(`Loaded ${Object.keys(allPresets).length} presets (${milkdropNames.size} MilkDrop-Original)`);
+console.log(
+  `Loaded ${Object.keys(allPresets).length} presets (${milkdropNames.size} MilkDrop-Original)`,
+);
 
 // ── Classification scoring ─────────────────────────────────────────────────
 
@@ -234,9 +236,18 @@ function percentile(arr, p) {
 }
 
 const allScores = Object.values(presetScores);
-const audioP65 = percentile(allScores.map((s) => s.audioScore), 0.65);
-const psychP60 = percentile(allScores.map((s) => s.psychScore), 0.6);
-const etherealP60 = percentile(allScores.map((s) => s.etherealScore), 0.6);
+const audioP65 = percentile(
+  allScores.map((s) => s.audioScore),
+  0.65,
+);
+const psychP60 = percentile(
+  allScores.map((s) => s.psychScore),
+  0.6,
+);
+const etherealP60 = percentile(
+  allScores.map((s) => s.etherealScore),
+  0.6,
+);
 
 // Phase 2: Classify
 function classify(name, scores) {
@@ -250,7 +261,11 @@ function classify(name, scores) {
 
   // Reactive: high audio refs AND dominant — require above 65th percentile
   // (most MilkDrop presets reference audio somewhat; Reactive means audio is the primary driver)
-  if (audioScore > audioP65 && audioScore >= psychScore * 0.9 && audioScore >= etherealScore * 0.9) {
+  if (
+    audioScore > audioP65 &&
+    audioScore >= psychScore * 0.9 &&
+    audioScore >= etherealScore * 0.9
+  ) {
     return 'Reactive';
   }
 

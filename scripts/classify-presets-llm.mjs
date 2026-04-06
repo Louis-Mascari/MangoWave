@@ -67,7 +67,7 @@ const PACK_DEFINITIONS = {
       'Slow, gentle motion. Mathematical patterns evolving smoothly over time. Audio may modulate ' +
       'slightly but is NOT the dominant driver. Simple or no shaders. Calm aesthetic. ' +
       'Think: lava lamp, slow kaleidoscope, reaction diffusion, gentle flowing. ' +
-      'This is also the DEFAULT/FALLBACK — if a preset doesn\'t strongly fit elsewhere, it\'s Ambient.',
+      "This is also the DEFAULT/FALLBACK — if a preset doesn't strongly fit elsewhere, it's Ambient.",
   },
   Reactive: {
     description: 'Responds to beats — audio-driven motion and color',
@@ -185,9 +185,25 @@ function extractFeatures(name, preset) {
 
   const keyVals = {};
   for (const k of [
-    'decay', 'warp', 'zoom', 'rot', 'sx', 'sy', 'dx', 'dy',
-    'wave_a', 'wave_mode', 'wave_mystery', 'mv_a', 'mv_x', 'mv_y',
-    'echo_alpha', 'echo_zoom', 'echo_orient', 'ob_a', 'ib_a',
+    'decay',
+    'warp',
+    'zoom',
+    'rot',
+    'sx',
+    'sy',
+    'dx',
+    'dy',
+    'wave_a',
+    'wave_mode',
+    'wave_mystery',
+    'mv_a',
+    'mv_x',
+    'mv_y',
+    'echo_alpha',
+    'echo_zoom',
+    'echo_orient',
+    'ob_a',
+    'ib_a',
   ]) {
     if (bv[k] !== undefined && bv[k] !== null) keyVals[k] = bv[k];
   }
@@ -462,7 +478,9 @@ async function main() {
         }
       }
       console.log(`\nDiff vs heuristic: ${changes} changes`);
-      for (const [transition, count] of Object.entries(changeCounts).sort(([, a], [, b]) => b - a)) {
+      for (const [transition, count] of Object.entries(changeCounts).sort(
+        ([, a], [, b]) => b - a,
+      )) {
         console.log(`  ${transition}: ${count}`);
       }
     } else {

@@ -17,12 +17,18 @@ function loadCjsModule(filePath) {
   return mod.exports.default ?? mod.exports;
 }
 
-const utilsPath = path.resolve(__dirname, '../node_modules/milkdrop-preset-utils/dist/milkdrop-preset-utils.min.js');
+const utilsPath = path.resolve(
+  __dirname,
+  '../node_modules/milkdrop-preset-utils/dist/milkdrop-preset-utils.min.js',
+);
 
 const utilsMod = loadCjsModule(utilsPath);
 const splitPreset = utilsMod.splitPreset ?? utilsMod.default?.splitPreset;
 
-if (!splitPreset) { console.error('Failed to load splitPreset. Keys:', Object.keys(utilsMod)); process.exit(1); }
+if (!splitPreset) {
+  console.error('Failed to load splitPreset. Keys:', Object.keys(utilsMod));
+  process.exit(1);
+}
 
 // Build EEL preprocessor from converter source
 const converterSrc = fs.readFileSync(
@@ -77,7 +83,10 @@ if (!dir) {
 }
 
 const absDir = path.resolve(dir);
-const milkFiles = fs.readdirSync(absDir).filter(f => f.endsWith('.milk')).sort();
+const milkFiles = fs
+  .readdirSync(absDir)
+  .filter((f) => f.endsWith('.milk'))
+  .sort();
 
 if (milkFiles.length === 0) {
   console.error(`No .milk files found in ${absDir}`);
@@ -113,17 +122,88 @@ async function main() {
       // Set up eel-wasm pools and compile
       const pool = {};
       const varNames = [
-        'frame', 'time', 'fps', 'bass', 'mid', 'treb', 'bass_att', 'mid_att', 'treb_att',
-        'meshx', 'meshy', 'aspectx', 'aspecty', 'pixelsx', 'pixelsy',
-        'zoom', 'zoomexp', 'rot', 'warp', 'cx', 'cy', 'dx', 'dy', 'sx', 'sy',
-        'ob_size', 'ob_r', 'ob_g', 'ob_b', 'ob_a', 'ib_size', 'ib_r', 'ib_g', 'ib_b', 'ib_a',
-        'mv_x', 'mv_y', 'mv_dx', 'mv_dy', 'mv_l', 'mv_r', 'mv_g', 'mv_b', 'mv_a',
-        'decay', 'gamma', 'echo_zoom', 'echo_alpha', 'echo_orient',
-        'wave_mode', 'wave_dots', 'wave_thick', 'wave_additive', 'wave_brighten',
-        'wave_a', 'wave_scale', 'wave_smoothing', 'wave_r', 'wave_g', 'wave_b',
-        'wave_x', 'wave_y', 'wave_mystery', 'darken_center', 'wrap', 'invert',
-        'brighten', 'darken', 'solarize', 'fshader', 'b1n', 'b2n', 'b3n', 'b1x', 'b2x', 'b3x', 'b1ed',
-        'monitor', 'x', 'y', 'rad', 'ang',
+        'frame',
+        'time',
+        'fps',
+        'bass',
+        'mid',
+        'treb',
+        'bass_att',
+        'mid_att',
+        'treb_att',
+        'meshx',
+        'meshy',
+        'aspectx',
+        'aspecty',
+        'pixelsx',
+        'pixelsy',
+        'zoom',
+        'zoomexp',
+        'rot',
+        'warp',
+        'cx',
+        'cy',
+        'dx',
+        'dy',
+        'sx',
+        'sy',
+        'ob_size',
+        'ob_r',
+        'ob_g',
+        'ob_b',
+        'ob_a',
+        'ib_size',
+        'ib_r',
+        'ib_g',
+        'ib_b',
+        'ib_a',
+        'mv_x',
+        'mv_y',
+        'mv_dx',
+        'mv_dy',
+        'mv_l',
+        'mv_r',
+        'mv_g',
+        'mv_b',
+        'mv_a',
+        'decay',
+        'gamma',
+        'echo_zoom',
+        'echo_alpha',
+        'echo_orient',
+        'wave_mode',
+        'wave_dots',
+        'wave_thick',
+        'wave_additive',
+        'wave_brighten',
+        'wave_a',
+        'wave_scale',
+        'wave_smoothing',
+        'wave_r',
+        'wave_g',
+        'wave_b',
+        'wave_x',
+        'wave_y',
+        'wave_mystery',
+        'darken_center',
+        'wrap',
+        'invert',
+        'brighten',
+        'darken',
+        'solarize',
+        'fshader',
+        'b1n',
+        'b2n',
+        'b3n',
+        'b1x',
+        'b2x',
+        'b3x',
+        'b1ed',
+        'monitor',
+        'x',
+        'y',
+        'rad',
+        'ang',
         ...Array.from({ length: 32 }, (_, i) => `q${i + 1}`),
         ...Array.from({ length: 8 }, (_, i) => `t${i + 1}`),
       ];
@@ -142,16 +222,48 @@ async function main() {
       const pWaves = deepPreprocessEel(parts.waves);
 
       const shapeVars = [
-        'r', 'g', 'b', 'a', 'r2', 'g2', 'b2', 'a2',
-        'border_r', 'border_g', 'border_b', 'border_a',
-        'thickoutline', 'textured', 'tex_zoom', 'tex_ang', 'additive',
-        'sides', 'num_inst', 'instance', 'tex_r', 'tex_g', 'tex_b', 'tex_a',
+        'r',
+        'g',
+        'b',
+        'a',
+        'r2',
+        'g2',
+        'b2',
+        'a2',
+        'border_r',
+        'border_g',
+        'border_b',
+        'border_a',
+        'thickoutline',
+        'textured',
+        'tex_zoom',
+        'tex_ang',
+        'additive',
+        'sides',
+        'num_inst',
+        'instance',
+        'tex_r',
+        'tex_g',
+        'tex_b',
+        'tex_a',
       ];
 
       const waveVars = [
-        'samples', 'sep', 'scaling', 'spectrum', 'smoothing',
-        'r', 'g', 'b', 'a', 'usedots', 'thick', 'additive',
-        'sample', 'value1', 'value2',
+        'samples',
+        'sep',
+        'scaling',
+        'spectrum',
+        'smoothing',
+        'r',
+        'g',
+        'b',
+        'a',
+        'usedots',
+        'thick',
+        'additive',
+        'sample',
+        'value1',
+        'value2',
       ];
 
       const pools = { main: pool };
@@ -219,7 +331,7 @@ async function main() {
 
   for (const [key, firstFile] of seenErrors) {
     const dupes = results.filter(
-      r => r.status === 'failed' && r.dedupe && r.error?.substring(0, 120) === key,
+      (r) => r.status === 'failed' && r.dedupe && r.error?.substring(0, 120) === key,
     );
     if (dupes.length > 0) {
       console.log(`  ${firstFile} (+${dupes.length} dupes):`);
@@ -230,7 +342,7 @@ async function main() {
 
   // Write error log
   const logPath = path.resolve('mw-import-errors.json');
-  const uniqueFailures = results.filter(r => r.status === 'failed' && !r.dedupe);
+  const uniqueFailures = results.filter((r) => r.status === 'failed' && !r.dedupe);
   const errorLog = {
     timestamp: new Date().toISOString(),
     sourceDir: absDir,
@@ -238,13 +350,11 @@ async function main() {
     passed,
     failed,
     uniqueErrors: uniqueFailures.length,
-    failures: uniqueFailures.map(f => ({
+    failures: uniqueFailures.map((f) => ({
       fileName: f.fileName,
       error: f.error?.substring(0, 500),
     })),
-    duplicates: results
-      .filter(r => r.status === 'failed' && r.dedupe)
-      .map(r => r.fileName),
+    duplicates: results.filter((r) => r.status === 'failed' && r.dedupe).map((r) => r.fileName),
   };
   fs.writeFileSync(logPath, JSON.stringify(errorLog, null, 2));
   console.log(`\nError log: ${logPath}`);
@@ -252,7 +362,7 @@ async function main() {
   process.exit(failed > 0 ? 1 : 0);
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error('Fatal error:', err);
   process.exit(1);
 });

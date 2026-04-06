@@ -315,7 +315,7 @@ export class DeviceSyncService {
       if (peer) peer.lastSeen = Date.now();
 
       if ((raw as { type: string }).type !== 'heartbeat') {
-        console.debug('[DeviceSync] received', (raw as { type: string }).type, 'from', conn.peer);
+        console.log('[DeviceSync] received', (raw as { type: string }).type, 'from', conn.peer);
       }
 
       // Host relays to all other peers (skip heartbeats — O(N²) waste)
@@ -373,7 +373,7 @@ export class DeviceSyncService {
       }
     }
     if (message.type !== 'heartbeat') {
-      console.debug('[DeviceSync] broadcast', message.type, `to ${sent}/${this.connections.size}`);
+      console.log('[DeviceSync] broadcast', message.type, `to ${sent}/${this.connections.size}`);
     }
   }
 

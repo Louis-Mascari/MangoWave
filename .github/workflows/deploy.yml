@@ -97,10 +97,20 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Sync app to S3
-        run: aws s3 sync packages/frontend/dist s3://${{ needs.deploy-backend.outputs.s3-bucket }} --delete --exclude 'landing/*'
+        run: |
+          aws s3 sync packages/frontend/dist s3://${{ needs.deploy-backend.outputs.s3-bucket }} --delete --exclude 'landing/*'
+          aws s3 cp packages/frontend/dist/index.html \
+            s3://${{ needs.deploy-backend.outputs.s3-bucket }}/index.html \
+            --cache-control "no-store" \
+            --content-type "text/html; charset=utf-8"
 
       - name: Sync landing page to S3
-        run: aws s3 sync packages/landing s3://${{ needs.deploy-backend.outputs.s3-bucket }}/landing --delete
+        run: |
+          aws s3 sync packages/landing s3://${{ needs.deploy-backend.outputs.s3-bucket }}/landing --delete
+          aws s3 cp packages/landing/index.html \
+            s3://${{ needs.deploy-backend.outputs.s3-bucket }}/landing/index.html \
+            --cache-control "no-store" \
+            --content-type "text/html; charset=utf-8"
 
       - name: Invalidate CloudFront cache
         run: |

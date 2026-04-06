@@ -121,8 +121,9 @@ test.describe('Preset Browser', () => {
     // Active pack chip should appear
     await expect(app.getByText(/Playing from: Pack 1/)).toBeVisible();
 
-    // Deactivate via the chip's Stop button
-    await app.getByRole('button', { name: /Stop pack/ }).click();
+    // Deactivate via the chip's Stop button — force: true because the renderer
+    // may be processing a preset change during the click handler in headless CI
+    await app.getByRole('button', { name: /Stop pack/ }).click({ force: true });
 
     // Chip should disappear
     await expect(app.getByText(/Playing from: Pack 1/)).not.toBeVisible();

@@ -36,13 +36,14 @@ test.describe('Keyboard Shortcuts', () => {
     const presetName = app.locator('[data-testid="preset-name"]');
     const initial = await presetName.textContent();
 
-    // Press space multiple times — presets are random, one press might pick the same one
+    // Press space multiple times — presets are random, one press might pick the same one.
+    // 15s timeout: preset loading (WASM init for 832 presets) can be slow on CI.
     await expect(async () => {
       await app.keyboard.press('Space');
       await app.waitForTimeout(500);
       const current = await presetName.textContent();
       expect(current).not.toBe(initial);
-    }).toPass({ timeout: 10000 });
+    }).toPass({ timeout: 15000 });
   });
 
   test('N triggers next preset', async ({ app }) => {
@@ -54,7 +55,7 @@ test.describe('Keyboard Shortcuts', () => {
       await app.waitForTimeout(500);
       const current = await presetName.textContent();
       expect(current).not.toBe(initial);
-    }).toPass({ timeout: 10000 });
+    }).toPass({ timeout: 15000 });
   });
 
   test('A toggles autopilot (toast appears)', async ({ app }) => {

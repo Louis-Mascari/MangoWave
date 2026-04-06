@@ -9,6 +9,6 @@
   "dependencies": {
     "hlslparser-wasm": "workspace:*",
     "lodash": "^4.17.21",
-    "milkdrop-preset-utils": "^0.1.0"
+    "milkdrop-preset-utils": "^0.2.1"
   }
 }

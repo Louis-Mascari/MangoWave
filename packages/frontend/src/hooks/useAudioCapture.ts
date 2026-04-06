@@ -145,10 +145,13 @@ export function useAudioCapture(): UseAudioCaptureReturn {
       setCaptureSource('system');
       return true;
     } catch (err) {
-      const isUserCancellation =
+      const isExpected =
         err instanceof DOMException &&
-        (err.name === 'NotAllowedError' || err.name === 'AbortError');
-      if (!isUserCancellation) {
+        (err.name === 'NotAllowedError' ||
+          err.name === 'AbortError' ||
+          err.name === 'NotReadableError' ||
+          err.name === 'NotFoundError');
+      if (!isExpected) {
         Sentry.captureException(err, { tags: { audioSource: 'system' } });
       }
       setError(humanizeAudioError(err, 'system'));
@@ -174,10 +177,14 @@ export function useAudioCapture(): UseAudioCaptureReturn {
       setCaptureSource('mic');
       return true;
     } catch (err) {
-      const isUserCancellation =
+      const isExpected =
         err instanceof DOMException &&
-        (err.name === 'NotAllowedError' || err.name === 'AbortError');
-      if (!isUserCancellation) {
+        (err.name === 'NotAllowedError' ||
+          err.name === 'AbortError' ||
+          err.name === 'NotSupportedError' ||
+          err.name === 'NotReadableError' ||
+          err.name === 'NotFoundError');
+      if (!isExpected) {
         Sentry.captureException(err, { tags: { audioSource: 'mic' } });
       }
       setError(humanizeAudioError(err, 'mic'));

@@ -30,12 +30,14 @@ export default class CustomShape {
     this.createShader();
     this.createBorderShader();
 
+    // [MW-PATCH: guard-sampler] createSampler() returns null on WebGL context loss
     this.mainSampler = this.gl.createSampler();
-
-    gl.samplerParameteri(this.mainSampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-    gl.samplerParameteri(this.mainSampler, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.samplerParameteri(this.mainSampler, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.samplerParameteri(this.mainSampler, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    if (this.mainSampler) {
+      gl.samplerParameteri(this.mainSampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+      gl.samplerParameteri(this.mainSampler, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.samplerParameteri(this.mainSampler, gl.TEXTURE_WRAP_S, gl.REPEAT);
+      gl.samplerParameteri(this.mainSampler, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    }
   }
 
   updateGlobals(opts) {
@@ -312,8 +314,10 @@ export default class CustomShape {
     this.gl.enableVertexAttribArray(this.aBorderPosLoc);
 
     const wrapping = mdVSFrame.wrap !== 0 ? this.gl.REPEAT : this.gl.CLAMP_TO_EDGE;
-    this.gl.samplerParameteri(this.mainSampler, this.gl.TEXTURE_WRAP_S, wrapping);
-    this.gl.samplerParameteri(this.mainSampler, this.gl.TEXTURE_WRAP_T, wrapping);
+    if (this.mainSampler) {
+      this.gl.samplerParameteri(this.mainSampler, this.gl.TEXTURE_WRAP_S, wrapping);
+      this.gl.samplerParameteri(this.mainSampler, this.gl.TEXTURE_WRAP_T, wrapping);
+    }
   }
 
   drawCustomShapeInstance(prevTexture, sides, isTextured, hasBorder, isBorderThick, isAdditive) {

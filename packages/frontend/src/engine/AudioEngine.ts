@@ -116,6 +116,12 @@ export class AudioEngine {
   }
 
   async initFromMicrophone(): Promise<void> {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      throw new DOMException(
+        'Microphone access is not available in this browser',
+        'NotSupportedError',
+      );
+    }
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: {
         // Disable voice-call DSP — these filters suppress ambient music on mobile devices,

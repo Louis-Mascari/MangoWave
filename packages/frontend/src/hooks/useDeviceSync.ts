@@ -84,7 +84,6 @@ export function useDeviceSync(
       // Inbound: preset change — async to support lazy-loading EEL presets
       service.onPresetChange = (presetName, transitionTime) => {
         const renderer = rendererRef.current;
-        console.log('[DeviceSync] onPresetChange:', presetName, 'renderer:', !!renderer);
         if (!renderer) return;
 
         // Mobile: check if preset is blocked, substitute if needed
@@ -282,18 +281,7 @@ export function useDeviceSync(
   }, [createRoom, joinRoom, leaveRoom]);
 
   const broadcastPreset = useCallback((name: string, transitionTime: number) => {
-    const svc = serviceRef.current;
-    console.log(
-      '[DeviceSync] broadcastPreset:',
-      name,
-      'service:',
-      !!svc,
-      'status:',
-      svc?.status,
-      'peers:',
-      svc?.peerCount,
-    );
-    svc?.sendPresetChange(name, transitionTime);
+    serviceRef.current?.sendPresetChange(name, transitionTime);
   }, []);
 
   const broadcastPresetRedirect = useCallback(

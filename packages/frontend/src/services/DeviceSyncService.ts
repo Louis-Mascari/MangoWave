@@ -314,10 +314,6 @@ export class DeviceSyncService {
       const peer = this.connections.get(conn.peer);
       if (peer) peer.lastSeen = Date.now();
 
-      if ((raw as { type: string }).type !== 'heartbeat') {
-        console.log('[DeviceSync] received', (raw as { type: string }).type, 'from', conn.peer);
-      }
-
       // Host relays to all other peers (skip heartbeats — O(N²) waste)
       if (this._isHost && raw.type !== 'heartbeat') {
         this.relayToOthers(raw, conn.peer);
@@ -365,15 +361,10 @@ export class DeviceSyncService {
 
   private broadcast(message: SyncMessagePayload): void {
     const payload = { ...message, senderId: this._peerId, timestamp: Date.now() };
-    let sent = 0;
     for (const { conn } of this.connections.values()) {
       if (conn.open) {
         conn.send(payload);
-        sent++;
       }
-    }
-    if (message.type !== 'heartbeat') {
-      console.log('[DeviceSync] broadcast', message.type, `to ${sent}/${this.connections.size}`);
     }
   }
 

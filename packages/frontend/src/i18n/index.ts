@@ -90,7 +90,7 @@ i18n
     },
     // Ensure fully synchronous init — prevents useTranslation from triggering
     // extra re-renders that can restart effects in consuming components
-    initImmediate: false,
+    initAsync: false,
     react: {
       useSuspense: false,
     },

@@ -1159,7 +1159,7 @@ function SyncTab() {
       {/* Sub-tab selector — desktop only (mobile only has device sync) */}
       {!isMobileDevice && (
         <div className="flex gap-3">
-          <label className="flex cursor-pointer items-center gap-1 text-[11px]">
+          <label className="flex cursor-pointer items-center gap-1 text-[11px] text-white/70">
             <input
               type="radio"
               name="syncSubTab"
@@ -1169,7 +1169,7 @@ function SyncTab() {
             />
             {t('sync.windowSyncTitle')}
           </label>
-          <label className="flex cursor-pointer items-center gap-1 text-[11px]">
+          <label className="flex cursor-pointer items-center gap-1 text-[11px] text-white/70">
             <input
               type="radio"
               name="syncSubTab"

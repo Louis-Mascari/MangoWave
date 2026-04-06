@@ -191,7 +191,7 @@ function DesktopControlBar({
             aria-label={ts('shortcutActions.previousPreset')}
             title={t('controlBar.previousPreset')}
           >
-            <ChevronLeftIcon className="h-3 w-3" />
+            <ChevronLeftIcon className="h-4 w-4" />
           </IconButton>
 
           {currentPreset && (
@@ -233,7 +233,7 @@ function DesktopControlBar({
             aria-label={ts('shortcutActions.nextPreset')}
             title={t('controlBar.nextPreset')}
           >
-            <ChevronRightIcon className="h-3 w-3" />
+            <ChevronRightIcon className="h-4 w-4" />
           </IconButton>
 
           <BarButton

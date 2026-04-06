@@ -1,6 +1,4 @@
 import butterchurn, { butterchurnExtraImages } from 'butterchurn';
-// milkdrop-textures loaded lazily in init() — its 4.6MB textureData.json
-// must not be parsed at module scope (blocks launch animation).
 import { setDiagnosticPresetName } from './shaderDiagnostics.ts';
 import {
   presetsMinimal,
@@ -10,6 +8,11 @@ import {
   presetsMD1,
 } from 'butterchurn-presets';
 import { THEMATIC_PACKS, presetThematicMap } from '../data/presetThematicPacks.ts';
+
+// Pre-warm: start fetching the milkdrop-textures chunk at module load time (while the start
+// screen is visible) so it's ready before init() runs. Dynamic import keeps the 4.6MB
+// textureData.json out of the main bundle — the fetch is async, not a blocking parse.
+const milkdropTexturesPromise = import('milkdrop-textures');
 
 const PACK_SOURCES = [
   presetsMinimal,
@@ -101,20 +104,43 @@ export class VisualizerRenderer {
     // Load 66 standard MilkDrop textures from the projectM texture pack.
     // Loaded async to avoid blocking the launch animation with 4.6MB JSON parse.
     // butterchurn skips names already loaded (5 overlap with butterchurnExtraImages).
-    import('milkdrop-textures').then(({ getImages }) => {
+    // Uploads are batched with setTimeout(0) yields to keep the UI responsive on mobile —
+    // 330 synchronous WebGL texture uploads (66 base + 264 wrap/clamp variants) would
+    // otherwise block the main thread for several seconds right after the visualizer loads.
+    milkdropTexturesPromise.then(({ getImages }) => {
       const milkdropTextures = getImages();
-      this.loadExtraImages(milkdropTextures);
+      const entries = Object.entries(milkdropTextures);
+      const BATCH_SIZE = 12;
+      type TexEntry = [string, { data: string; width: number; height: number }];
 
+      const uploadBatch = (startIdx: number, source: TexEntry[], onComplete?: () => void) => {
+        if (!this.visualizer) return;
+        const batch: Record<string, { data: string; width: number; height: number }> = {};
+        for (let i = startIdx; i < Math.min(startIdx + BATCH_SIZE, source.length); i++) {
+          batch[source[i][0]] = source[i][1];
+        }
+        this.loadExtraImages(batch);
+        const next = startIdx + BATCH_SIZE;
+        if (next < source.length) {
+          setTimeout(() => uploadBatch(next, source, onComplete), 0);
+        } else {
+          onComplete?.();
+        }
+      };
+
+      // Upload base textures in batches, then build and upload wrap/clamp variants.
       // Register wrap/clamp variants (fw_/fc_/pw_/pc_) so sampler_fw_X etc. resolve
       // to the correct image instead of the clouds2 fallback.
-      const variants: Record<string, { data: string; width: number; height: number }> = {};
-      for (const [name, data] of Object.entries(milkdropTextures)) {
-        for (const prefix of ['fw_', 'fc_', 'pw_', 'pc_']) {
-          const variantKey = prefix + name;
-          if (!(variantKey in milkdropTextures)) variants[variantKey] = data;
+      uploadBatch(0, entries, () => {
+        const variants: TexEntry[] = [];
+        for (const [name, data] of entries) {
+          for (const prefix of ['fw_', 'fc_', 'pw_', 'pc_']) {
+            const variantKey = prefix + name;
+            if (!(variantKey in milkdropTextures)) variants.push([variantKey, data]);
+          }
         }
-      }
-      if (Object.keys(variants).length > 0) this.loadExtraImages(variants);
+        if (variants.length > 0) uploadBatch(0, variants);
+      });
     });
 
     // Register MilkDrop-Original preset names from a lightweight manifest (18KB).

@@ -24,6 +24,13 @@ const HEARTBEAT_INTERVAL_MS = 3000;
 const PEER_TIMEOUT_MS = 6000;
 const MAX_RETRIES = 3;
 const RETRY_DELAYS = [2000, 4000, 8000];
+const CONNECTION_TIMEOUT_MS = 15000;
+
+/** ICE servers for NAT traversal — Google STUN servers are free and widely available. */
+const ICE_SERVERS: RTCIceServer[] = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+];
 
 /** Validate PeerJS DataChannel messages (same shape as sync messages but parsed from JSON). */
 function isValidDeviceMessage(
@@ -126,9 +133,18 @@ export class DeviceSyncService {
 
     return new Promise<string>((resolve, reject) => {
       // Host's peer ID IS the room code
-      this.peer = new Peer(code);
+      this.peer = new Peer(code, { config: { iceServers: ICE_SERVERS } });
+
+      const timeout = setTimeout(() => {
+        if (this._destroyed) return;
+        this.setStatus('error', 'Connection timed out — could not reach signaling server');
+        this.peer?.destroy();
+        this.peer = null;
+        reject(new Error('Connection timeout'));
+      }, CONNECTION_TIMEOUT_MS);
 
       this.peer.on('open', () => {
+        clearTimeout(timeout);
         if (this._destroyed) return;
         this._peerId = code;
         this.setStatus('connected');
@@ -141,6 +157,7 @@ export class DeviceSyncService {
       });
 
       this.peer.on('error', (err) => {
+        clearTimeout(timeout);
         if (this._destroyed) return;
         const peerError = err as import('peerjs').PeerError<string>;
         if (peerError.type === 'unavailable-id' && this._codeRetries < 5) {
@@ -178,16 +195,28 @@ export class DeviceSyncService {
     if (this._destroyed) return;
 
     return new Promise<void>((resolve, reject) => {
-      this.peer = new Peer();
+      this.peer = new Peer({ config: { iceServers: ICE_SERVERS } });
+
+      const timeout = setTimeout(() => {
+        if (this._destroyed) return;
+        this.setStatus('error', 'Connection timed out — could not connect to room');
+        this.peer?.destroy();
+        this.peer = null;
+        reject(new Error('Connection timeout'));
+      }, CONNECTION_TIMEOUT_MS);
 
       this.peer.on('open', (id) => {
-        if (this._destroyed) return;
+        if (this._destroyed) {
+          clearTimeout(timeout);
+          return;
+        }
         this._peerId = id;
 
         const conn = this.peer!.connect(this._roomCode, { reliable: true });
         this.setupConnection(conn);
 
         conn.on('open', () => {
+          clearTimeout(timeout);
           if (this._destroyed) return;
           this._retryCount = 0;
           this.setStatus('connected');
@@ -196,6 +225,7 @@ export class DeviceSyncService {
         });
 
         conn.on('error', (err) => {
+          clearTimeout(timeout);
           if (this._destroyed) return;
           this.handleConnectionError(err);
           reject(err);
@@ -203,6 +233,7 @@ export class DeviceSyncService {
       });
 
       this.peer.on('error', (err) => {
+        clearTimeout(timeout);
         if (this._destroyed) return;
         const peerError = err as import('peerjs').PeerError<string>;
         if (peerError.type === 'peer-unavailable') {

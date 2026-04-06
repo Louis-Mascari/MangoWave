@@ -1149,14 +1149,40 @@ function SpotifyTab() {
 }
 
 function SyncTab() {
+  const { t } = useTranslation('settings');
+  const [syncSubTab, setSyncSubTab] = useState<'window' | 'device'>(
+    isMobileDevice ? 'device' : 'window',
+  );
+
   return (
     <>
-      {/* Window Sync — desktop only */}
-      {!isMobileDevice && <WindowSyncSection />}
+      {/* Sub-tab selector — desktop only (mobile only has device sync) */}
+      {!isMobileDevice && (
+        <div className="flex gap-3">
+          <label className="flex cursor-pointer items-center gap-1 text-[11px]">
+            <input
+              type="radio"
+              name="syncSubTab"
+              checked={syncSubTab === 'window'}
+              onChange={() => setSyncSubTab('window')}
+              className="accent-orange-500"
+            />
+            {t('sync.windowSyncTitle')}
+          </label>
+          <label className="flex cursor-pointer items-center gap-1 text-[11px]">
+            <input
+              type="radio"
+              name="syncSubTab"
+              checked={syncSubTab === 'device'}
+              onChange={() => setSyncSubTab('device')}
+              className="accent-orange-500"
+            />
+            {t('sync.deviceSync.title')}
+          </label>
+        </div>
+      )}
 
-      {/* Device Sync — all platforms */}
-      {!isMobileDevice && <hr className="border-white/10" />}
-      <DeviceSyncSection />
+      {syncSubTab === 'window' && !isMobileDevice ? <WindowSyncSection /> : <DeviceSyncSection />}
 
       {/* Spacer to prevent invisible text below */}
       <div className="pb-1" />
@@ -1259,7 +1285,8 @@ function DeviceSyncSection() {
       const qrgen = await import('qrcode-generator');
       if (cancelled) return;
       const qr = qrgen.default(0, 'M');
-      qr.addData(roomCode);
+      const url = `${window.location.origin}?room=${encodeURIComponent(roomCode)}`;
+      qr.addData(url);
       qr.make();
       setQrDataUrl(qr.createDataURL(6, 2));
     })();

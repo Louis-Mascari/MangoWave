@@ -132,6 +132,35 @@ function MainApp() {
     isRemotePresetRef: isRemoteDevicePresetRef,
   } = useDeviceSync(rendererRef, resetAutopilotRef);
   const deviceSyncStatus = useDeviceSyncStatusStore((s) => s.status);
+
+  // Auto-join device sync room from URL ?room=MANGO-XXXX (e.g. QR code scan)
+  const pendingRoomRef = useRef(
+    (() => {
+      const params = new URLSearchParams(window.location.search);
+      const room = params.get('room')?.toUpperCase() ?? '';
+      if (/^MANGO-[A-HJ-NP-Z]{4}$/.test(room)) {
+        // Clean URL immediately so refresh doesn't re-trigger
+        const url = new URL(window.location.href);
+        url.searchParams.delete('room');
+        window.history.replaceState({}, '', url.pathname + url.search + url.hash);
+        return room;
+      }
+      return '';
+    })(),
+  );
+
+  useEffect(() => {
+    const code = pendingRoomRef.current;
+    if (!code || !isActive || deviceSyncStatus !== 'idle') return;
+    pendingRoomRef.current = '';
+    useDeviceSyncStatusStore
+      .getState()
+      .actions.joinRoom(code)
+      .then(() => {
+        useToastStore.getState().show(i18n.t('toasts.joinedRoom', { ns: 'messages', code }));
+      });
+  }, [isActive, deviceSyncStatus]);
+
   const autopilot = useSettingsStore((s) => s.autopilot);
   const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);
   const presetNameDisplay = useSettingsStore((s) => s.presetNameDisplay);

@@ -490,6 +490,9 @@ function AddToPackButton({
   );
 }
 
+/** Persists import sub-tab selection across panel open/close (module-level, not in store). */
+let _lastImportSubTab: 'presets' | 'textures' = 'presets';
+
 export function PresetBrowser({
   presetList,
   currentPreset,
@@ -1038,7 +1041,11 @@ export function PresetBrowser({
               handleSelectPreset(name);
             }
           }}
-          className="flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs text-white/70 hover:bg-white/10"
+          className={`flex cursor-pointer items-center justify-between rounded px-2 py-1 text-xs ${
+            name === currentPreset
+              ? 'bg-orange-500/30 text-white'
+              : 'text-white/70 hover:bg-white/10'
+          }`}
         >
           <span className="min-w-0 flex-1 truncate text-left">
             <span className={`mr-1.5 text-xs font-medium ${reason.color}`}>
@@ -1076,7 +1083,7 @@ export function PresetBrowser({
   // Pack detail search state moved to PackAddPresets child component
 
   // Import tab state
-  const [importSubTab, setImportSubTab] = useState<'presets' | 'textures'>('presets');
+  const [importSubTab, setImportSubTab] = useState<'presets' | 'textures'>(_lastImportSubTab);
   const [importSearch, setImportSearch] = useState('');
   const deferredImportSearch = useDeferredValue(importSearch);
 
@@ -1586,7 +1593,10 @@ export function PresetBrowser({
             type="radio"
             name="importSubTab"
             checked={importSubTab === 'presets'}
-            onChange={() => setImportSubTab('presets')}
+            onChange={() => {
+              setImportSubTab('presets');
+              _lastImportSubTab = 'presets';
+            }}
             className="accent-orange-500"
           />
           {t('importedPresets.sectionTitle')} ({importedPresets.length})
@@ -1596,7 +1606,10 @@ export function PresetBrowser({
             type="radio"
             name="importSubTab"
             checked={importSubTab === 'textures'}
-            onChange={() => setImportSubTab('textures')}
+            onChange={() => {
+              setImportSubTab('textures');
+              _lastImportSubTab = 'textures';
+            }}
             className="accent-orange-500"
           />
           {t('importedTextures.sectionTitle')} ({importedTextures.length})

@@ -1148,11 +1148,12 @@ function SpotifyTab() {
   );
 }
 
+/** Persists sync sub-tab selection across panel open/close (module-level, not in store). */
+let _lastSyncSubTab: 'window' | 'device' = isMobileDevice ? 'device' : 'window';
+
 function SyncTab() {
   const { t } = useTranslation('settings');
-  const [syncSubTab, setSyncSubTab] = useState<'window' | 'device'>(
-    isMobileDevice ? 'device' : 'window',
-  );
+  const [syncSubTab, setSyncSubTab] = useState<'window' | 'device'>(_lastSyncSubTab);
 
   return (
     <>
@@ -1164,7 +1165,10 @@ function SyncTab() {
               type="radio"
               name="syncSubTab"
               checked={syncSubTab === 'window'}
-              onChange={() => setSyncSubTab('window')}
+              onChange={() => {
+                setSyncSubTab('window');
+                _lastSyncSubTab = 'window';
+              }}
               className="accent-orange-500"
             />
             {t('sync.windowSyncTitle')}
@@ -1174,7 +1178,10 @@ function SyncTab() {
               type="radio"
               name="syncSubTab"
               checked={syncSubTab === 'device'}
-              onChange={() => setSyncSubTab('device')}
+              onChange={() => {
+                setSyncSubTab('device');
+                _lastSyncSubTab = 'device';
+              }}
               className="accent-orange-500"
             />
             {t('sync.deviceSync.title')}

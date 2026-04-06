@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { usePresetHistoryStore } from '../store/usePresetHistoryStore.ts';
-import { useImportedPresetsStore } from '../store/useImportedPresetsStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
+import { ensurePresetLoaded } from '../engine/lazyPresetLoader.ts';
 import { pickPreset } from '../utils/pickPreset.ts';
 import { quarantinedSet, mobileBlockedSet } from '../data/excludedPresets.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
@@ -103,22 +103,13 @@ export function usePresetNavigation({
       blendTime: number,
       fallbackToNext?: () => void,
     ) => {
-      if (renderer.isEelPresetUnloaded(name)) {
-        let preset: object | null = null;
-        if (renderer.isImportedPreset(name)) {
-          preset = await useImportedPresetsStore.getState().getConvertedPreset(name);
-        } else if (renderer.isMilkdropPreset(name)) {
-          const { loadMilkdropPreset } = await import('../engine/milkdropPresetsLoader.ts');
-          preset = await loadMilkdropPreset(name);
-        }
-        if (!preset) {
-          useToastStore
-            .getState()
-            .show(i18n.t('importedPresets.conversionFailed', { name, ns: 'messages' }));
-          fallbackToNext?.();
-          return;
-        }
-        renderer.registerEelPreset(name, preset);
+      const loaded = await ensurePresetLoaded(renderer, name);
+      if (!loaded) {
+        useToastStore
+          .getState()
+          .show(i18n.t('importedPresets.conversionFailed', { name, ns: 'messages' }));
+        fallbackToNext?.();
+        return;
       }
       renderer.loadPreset(name, blendTime);
     },

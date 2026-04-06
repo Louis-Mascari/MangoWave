@@ -8,6 +8,7 @@ import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { mobileBlockedSet } from '../data/excludedPresets.ts';
 import i18n from '../i18n/index.ts';
 import type { VisualizerRenderer } from '../engine/VisualizerRenderer.ts';
+import { ensurePresetLoaded } from '../engine/lazyPresetLoader.ts';
 
 const SETTINGS_DEBOUNCE_MS = 500;
 
@@ -80,7 +81,7 @@ export function useDeviceSync(
   // Wire up callbacks when service exists
   const setupCallbacks = useCallback(
     (service: DeviceSyncService) => {
-      // Inbound: preset change
+      // Inbound: preset change — async to support lazy-loading EEL presets
       service.onPresetChange = (presetName, transitionTime) => {
         const renderer = rendererRef.current;
         console.log('[DeviceSync] onPresetChange:', presetName, 'renderer:', !!renderer);
@@ -95,7 +96,6 @@ export function useDeviceSync(
               isRemotePresetRef.current = true;
               renderer.loadPreset(substitute, transitionTime);
               resetAutopilotRef.current();
-              // Broadcast redirect so other devices know we substituted
               service.sendPresetRedirect(substitute, transitionTime, presetName);
             }
             return;
@@ -109,10 +109,14 @@ export function useDeviceSync(
           return;
         }
 
-        isRemotePresetRef.current = true;
-        renderer.loadPreset(presetName, transitionTime);
-        // Reset host's autopilot timer on remote preset change
-        resetAutopilotRef.current();
+        // Lazy-load EEL preset (MilkDrop/imported) if not yet compiled, then display
+        void (async () => {
+          const loaded = await ensurePresetLoaded(renderer, presetName);
+          if (!loaded) return;
+          isRemotePresetRef.current = true;
+          renderer.loadPreset(presetName, transitionTime);
+          resetAutopilotRef.current();
+        })();
       };
 
       // Inbound: preset redirect — desktops ignore (prevents loops)

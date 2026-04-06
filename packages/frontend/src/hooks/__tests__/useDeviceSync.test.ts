@@ -58,6 +58,7 @@ function createMockRenderer() {
     loadPreset: vi.fn(),
     presetList: ['preset-a', 'preset-b', 'blocked-preset'],
     currentPresetName: 'preset-a',
+    isEelPresetUnloaded: vi.fn().mockReturnValue(false),
   };
 }
 
@@ -134,12 +135,14 @@ describe('useDeviceSync', () => {
       await store.actions.createRoom();
     });
 
-    // Simulate inbound preset
-    act(() => {
+    // Simulate inbound preset (handler is async — flush microtasks)
+    await act(async () => {
       capturedOnPresetChange?.('preset-b', 1.5);
+      await vi.waitFor(() => {
+        expect(renderer.loadPreset).toHaveBeenCalledWith('preset-b', 1.5);
+      });
     });
 
-    expect(renderer.loadPreset).toHaveBeenCalledWith('preset-b', 1.5);
     expect(resetAutopilotRef.current).toHaveBeenCalled();
   });
 

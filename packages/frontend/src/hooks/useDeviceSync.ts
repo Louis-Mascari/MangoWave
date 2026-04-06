@@ -83,6 +83,7 @@ export function useDeviceSync(
       // Inbound: preset change
       service.onPresetChange = (presetName, transitionTime) => {
         const renderer = rendererRef.current;
+        console.debug('[DeviceSync] onPresetChange:', presetName, 'renderer:', !!renderer);
         if (!renderer) return;
 
         // Mobile: check if preset is blocked, substitute if needed

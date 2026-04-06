@@ -252,3 +252,24 @@ Call `gl.deleteProgram(this.shaderProgram)` at the top of `createShader()` befor
 ### Location
 
 `src/butterchurn/rendering/shaders/warp.js` and `src/butterchurn/rendering/shaders/comp.js` — search for `[MW-PATCH: clean up previous program to avoid GPU memory leak]`.
+
+---
+
+## 13. Guard `createSampler()` Against Null Returns
+
+### Problem
+
+`gl.createSampler()` returns `null` when the WebGL context is lost (GPU crash, driver issue, tab backgrounding). butterchurn immediately calls `gl.samplerParameteri()` on the result, producing `TypeError: Argument 1 ('sampler') to WebGL2RenderingContext.samplerParameteri must be an instance of WebGLSampler`.
+
+### Solution
+
+Null-check every `createSampler()` result before calling `samplerParameteri()`. Both constructor-time and render-time `samplerParameteri` calls are guarded.
+
+### Location
+
+- `src/butterchurn/noise/noise.js` — `noiseTexPointLQ`
+- `src/butterchurn/rendering/shaders/comp.js` — 5 samplers (constructor) + runtime wrapping
+- `src/butterchurn/rendering/shaders/warp.js` — 5 samplers (constructor) + runtime wrapping
+- `src/butterchurn/rendering/shapes/customShape.js` — `mainSampler` (constructor) + runtime wrapping
+
+Search for `[MW-PATCH: guard-sampler]`.

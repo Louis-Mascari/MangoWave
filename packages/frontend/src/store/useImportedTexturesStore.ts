@@ -17,7 +17,7 @@ export interface ImportedTexturesState {
   addTexture: (name: string, data: TextureData) => Promise<void>;
   removeTexture: (name: string) => Promise<void>;
   removeAllTextures: () => Promise<void>;
-  /** Returns a plain Record suitable for butterchurn's loadExtraImages. */
+  /** Returns a plain Record suitable for renderer's loadExtraImages. */
   getAllTextures: () => Record<string, TextureData>;
 }
 

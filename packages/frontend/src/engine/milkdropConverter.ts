@@ -1,5 +1,4 @@
 import { getNames as getMilkdropTextureNames } from 'milkdrop-textures';
-import sjson from 'secure-json-parse';
 
 const MAX_FILE_SIZE = 500_000; // 500KB
 const VALID_EXTENSIONS = ['.milk'];
@@ -24,7 +23,7 @@ export async function readMilkFile(file: File): Promise<{ name: string; text: st
   return { name, text };
 }
 
-// Built-in sampler names that butterchurn always provides (no user texture needed)
+// Built-in sampler names that projectM always provides (no user texture needed)
 const BUILTIN_SAMPLERS = new Set([
   'main',
   'fw_main',
@@ -44,7 +43,7 @@ const BUILTIN_SAMPLERS = new Set([
   'blur3',
 ]);
 
-// Extra images: 6 from butterchurnExtraImages + 66 from milkdrop-textures (with case variants)
+// Extra images: 66 standard MilkDrop textures from milkdrop-textures (with case variants)
 export const BUILTIN_EXTRA_IMAGES = new Set([
   'cells',
   'lichen',
@@ -70,19 +69,21 @@ export function parsePsVersion(milkText: string): number {
 // Wrap/clamp filter prefixes: fw_ (bilinear+wrap), fc_ (bilinear+clamp),
 // pw_ (point+wrap), pc_ (point+clamp). Strip before texture lookup.
 const WRAP_PREFIX_RE = /^(?:fw|fc|pw|pc)_/;
-// Random texture selectors (rand00–rand15). butterchurn doesn't implement these,
-// but they're not real texture files — exclude from missing warnings.
+// Random texture selectors (rand00–rand15). These are runtime-resolved by the engine,
+// not real texture files — exclude from missing warnings.
 const RAND_TEXTURE_RE = /^rand\d{2}/;
 
-/** Extract custom texture names from a converted preset object's shader code.
+/** Extract custom texture names from raw .milk text.
  *  Returns texture names that aren't built-in and aren't in the provided loaded set.
  *  Handles case-insensitive matching, wrap/clamp prefixes, and rand selectors. */
-export function findMissingTextures(preset: object, loadedTextures: ReadonlySet<string>): string[] {
-  const content = JSON.stringify(preset);
+export function findMissingTextures(
+  milkText: string,
+  loadedTextures: ReadonlySet<string>,
+): string[] {
   const refs = new Set<string>();
   const re = /sampler_(\w+)/g;
   let m: RegExpExecArray | null;
-  while ((m = re.exec(content)) !== null) {
+  while ((m = re.exec(milkText)) !== null) {
     refs.add(m[1]);
   }
 
@@ -94,7 +95,7 @@ export function findMissingTextures(preset: object, loadedTextures: ReadonlySet<
 
   const missing: string[] = [];
   for (const name of refs) {
-    // Skip random texture selectors (butterchurn doesn't support them)
+    // Skip random texture selectors (runtime-resolved, not real texture files)
     if (RAND_TEXTURE_RE.test(name)) continue;
 
     // Strip wrap/clamp prefix for lookup: fw_fire_base → fire_base
@@ -107,12 +108,4 @@ export function findMissingTextures(preset: object, loadedTextures: ReadonlySet<
   }
   // Deduplicate (fw_X and pc_X → one entry for X) and sort
   return [...new Set(missing)].sort();
-}
-
-/** Security scan of a converted preset object. Throws on suspicious content. */
-export function validatePreset(preset: object): void {
-  // Run secure-json-parse scan for prototype pollution.
-  // EEL string scanning is no longer needed — eel-wasm compiles EEL to a WASM
-  // sandbox that cannot access JS globals, DOM, or network APIs.
-  sjson.scan(preset);
 }

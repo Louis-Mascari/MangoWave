@@ -62,13 +62,13 @@ A PKCE-based flow also exists in the frontend code (`spotifyPkce.ts`) for self-h
 
 Authenticated users can sync all visualizer settings to the cloud via `settings-save` / `settings-load`. The synced payload mirrors the frontend Zustand store:
 
-- **performance** — fpsCap (0/15–300), resolutionScale (0.25–1.0), mesh resolution (meshWidth 16–128 / meshHeight 12–96), texture quality (0.25–2.0), fxaa
+- **performance** — fpsCap (0/15–300), resolutionScale (0.25–1.0), mesh resolution (meshWidth 16–128 / meshHeight 12–96)
 - **eqSettings** — pre-amp gain (0–3 linear) + 10 band gains (±12 dB)
 - **audio** — smoothingConstant (0–1), fftSize (512/1024/2048/4096)
 - **autopilot** — enabled, interval (5–120s), mode (all/favorites), favoriteWeight (1–10)
 - **transitionTime** — preset blend duration (0–30s)
 - **blockedPresets / favoritePresets** — preset name lists (up to 500 items, 200 chars each)
-- **enabledPacks** — active butterchurn pack names (up to 100 items)
+- **enabledPacks** — active thematic pack names (up to 100 items)
 - **excludedOverrides** — user-restored excluded presets (up to 500 items)
 - **presetNameDisplay** — "off", "always", or duration in seconds (1–10)
 - **songInfoDisplay** — "off" or duration in seconds (1–10)

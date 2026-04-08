@@ -176,6 +176,7 @@
     "invalidFileType": "不是 .milk 文件",
     "emptyFile": "文件为空",
     "duplicateName": "已存在",
+    "loadFailed": "无法加载预设「{{name}}」",
     "conversionFailed": "转换失败",
     "securityBlocked": "包含被阻止的内容",
     "nativeNameCollision": "已存在于内置预设中",

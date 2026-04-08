@@ -26,8 +26,6 @@ const mockSettings = {
     resolutionScale: 1.0,
     meshWidth: 48,
     meshHeight: 36,
-    textureRatio: 1.0,
-    fxaa: false,
   },
   eqSettings: { preAmpGain: 1.0, bandGains: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
   audio: { smoothingConstant: 0.3, fftSize: 1024 },

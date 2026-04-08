@@ -111,12 +111,10 @@ function validatePerformance(
   if (err) return err;
   const p = raw as Record<string, unknown>;
 
-  for (const field of ['fpsCap', 'resolutionScale', 'meshWidth', 'meshHeight', 'textureRatio']) {
+  for (const field of ['fpsCap', 'resolutionScale', 'meshWidth', 'meshHeight']) {
     const numErr = requireFiniteNumber(p[field], `performance.${field}`);
     if (numErr) return numErr;
   }
-  const boolErr = requireBoolean(p.fxaa, 'performance.fxaa');
-  if (boolErr) return boolErr;
 
   const fpsCap = Math.round(clamp(p.fpsCap as number, 0, 300));
   return {
@@ -125,8 +123,6 @@ function validatePerformance(
       resolutionScale: clamp(p.resolutionScale as number, 0.25, 1.0),
       meshWidth: Math.round(clamp(p.meshWidth as number, 16, 128)),
       meshHeight: Math.round(clamp(p.meshHeight as number, 12, 96)),
-      textureRatio: clamp(p.textureRatio as number, 0.25, 2.0),
-      fxaa: p.fxaa as boolean,
     },
   };
 }

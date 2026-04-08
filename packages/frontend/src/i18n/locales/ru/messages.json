@@ -176,6 +176,7 @@
     "invalidFileType": "Не файл .milk",
     "emptyFile": "Файл пустой",
     "duplicateName": "Уже существует",
+    "loadFailed": "Не удалось загрузить пресет \"{{name}}\"",
     "conversionFailed": "Ошибка конвертации",
     "securityBlocked": "Содержит заблокированный контент",
     "nativeNameCollision": "Уже существует среди встроенных пресетов",

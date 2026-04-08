@@ -1,50 +1,47 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { VisualizerRenderer } from '../VisualizerRenderer.ts';
 
-// Mock butterchurn
-vi.mock('butterchurn', () => ({
-  default: {
-    createVisualizer: vi.fn(() => ({
-      connectAudio: vi.fn(),
-      loadPreset: vi.fn(),
-      loadExtraImages: vi.fn(),
-      setRendererSize: vi.fn(),
-      render: vi.fn(),
-    })),
-  },
-  butterchurnExtraImages: {
-    getImages: () => ({ cells: { data: 'data:image/png;base64,abc', width: 256, height: 256 } }),
-  },
+// Mock projectm-wasm
+const mockProjectM = {
+  init: vi.fn().mockReturnValue(0),
+  destroy: vi.fn(),
+  renderFrame: vi.fn(),
+  loadPreset: vi.fn(),
+  setWindowSize: vi.fn(),
+  setMeshSize: vi.fn(),
+  setFps: vi.fn(),
+  setSoftCutDuration: vi.fn(),
+  setBeatSensitivity: vi.fn(),
+  setPresetLocked: vi.fn(),
+  setHardCutEnabled: vi.fn(),
+  setAspectCorrection: vi.fn(),
+  pcmAddFloat: vi.fn(),
+  setTextureLoadCallback: vi.fn(),
+  setPresetSwitchFailedCallback: vi.fn(),
+  getVersion: vi.fn().mockReturnValue({ major: 4, minor: 1, patch: 0 }),
+};
+
+vi.mock('projectm-wasm', () => ({
+  createProjectM: vi.fn().mockResolvedValue(mockProjectM),
 }));
 
-// Mock milkdrop-presets (empty for tests — MilkDrop presets load async)
+// Mock milkdrop-presets
 vi.mock('milkdrop-presets', () => ({
+  getMilkText: vi.fn().mockReturnValue('[preset00]\nfoo=bar'),
   getPresets: () => ({}),
-  getPresetNames: () => [],
-  getPreset: () => undefined,
 }));
 
-// Mock milkdrop-presets/names (lightweight manifest loaded at init)
+// Mock milkdrop-presets/names
 vi.mock('milkdrop-presets/names', () => ({
-  getPresetNames: () => [],
+  getPresetNames: () => ['Preset A', 'Preset B', 'Preset C'],
 }));
 
-// Mock butterchurn-presets (Minimal pack provides test presets; others empty)
-vi.mock('butterchurn-presets', () => ({
-  presetsMinimal: {
-    getPresets: vi.fn(() => ({
-      'Preset A': { code: 'a' },
-      'Preset B': { code: 'b' },
-      'Preset C': { code: 'c' },
-    })),
-  },
-  presetsNonMinimal: { getPresets: () => ({}) },
-  presetsExtra: { getPresets: () => ({}) },
-  presetsExtra2: { getPresets: () => ({}) },
-  presetsMD1: { getPresets: () => ({}) },
+// Mock milkdrop-textures
+vi.mock('milkdrop-textures', () => ({
+  getImages: () => ({}),
 }));
 
-// Mock presetThematicMap — test presets map to known thematic packs
+// Mock presetThematicMap
 vi.mock('../../data/presetThematicPacks.ts', () => ({
   THEMATIC_PACKS: ['Ambient', 'Reactive', 'Psychedelic', 'Ethereal'],
   presetThematicMap: {
@@ -55,12 +52,19 @@ vi.mock('../../data/presetThematicPacks.ts', () => ({
   PACK_DESCRIPTIONS: {},
 }));
 
+// Mock AudioEngine
+const mockAudioEngine = {
+  initPcmCapture: vi.fn().mockResolvedValue(undefined),
+  onPcmData: vi.fn(),
+} as unknown as Parameters<VisualizerRenderer['init']>[0];
+
 describe('VisualizerRenderer', () => {
   let renderer: VisualizerRenderer;
 
   beforeEach(() => {
     renderer = new VisualizerRenderer();
-    vi.spyOn(Math, 'random').mockReturnValue(0); // deterministic preset selection
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+    vi.clearAllMocks();
   });
 
   it('starts with empty state', () => {
@@ -69,26 +73,17 @@ describe('VisualizerRenderer', () => {
   });
 
   describe('init', () => {
-    it('initializes butterchurn and loads a preset', () => {
-      const canvas = {
-        width: 800,
-        height: 600,
-        getContext: vi.fn(),
-      } as unknown as HTMLCanvasElement;
-      const audioContext = {} as AudioContext;
-      const analyser = {} as AnalyserNode;
+    it('initializes projectM and loads a preset', async () => {
       const onPresetChange = vi.fn();
-
-      renderer.init(canvas, audioContext, analyser, onPresetChange);
+      await renderer.init(mockAudioEngine, onPresetChange);
 
       expect(renderer.presetList).toEqual(['Preset A', 'Preset B', 'Preset C']);
       expect(renderer.currentPresetName).toBe('Preset A');
       expect(onPresetChange).toHaveBeenCalledWith('Preset A');
     });
 
-    it('builds pack map using thematic classification', () => {
-      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
-      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+    it('builds pack map using thematic classification', async () => {
+      await renderer.init(mockAudioEngine);
 
       const packMap = renderer.presetPackMap;
       expect(packMap.get('Preset A')).toBe('Reactive');
@@ -96,11 +91,9 @@ describe('VisualizerRenderer', () => {
       expect(packMap.get('Preset C')).toBe('Ethereal');
     });
 
-    it('excludes mobile-blocked presets via excludedPresets set', () => {
-      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+    it('excludes presets via excludedPresets set', async () => {
       const onPresetChange = vi.fn();
-
-      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode, onPresetChange, {
+      await renderer.init(mockAudioEngine, onPresetChange, {
         excludedPresets: new Set(['Preset A', 'Preset C']),
       });
 
@@ -108,39 +101,39 @@ describe('VisualizerRenderer', () => {
       expect(onPresetChange).toHaveBeenCalledWith('Preset B');
     });
 
-    it('falls back to all presets when excludedPresets excludes everything', () => {
-      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
+    it('falls back to all presets when excludedPresets excludes everything', async () => {
       const onPresetChange = vi.fn();
-
-      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode, onPresetChange, {
+      await renderer.init(mockAudioEngine, onPresetChange, {
         excludedPresets: new Set(['Preset A', 'Preset B', 'Preset C']),
       });
 
-      // Should fall back to full list since no candidates remained
       expect(renderer.currentPresetName).toBe('Preset A');
       expect(onPresetChange).toHaveBeenCalledWith('Preset A');
     });
   });
 
   describe('nextPreset', () => {
-    it('skips blocked presets', () => {
-      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
-      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+    it('skips blocked presets', async () => {
+      await renderer.init(mockAudioEngine);
 
       const blocked = new Set(['Preset A', 'Preset C']);
       renderer.nextPreset(blocked);
 
-      expect(renderer.currentPresetName).toBe('Preset B');
+      // nextPreset calls loadPreset which is async internally; wait a tick
+      await vi.waitFor(() => {
+        expect(renderer.currentPresetName).toBe('Preset B');
+      });
     });
 
-    it('does nothing when all presets are blocked', () => {
-      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
-      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+    it('does nothing when all presets are blocked', async () => {
+      await renderer.init(mockAudioEngine);
 
       const initialPreset = renderer.currentPresetName;
       const blocked = new Set(['Preset A', 'Preset B', 'Preset C']);
       renderer.nextPreset(blocked);
 
+      // Even after a tick, preset should not change
+      await Promise.resolve();
       expect(renderer.currentPresetName).toBe(initialPreset);
     });
   });
@@ -148,8 +141,6 @@ describe('VisualizerRenderer', () => {
   describe('setFpsCap', () => {
     it('sets fps interval for frame limiting', () => {
       renderer.setFpsCap(30);
-      // Internal state — we verify indirectly through render behavior
-      // Just ensure it doesn't throw
       expect(true).toBe(true);
     });
 
@@ -160,12 +151,11 @@ describe('VisualizerRenderer', () => {
   });
 
   describe('start/stop', () => {
-    it('can start and stop the render loop', () => {
+    it('can start and stop the render loop', async () => {
       const mockRaf = vi.spyOn(globalThis, 'requestAnimationFrame').mockReturnValue(1);
       const mockCaf = vi.spyOn(globalThis, 'cancelAnimationFrame').mockImplementation(() => {});
 
-      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
-      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+      await renderer.init(mockAudioEngine);
 
       renderer.start();
       expect(mockRaf).toHaveBeenCalled();
@@ -177,14 +167,13 @@ describe('VisualizerRenderer', () => {
       mockCaf.mockRestore();
     });
 
-    it('does not start twice', () => {
+    it('does not start twice', async () => {
       const mockRaf = vi.spyOn(globalThis, 'requestAnimationFrame').mockReturnValue(1);
 
-      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
-      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+      await renderer.init(mockAudioEngine);
 
       renderer.start();
-      renderer.start(); // second call should be a no-op
+      renderer.start();
       expect(mockRaf).toHaveBeenCalledTimes(1);
 
       mockRaf.mockRestore();
@@ -192,9 +181,8 @@ describe('VisualizerRenderer', () => {
   });
 
   describe('imported presets', () => {
-    it('registers imported preset names without objects', () => {
-      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
-      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+    it('registers imported preset names', async () => {
+      await renderer.init(mockAudioEngine);
 
       renderer.registerImportedPresetNames(['Import A', 'Import B']);
 
@@ -204,29 +192,8 @@ describe('VisualizerRenderer', () => {
       expect(renderer.presetPackMap.get('Import B')).toBe('Imported');
     });
 
-    it('marks imported preset as unloaded if no object registered', () => {
-      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
-      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
-
-      renderer.registerImportedPresetNames(['Lazy Preset']);
-      expect(renderer.isEelPresetUnloaded('Lazy Preset')).toBe(true);
-      expect(renderer.isEelPresetUnloaded('Preset A')).toBe(false);
-    });
-
-    it('registers a converted imported preset object', () => {
-      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
-      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
-
-      renderer.registerImportedPresetNames(['My Import']);
-      expect(renderer.isEelPresetUnloaded('My Import')).toBe(true);
-
-      renderer.registerEelPreset('My Import', { code: 'imported' });
-      expect(renderer.isEelPresetUnloaded('My Import')).toBe(false);
-    });
-
-    it('unregisters an imported preset', () => {
-      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
-      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+    it('unregisters an imported preset', async () => {
+      await renderer.init(mockAudioEngine);
 
       renderer.registerImportedPresetNames(['To Remove']);
       expect(renderer.presetList).toContain('To Remove');
@@ -236,9 +203,8 @@ describe('VisualizerRenderer', () => {
       expect(renderer.presetPackMap.has('To Remove')).toBe(false);
     });
 
-    it('does not duplicate names when registering twice', () => {
-      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
-      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+    it('does not duplicate names when registering twice', async () => {
+      await renderer.init(mockAudioEngine);
 
       renderer.registerImportedPresetNames(['Dup']);
       renderer.registerImportedPresetNames(['Dup']);
@@ -247,25 +213,16 @@ describe('VisualizerRenderer', () => {
       expect(count).toBe(1);
     });
 
-    it('isImportedPreset returns true for imported, false for others', () => {
-      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
-      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+    it('isImportedPreset returns true for imported, false for others', async () => {
+      await renderer.init(mockAudioEngine);
 
       renderer.registerImportedPresetNames(['Import A']);
       expect(renderer.isImportedPreset('Import A')).toBe(true);
       expect(renderer.isImportedPreset('Preset A')).toBe(false);
     });
 
-    it('isMilkdropPreset returns false before MilkDrop names are registered', () => {
-      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
-      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
-
-      expect(renderer.isMilkdropPreset('Preset A')).toBe(false);
-    });
-
-    it('unregisterImportedPreset removes from _importedPresetNames', () => {
-      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
-      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+    it('unregisterImportedPreset removes from _importedPresetNames', async () => {
+      await renderer.init(mockAudioEngine);
 
       renderer.registerImportedPresetNames(['To Remove']);
       expect(renderer.isImportedPreset('To Remove')).toBe(true);
@@ -276,12 +233,11 @@ describe('VisualizerRenderer', () => {
   });
 
   describe('destroy', () => {
-    it('cleans up all state', () => {
+    it('cleans up all state', async () => {
       const mockCaf = vi.spyOn(globalThis, 'cancelAnimationFrame').mockImplementation(() => {});
       vi.spyOn(globalThis, 'requestAnimationFrame').mockReturnValue(1);
 
-      const canvas = { width: 800, height: 600 } as HTMLCanvasElement;
-      renderer.init(canvas, {} as AudioContext, {} as AnalyserNode);
+      await renderer.init(mockAudioEngine);
       renderer.start();
       renderer.destroy();
 

@@ -1,9 +1,8 @@
 import type { VisualizerRenderer } from './VisualizerRenderer.ts';
-import { useImportedPresetsStore } from '../store/useImportedPresetsStore.ts';
 
 /**
- * Check if a dynamic import error is due to a stale deployment (old HTML referencing
- * chunk hashes that no longer exist on the CDN). Triggers a one-time page reload.
+ * Check if a stale deployment error occurred (old HTML referencing
+ * chunk hashes that no longer exist on the CDN). Triggers a one-time reload.
  */
 const RELOAD_KEY = 'mw-chunk-reload';
 function handleStaleChunkError(err: unknown): void {
@@ -18,29 +17,18 @@ function handleStaleChunkError(err: unknown): void {
 }
 
 /**
- * Lazily load and register an EEL preset (imported or MilkDrop) with the renderer
- * if it hasn't been loaded yet. Returns true if the preset is ready to display.
+ * Lazily load a preset's .milk text and feed it to the renderer.
+ * With projectM, no conversion or compilation is needed — just fetch the text.
+ * Returns true if the preset loaded successfully.
  */
 export async function ensurePresetLoaded(
   renderer: VisualizerRenderer,
   name: string,
 ): Promise<boolean> {
-  if (!renderer.isEelPresetUnloaded(name)) return true;
-
-  let preset: object | null = null;
   try {
-    if (renderer.isImportedPreset(name)) {
-      preset = await useImportedPresetsStore.getState().getConvertedPreset(name);
-    } else if (renderer.isMilkdropPreset(name)) {
-      const { loadMilkdropPreset } = await import('./milkdropPresetsLoader.ts');
-      preset = await loadMilkdropPreset(name);
-    }
+    return await renderer.loadPresetByName(name, true);
   } catch (err) {
     handleStaleChunkError(err);
     return false;
   }
-
-  if (!preset) return false;
-  renderer.registerEelPreset(name, preset);
-  return true;
 }

@@ -10,7 +10,7 @@ The exported `getImages()` returns textures keyed by both original case (`OIbean
 
 ## Exports
 
-- `getImages()` — all textures in butterchurn-compatible format (`{ [name]: { data, width, height } }`)
+- `getImages()` — all textures as `{ [name]: { data, width, height } }` for projectM's texture callback
 - `getNames()` — all registered texture names (includes both case variants)
 
 ## Regenerating texture data
@@ -23,8 +23,8 @@ Requires `image-size` (dev dependency). Reads from `textures/`, writes to `src/t
 
 ## Texture coverage
 
-5 textures overlap with butterchurn's built-in `butterchurnExtraImages` (cells, lichen, prayerwheel, seaweed, smalltiled_lizard_scales) — butterchurn skips duplicates. `mage` is only in butterchurn's set, not this pack. The only permanently lost standard MilkDrop texture is "worms" (per [projectM issue #532](https://github.com/projectM-visualizer/projectm/issues/532)).
+The only permanently lost standard MilkDrop texture is "worms" (per [projectM issue #532](https://github.com/projectM-visualizer/projectm/issues/532)).
 
 ## License
 
-These textures originally shipped with MilkDrop (BSD-licensed Winamp plugin) and are redistributed by projectM under MIT. butterchurn already redistributes MilkDrop content (presets, 6 textures). Consistent with existing practice.
+These textures originally shipped with MilkDrop (BSD-licensed Winamp plugin) and are redistributed by projectM under MIT.

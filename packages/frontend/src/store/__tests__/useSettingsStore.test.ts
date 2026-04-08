@@ -12,8 +12,6 @@ describe('useSettingsStore', () => {
       result.current.setFpsCap(60);
       result.current.setResolutionScale(1.0);
       result.current.setMeshSize(48, 36);
-      result.current.setTextureRatio(1.0);
-      result.current.setFxaa(false);
       result.current.setTransitionTime(2.0);
       result.current.setSmoothingConstant(0.3);
       result.current.setFftSize(1024);
@@ -43,8 +41,6 @@ describe('useSettingsStore', () => {
       expect(result.current.performance.resolutionScale).toBe(1.0);
       expect(result.current.performance.meshWidth).toBe(48);
       expect(result.current.performance.meshHeight).toBe(36);
-      expect(result.current.performance.textureRatio).toBe(1.0);
-      expect(result.current.performance.fxaa).toBe(false);
     });
 
     it('sets fps cap', () => {
@@ -88,18 +84,6 @@ describe('useSettingsStore', () => {
       act(() => result.current.setMeshSize(64, 48));
       expect(result.current.performance.meshWidth).toBe(64);
       expect(result.current.performance.meshHeight).toBe(48);
-    });
-
-    it('sets texture ratio', () => {
-      const { result } = renderHook(() => useSettingsStore());
-      act(() => result.current.setTextureRatio(1.5));
-      expect(result.current.performance.textureRatio).toBe(1.5);
-    });
-
-    it('sets fxaa', () => {
-      const { result } = renderHook(() => useSettingsStore());
-      act(() => result.current.setFxaa(true));
-      expect(result.current.performance.fxaa).toBe(true);
     });
   });
 
@@ -383,8 +367,6 @@ describe('useSettingsStore', () => {
         result.current.setFpsCap(144);
         result.current.setResolutionScale(0.5);
         result.current.setMeshSize(96, 72);
-        result.current.setTextureRatio(1.5);
-        result.current.setFxaa(true);
         result.current.setSmoothingConstant(0.8);
         result.current.setFftSize(4096);
       });
@@ -394,8 +376,6 @@ describe('useSettingsStore', () => {
         resolutionScale: 1.0,
         meshWidth: 48,
         meshHeight: 36,
-        textureRatio: 1.0,
-        fxaa: false,
       });
       expect(result.current.audio).toEqual({
         smoothingConstant: 0.3,
@@ -441,18 +421,15 @@ describe('useSettingsStore', () => {
       expect(result.current.blockedPresets).toEqual([]);
     });
 
-    it('retains presets that are also quarantined', () => {
+    it('clears all user-blocked presets (quarantine list is now empty)', () => {
       const { result } = renderHook(() => useSettingsStore());
       act(() => {
-        result.current.blockPreset('User Blocked Preset');
-        result.current.blockPreset('martin - attack of the beast'); // quarantined
-        result.current.blockPreset('Geiss - Spiral Artifact'); // quarantined
+        result.current.blockPreset('User Blocked A');
+        result.current.blockPreset('User Blocked B');
       });
-      expect(result.current.blockedPresets).toHaveLength(3);
+      expect(result.current.blockedPresets).toHaveLength(2);
       act(() => result.current.clearBlocked());
-      expect(result.current.blockedPresets).toContain('martin - attack of the beast');
-      expect(result.current.blockedPresets).toContain('Geiss - Spiral Artifact');
-      expect(result.current.blockedPresets).not.toContain('User Blocked Preset');
+      expect(result.current.blockedPresets).toEqual([]);
     });
   });
 
@@ -675,7 +652,6 @@ describe('useSettingsStore', () => {
       // Fields not in import are preserved from current state
       expect(result.current.performance.resolutionScale).toBe(1.0);
       expect(result.current.performance.meshWidth).toBe(48);
-      expect(result.current.performance.fxaa).toBe(false);
     });
 
     it('ignores non-data keys like store functions', () => {

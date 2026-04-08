@@ -1,10 +1,4 @@
-import {
-  readMilkFile,
-  validatePreset,
-  findMissingTextures,
-  BUILTIN_EXTRA_IMAGES,
-} from './milkdropConverter.ts';
-import { convertInWorker } from './conversionWorkerManager.ts';
+import { readMilkFile, findMissingTextures, BUILTIN_EXTRA_IMAGES } from './milkdropConverter.ts';
 import { readTextureFile, validateTextureFile } from './textureLoader.ts';
 import { useImportedPresetsStore } from '../store/useImportedPresetsStore.ts';
 import { useImportedTexturesStore } from '../store/useImportedTexturesStore.ts';
@@ -55,18 +49,13 @@ export async function processPresetImport(
         throw new Error('nativeNameCollision');
       }
 
-      const converted = await convertInWorker(name, text);
-      validatePreset(converted);
-
-      const missing = findMissingTextures(converted, opts.importedTextureNameSet);
+      const missing = findMissingTextures(text, opts.importedTextureNameSet);
       if (missing.length > 0) {
         warnings.push(...missing);
       }
 
       batchNames.add(name);
       await store.addPreset(name, text);
-      // Persist converted JSON to IDB for instant future access
-      await idbSet(`mw-conv:${name}`, converted);
       useSettingsStore.getState().addImportedPresetMeta({
         name,
         fileName: file.name,

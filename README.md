@@ -6,8 +6,8 @@
 
 <p align="center">
   Browser-based audio-reactive visualizer inspired by Winamp/MilkDrop.<br>
-  Plays local files, captures system audio, or listens via microphone — feeds real-time FFT data into
-  <a href="https://github.com/jberg/butterchurn">butterchurn</a> (a WebGL 2 MilkDrop port) with 832 presets across 4 thematic packs.
+  Plays local files, captures system audio, or listens via microphone — feeds real-time PCM audio data into
+  <a href="https://github.com/projectM-visualizer/projectm">projectM</a> (C++ reference MilkDrop implementation compiled to WASM) with 832 presets across 4 thematic packs.
 </p>
 
 <p align="center">
@@ -22,9 +22,9 @@
 
 ## Features
 
-- **832 MilkDrop presets** (395 butterchurn + 437 MilkDrop-Original) across 4 thematic packs (Ambient, Reactive, Psychedelic, Ethereal) with virtualized browsing
-- **Import .milk presets** — add community MilkDrop presets (PS1, PS2, and PS3) from the thousands available online. Raw files stored in IndexedDB, converted at import time in a Web Worker via a forked `milkdrop-preset-converter` (GLSL ES 3.0 shaders) with EEL equations compiled to WebAssembly at load time via `eel-wasm`
-- **Import custom textures** — upload JPEG/PNG/WebP images for MilkDrop presets that reference `sampler_<name>`. 66 standard MilkDrop textures bundled from the [projectM texture pack](https://github.com/projectM-visualizer/presets-milkdrop-texture-pack), plus 6 built-in butterchurn textures — covers all canonical presets. Additional author-specific textures can be uploaded manually
+- **832 MilkDrop presets** across 4 thematic packs (Ambient, Reactive, Psychedelic, Ethereal) with virtualized browsing
+- **Import .milk presets** — add community MilkDrop presets (PS1, PS2, and PS3) from the thousands available online. Raw `.milk` files stored in IndexedDB; projectM parses and renders them natively with no conversion step
+- **Import custom textures** — upload JPEG/PNG/WebP images for MilkDrop presets that reference `sampler_<name>`. 66 standard MilkDrop textures bundled from the [projectM texture pack](https://github.com/projectM-visualizer/presets-milkdrop-texture-pack) — covers all canonical presets. Additional author-specific textures can be uploaded manually
 - **Custom packs** — create, edit, import/export preset collections; start a pack to lock autopilot and navigation to its presets only
 - **Pack filtering** — enable/disable built-in packs to control which presets appear and which autopilot draws from
 - **Excluded presets** — quarantined presets (broken or inappropriate content) and mobile-blocked presets (36 GPU-heavy presets identified via device testing) collected in a unified Excluded tab with reason badges and per-preset overrides
@@ -37,7 +37,7 @@
 - **Shortcuts** — keyboard and mouse shortcuts for preset navigation, fullscreen, favorites, and more
 - **Mobile-optimized UI** with tap-to-reveal circular controls, full-screen modal panels, and automatic filtering of 36 GPU-heavy presets on mobile devices
 - **Optional Spotify integration** — Now Playing metadata for all authorized users; seek, shuffle, and repeat controls for Premium users. Cloud-synced settings. Owner-mode only due to Spotify's dev mode policy (1 Client ID per developer, max 5 authorized users, Premium required to register the app). Self-hosters can set up their own Spotify developer app via the included PKCE code
-- **Visual quality controls** — mesh resolution, texture quality, FXAA anti-aliasing, plus FPS cap, resolution scaling, FFT size, smoothing
+- **Visual quality controls** — mesh resolution, FPS cap, resolution scaling, FFT size, smoothing
 - **Multi-window sync** — sync presets and settings across browser windows on the same device via BroadcastChannel. Any window can make changes; automatic leader election drives autopilot from one window
 - **Cross-device sync** — sync presets and settings across phones, laptops, and TVs via peer-to-peer WebRTC (PeerJS). Create a room to get a `MANGO-XXXX` code + QR code, join from another device. Star topology with host-controlled autopilot. Any device can manually change presets. Mobile-blocked presets automatically substituted. Zero backend — connections are peer-to-peer
 - **Settings export/import** — transfer settings between browsers or devices via JSON file
@@ -54,7 +54,7 @@ The backend only serves **optional Spotify integration** — 4 Lambda endpoints 
 ### Audio Pipeline
 
 ```
-Source → GainNode (pre-amp) → 10× BiquadFilter (EQ) → AnalyserNode → butterchurn
+Source → GainNode (pre-amp) → 10× BiquadFilter (EQ) → AnalyserNode (silence detection) + AudioWorkletNode (PCM capture) → projectM WASM
 ```
 
 Three audio sources feed the pipeline:
@@ -97,12 +97,9 @@ pnpm workspaces monorepo. Node >= 20, pnpm >= 10 required.
 ```
 MangoWave/
 ├── packages/frontend/                   # React 19 + Vite 8 + TypeScript — the visualizer app
-├── packages/butterchurn/                # Vendored butterchurn with ESM wrapper + types
-├── packages/butterchurn-presets/        # Vendored preset packs with ESM wrapper + types
-├── packages/milkdrop-preset-converter/  # Forked .milk → butterchurn JSON converter (hlslparser-wasm + EEL preprocessor)
-├── packages/milkdrop-presets/           # 437 MilkDrop-Original presets (lazy-loaded, WASM-compiled on demand)
+├── packages/projectm-wasm/              # projectM C++ MilkDrop renderer compiled to WASM
+├── packages/milkdrop-presets/           # 437 MilkDrop-Original presets
 ├── packages/milkdrop-textures/          # 66 standard MilkDrop textures (projectM texture pack)
-├── packages/hlslparser-wasm/            # HLSL → GLSL ES 3.0 compiler (projectM fork, WASM)
 ├── packages/backend/                    # Lambda handlers for Spotify OAuth & settings sync
 ├── packages/landing/                    # Static landing page (HTML + CSS, no JS)
 ├── infrastructure/                      # AWS CDK v2 — DynamoDB, Lambda, API Gateway, S3, CloudFront
@@ -168,7 +165,7 @@ pnpm --filter @mangowave/frontend build   # tsc + vite build
 ## Tech Stack
 
 - **Frontend:** React 19, Vite 8, TypeScript 6, Tailwind CSS 4, Zustand, react-i18next, PeerJS (WebRTC)
-- **Visual engine:** butterchurn (WebGL 2 MilkDrop port)
+- **Visual engine:** projectM (C++ reference MilkDrop implementation compiled to WASM)
 - **Audio:** Web Audio API (`getDisplayMedia`, `HTMLAudioElement`, `getUserMedia`), music-metadata (ID3 parsing)
 - **Backend:** AWS Lambda (Node.js/TypeScript), API Gateway, DynamoDB
 - **Infrastructure:** AWS CDK v2
@@ -201,10 +198,9 @@ See **[SELF-HOSTING.md](SELF-HOSTING.md)** for full instructions.
 
 ## Acknowledgments
 
-- [butterchurn](https://github.com/jberg/butterchurn) — WebGL 2 implementation of the MilkDrop visualizer by Jordan Berg
-- [milkdrop-preset-converter](https://github.com/jberg/milkdrop-preset-converter), [milkdrop-preset-utils](https://github.com/jberg/milkdrop-preset-utils) — MilkDrop toolchain by Jordan Berg
-- [eel-wasm](https://github.com/captbaritone/eel-wasm) — EEL2 → WebAssembly compiler by Jordan Eldredge (captbaritone)
-- [projectM](https://github.com/projectM-visualizer/projectm) — open-source MilkDrop reimplementation; hlslparser fork (GLSL ES 3.0) vendored in `packages/hlslparser-wasm`; [standard texture pack](https://github.com/projectM-visualizer/presets-milkdrop-texture-pack) bundled in `packages/milkdrop-textures`
+- [projectM](https://github.com/projectM-visualizer/projectm) — C++ reference MilkDrop implementation compiled to WASM; powers the rendering engine. [Standard texture pack](https://github.com/projectM-visualizer/presets-milkdrop-texture-pack) bundled in `packages/milkdrop-textures`
+- [butterchurn](https://github.com/jberg/butterchurn) — WebGL 2 MilkDrop port by Jordan Berg (previous renderer, replaced by projectM)
+- [eel-wasm](https://github.com/captbaritone/eel-wasm) — EEL2 → WebAssembly compiler by Jordan Eldredge (captbaritone) (used by the previous butterchurn-based renderer)
 - [MilkDrop](https://en.wikipedia.org/wiki/MilkDrop) — original visualizer by Ryan Geiss
 - [Winamp](https://en.wikipedia.org/wiki/Winamp) — created by Nullsoft
 

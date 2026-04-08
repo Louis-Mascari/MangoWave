@@ -1,0 +1,12 @@
+{
+  "name": "projectm-wasm",
+  "version": "1.0.0",
+  "description": "projectM MilkDrop visualizer compiled to WebAssembly via Emscripten",
+  "license": "LGPL-2.1-or-later",
+  "main": "src/index.ts",
+  "type": "module",
+  "files": [
+    "src/index.ts",
+    "dist/projectm.mjs"
+  ]
+}

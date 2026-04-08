@@ -3,6 +3,10 @@
  * - System capture: getDisplayMedia → MediaStreamSource → EQ → AnalyserNode (visual only)
  * - Local files: HTMLAudioElement → MediaElementSource → fork (EQ → Analyser + destination)
  * - Microphone: getUserMedia → MediaStreamSource → EQ → AnalyserNode (silent, no destination)
+ *
+ * Audio pipeline:
+ *   Source → GainNode (pre-amp) → 10× BiquadFilter (EQ) → AnalyserNode (silence detection)
+ *                                                        → AudioWorklet (PCM capture for projectM)
  */
 
 import { browserInfo } from '../utils/browserInfo';
@@ -10,6 +14,8 @@ import { browserInfo } from '../utils/browserInfo';
 export const EQ_BANDS = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000] as const;
 
 const EMPTY_UINT8: Uint8Array<ArrayBuffer> = new Uint8Array(0);
+
+export type PcmDataCallback = (samples: Float32Array) => void;
 
 export class AudioEngine {
   private audioContext: AudioContext | null = null;
@@ -21,6 +27,11 @@ export class AudioEngine {
   private outputsAudio = false;
   private freqBuffer: Uint8Array<ArrayBuffer> | null = null;
   private timeBuffer: Uint8Array<ArrayBuffer> | null = null;
+
+  // PCM capture for projectM
+  private pcmWorkletNode: AudioWorkletNode | null = null;
+  private pcmCallback: PcmDataCallback | null = null;
+  private pcmInitialized = false;
 
   get context(): AudioContext | null {
     return this.audioContext;
@@ -53,7 +64,7 @@ export class AudioEngine {
   }
 
   /**
-   * Shared pipeline builder: source → preAmp → EQ filters → analyser
+   * Shared pipeline builder: source → preAmp → EQ filters → analyser + pcmWorklet
    * When connectToOutput is true, also forks the pre-EQ signal to destination (audible output).
    */
   private buildPipeline(source: AudioNode, connectToOutput: boolean): void {
@@ -73,7 +84,7 @@ export class AudioEngine {
       return filter;
     });
 
-    // Analyser for FFT data
+    // Analyser for FFT data (used by silence detection)
     this.analyser = ctx.createAnalyser();
     this.analyser.fftSize = 1024;
     this.analyser.smoothingTimeConstant = 0.3;
@@ -97,6 +108,41 @@ export class AudioEngine {
       source.connect(ctx.destination);
       this.outputsAudio = true;
     }
+  }
+
+  /**
+   * Initialize the PCM capture AudioWorklet and connect it after the EQ chain.
+   * Must be called after buildPipeline. The worklet captures post-EQ PCM for projectM.
+   */
+  async initPcmCapture(): Promise<void> {
+    const ctx = this.audioContext;
+    if (!ctx || this.pcmInitialized) return;
+
+    try {
+      const workletUrl = new URL('../audio/pcmCaptureProcessor.ts', import.meta.url);
+      await ctx.audioWorklet.addModule(workletUrl);
+
+      this.pcmWorkletNode = new AudioWorkletNode(ctx, 'pcm-capture-processor');
+      this.pcmWorkletNode.port.onmessage = (e: MessageEvent<Float32Array>) => {
+        this.pcmCallback?.(e.data);
+      };
+
+      // Connect EQ chain output (last EQ filter) → PCM worklet
+      // The analyser is already connected; connect the worklet in parallel
+      const lastFilter = this.eqFilters[this.eqFilters.length - 1];
+      if (lastFilter) {
+        lastFilter.connect(this.pcmWorkletNode);
+      }
+
+      this.pcmInitialized = true;
+    } catch (err) {
+      console.error('Failed to initialize PCM capture worklet:', err);
+    }
+  }
+
+  /** Register a callback to receive interleaved stereo PCM Float32Array data. */
+  onPcmData(callback: PcmDataCallback | null): void {
+    this.pcmCallback = callback;
   }
 
   initAudioPipeline(stream: MediaStream): void {
@@ -187,6 +233,12 @@ export class AudioEngine {
         // Already disconnected
       }
     }
+    if (this.pcmWorkletNode) {
+      this.pcmWorkletNode.disconnect();
+      this.pcmWorkletNode = null;
+    }
+    this.pcmCallback = null;
+    this.pcmInitialized = false;
     if (this.stream) {
       this.stream.getTracks().forEach((track) => track.stop());
       this.stream = null;

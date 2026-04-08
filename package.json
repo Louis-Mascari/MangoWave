@@ -22,16 +22,7 @@
     "infrastructure/**/*.ts": [
       "prettier --write"
     ],
-    "packages/butterchurn/src/**/*.{js,ts}": [
-      "prettier --write"
-    ],
-    "packages/butterchurn-presets/src/**/*.{js,ts}": [
-      "prettier --write"
-    ],
-    "packages/milkdrop-preset-converter/src/**/*.{js,ts}": [
-      "prettier --write"
-    ],
-    "packages/hlslparser-wasm/src/**/*.{js,ts}": [
+    "packages/projectm-wasm/src/**/*.{js,ts}": [
       "prettier --write"
     ],
     "packages/milkdrop-presets/src/**/*.{js,ts}": [

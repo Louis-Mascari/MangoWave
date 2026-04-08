@@ -50,8 +50,6 @@ describe('useSettingsSync', () => {
         resolutionScale: 0.5,
         meshWidth: 32,
         meshHeight: 24,
-        textureRatio: 0.5,
-        fxaa: true,
       },
       eqSettings: { preAmpGain: 2.0, bandGains: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
       audio: { smoothingConstant: 0.5, fftSize: 2048 },

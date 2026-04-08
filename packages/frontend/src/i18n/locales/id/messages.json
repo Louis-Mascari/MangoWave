@@ -176,6 +176,7 @@
     "invalidFileType": "Bukan file .milk",
     "emptyFile": "File kosong",
     "duplicateName": "Sudah ada",
+    "loadFailed": "Gagal memuat preset \"{{name}}\"",
     "conversionFailed": "Konversi gagal",
     "securityBlocked": "Mengandung konten yang diblokir",
     "nativeNameCollision": "Sudah ada di preset bawaan",

@@ -176,6 +176,7 @@
     "invalidFileType": ".milk फ़ाइल नहीं है",
     "emptyFile": "फ़ाइल खाली है",
     "duplicateName": "पहले से मौजूद है",
+    "loadFailed": "प्रीसेट \"{{name}}\" लोड करने में विफल",
     "conversionFailed": "कनवर्शन विफल",
     "securityBlocked": "अवरुद्ध सामग्री है",
     "nativeNameCollision": "बिल्ट-इन प्रीसेट में पहले से मौजूद है",

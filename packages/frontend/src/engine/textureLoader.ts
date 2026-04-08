@@ -17,7 +17,7 @@ export function validateTextureFile(file: File): string | null {
 }
 
 /** Derive texture name from filename: stem with original case preserved.
- *  butterchurn's getTexture() is case-sensitive — presets reference textures
+ *  projectM's texture callback is case-sensitive — presets reference textures
  *  by their original filename case. */
 function deriveTextureName(fileName: string): string {
   return fileName.replace(/\.[^.]+$/, '');

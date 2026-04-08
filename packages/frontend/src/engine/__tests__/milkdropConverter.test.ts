@@ -1,10 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-  readMilkFile,
-  validatePreset,
-  parsePsVersion,
-  findMissingTextures,
-} from '../milkdropConverter.ts';
+import { readMilkFile, parsePsVersion, findMissingTextures } from '../milkdropConverter.ts';
 
 describe('readMilkFile', () => {
   it('reads a valid .milk file and strips the extension from the name', async () => {
@@ -45,47 +40,6 @@ describe('readMilkFile', () => {
   });
 });
 
-describe('validatePreset', () => {
-  it('passes a clean preset object', () => {
-    const preset = {
-      init_eqs_str: 'x = sin(y);',
-      frame_eqs_str: 'r = 0.5;',
-      shapes: [{ init_eqs_str: 'a = 1;' }],
-      waves: [],
-    };
-    expect(() => validatePreset(preset)).not.toThrow();
-  });
-
-  it('throws on prototype pollution via __proto__', () => {
-    const preset = JSON.parse('{"__proto__": {"polluted": true}}');
-    expect(() => validatePreset(preset)).toThrow();
-  });
-
-  it('throws on prototype pollution via constructor.prototype', () => {
-    const preset = JSON.parse('{"constructor": {"prototype": {"polluted": true}}}');
-    expect(() => validatePreset(preset)).toThrow();
-  });
-
-  it('allows EEL code with JS-like identifiers (WASM sandbox makes them safe)', () => {
-    // With eel-wasm, EEL strings are compiled to WASM — they can never
-    // execute as JS. These identifiers are harmless EEL variable names.
-    const preset = {
-      init_eqs_str: 'x = fetch + eval;',
-      frame_eqs_str: 'window = 1; document = 2;',
-    };
-    expect(() => validatePreset(preset)).not.toThrow();
-  });
-
-  it('handles preset with no EEL fields', () => {
-    const preset = { someOtherField: 'value' };
-    expect(() => validatePreset(preset)).not.toThrow();
-  });
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-});
-
 describe('parsePsVersion', () => {
   it('returns 0 when no PSVERSION is present', () => {
     expect(parsePsVersion('[preset00]\nfoo=bar')).toBe(0);
@@ -106,29 +60,33 @@ describe('parsePsVersion', () => {
 });
 
 describe('findMissingTextures', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('returns empty for presets using only built-in samplers', () => {
-    const preset = { warp: 'sampler_main sampler_noise_lq', comp: 'sampler_fw_main' };
-    expect(findMissingTextures(preset, new Set())).toEqual([]);
+    const milkText = 'sampler_main sampler_noise_lq sampler_fw_main';
+    expect(findMissingTextures(milkText, new Set())).toEqual([]);
   });
 
   it('returns empty for built-in extra images', () => {
-    const preset = { warp: 'sampler_lichen sampler_cells sampler_mage' };
-    expect(findMissingTextures(preset, new Set())).toEqual([]);
+    const milkText = 'sampler_lichen sampler_cells sampler_mage';
+    expect(findMissingTextures(milkText, new Set())).toEqual([]);
   });
 
   it('detects missing custom textures', () => {
-    const preset = { warp: 'sampler_main sampler_worms sampler_alienfruit' };
-    expect(findMissingTextures(preset, new Set())).toEqual(['alienfruit', 'worms']);
+    const milkText = 'sampler_main sampler_worms sampler_alienfruit';
+    expect(findMissingTextures(milkText, new Set())).toEqual(['alienfruit', 'worms']);
   });
 
   it('excludes textures that are in the loaded set', () => {
-    const preset = { warp: 'sampler_worms sampler_fire' };
+    const milkText = 'sampler_worms sampler_fire';
     const loaded = new Set(['worms']);
-    expect(findMissingTextures(preset, loaded)).toEqual(['fire']);
+    expect(findMissingTextures(milkText, loaded)).toEqual(['fire']);
   });
 
   it('handles presets with no sampler references', () => {
-    const preset = { init_eqs_str: 'x = sin(y);' };
-    expect(findMissingTextures(preset, new Set())).toEqual([]);
+    const milkText = 'x = sin(y);';
+    expect(findMissingTextures(milkText, new Set())).toEqual([]);
   });
 });

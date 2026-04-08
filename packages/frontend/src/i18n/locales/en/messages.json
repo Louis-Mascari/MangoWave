@@ -186,6 +186,7 @@
     "invalidFileType": "Not a .milk file",
     "emptyFile": "File is empty",
     "duplicateName": "Already exists",
+    "loadFailed": "Failed to load preset \"{{name}}\"",
     "conversionFailed": "Conversion failed",
     "securityBlocked": "Contains blocked content",
     "nativeNameCollision": "Already exists in built-in presets",

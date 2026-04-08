@@ -53,6 +53,10 @@ vi.mock('../../data/excludedPresets.ts', () => ({
   quarantinedSet: new Set(),
 }));
 
+vi.mock('../../engine/lazyPresetLoader.ts', () => ({
+  ensurePresetLoaded: vi.fn().mockResolvedValue(true),
+}));
+
 function createMockRenderer() {
   return {
     loadPreset: vi.fn(),

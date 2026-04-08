@@ -9,8 +9,6 @@ const mockState = {
     resolutionScale: 0.75,
     meshWidth: 48,
     meshHeight: 36,
-    textureRatio: 1.0,
-    fxaa: false,
   },
   audio: { smoothingConstant: 0.3, fftSize: 1024 },
   eq: { preAmpGain: 1.5, bandGains: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
@@ -74,7 +72,7 @@ describe('buildImportPayload', () => {
   it('clamps numeric values to valid ranges', () => {
     const extreme = {
       _meta: validExport._meta,
-      performance: { fpsCap: 999, resolutionScale: 50, meshWidth: 9999, textureRatio: -5 },
+      performance: { fpsCap: 999, resolutionScale: 50, meshWidth: 9999 },
       volume: 100,
       transitionTime: -10,
     };
@@ -83,7 +81,6 @@ describe('buildImportPayload', () => {
     expect(perf.fpsCap).toBe(300);
     expect(perf.resolutionScale).toBe(1.0);
     expect(perf.meshWidth).toBe(128);
-    expect(perf.textureRatio).toBe(0.25);
     expect(payload.volume).toBe(1);
     expect(payload.transitionTime).toBe(0);
   });

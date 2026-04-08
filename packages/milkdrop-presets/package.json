@@ -1,7 +1,7 @@
 {
   "name": "milkdrop-presets",
   "version": "1.0.0",
-  "description": "437 MilkDrop-Original presets converted to butterchurn JSON with EEL source strings",
+  "description": "706 bundled MilkDrop presets as raw .milk text for projectM WASM",
   "license": "MIT",
   "private": true,
   "type": "module",

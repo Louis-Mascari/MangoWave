@@ -41,7 +41,7 @@ node scripts/classify-presets.mjs --update
 
 Both scripts:
 
-1. Load all butterchurn (5 packs) and MilkDrop-Original (437) presets
+1. Load all preset packs and MilkDrop-Original (437) presets
 2. Classify each preset
 3. Write `scripts/preset-classification.json` (intermediate, gitignored)
 4. With `--update`: regenerate `packages/frontend/src/data/presetThematicPacks.ts`
@@ -71,4 +71,4 @@ From [Geiss's MilkDrop preset authoring guide](http://www.geisswerks.com/milkdro
 - `bass_att`, `mid_att`, `treb_att` — attenuated (smoothed) versions
 - `vol` — overall volume level
 
-In butterchurn JS form, these are `a.bass`, `a.mid`, etc. In raw EEL (MilkDrop .milk files), they're bare identifiers.
+In `.milk` source files, these are bare identifiers in EEL equations.

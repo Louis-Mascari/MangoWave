@@ -91,8 +91,6 @@ export interface PerformanceSettings {
   resolutionScale: number;
   meshWidth: number;
   meshHeight: number;
-  textureRatio: number;
-  fxaa: boolean;
 }
 
 export interface AudioSettings {

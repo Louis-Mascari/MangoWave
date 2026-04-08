@@ -7,8 +7,6 @@ const validSettings = {
     resolutionScale: 1.0,
     meshWidth: 48,
     meshHeight: 36,
-    textureRatio: 1.0,
-    fxaa: false,
   },
   eqSettings: { preAmpGain: 1.0, bandGains: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
   audio: { smoothingConstant: 0.3, fftSize: 1024 },
@@ -80,8 +78,6 @@ describe('validateSettings', () => {
         resolutionScale: 5.0,
         meshWidth: 200,
         meshHeight: 200,
-        textureRatio: 10.0,
-        fxaa: true,
       },
     });
     expect(result.valid).toBe(true);
@@ -90,7 +86,6 @@ describe('validateSettings', () => {
       expect(result.settings.performance.resolutionScale).toBe(1.0);
       expect(result.settings.performance.meshWidth).toBe(128);
       expect(result.settings.performance.meshHeight).toBe(96);
-      expect(result.settings.performance.textureRatio).toBe(2.0);
     }
   });
 

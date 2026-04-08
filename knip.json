@@ -10,8 +10,7 @@
       "ignore": ["src/types/**/*.d.ts"],
       "ignoreDependencies": ["tailwindcss"]
     },
-    "packages/butterchurn": {},
-    "packages/butterchurn-presets": {},
+    "packages/projectm-wasm": {},
     "packages/milkdrop-presets": {},
     "packages/milkdrop-textures": {},
     "packages/backend": {},

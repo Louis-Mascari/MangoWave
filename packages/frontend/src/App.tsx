@@ -50,7 +50,6 @@ import {
   supportsFullscreen,
 } from './utils/fullscreen.ts';
 import type { VisualizerRenderer } from './engine/VisualizerRenderer.ts';
-import { installShaderDiagnostics } from './engine/shaderDiagnostics.ts';
 
 /**
  * Minimal shell for OAuth popup callbacks.
@@ -64,11 +63,6 @@ function OAuthPopup() {
       {t('spotify.connectingToSpotify')}
     </div>
   );
-}
-
-// DEV-ONLY: shader diagnostics for QA (tree-shaken from production builds)
-if (import.meta.env.DEV) {
-  installShaderDiagnostics();
 }
 
 function App() {
@@ -246,7 +240,7 @@ function MainApp() {
   const handlePresetsLoaded = useCallback((presets: string[], packMap: Map<string, string>) => {
     setPresetList(presets);
     setPresetPackMap(packMap);
-    // First call = butterchurn packs only, second = milkdrop-presets registered (all loaded)
+    // First call = bundled packs only, second = milkdrop-presets registered (all loaded)
     presetsLoadedCountRef.current += 1;
     if (presetsLoadedCountRef.current >= 2) {
       setPresetsLoading(false);

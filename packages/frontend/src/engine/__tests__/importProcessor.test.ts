@@ -9,12 +9,6 @@ vi.mock('idb-keyval', () => ({
   keys: vi.fn().mockResolvedValue([]),
 }));
 
-// Mock conversionWorkerManager — passes raw text into init_eqs_str
-// so that findMissingTextures can still detect sampler references.
-vi.mock('../conversionWorkerManager.ts', () => ({
-  convertInWorker: vi.fn((_name: string, text: string) => Promise.resolve({ init_eqs_str: text })),
-}));
-
 // Mock useImportedPresetsStore
 const mockAddPreset = vi.fn().mockResolvedValue(undefined);
 vi.mock('../../store/useImportedPresetsStore.ts', () => ({
@@ -137,17 +131,7 @@ describe('processPresetImport', () => {
     expect(results[0].errorCode).toBe('nativeNameCollision');
   });
 
-  it('imports PS3 presets successfully', async () => {
-    const ps3Content = 'PSVERSION=3\nPSVERSION_WARP=3\nPSVERSION_COMP=3\n[preset00]\nfoo=bar';
-    const file = new File([ps3Content], 'ps3.milk');
-    const results = await processPresetImport([file], defaultOpts);
-
-    expect(results[0].status).toBe('success');
-    expect(results[0].presetName).toBe('ps3');
-  });
-
   it('reports missing textures as warnings (not failures)', async () => {
-    // Mock converter passes raw text to init_eqs_str — include a sampler ref
     const file = createMilkFile('TexturePreset', 'sampler_custom_texture\nfoo=bar');
     const results = await processPresetImport([file], defaultOpts);
 
@@ -197,7 +181,6 @@ describe('processTextureImport', () => {
   });
 
   it('rejects textures that shadow built-in names', async () => {
-    // lichen is a built-in butterchurn extra image
     const file = new File(['x'], 'lichen.png', { type: 'image/png' });
     const results = await processTextureImport([file], defaultOpts);
 

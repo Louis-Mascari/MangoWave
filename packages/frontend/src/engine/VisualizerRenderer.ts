@@ -1,45 +1,32 @@
-import butterchurn, { butterchurnExtraImages } from 'butterchurn';
-import { setDiagnosticPresetName } from './shaderDiagnostics.ts';
-import {
-  presetsMinimal,
-  presetsNonMinimal,
-  presetsExtra,
-  presetsExtra2,
-  presetsMD1,
-} from 'butterchurn-presets';
+import type { ProjectMWasm, TextureLoadResult } from 'projectm-wasm';
+import type { AudioEngine } from './AudioEngine.ts';
 import { THEMATIC_PACKS, presetThematicMap } from '../data/presetThematicPacks.ts';
 
 // Pre-warm: start fetching the milkdrop-textures chunk at module load time (while the start
-// screen is visible) so it's ready before init() runs. Dynamic import keeps the 4.6MB
-// textureData.json out of the main bundle — the fetch is async, not a blocking parse.
+// screen is visible) so it's ready before init() runs.
 const milkdropTexturesPromise = import('milkdrop-textures');
-
-const PACK_SOURCES = [
-  presetsMinimal,
-  presetsNonMinimal,
-  presetsExtra,
-  presetsExtra2,
-  presetsMD1,
-] as const;
 
 /** Authoritative pack display order — thematic packs derived from preset classification. */
 export const PACK_ORDER: string[] = [...THEMATIC_PACKS];
 
 export class VisualizerRenderer {
-  private visualizer: ReturnType<typeof butterchurn.createVisualizer> | null = null;
+  private projectm: ProjectMWasm | null = null;
   private animationFrameId: number | null = null;
-  private presets: Record<string, object> = {};
   private presetKeys: string[] = [];
   private presetKeySet: Set<string> = new Set();
   private currentPresetIndex = 0;
   private fpsInterval = 0; // 0 = uncapped
   private lastFrameTime = 0;
-  private lastRenderTime = 0;
   private onPresetChange?: (name: string) => void;
   private onPresetsRegistered?: () => void;
   private _presetPackMap: Map<string, string> = new Map();
-  private _milkdropPresetNames: Set<string> = new Set();
   private _importedPresetNames: Set<string> = new Set();
+
+  // Preset .milk text cache — only keep current + previous to avoid unbounded growth
+  private milkTextCache: Map<string, string> = new Map();
+
+  // Pre-decoded texture pixel data for the projectM texture callback
+  private decodedTextures: Map<string, ImageData> = new Map();
 
   get currentPresetName(): string {
     return this.presetKeys[this.currentPresetIndex] ?? '';
@@ -53,148 +40,207 @@ export class VisualizerRenderer {
     return new Map(this._presetPackMap);
   }
 
-  init(
-    canvas: HTMLCanvasElement,
-    audioContext: AudioContext,
-    analyserNode: AnalyserNode,
+  /** Names of all bundled preset names (non-imported). */
+  get bundledPresetNames(): ReadonlySet<string> {
+    const imported = this._importedPresetNames;
+    const bundled = new Set<string>();
+    for (const key of this.presetKeys) {
+      if (!imported.has(key)) bundled.add(key);
+    }
+    return bundled;
+  }
+
+  async init(
+    audioEngine: AudioEngine,
     onPresetChange?: (name: string) => void,
     opts?: {
       meshWidth?: number;
       meshHeight?: number;
-      textureRatio?: number;
-      fxaa?: boolean;
+      fpsCap?: number;
+      beatSensitivity?: number;
       excludedPresets?: Set<string>;
       onPresetsRegistered?: () => void;
     },
-  ): void {
+  ): Promise<void> {
     this.onPresetChange = onPresetChange;
     this.onPresetsRegistered = opts?.onPresetsRegistered;
 
-    this.visualizer = butterchurn.createVisualizer(audioContext, canvas, {
-      width: canvas.width,
-      height: canvas.height,
-      pixelRatio: window.devicePixelRatio || 1,
-      meshWidth: opts?.meshWidth,
-      meshHeight: opts?.meshHeight,
-      textureRatio: opts?.textureRatio,
-      outputFXAA: opts?.fxaa,
-    });
+    // Dynamically import projectm-wasm (lazy — not loaded on start screen)
+    const { createProjectM } = await import('projectm-wasm');
+    this.projectm = await createProjectM();
 
-    this.visualizer.connectAudio(analyserNode);
-
-    this._presetPackMap = new Map();
-    this._milkdropPresetNames = new Set();
-    this._importedPresetNames = new Set();
-    this.presets = {};
-
-    for (const source of PACK_SOURCES) {
-      const packPresets = source.getPresets();
-      for (const [name, preset] of Object.entries(packPresets)) {
-        this.presets[name] = preset;
-        this._presetPackMap.set(name, presetThematicMap[name] ?? 'Ambient');
-      }
+    // Initialize projectM with WebGL context on the canvas
+    const result = this.projectm.init('#mw-canvas');
+    if (result !== 0) {
+      throw new Error(`projectM init failed with code ${result}`);
     }
 
-    this.presetKeys = Object.keys(this.presets);
+    // Configure projectM
+    this.projectm.setPresetLocked(true); // MangoWave's autopilot handles transitions
+    this.projectm.setMeshSize(opts?.meshWidth ?? 48, opts?.meshHeight ?? 36);
+    this.projectm.setFps(opts?.fpsCap || 60);
+    this.projectm.setSoftCutDuration(2.0); // Default blend time
+    this.projectm.setBeatSensitivity(opts?.beatSensitivity ?? 1.0);
+    this.projectm.setAspectCorrection(true);
+    this.projectm.setHardCutEnabled(false);
+
+    // Set up texture load callback
+    this.projectm.setTextureLoadCallback((name: string): TextureLoadResult | null => {
+      return this.handleTextureLoad(name);
+    });
+
+    // Set up preset switch failure callback
+    this.projectm.setPresetSwitchFailedCallback((filename: string, message: string) => {
+      console.warn(`Preset load failed: ${filename} — ${message}`);
+    });
+
+    // Initialize PCM capture from AudioEngine
+    await audioEngine.initPcmCapture();
+    audioEngine.onPcmData((samples) => {
+      if (this.projectm) {
+        // samples is interleaved stereo: LRLRLR
+        // count = number of samples per channel = total / 2
+        this.projectm.pcmAddFloat(samples, samples.length / 2, 2);
+      }
+    });
+
+    // Register preset names from bundled milkdrop-presets (lazy-loaded)
+    this._presetPackMap = new Map();
+    this._importedPresetNames = new Set();
+
+    // Load preset names from lightweight manifest
+    const { getPresetNames } = await import('milkdrop-presets/names');
+    const presetNames = getPresetNames();
+    for (const name of presetNames) {
+      this._presetPackMap.set(name, presetThematicMap[name] ?? 'Ambient');
+    }
+    this.presetKeys = [...this._presetPackMap.keys()];
     this.presetKeySet = new Set(this.presetKeys);
 
-    // Load built-in extra textures (cells, fire, etc.) so presets referencing sampler_<name> render correctly
-    this.loadExtraImages(butterchurnExtraImages.getImages());
+    // Load built-in textures for projectM's texture callback (await to avoid race)
+    await this.loadBuiltInTextures();
 
-    // Load 66 standard MilkDrop textures from the projectM texture pack.
-    // Loaded async to avoid blocking the launch animation with 4.6MB JSON parse.
-    // butterchurn skips names already loaded (5 overlap with butterchurnExtraImages).
-    // Uploads are batched with setTimeout(0) yields to keep the UI responsive on mobile —
-    // 330 synchronous WebGL texture uploads (66 base + 264 wrap/clamp variants) would
-    // otherwise block the main thread for several seconds right after the visualizer loads.
-    milkdropTexturesPromise.then(({ getImages }) => {
-      const milkdropTextures = getImages();
-      const entries = Object.entries(milkdropTextures);
-      const BATCH_SIZE = 12;
-      type TexEntry = [string, { data: string; width: number; height: number }];
+    this.onPresetsRegistered?.();
 
-      const uploadBatch = (startIdx: number, source: TexEntry[], onComplete?: () => void) => {
-        if (!this.visualizer) return;
-        const batch: Record<string, { data: string; width: number; height: number }> = {};
-        for (let i = startIdx; i < Math.min(startIdx + BATCH_SIZE, source.length); i++) {
-          batch[source[i][0]] = source[i][1];
-        }
-        this.loadExtraImages(batch);
-        const next = startIdx + BATCH_SIZE;
-        if (next < source.length) {
-          setTimeout(() => uploadBatch(next, source, onComplete), 0);
-        } else {
-          onComplete?.();
-        }
-      };
-
-      // Upload base textures in batches, then build and upload wrap/clamp variants.
-      // Register wrap/clamp variants (fw_/fc_/pw_/pc_) so sampler_fw_X etc. resolve
-      // to the correct image instead of the clouds2 fallback.
-      uploadBatch(0, entries, () => {
-        const variants: TexEntry[] = [];
-        for (const [name, data] of entries) {
-          for (const prefix of ['fw_', 'fc_', 'pw_', 'pc_']) {
-            const variantKey = prefix + name;
-            if (!(variantKey in milkdropTextures)) variants.push([variantKey, data]);
-          }
-        }
-        if (variants.length > 0) uploadBatch(0, variants);
-      });
-    });
-
-    // Register MilkDrop-Original preset names from a lightweight manifest (18KB).
-    // The heavy 5MB preset data stays in a separate chunk, loaded lazily on first access.
-    import('milkdrop-presets/names').then(({ getPresetNames }) => {
-      this.registerMilkdropPresetNames(getPresetNames());
-      this.onPresetsRegistered?.();
-    });
-
-    // Load a random initial preset, filtering out excluded presets.
-    // Only pick from presets with loaded objects (excludes EEL packs that need WASM compilation).
+    // Load a random initial preset, filtering out excluded presets
     if (this.presetKeys.length > 0) {
       const excluded = opts?.excludedPresets;
-      const candidates = this.presetKeys.filter(
-        (k) => this.presets[k] && (!excluded?.size || !excluded.has(k)),
-      );
+      const candidates = this.presetKeys.filter((k) => !excluded?.size || !excluded.has(k));
       const pool = candidates.length > 0 ? candidates : this.presetKeys;
       const presetName = pool[Math.floor(Math.random() * pool.length)];
       this.currentPresetIndex = this.presetKeys.indexOf(presetName);
-      setDiagnosticPresetName(presetName);
-      this.visualizer.loadPreset(this.presets[presetName], 0);
+      await this.loadPresetByName(presetName, false);
       this.onPresetChange?.(presetName);
     }
   }
 
-  setSize(
-    width: number,
-    height: number,
-    opts?: { meshWidth?: number; meshHeight?: number; textureRatio?: number },
-  ): void {
-    if (this.visualizer) {
-      this.visualizer.setRendererSize(width, height, opts);
+  /** Load and pre-decode built-in textures for the projectM texture callback. */
+  private async loadBuiltInTextures(): Promise<void> {
+    const { getImages } = await milkdropTexturesPromise;
+    const textures = getImages();
+
+    // Decode all textures in parallel batches (limit concurrency to avoid UI block)
+    const entries = Object.entries(textures);
+    const BATCH_SIZE = 10;
+    for (let i = 0; i < entries.length; i += BATCH_SIZE) {
+      const batch = entries.slice(i, i + BATCH_SIZE);
+      const decoded = await Promise.all(
+        batch.map(async ([name, entry]) => {
+          const imageData = await this.decodeDataUri(entry.data);
+          return { name, imageData };
+        }),
+      );
+      for (const { name, imageData } of decoded) {
+        if (!imageData) continue;
+        this.decodedTextures.set(name, imageData);
+        // Also register wrap/clamp variants pointing to same ImageData
+        for (const prefix of ['fw_', 'fc_', 'pw_', 'pc_']) {
+          const variantKey = prefix + name;
+          if (!this.decodedTextures.has(variantKey)) {
+            this.decodedTextures.set(variantKey, imageData);
+          }
+        }
+      }
     }
   }
 
-  setOutputAA(useAA: boolean): void {
-    if (this.visualizer) {
-      this.visualizer.setOutputAA(useAA);
-    }
+  /** Handle projectM's texture load callback — synchronous, returns pre-decoded data. */
+  private handleTextureLoad(name: string): TextureLoadResult | null {
+    const decoded = this.decodedTextures.get(name) ?? this.decodedTextures.get(name.toLowerCase());
+    if (!decoded) return null;
+    return {
+      data: new Uint8Array(decoded.data.buffer),
+      width: decoded.width,
+      height: decoded.height,
+      channels: 4,
+    };
   }
 
-  loadExtraImages(
+  /** Decode a data URI to ImageData using OffscreenCanvas. */
+  private async decodeDataUri(dataUri: string): Promise<ImageData | null> {
+    const commaIdx = dataUri.indexOf(',');
+    if (commaIdx === -1) return null;
+    const base64 = dataUri.slice(commaIdx + 1);
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    const mimeMatch = dataUri.match(/^data:([^;]+)/);
+    const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+    const blob = new Blob([bytes], { type: mimeType });
+    const bitmap = await createImageBitmap(blob);
+    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      bitmap.close();
+      return null;
+    }
+    ctx.drawImage(bitmap, 0, 0);
+    const imageData = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+    bitmap.close();
+    return imageData;
+  }
+
+  /** Load and decode user-imported textures for the projectM texture callback. */
+  async loadExtraImages(
     imageData: Record<string, { data: string; width: number; height: number }>,
-  ): void {
-    if (this.visualizer) {
-      this.visualizer.loadExtraImages(imageData);
+  ): Promise<void> {
+    for (const [name, entry] of Object.entries(imageData)) {
+      if (this.decodedTextures.has(name)) continue; // Don't shadow built-in
+      const decoded = await this.decodeDataUri(entry.data);
+      if (decoded) {
+        this.decodedTextures.set(name, decoded);
+      }
+    }
+  }
+
+  setSize(width: number, height: number): void {
+    if (this.projectm) {
+      this.projectm.setWindowSize(width, height);
+    }
+  }
+
+  setMeshSize(width: number, height: number): void {
+    if (this.projectm) {
+      this.projectm.setMeshSize(width, height);
     }
   }
 
   setFpsCap(fps: number): void {
     this.fpsInterval = fps > 0 ? 1000 / fps : 0;
+    if (this.projectm) {
+      this.projectm.setFps(fps > 0 ? fps : 60);
+    }
   }
 
-  /** Register imported preset names into the preset list and pack map (without preset objects). */
+  setBeatSensitivity(sensitivity: number): void {
+    if (this.projectm) {
+      this.projectm.setBeatSensitivity(sensitivity);
+    }
+  }
+
+  /** Register imported preset names into the preset list and pack map (without loading). */
   registerImportedPresetNames(names: string[]): void {
     for (const name of names) {
       this._importedPresetNames.add(name);
@@ -208,47 +254,13 @@ export class VisualizerRenderer {
     }
   }
 
-  /** Register MilkDrop-Original preset names (lazy-loaded, EEL→WASM compiled on demand). */
-  private registerMilkdropPresetNames(names: string[]): void {
-    for (const name of names) {
-      this._milkdropPresetNames.add(name);
-      if (!this._presetPackMap.has(name)) {
-        this._presetPackMap.set(name, presetThematicMap[name] ?? 'Ambient');
-        if (!this.presetKeySet.has(name)) {
-          this.presetKeys.push(name);
-          this.presetKeySet.add(name);
-        }
-      }
-    }
-  }
-
-  /** Register a single converted EEL preset object (called before loadPreset). */
-  registerEelPreset(name: string, preset: object): void {
-    this.presets[name] = preset;
-    if (!this._presetPackMap.has(name)) {
-      this._presetPackMap.set(name, 'Imported');
-    }
-    if (!this.presetKeySet.has(name)) {
-      this.presetKeys.push(name);
-      this.presetKeySet.add(name);
-    }
-  }
-
   /** Unregister an imported preset (on delete). */
   unregisterImportedPreset(name: string): void {
-    delete this.presets[name];
     this._presetPackMap.delete(name);
     this._importedPresetNames.delete(name);
+    this.milkTextCache.delete(name);
     this.presetKeys = this.presetKeys.filter((k) => k !== name);
     this.presetKeySet.delete(name);
-  }
-
-  /** Check if a preset is an EEL preset (Imported or MilkDrop) but not yet WASM-compiled. */
-  isEelPresetUnloaded(name: string): boolean {
-    return (
-      (this._importedPresetNames.has(name) || this._milkdropPresetNames.has(name)) &&
-      !this.presets[name]
-    );
   }
 
   /** Whether the preset was user-imported (.milk file). */
@@ -256,46 +268,52 @@ export class VisualizerRenderer {
     return this._importedPresetNames.has(name);
   }
 
-  /** Whether the preset is from the bundled MilkDrop-Original pack. */
-  isMilkdropPreset(name: string): boolean {
-    return this._milkdropPresetNames.has(name);
-  }
+  /** Load a preset by name. Fetches .milk text if not cached, then loads into projectM. */
+  async loadPresetByName(name: string, smooth: boolean): Promise<boolean> {
+    if (!this.projectm) return false;
 
-  /** Names of all bundled MilkDrop-Original presets. */
-  get milkdropPresetNames(): ReadonlySet<string> {
-    return this._milkdropPresetNames;
-  }
+    let milkText = this.milkTextCache.get(name);
 
-  loadPreset(name: string, blendTime = 2.0): void {
-    if (!this.visualizer) return;
-    if (this.presets[name]) {
-      const previousName = this.currentPresetName;
-      setDiagnosticPresetName(name);
-      this.visualizer.loadPreset(this.presets[name], blendTime);
-      this.currentPresetIndex = this.presetKeys.indexOf(name);
-      this.onPresetChange?.(name);
-      // Evict old WASM-compiled EEL presets to prevent memory exhaustion.
-      // Each EEL preset holds a WebAssembly.Instance + Globals that can't
-      // be GC'd while referenced. Keep current + previous (for blend transition).
-      this.evictStaleEelPresets(name, previousName);
-    }
-  }
-
-  /**
-   * Remove compiled preset objects for EEL presets (Imported + MilkDrop) that
-   * aren't actively in use. They remain registered (in _presetPackMap) so
-   * isEelPresetUnloaded() returns true and they'll be lazily recompiled on next visit.
-   */
-  private evictStaleEelPresets(current: string, previous: string): void {
-    for (const key of this.presetKeys) {
-      if (key === current || key === previous) continue;
-      if (
-        (this._importedPresetNames.has(key) || this._milkdropPresetNames.has(key)) &&
-        this.presets[key]
-      ) {
-        delete this.presets[key];
+    if (!milkText) {
+      try {
+        if (this._importedPresetNames.has(name)) {
+          // Imported preset — read from IDB
+          const { get: idbGet } = await import('idb-keyval');
+          milkText = await idbGet<string>(`mw-milk:${name}`);
+        } else {
+          // Bundled preset — read from milkdrop-presets
+          const { getMilkText } = await import('milkdrop-presets');
+          milkText = getMilkText(name);
+        }
+      } catch (err) {
+        console.error(`Failed to load preset "${name}":`, err);
+        return false;
       }
     }
+
+    if (!milkText) return false;
+
+    // Evict stale cache entries — keep only current + previous (needed for blend transitions)
+    const prevName = this.currentPresetName;
+    for (const key of this.milkTextCache.keys()) {
+      if (key !== prevName && key !== name) {
+        this.milkTextCache.delete(key);
+      }
+    }
+    this.milkTextCache.set(name, milkText);
+
+    this.projectm.loadPreset(milkText, smooth);
+    this.currentPresetIndex = this.presetKeys.indexOf(name);
+    this.onPresetChange?.(name);
+    return true;
+  }
+
+  /** Synchronous loadPreset wrapper for compatibility with existing callers. */
+  loadPreset(name: string, blendTime = 2.0): void {
+    if (!this.projectm) return;
+    // Set soft cut duration before loading
+    this.projectm.setSoftCutDuration(blendTime);
+    this.loadPresetByName(name, blendTime > 0);
   }
 
   nextPreset(blockedPresets: Set<string> = new Set(), blendTime = 2.0): void {
@@ -307,11 +325,7 @@ export class VisualizerRenderer {
 
   start(): void {
     if (this.animationFrameId !== null) return;
-    const now = performance.now();
-    this.lastFrameTime = now;
-    // Reset lastRenderTime so the first frame after resume doesn't get a
-    // huge delta (which would cause butterchurn to skip-forward visuals).
-    this.lastRenderTime = now;
+    this.lastFrameTime = performance.now();
     this.render();
   }
 
@@ -332,22 +346,25 @@ export class VisualizerRenderer {
       this.lastFrameTime = now - (elapsed % this.fpsInterval);
     }
 
-    if (this.visualizer) {
-      const dt = (now - this.lastRenderTime) / 1000;
-      this.lastRenderTime = now;
-      this.visualizer.render({ elapsedTime: dt });
+    if (this.projectm) {
+      this.projectm.renderFrame();
     }
   };
 
   destroy(): void {
     this.stop();
-    this.visualizer = null;
-    this.presets = {};
+    if (this.projectm) {
+      this.projectm.setTextureLoadCallback(null);
+      this.projectm.setPresetSwitchFailedCallback(null);
+      this.projectm.destroy();
+      this.projectm = null;
+    }
     this.presetKeys = [];
     this.presetKeySet = new Set();
     this._presetPackMap = new Map();
-    this._milkdropPresetNames = new Set();
     this._importedPresetNames = new Set();
+    this.milkTextCache = new Map();
+    this.decodedTextures = new Map();
     this.onPresetChange = undefined;
     this.onPresetsRegistered = undefined;
   }

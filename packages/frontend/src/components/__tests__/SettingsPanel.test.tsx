@@ -20,15 +20,13 @@ describe('SettingsPanel', () => {
     expect(screen.getByText('Resolution')).toBeInTheDocument();
   });
 
-  it('shows butterchurn config controls on Rendering tab', async () => {
+  it('shows rendering config controls on Rendering tab', async () => {
     const user = userEvent.setup();
     render(<SettingsPanel />);
 
     await user.click(screen.getByRole('button', { name: 'Rendering' }));
 
     expect(screen.getByText('Mesh Resolution')).toBeInTheDocument();
-    expect(screen.getByText('Texture Quality')).toBeInTheDocument();
-    expect(screen.getByText('Anti-Aliasing')).toBeInTheDocument();
   });
 
   it('shows Analysis section on Rendering tab', async () => {

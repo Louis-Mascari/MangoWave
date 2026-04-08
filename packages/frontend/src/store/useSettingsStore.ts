@@ -10,8 +10,6 @@ export interface PerformanceSettings {
   resolutionScale: number; // 0.25 to 1.0
   meshWidth: number; // vertex grid width for warp distortions (default 48)
   meshHeight: number; // vertex grid height for warp distortions (default 36)
-  textureRatio: number; // internal render resolution multiplier (default 1.0)
-  fxaa: boolean; // fast anti-aliasing on output (default false)
 }
 
 export interface EQSettings {
@@ -62,8 +60,6 @@ export interface SettingsState {
   setFpsCap: (fps: number) => void;
   setResolutionScale: (scale: number) => void;
   setMeshSize: (width: number, height: number) => void;
-  setTextureRatio: (ratio: number) => void;
-  setFxaa: (enabled: boolean) => void;
 
   // EQ
   eq: EQSettings;
@@ -91,7 +87,7 @@ export interface SettingsState {
   toggleBlockPreset: (name: string) => void;
   toggleFavoritePreset: (name: string) => void;
 
-  // Pack filtering (built-in butterchurn packs)
+  // Pack filtering (built-in thematic packs)
   enabledPacks: string[];
   setEnabledPacks: (packs: string[]) => void;
   togglePack: (pack: string) => void;
@@ -174,8 +170,6 @@ const DESKTOP_PERFORMANCE: PerformanceSettings = {
   resolutionScale: 1.0,
   meshWidth: 48,
   meshHeight: 36,
-  textureRatio: 1.0,
-  fxaa: false,
 };
 
 const DEFAULT_AUDIO: AudioSettings = {
@@ -232,14 +226,6 @@ export const useSettingsStore = create<SettingsState>()(
       setMeshSize: (width, height) =>
         set((state) => ({
           performance: { ...state.performance, meshWidth: width, meshHeight: height },
-        })),
-      setTextureRatio: (ratio) =>
-        set((state) => ({
-          performance: { ...state.performance, textureRatio: ratio },
-        })),
-      setFxaa: (enabled) =>
-        set((state) => ({
-          performance: { ...state.performance, fxaa: enabled },
         })),
 
       // Audio
@@ -327,7 +313,7 @@ export const useSettingsStore = create<SettingsState>()(
             : state.blockedPresets.filter((p) => p !== name),
         })),
 
-      // Pack filtering (built-in butterchurn packs)
+      // Pack filtering (built-in thematic packs)
       enabledPacks: [],
       setEnabledPacks: (packs) => set({ enabledPacks: packs }),
       togglePack: (pack) =>
@@ -541,14 +527,12 @@ export const useSettingsStore = create<SettingsState>()(
             if (autopilot.mode === 'pack') autopilot.mode = 'all';
           }
         }
-        // v1 → v2: Backfill butterchurn config defaults
+        // v1 → v2: Backfill mesh size defaults
         if ((version ?? 0) < 2) {
           const perf = state.performance as Record<string, unknown> | undefined;
           if (perf) {
             perf.meshWidth = perf.meshWidth ?? 48;
             perf.meshHeight = perf.meshHeight ?? 36;
-            perf.textureRatio = perf.textureRatio ?? 1.0;
-            perf.fxaa = perf.fxaa ?? false;
           }
         }
         // v2 → v3: songInfoDisplay no longer supports 'always' — convert to 5s
@@ -629,9 +613,25 @@ export const useSettingsStore = create<SettingsState>()(
           state.deviceSyncEnabled = state.deviceSyncEnabled ?? false;
           state.deviceSyncSettingsSync = state.deviceSyncSettingsSync ?? false;
         }
+        // v15 → v16: projectM migration — remove fxaa/textureRatio, clean up IDB conversion cache
+        if ((version ?? 0) < 16) {
+          const perf = state.performance as Record<string, unknown> | undefined;
+          if (perf) {
+            delete perf.fxaa;
+            delete perf.textureRatio;
+          }
+          // Clean up legacy conversion cache (async, fire-and-forget)
+          import('idb-keyval').then(({ keys, del }) => {
+            keys().then((allKeys) => {
+              const convKeys = (allKeys as string[]).filter((k) => k.startsWith('mw-conv:'));
+              convKeys.forEach((k) => del(k));
+            });
+          });
+          localStorage.removeItem('mw-conv-version');
+        }
         return state as unknown as SettingsState;
       },
-      version: 15,
+      version: 16,
     },
   ),
 );

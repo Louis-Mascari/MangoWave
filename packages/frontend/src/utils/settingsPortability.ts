@@ -147,7 +147,7 @@ export async function estimateImportedDataSize(): Promise<number> {
 
 /**
  * Restore imported preset and texture data from a settings export.
- * Writes raw .milk texts to IDB, converts each via Worker, and restores texture data.
+ * Writes raw .milk texts to IDB and restores texture data.
  */
 export async function restoreImportedData(
   data: Record<string, unknown>,
@@ -159,19 +159,11 @@ export async function restoreImportedData(
   };
   if (!imported) return;
 
-  const { convertInWorker } = await import('../engine/conversionWorkerManager.ts');
-
-  // Restore presets
+  // Restore presets — just store raw .milk text in IDB (projectM loads directly)
   if (imported.presets) {
     for (const [name, text] of Object.entries(imported.presets)) {
       if (typeof text !== 'string') continue;
       await idbSet(`mw-milk:${name}`, text);
-      try {
-        const converted = await convertInWorker(name, text);
-        await idbSet(`mw-conv:${name}`, converted);
-      } catch {
-        // Conversion failure is non-fatal — user can trigger re-conversion on selection
-      }
     }
   }
 
@@ -312,8 +304,6 @@ function sanitizePerformance(raw: unknown): Record<string, unknown> | undefined 
   if ('resolutionScale' in p) out.resolutionScale = clamp(p.resolutionScale, 0.25, 1.0, 1.0);
   if ('meshWidth' in p) out.meshWidth = clamp(p.meshWidth, 16, 128, 48);
   if ('meshHeight' in p) out.meshHeight = clamp(p.meshHeight, 12, 96, 36);
-  if ('textureRatio' in p) out.textureRatio = clamp(p.textureRatio, 0.25, 2.0, 1.0);
-  if ('fxaa' in p) out.fxaa = typeof p.fxaa === 'boolean' ? p.fxaa : false;
   return out;
 }
 

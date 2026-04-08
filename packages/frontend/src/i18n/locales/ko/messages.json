@@ -176,6 +176,7 @@
     "invalidFileType": ".milk 파일이 아닙니다",
     "emptyFile": "파일이 비어 있습니다",
     "duplicateName": "이미 존재합니다",
+    "loadFailed": "프리셋 \"{{name}}\" 불러오기 실패",
     "conversionFailed": "변환 실패",
     "securityBlocked": "차단된 콘텐츠가 포함되어 있습니다",
     "nativeNameCollision": "기본 제공 프리셋에 이미 존재합니다",

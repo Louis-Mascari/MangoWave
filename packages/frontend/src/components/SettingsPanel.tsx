@@ -59,12 +59,6 @@ const MESH_OPTIONS = [
   { labelKey: 'ultra', width: 96, height: 72 },
 ];
 
-const TEXTURE_OPTIONS = [
-  { labelKey: 'low', value: 0.5 },
-  { labelKey: 'default', value: 1.0 },
-  { labelKey: 'high', value: 1.5 },
-];
-
 const FFT_OPTIONS = [512, 1024, 2048, 4096];
 
 function formatFreq(freq: number): string {
@@ -273,8 +267,6 @@ function RenderingTab() {
   const setFpsCap = useSettingsStore((s) => s.setFpsCap);
   const setResolutionScale = useSettingsStore((s) => s.setResolutionScale);
   const setMeshSize = useSettingsStore((s) => s.setMeshSize);
-  const setTextureRatio = useSettingsStore((s) => s.setTextureRatio);
-  const setFxaa = useSettingsStore((s) => s.setFxaa);
   const brightness = useSettingsStore((s) => s.brightness);
   const setBrightness = useSettingsStore((s) => s.setBrightness);
   const audio = useSettingsStore((s) => s.audio);
@@ -407,57 +399,6 @@ function RenderingTab() {
               {tc(opt.labelKey)}
             </button>
           ))}
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <span className="flex items-center text-xs text-white/60">
-          {t('rendering.textureQuality')}
-          <Tooltip text={t('rendering.textureQualityTooltip')} />
-        </span>
-        <div className="flex gap-2">
-          {TEXTURE_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => setTextureRatio(opt.value)}
-              className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
-                performance.textureRatio === opt.value
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-white/10 text-white/70 hover:bg-white/20'
-              }`}
-            >
-              {tc(opt.labelKey)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <span className="flex items-center text-xs text-white/60">
-          {t('rendering.antiAliasing')}
-          <Tooltip text={t('rendering.antiAliasingTooltip')} />
-        </span>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setFxaa(true)}
-            className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
-              performance.fxaa
-                ? 'bg-orange-500 text-white'
-                : 'bg-white/10 text-white/70 hover:bg-white/20'
-            }`}
-          >
-            {tc('on')}
-          </button>
-          <button
-            onClick={() => setFxaa(false)}
-            className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
-              !performance.fxaa
-                ? 'bg-orange-500 text-white'
-                : 'bg-white/10 text-white/70 hover:bg-white/20'
-            }`}
-          >
-            {tc('off')}
-          </button>
         </div>
       </div>
 

@@ -92,11 +92,8 @@ export function usePresetNavigation({
     return pack ? new Set(pack.presets) : null;
   }, [activeCustomPackId, customPacks]);
 
-  /**
-   * Lazily convert an imported preset (if needed), register it with the renderer,
-   * then load it. Falls back to next preset on failure.
-   */
-  const loadPresetWithLazyConvert = useCallback(
+  /** Load a preset by name, falling back to next on failure. */
+  const loadPresetByName = useCallback(
     async (
       renderer: VisualizerRenderer,
       name: string,
@@ -107,7 +104,7 @@ export function usePresetNavigation({
       if (!loaded) {
         useToastStore
           .getState()
-          .show(i18n.t('importedPresets.conversionFailed', { name, ns: 'messages' }));
+          .show(i18n.t('importedPresets.loadFailed', { name, ns: 'messages' }));
         fallbackToNext?.();
         return;
       }
@@ -165,8 +162,8 @@ export function usePresetNavigation({
 
     if (result.roundReset) historyStore.resetRound();
     historyStore.markPlayed(result.pick);
-    loadPresetWithLazyConvert(renderer, result.pick, transitionTime, () => {
-      // On conversion failure, fall back to a random built-in preset
+    loadPresetByName(renderer, result.pick, transitionTime, () => {
+      // On load failure, fall back to a random built-in preset
       renderer.nextPreset(mergedBlockedSet, transitionTime);
     });
   }, [
@@ -180,7 +177,7 @@ export function usePresetNavigation({
     autopilotMode,
     autopilotFavoriteWeight,
     transitionTime,
-    loadPresetWithLazyConvert,
+    loadPresetByName,
   ]);
 
   const handleNextPreset = useCallback(() => {
@@ -202,22 +199,22 @@ export function usePresetNavigation({
       historyStore.markPlayed(name);
       const renderer = rendererRef.current;
       if (renderer) {
-        loadPresetWithLazyConvert(renderer, name, transitionTime);
+        loadPresetByName(renderer, name, transitionTime);
       }
       resetAutopilotRef.current();
     }
-  }, [rendererRef, transitionTime, resetAutopilotRef, loadPresetWithLazyConvert]);
+  }, [rendererRef, transitionTime, resetAutopilotRef, loadPresetByName]);
 
   const handleSelectPreset = useCallback(
     (name: string) => {
       usePresetHistoryStore.getState().markPlayed(name);
       const renderer = rendererRef.current;
       if (renderer) {
-        loadPresetWithLazyConvert(renderer, name, transitionTime);
+        loadPresetByName(renderer, name, transitionTime);
       }
       resetAutopilotRef.current();
     },
-    [rendererRef, transitionTime, resetAutopilotRef, loadPresetWithLazyConvert],
+    [rendererRef, transitionTime, resetAutopilotRef, loadPresetByName],
   );
 
   const handleToggleFavorite = useCallback(() => {

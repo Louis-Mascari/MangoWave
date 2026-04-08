@@ -11,7 +11,7 @@ for (const [name, value] of Object.entries(textureData)) {
   if (lower !== name) images[lower] = value as TextureEntry;
 }
 
-/** Get all texture images in butterchurn-compatible format. */
+/** Get all texture images as `{ [name]: { data, width, height } }` for projectM's texture callback. */
 export function getImages(): Record<string, TextureEntry> {
   return images;
 }

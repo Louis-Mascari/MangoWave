@@ -176,6 +176,7 @@
     "invalidFileType": ".milk ファイルではありません",
     "emptyFile": "ファイルが空です",
     "duplicateName": "既に存在します",
+    "loadFailed": "プリセット「{{name}}」の読み込みに失敗しました",
     "conversionFailed": "変換に失敗しました",
     "securityBlocked": "ブロックされたコンテンツが含まれています",
     "nativeNameCollision": "組み込みプリセットに既に存在します",

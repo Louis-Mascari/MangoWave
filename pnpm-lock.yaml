@@ -83,24 +83,11 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1)(vite@8.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.5.2)(jiti@2.6.1)(yaml@2.8.3))
 
-  packages/butterchurn: {}
-
-  packages/butterchurn-presets: {}
-
   packages/frontend:
     dependencies:
       '@sentry/react':
         specifier: ^10.47.0
         version: 10.47.0(react@19.2.4)
-      butterchurn:
-        specifier: workspace:*
-        version: link:../butterchurn
-      butterchurn-presets:
-        specifier: workspace:*
-        version: link:../butterchurn-presets
-      eel-wasm:
-        specifier: ^0.0.17
-        version: 0.0.17
       i18next:
         specifier: ^26.0.3
         version: 26.0.3(typescript@6.0.2)
@@ -110,9 +97,6 @@ importers:
       idb-keyval:
         specifier: ^6.2.2
         version: 6.2.2
-      milkdrop-preset-converter:
-        specifier: workspace:*
-        version: link:../milkdrop-preset-converter
       milkdrop-presets:
         specifier: workspace:*
         version: link:../milkdrop-presets
@@ -128,6 +112,9 @@ importers:
       posthog-js:
         specifier: ^1.364.3
         version: 1.364.7
+      projectm-wasm:
+        specifier: workspace:*
+        version: link:../projectm-wasm
       qrcode-generator:
         specifier: ^2.0.4
         version: 2.0.4
@@ -232,20 +219,6 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1)(vite@8.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.5.2)(jiti@2.6.1)(yaml@2.8.3))
 
-  packages/hlslparser-wasm: {}
-
-  packages/milkdrop-preset-converter:
-    dependencies:
-      hlslparser-wasm:
-        specifier: workspace:*
-        version: link:../hlslparser-wasm
-      lodash:
-        specifier: ^4.17.21
-        version: 4.18.1
-      milkdrop-preset-utils:
-        specifier: ^0.2.1
-        version: 0.2.1
-
   packages/milkdrop-presets: {}
 
   packages/milkdrop-textures:
@@ -253,6 +226,8 @@ importers:
       image-size:
         specifier: ^2.0.2
         version: 2.0.2
+
+  packages/projectm-wasm: {}
 
 packages:
 
@@ -2722,9 +2697,6 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  eel-wasm@0.0.17:
-    resolution: {integrity: sha512-N2VzSUm5djpw9kQ7f69RZa+o2wlmI9lFDFEe0PLcXdhHXetvMsdceYdBS7qtFQvfj4N9ssjUh+J3fQrjvG3Usg==}
-
   electron-to-chromium@1.5.331:
     resolution: {integrity: sha512-IbxXrsTlD3hRodkLnbxAPP4OuJYdWCeM3IOdT+CpcMoIwIoDfCmRpEtSPfwBXxVkg9xmBeY7Lz2Eo2TDn/HC3Q==}
 
@@ -3654,9 +3626,6 @@ packages:
   lodash.memoize@4.1.2:
     resolution: {integrity: sha512-t7j+NzmgnQzTAYXcsHYLgimltOV1MXHtlOWf6GjL9Kj8GK5FInw5JotxvbOs+IvV1/Dzo04/fCGfLVs7aXb4Ag==}
 
-  lodash@4.18.1:
-    resolution: {integrity: sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==}
-
   log-update@6.1.0:
     resolution: {integrity: sha512-9ie8ItPR6tjY5uYJh8K/Zrv/RMZ5VOlOWvtZdEHYSTFKZfIBPQa9tOAEeAWhd+AnIneLJ22w5fjOYtoutpWq5w==}
     engines: {node: '>=18'}
@@ -3712,9 +3681,6 @@ packages:
   micromatch@4.0.8:
     resolution: {integrity: sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==}
     engines: {node: '>=8.6'}
-
-  milkdrop-preset-utils@0.2.1:
-    resolution: {integrity: sha512-43HeZ5iQ5EsSh1P4sHCi+MYAshOmlnpKvGRW66g6Sa2XEpAoHWyX9qyrLs/OVSZCtQy+vQ86S0S57b243VTByw==}
 
   mimic-fn@2.1.0:
     resolution: {integrity: sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==}
@@ -7367,8 +7333,6 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  eel-wasm@0.0.17: {}
-
   electron-to-chromium@1.5.331: {}
 
   emittery@0.13.1: {}
@@ -8599,8 +8563,6 @@ snapshots:
 
   lodash.memoize@4.1.2: {}
 
-  lodash@4.18.1: {}
-
   log-update@6.1.0:
     dependencies:
       ansi-escapes: 7.3.0
@@ -8649,11 +8611,6 @@ snapshots:
     dependencies:
       braces: 3.0.3
       picomatch: 2.3.2
-
-  milkdrop-preset-utils@0.2.1:
-    dependencies:
-      '@babel/runtime': 7.29.2
-      lodash: 4.18.1
 
   mimic-fn@2.1.0: {}
 

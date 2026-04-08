@@ -1,6 +1,6 @@
 # @mangowave/frontend
 
-The MangoWave visualizer app — a React 19 + Vite 8 + TypeScript SPA that plays local files, captures system audio, or listens via microphone, rendering real-time MilkDrop-style visuals via butterchurn.
+The MangoWave visualizer app — a React 19 + Vite 8 + TypeScript SPA that plays local files, captures system audio, or listens via microphone, rendering real-time MilkDrop-style visuals via projectM WASM.
 
 ## Development
 
@@ -20,7 +20,7 @@ pnpm run lint       # ESLint (includes jsx-a11y)
 ### Audio Pipeline
 
 ```
-Source → GainNode (pre-amp) → 10× BiquadFilter (EQ) → AnalyserNode → butterchurn
+Source → GainNode (pre-amp) → 10× BiquadFilter (EQ) → AnalyserNode (silence detection) + AudioWorkletNode (PCM capture) → projectM WASM
 ```
 
 Three source modes:
@@ -31,9 +31,9 @@ Three source modes:
 
 Key details:
 
-- **EQ is purely visual** — shapes FFT data for butterchurn, does not change audio output
+- **EQ is purely visual** — shapes PCM data fed to projectM, does not change audio output
 - **Pre-amp** scales overall visual reactivity (0-3x linear gain)
-- butterchurn calls `connectAudio(analyserNode)` and reads FFT data directly
+- An AudioWorkletNode captures raw PCM samples and feeds them to projectM WASM for analysis
 - `createMediaElementSource` can only be called once per element — engine is created once, track changes update `audioElement.src`
 
 ### Source Layout
@@ -44,9 +44,8 @@ src/
 │                  #     PresetBrowser, MediaPlaylist, NowPlaying, PlaybackPanel, StartScreen,
 │                  #     ImportModal (drag-and-drop import with progress/results),
 │                  #     OnboardingOverlay (first-time tips), etc.
-├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (butterchurn),
-│                  # milkdropConverter (.milk → butterchurn JSON via workspace milkdrop-preset-converter),
-│                  # eelWasmAdapter (EEL→WASM compilation via eel-wasm, butterchurn adapter functions),
+├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (projectM WASM),
+│                  # pcmCaptureProcessor (AudioWorklet for PCM capture),
 │                  # textureLoader (image validation), importProcessor (batch import with progress callbacks),
 │                  # isWebGL2Supported
 ├── data/          # quarantined-presets.json, mobile-blocked-presets.json, excludedPresets.ts (shared Sets),
@@ -70,7 +69,7 @@ src/
 │                  #     useImportedTexturesStore, useToastStore, useConfirmStore, useImportModalStore,
 │                  #     useWindowSyncStatusStore, useDeviceSyncStatusStore
 ├── utils/         # Shared utilities (isMobileDevice, browserInfo, settingsPortability, audioFileValidation)
-├── types/         # music-metadata.d.ts, getDisplayMedia.d.ts, eel-wasm.d.ts (type declarations for untyped APIs)
+├── types/         # music-metadata.d.ts, getDisplayMedia.d.ts, audioworklet.d.ts (type declarations for untyped APIs)
 └── test/          # Vitest global setup
 
 e2e/                 # Playwright E2E tests (separate from Vitest, own tsconfig)
@@ -82,30 +81,30 @@ e2e/                 # Playwright E2E tests (separate from Vitest, own tsconfig)
 
 Zustand with `localStorage` persistence. Key sections:
 
-| Section                  | Fields                                                                                  | Defaults                    |
-| ------------------------ | --------------------------------------------------------------------------------------- | --------------------------- |
-| `performance`            | `fpsCap`, `resolutionScale`, `meshWidth`, `meshHeight`, `textureRatio`, `fxaa`          | 60, 1.0, 48, 36, 1.0, false |
-| `audio`                  | `smoothingConstant`, `fftSize`                                                          | 0.3, 1024                   |
-| `autopilot`              | `enabled`, `interval`, `mode`, `favoriteWeight`                                         | true, 15s, `'all'`, 2       |
-| `eq`                     | `preAmpGain`, `bandGains[10]`                                                           | 1.5, all 0dB                |
-| `blockedPresets`         | string[]                                                                                | []                          |
-| `favoritePresets`        | string[]                                                                                | []                          |
-| `presetNameDisplay`      | `'off' \| 'always' \| number`                                                           | 5                           |
-| `songInfoDisplay`        | `'off' \| number` (on/off toggle, hardcoded 5s when on)                                 | 5                           |
-| `transitionTime`         | number (seconds)                                                                        | 2.0                         |
-| `volume`                 | number (0.0–1.0)                                                                        | 0.5                         |
-| `brightness`             | number (0.1–1.0)                                                                        | 1.0                         |
-| `enabledPacks`           | string[]                                                                                | all packs                   |
-| `customPacks`            | `CustomPack[]` (`id`, `name`, `presets[]`, `createdAt`)                                 | []                          |
-| `activeCustomPackId`     | `string \| null`                                                                        | null                        |
-| `excludedOverrides`      | string[]                                                                                | []                          |
-| `importedPresets`        | `ImportedPresetMeta[]` (`name`, `fileName`, `addedAt`, `missingTextures?`)              | []                          |
-| `importedTextures`       | `ImportedTextureMeta[]` (`name`, `fileName`, `width`, `height`, `sizeBytes`, `addedAt`) | []                          |
-| `windowSyncEnabled`      | boolean                                                                                 | false                       |
-| `deviceSyncEnabled`      | boolean                                                                                 | false                       |
-| `deviceSyncSettingsSync` | boolean                                                                                 | false                       |
-| `syncPerformance`        | boolean                                                                                 | true                        |
-| `onboardingShown`        | boolean                                                                                 | false                       |
+| Section                  | Fields                                                                                  | Defaults              |
+| ------------------------ | --------------------------------------------------------------------------------------- | --------------------- |
+| `performance`            | `fpsCap`, `resolutionScale`, `meshWidth`, `meshHeight`                                  | 60, 1.0, 48, 36       |
+| `audio`                  | `smoothingConstant`, `fftSize`                                                          | 0.3, 1024             |
+| `autopilot`              | `enabled`, `interval`, `mode`, `favoriteWeight`                                         | true, 15s, `'all'`, 2 |
+| `eq`                     | `preAmpGain`, `bandGains[10]`                                                           | 1.5, all 0dB          |
+| `blockedPresets`         | string[]                                                                                | []                    |
+| `favoritePresets`        | string[]                                                                                | []                    |
+| `presetNameDisplay`      | `'off' \| 'always' \| number`                                                           | 5                     |
+| `songInfoDisplay`        | `'off' \| number` (on/off toggle, hardcoded 5s when on)                                 | 5                     |
+| `transitionTime`         | number (seconds)                                                                        | 2.0                   |
+| `volume`                 | number (0.0–1.0)                                                                        | 0.5                   |
+| `brightness`             | number (0.1–1.0)                                                                        | 1.0                   |
+| `enabledPacks`           | string[]                                                                                | all packs             |
+| `customPacks`            | `CustomPack[]` (`id`, `name`, `presets[]`, `createdAt`)                                 | []                    |
+| `activeCustomPackId`     | `string \| null`                                                                        | null                  |
+| `excludedOverrides`      | string[]                                                                                | []                    |
+| `importedPresets`        | `ImportedPresetMeta[]` (`name`, `fileName`, `addedAt`, `missingTextures?`)              | []                    |
+| `importedTextures`       | `ImportedTextureMeta[]` (`name`, `fileName`, `width`, `height`, `sizeBytes`, `addedAt`) | []                    |
+| `windowSyncEnabled`      | boolean                                                                                 | false                 |
+| `deviceSyncEnabled`      | boolean                                                                                 | false                 |
+| `deviceSyncSettingsSync` | boolean                                                                                 | false                 |
+| `syncPerformance`        | boolean                                                                                 | true                  |
+| `onboardingShown`        | boolean                                                                                 | false                 |
 
 Blocked and favorited presets are mutually exclusive.
 
@@ -182,9 +181,9 @@ Floating panel (`components/PlaybackPanel.tsx`) rendered by App.tsx when local p
 ## Key Technical Notes
 
 - **WebGL 2 required.** `isWebGL2Supported()` checks on mount and shows a fallback if unavailable.
-- **butterchurn is untyped** — vendored as workspace packages (`packages/butterchurn`, `packages/butterchurn-presets`) with ESM wrappers and `.d.ts` declarations. 66 standard MilkDrop textures bundled via `milkdrop-textures` workspace package (loaded at renderer init alongside butterchurn's 6 built-in textures).
+- **projectM WASM** — MilkDrop rendering engine compiled to WebAssembly, renders presets natively from `.milk` source files. 66 standard MilkDrop textures bundled via `milkdrop-textures` workspace package (loaded at renderer init via texture callback).
 - **`vite.config.ts`** imports `defineConfig` from `vitest/config` (not `vite`) to support the `test` property.
-- **832 presets** (395 butterchurn + 437 MilkDrop-Original) across 4 thematic packs (Ambient, Reactive, Psychedelic, Ethereal) with virtualized browsing (`react-virtuoso`).
+- **832 presets** across 4 thematic packs (Ambient, Reactive, Psychedelic, Ethereal) with virtualized browsing (`react-virtuoso`).
 - **`secure-json-parse`** used for prototype pollution protection on settings import.
 - **Settings import sanitization** — all imported values clamped to UI-enforced ranges. Whitelisted data keys only (store functions can't be overwritten). Array fields (favorites, blocked, packs) are merged/unioned with existing state rather than replaced. Custom packs merge by id with auto-rename on name collision. If a preset is in both favorites and blocked after merge, block wins (removed from favorites).
 - **Audio capture errors** — `humanizeAudioError` in `useAudioCapture` maps DOMException names to user-friendly messages per source (system vs mic). Missing audio tracks on screen share (user forgot "Share audio") block launch with browser/OS-aware guidance via `buildNoAudioMessage` (uses `browserInfo` to show only the relevant platform's constraints and names the user's browser if non-Chromium). `startCapture`/`startMicCapture` return `boolean` success so callers gate on result.

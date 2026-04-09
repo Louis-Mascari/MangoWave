@@ -94,9 +94,11 @@ export function SettingsPanel() {
         <TabButton active={activeTab === 'presets'} onClick={() => setActiveTab('presets')}>
           {t('tabs.presets')}
         </TabButton>
-        <TabButton active={activeTab === 'shortcuts'} onClick={() => setActiveTab('shortcuts')}>
-          {t('tabs.shortcuts')}
-        </TabButton>
+        {!isMobileDevice && (
+          <TabButton active={activeTab === 'shortcuts'} onClick={() => setActiveTab('shortcuts')}>
+            {t('tabs.shortcuts')}
+          </TabButton>
+        )}
         <TabButton active={activeTab === 'data'} onClick={() => setActiveTab('data')}>
           {t('tabs.data')}
         </TabButton>
@@ -116,7 +118,7 @@ export function SettingsPanel() {
         {activeTab === 'equalizer' && <EqualizerTab />}
         {activeTab === 'rendering' && <RenderingTab />}
         {activeTab === 'presets' && <PresetsTab />}
-        {activeTab === 'shortcuts' && <ShortcutsTab />}
+        {activeTab === 'shortcuts' && !isMobileDevice && <ShortcutsTab />}
         {activeTab === 'data' && <DataTab />}
         {activeTab === 'sync' && showSyncTab && <SyncTab />}
         {activeTab === 'spotify' && showSpotifyTab && <SpotifyTab />}

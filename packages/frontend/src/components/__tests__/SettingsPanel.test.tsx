@@ -1,6 +1,13 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
+// Force desktop path (JSDOM lacks getDisplayMedia, making isMobileDevice true by default).
+vi.mock('../../utils/isMobileDevice.ts', () => ({
+  isMobileDevice: false,
+  detectMobile: () => false,
+}));
+
 import { SettingsPanel } from '../SettingsPanel.tsx';
 
 describe('SettingsPanel', () => {
@@ -87,21 +94,20 @@ describe('SettingsPanel', () => {
     expect(screen.getByText('Import Settings')).toBeInTheDocument();
   });
 
-  // jsdom lacks getDisplayMedia, so isMobileDevice is true and the sync category is hidden
-  it('shows export category checkboxes on Data tab (mobile: no sync)', async () => {
+  it('shows export category checkboxes on Data tab (desktop: includes sync)', async () => {
     const user = userEvent.setup();
     render(<SettingsPanel />);
 
     await user.click(screen.getByRole('button', { name: 'Data' }));
 
     const checkboxes = screen.getAllByRole('checkbox');
-    expect(checkboxes).toHaveLength(8);
+    expect(checkboxes).toHaveLength(9);
     expect(screen.getByText('Audio Smoothing & FFT')).toBeInTheDocument();
     expect(screen.getByText('EQ')).toBeInTheDocument();
     expect(screen.getByText('Display & Volume')).toBeInTheDocument();
     expect(screen.getByText('Favorites')).toBeInTheDocument();
     expect(screen.getByText('Blocked Presets')).toBeInTheDocument();
     expect(screen.getByText('Packs, Custom Packs & Exclusions')).toBeInTheDocument();
-    expect(screen.queryByText('Window Sync')).not.toBeInTheDocument();
+    expect(screen.getByText('Window Sync')).toBeInTheDocument();
   });
 });

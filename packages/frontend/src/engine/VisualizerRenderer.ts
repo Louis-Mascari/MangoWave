@@ -8,11 +8,18 @@ import {
   presetsMD1,
 } from 'butterchurn-presets';
 import { THEMATIC_PACKS, presetThematicMap } from '../data/presetThematicPacks.ts';
+import { initOptimizer } from 'glsl-optimizer-wasm';
 
 // Pre-warm: start fetching the milkdrop-textures chunk at module load time (while the start
 // screen is visible) so it's ready before init() runs. Dynamic import keeps the 4.6MB
 // textureData.json out of the main bundle — the fetch is async, not a blocking parse.
 const milkdropTexturesPromise = import('milkdrop-textures');
+
+// Pre-warm: start loading the GLSL optimizer WASM module so it's ready for shader compilation.
+// Non-blocking — if it hasn't loaded by the time a shader compiles, the unoptimized shader is used.
+initOptimizer().catch(() => {
+  /* optimizer is optional — silent failure */
+});
 
 const PACK_SOURCES = [
   presetsMinimal,

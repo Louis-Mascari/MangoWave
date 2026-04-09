@@ -6,5 +6,8 @@
   "license": "MIT",
   "type": "module",
   "main": "src/index.js",
-  "types": "src/index.d.ts"
+  "types": "src/index.d.ts",
+  "dependencies": {
+    "glsl-optimizer-wasm": "workspace:*"
+  }
 }

@@ -6,6 +6,9 @@
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "type": "module",
+  "scripts": {
+    "build:wasm": "node build.js"
+  },
   "files": [
     "src/index.js",
     "src/index.d.ts",

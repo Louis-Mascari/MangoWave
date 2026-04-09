@@ -55,9 +55,10 @@ test.describe('Mobile UI', () => {
   });
 
   test('controls hide after idle timeout', async ({ app }) => {
-    // beforeEach confirmed controls are visible. The 5s idle timer is already
-    // running — just wait for controls to fade out (10s timeout is generous).
-    await expectControlsHidden(app);
+    // beforeEach confirmed controls are visible. The idle timer may still be in
+    // its initial 8s grace period + 5s idle timeout + 500ms transition = ~13.5s.
+    // Use 20s to avoid flakiness on slow CI.
+    await expectControlsHidden(app, 20000);
   });
 
   test('tap hides visible controls', async ({ app }) => {

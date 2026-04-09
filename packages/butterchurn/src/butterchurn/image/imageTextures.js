@@ -60,17 +60,67 @@ export default class ImageTextures {
   }
 
   loadExtraImages(imageData) {
+    // [MW-PATCH:16] Deduplicate by ImageBitmap reference — upload each unique bitmap
+    // once, then reuse the WebGL texture handle for variant names (fw_/fc_/pw_/pc_,
+    // case variants). Without this, 66 textures × 10 variants = 660 gl.texImage2D +
+    // generateMipmap calls, blocking the main thread for seconds on mobile.
+    const bitmapToTexture = new Map();
+
     Object.keys(imageData).forEach((imageName) => {
-      const { data, width, height } = imageData[imageName];
-      if (!this.samplers[imageName]) {
-        const image = new Image();
-        image.onload = () => {
-          this.samplers[imageName] = this.gl.createTexture();
-          this.bindTexture(this.samplers[imageName], image, width, height);
-        };
-        image.src = data;
+      if (this.samplers[imageName]) return;
+      const entry = imageData[imageName];
+
+      // Pre-decoded ImageBitmap path — fast GPU copy, no main-thread decode
+      if (typeof ImageBitmap !== 'undefined' && entry instanceof ImageBitmap) {
+        // Reuse existing texture if this exact bitmap was already uploaded
+        const existing = bitmapToTexture.get(entry);
+        if (existing) {
+          this.samplers[imageName] = existing;
+          return;
+        }
+        this.samplers[imageName] = this.gl.createTexture();
+        this.bindTextureBitmap(this.samplers[imageName], entry);
+        bitmapToTexture.set(entry, this.samplers[imageName]);
+        return;
       }
+
+      // Legacy data URI path — decode via Image element
+      const { data, width, height } = entry;
+      const image = new Image();
+      image.onload = () => {
+        this.samplers[imageName] = this.gl.createTexture();
+        this.bindTexture(this.samplers[imageName], image, width, height);
+      };
+      image.src = data;
     });
+  }
+
+  bindTextureBitmap(texture, bitmap) {
+    this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+    this.gl.pixelStorei(this.gl.UNPACK_ALIGNMENT, 1);
+    this.gl.texImage2D(
+      this.gl.TEXTURE_2D,
+      0,
+      this.gl.RGBA,
+      this.gl.RGBA,
+      this.gl.UNSIGNED_BYTE,
+      bitmap,
+    );
+
+    this.gl.generateMipmap(this.gl.TEXTURE_2D);
+
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.REPEAT);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.REPEAT);
+    this.gl.texParameteri(
+      this.gl.TEXTURE_2D,
+      this.gl.TEXTURE_MIN_FILTER,
+      this.gl.LINEAR_MIPMAP_LINEAR,
+    );
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
+    if (this.anisoExt) {
+      const max = this.gl.getParameter(this.anisoExt.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+      this.gl.texParameterf(this.gl.TEXTURE_2D, this.anisoExt.TEXTURE_MAX_ANISOTROPY_EXT, max);
+    }
   }
 
   getTexture(sampler) {

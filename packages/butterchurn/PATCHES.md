@@ -1,6 +1,6 @@
 # butterchurn Patches
 
-14 MangoWave patches applied to the butterchurn source fork (`src/butterchurn/`, forked from jberg/butterchurn v2.6.7, commit `d90f271`). Patches 1-13 searchable via `[MW-PATCH:` comments. Patch 14 is a dependency integration (`glsl-optimizer-wasm`).
+16 MangoWave patches applied to the butterchurn source fork (`src/butterchurn/`, forked from jberg/butterchurn v2.6.7, commit `d90f271`). Patches 1-13 searchable via `[MW-PATCH:` comments. Patch 14 is a dependency integration (`glsl-optimizer-wasm`).
 
 ---
 
@@ -299,3 +299,35 @@ Graceful fallback: `tryOptimizeGlsl()` returns the input unchanged if the WASM m
 ### Location
 
 `src/butterchurn/rendering/shaders/warp.js` and `src/butterchurn/rendering/shaders/comp.js` — `import { tryOptimizeGlsl } from 'glsl-optimizer-wasm'` and `tryOptimizeGlsl()` call wrapping the template literal in `createShader`.
+
+---
+
+## 15. ImageBitmap Texture Upload
+
+### Problem
+
+`loadExtraImages()` used `new Image()` with base64 data URI `src` assignment + `onload` callback for WebGL texture upload. For data URIs, browsers decode the image synchronously on the main thread. With 330 textures (66 MilkDrop base + 264 wrap/clamp variants) loading at init time, this blocked the main thread for ~3-5 seconds on mobile, making controls visible but unresponsive.
+
+### Fix
+
+Added `bindTextureBitmap()` method to `imageTextures.js` that accepts `ImageBitmap` objects directly. `loadExtraImages()` now detects `ImageBitmap` instances via `instanceof` check and uses the fast path — `texImage2D(ImageBitmap)` is a GPU copy with no main-thread decode. Falls back to the legacy `Image` + `onload` path for data URI entries (used by built-in textures and user imports).
+
+### Location
+
+`src/butterchurn/image/imageTextures.js` — `loadExtraImages()` instanceof check + `bindTextureBitmap()` method.
+
+---
+
+## 16. Deduplicate Texture Uploads by ImageBitmap Reference
+
+### Problem
+
+Wrap/clamp variants (`fw_`, `fc_`, `pw_`, `pc_`) and case variants (original + lowercase) all share the same `ImageBitmap` object but each got its own `gl.createTexture()` + `gl.texImage2D()` + `gl.generateMipmap()`. 66 base textures × 10 variant names = 660 GPU texture uploads at init time, blocking the main thread for seconds on mobile.
+
+### Fix
+
+Added a `Map<ImageBitmap, WebGLTexture>` lookup in `loadExtraImages()`. When an ImageBitmap has already been uploaded, variant names reuse the existing WebGL texture handle (just a JS property assignment) instead of re-uploading the same pixel data. Reduces GPU uploads from 660 to 66.
+
+### Location
+
+`src/butterchurn/image/imageTextures.js` — search for `[MW-PATCH:16]`.

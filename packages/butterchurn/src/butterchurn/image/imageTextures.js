@@ -60,14 +60,27 @@ export default class ImageTextures {
   }
 
   loadExtraImages(imageData) {
+    // [MW-PATCH:16] Deduplicate by ImageBitmap reference — upload each unique bitmap
+    // once, then reuse the WebGL texture handle for variant names (fw_/fc_/pw_/pc_,
+    // case variants). Without this, 66 textures × 10 variants = 660 gl.texImage2D +
+    // generateMipmap calls, blocking the main thread for seconds on mobile.
+    const bitmapToTexture = new Map();
+
     Object.keys(imageData).forEach((imageName) => {
       if (this.samplers[imageName]) return;
       const entry = imageData[imageName];
 
       // Pre-decoded ImageBitmap path — fast GPU copy, no main-thread decode
       if (typeof ImageBitmap !== 'undefined' && entry instanceof ImageBitmap) {
+        // Reuse existing texture if this exact bitmap was already uploaded
+        const existing = bitmapToTexture.get(entry);
+        if (existing) {
+          this.samplers[imageName] = existing;
+          return;
+        }
         this.samplers[imageName] = this.gl.createTexture();
         this.bindTextureBitmap(this.samplers[imageName], entry);
+        bitmapToTexture.set(entry, this.samplers[imageName]);
         return;
       }
 

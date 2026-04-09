@@ -32,14 +32,10 @@ const preDecodedTexturesPromise: Promise<Map<string, ImageBitmap>> = import('mil
       const batch = entries.slice(i, i + BATCH);
       const results = await Promise.all(
         batch.map(async ([name, { data }]) => {
-          const commaIdx = data.indexOf(',');
-          const header = data.slice(0, commaIdx);
-          const b64 = data.slice(commaIdx + 1);
-          const mime = header.match(/:(.*?);/)?.[1] ?? 'image/jpeg';
-          const binary = atob(b64);
-          const bytes = new Uint8Array(binary.length);
-          for (let j = 0; j < binary.length; j++) bytes[j] = binary.charCodeAt(j);
-          const blob = new Blob([bytes], { type: mime });
+          // Use fetch to decode data URI — native browser implementation is faster
+          // than manual atob + byte-by-byte copy, and doesn't block the main thread.
+          const response = await fetch(data);
+          const blob = await response.blob();
           const bitmap = await createImageBitmap(blob);
           return [name, bitmap] as const;
         }),

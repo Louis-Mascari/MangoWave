@@ -81,6 +81,7 @@ export function useAudioCapture(): UseAudioCaptureReturn {
   const engineRef = useRef<AudioEngine | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const trackEndedRef = useRef<(() => void) | null>(null);
+  const startingRef = useRef(false);
   const [audioEngine, setAudioEngine] = useState<AudioEngine | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [captureSource, setCaptureSource] = useState<CaptureSource>(null);
@@ -108,6 +109,8 @@ export function useAudioCapture(): UseAudioCaptureReturn {
   }, [removeTrackListeners]);
 
   const startCapture = useCallback(async (): Promise<boolean> => {
+    if (startingRef.current) return false;
+    startingRef.current = true;
     try {
       if (engineRef.current) {
         engineRef.current.destroy();
@@ -149,18 +152,24 @@ export function useAudioCapture(): UseAudioCaptureReturn {
         err instanceof DOMException &&
         (err.name === 'NotAllowedError' ||
           err.name === 'AbortError' ||
+          err.name === 'NotSupportedError' ||
           err.name === 'NotReadableError' ||
-          err.name === 'NotFoundError');
+          err.name === 'NotFoundError' ||
+          err.name === 'InvalidStateError');
       if (!isExpected) {
         Sentry.captureException(err, { tags: { audioSource: 'system' } });
       }
       setError(humanizeAudioError(err, 'system'));
       setIsCapturing(false);
       return false;
+    } finally {
+      startingRef.current = false;
     }
   }, [cleanup, removeTrackListeners]);
 
   const startMicCapture = useCallback(async (): Promise<boolean> => {
+    if (startingRef.current) return false;
+    startingRef.current = true;
     try {
       if (engineRef.current) {
         engineRef.current.destroy();
@@ -183,13 +192,16 @@ export function useAudioCapture(): UseAudioCaptureReturn {
           err.name === 'AbortError' ||
           err.name === 'NotSupportedError' ||
           err.name === 'NotReadableError' ||
-          err.name === 'NotFoundError');
+          err.name === 'NotFoundError' ||
+          err.name === 'InvalidStateError');
       if (!isExpected) {
         Sentry.captureException(err, { tags: { audioSource: 'mic' } });
       }
       setError(humanizeAudioError(err, 'mic'));
       setIsCapturing(false);
       return false;
+    } finally {
+      startingRef.current = false;
     }
   }, []);
 

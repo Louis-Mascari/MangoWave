@@ -228,9 +228,10 @@ export function Visualizer({
     store.setTextureRatio(settings.textureRatio);
     store.setResolutionScale(settings.resolutionScale);
 
-    // Show info toast when quality steps down
-    if (tier < prevAutoTierRef.current) {
-      useToastStore.getState().show(`Auto Quality adjusted to ${TIER_LABELS[tier]}`, {
+    // Show info toast on quality tier changes
+    if (tier !== prevAutoTierRef.current) {
+      const verb = tier < prevAutoTierRef.current ? 'adjusted' : 'restored';
+      useToastStore.getState().show(`Auto Quality ${verb} to ${TIER_LABELS[tier]}`, {
         type: 'info',
         durationMs: 3000,
       });

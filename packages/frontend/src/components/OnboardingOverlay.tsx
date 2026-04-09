@@ -2,9 +2,20 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { useFocusTrap } from '../hooks/useFocusTrap.ts';
-import { NextTrackIcon, PaletteIcon, GearIcon, KeyboardIcon } from './icons.tsx';
+import {
+  NextTrackIcon,
+  GearIcon,
+  KeyboardIcon,
+  StarIcon,
+  BlockIcon,
+  ChevronRightIcon,
+  ChevronLeftIcon,
+} from './icons.tsx';
+
 interface OnboardingOverlayProps {
   onComplete: () => void;
+  /** Called when the overlay starts closing — lets the caller show controls immediately. */
+  onClosing?: () => void;
 }
 
 interface Tip {
@@ -17,22 +28,27 @@ const DESKTOP_TIPS: Tip[] = [
   {
     titleKey: 'onboarding.desktop.skipPresetsTitle',
     descKey: 'onboarding.desktop.skipPresetsDesc',
-    icon: <NextTrackIcon className="h-8 w-8" />,
+    icon: <NextTrackIcon className="h-10 w-10 text-orange-400" />,
   },
   {
     titleKey: 'onboarding.desktop.curateTitle',
     descKey: 'onboarding.desktop.curateDesc',
-    icon: <PaletteIcon className="h-8 w-8" />,
+    icon: (
+      <span className="inline-flex items-center gap-2 text-orange-400">
+        <StarIcon className="h-8 w-8" />
+        <BlockIcon className="h-8 w-8" />
+      </span>
+    ),
   },
   {
     titleKey: 'onboarding.desktop.tuneTitle',
     descKey: 'onboarding.desktop.tuneDesc',
-    icon: <GearIcon className="h-8 w-8" />,
+    icon: <GearIcon className="h-10 w-10 text-orange-400" />,
   },
   {
     titleKey: 'onboarding.desktop.shortcutsTitle',
     descKey: 'onboarding.desktop.shortcutsDesc',
-    icon: <KeyboardIcon className="h-8 w-8" />,
+    icon: <KeyboardIcon className="h-10 w-10 text-orange-400" />,
   },
 ];
 
@@ -42,14 +58,14 @@ const MOBILE_TIPS: Tip[] = [
     descKey: 'onboarding.mobile.menuDesc',
     icon: (
       <svg
-        xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 36 36"
         fill="none"
-        className="inline-block h-10 w-10"
+        className="inline-block h-10 w-10 text-orange-400"
+        aria-hidden="true"
       >
-        <circle cx="18" cy="18" r="14" stroke="#f97316" strokeWidth="2" />
-        <circle cx="18" cy="14" r="2" fill="#f97316" />
-        <path d="M18 18v8" stroke="#f97316" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="18" cy="18" r="14" stroke="currentColor" strokeWidth="2" />
+        <circle cx="18" cy="14" r="2" fill="currentColor" />
+        <path d="M18 18v8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       </svg>
     ),
   },
@@ -57,33 +73,39 @@ const MOBILE_TIPS: Tip[] = [
     titleKey: 'onboarding.mobile.navigateTitle',
     descKey: 'onboarding.mobile.navigateDesc',
     icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 36 36"
-        fill="none"
-        className="inline-block h-8 w-8"
-      >
-        <path d="M6 8l10 10L6 28V8z" fill="#f97316" />
-        <path d="M18 8l10 10-10 10V8z" fill="#f97316" />
-        <rect x="29" y="8" width="3" height="20" rx="1" fill="#f97316" />
-      </svg>
+      <span className="inline-flex items-center gap-3 text-orange-400">
+        <ChevronLeftIcon className="h-8 w-8" />
+        <ChevronRightIcon className="h-8 w-8" />
+      </span>
     ),
   },
   {
     titleKey: 'onboarding.mobile.curateTitle',
     descKey: 'onboarding.mobile.curateDesc',
-    icon: <PaletteIcon className="h-8 w-8" />,
+    icon: (
+      <span className="inline-flex items-center gap-2 text-orange-400">
+        <StarIcon className="h-8 w-8" />
+        <BlockIcon className="h-8 w-8" />
+      </span>
+    ),
   },
   {
     titleKey: 'onboarding.mobile.autopilotTitle',
     descKey: 'onboarding.mobile.autopilotDesc',
-    icon: <GearIcon className="h-8 w-8" />,
+    icon: (
+      <span className="inline-flex items-center gap-3 text-orange-400">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-current text-lg font-bold">
+          A
+        </span>
+        <GearIcon className="h-9 w-9" />
+      </span>
+    ),
   },
 ];
 
 const FADE_OUT_MS = 800;
 
-export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
+export function OnboardingOverlay({ onComplete, onClosing }: OnboardingOverlayProps) {
   const { t } = useTranslation('start');
   const { t: tc } = useTranslation('common');
   const tips = isMobileDevice ? MOBILE_TIPS : DESKTOP_TIPS;
@@ -107,8 +129,9 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
   const handleClose = useCallback(() => {
     if (closing) return;
     setClosing(true);
+    onClosing?.();
     fadeTimerRef.current = setTimeout(onComplete, FADE_OUT_MS);
-  }, [closing, onComplete]);
+  }, [closing, onComplete, onClosing]);
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
@@ -142,7 +165,7 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
 
         {/* Tip content */}
         <div className="text-center">
-          <div className="mb-3 text-3xl">{tip.icon}</div>
+          <div className="mb-3 flex justify-center">{tip.icon}</div>
           <h3 className="mb-2 text-base font-semibold text-white">{t(tip.titleKey)}</h3>
           <p className="text-sm leading-relaxed text-white/60">{t(tip.descKey)}</p>
         </div>

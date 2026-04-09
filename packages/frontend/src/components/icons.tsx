@@ -281,31 +281,6 @@ export function NowPlayingIcon({ className = 'h-4 w-4' }: IconProps) {
 
 // ── Onboarding ────────────────────────────────────────────────────────
 
-export function PaletteIcon({ className = 'h-4 w-4' }: IconProps) {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <path
-        d="M10 2a8 8 0 00-1.2 15.9c.9.1 1.2-.5 1.2-.5s-.1-1.5 1-2c1.2-.5 2.5-.5 3.2-1.5.8-1.2.3-2.8-.5-3.5L10 2z"
-        fill="currentColor"
-        fillOpacity="0.15"
-      />
-      <circle cx="7" cy="8" r="1.2" fill="currentColor" />
-      <circle cx="10.5" cy="6.5" r="1.2" fill="currentColor" />
-      <circle cx="13.5" cy="8.5" r="1.2" fill="currentColor" />
-      <circle cx="7" cy="12" r="1.2" fill="currentColor" />
-    </svg>
-  );
-}
-
 export function KeyboardIcon({ className = 'h-4 w-4' }: IconProps) {
   return (
     <svg

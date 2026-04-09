@@ -13,6 +13,10 @@ interface LaunchAnimationProps {
 
 export function LaunchAnimation({ onComplete }: LaunchAnimationProps) {
   const completedRef = useRef(false);
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
   const [passthrough, setPassthrough] = useState(false);
 
   useEffect(() => {
@@ -21,14 +25,15 @@ export function LaunchAnimation({ onComplete }: LaunchAnimationProps) {
     const completeTimer = setTimeout(() => {
       if (!completedRef.current) {
         completedRef.current = true;
-        onComplete();
+        onCompleteRef.current();
       }
     }, LAUNCH_DURATION_MS);
     return () => {
       clearTimeout(fadeTimer);
       clearTimeout(completeTimer);
     };
-  }, [onComplete]);
+    // Stable ref — timers must not restart when parent re-renders
+  }, []);
 
   return (
     <div

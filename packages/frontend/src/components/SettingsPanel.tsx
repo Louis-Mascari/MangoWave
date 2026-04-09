@@ -462,7 +462,7 @@ function RenderingTab() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex items-center justify-between">
         <span className="flex items-center text-xs text-white/60">
           {t('rendering.antiAliasing')}
           <Tooltip text={t('rendering.antiAliasingTooltip')} />
@@ -694,16 +694,28 @@ function PresetsTab() {
             {tc('autopilot')}
             <Tooltip text={t('presets.autopilotTooltip')} />
           </span>
-          <button
-            onClick={() => setAutopilotEnabled(!autopilot.enabled)}
-            className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
-              autopilot.enabled
-                ? 'bg-orange-500 text-white'
-                : 'bg-white/10 text-white/70 hover:bg-white/20'
-            }`}
-          >
-            {autopilot.enabled ? tc('on') : tc('off')}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setAutopilotEnabled(true)}
+              className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
+                autopilot.enabled
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-white/10 text-white/70 hover:bg-white/20'
+              }`}
+            >
+              {tc('on')}
+            </button>
+            <button
+              onClick={() => setAutopilotEnabled(false)}
+              className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
+                !autopilot.enabled
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-white/10 text-white/70 hover:bg-white/20'
+              }`}
+            >
+              {tc('off')}
+            </button>
+          </div>
         </div>
 
         <div className="mt-2 flex flex-col gap-1">
@@ -1247,16 +1259,28 @@ function WindowSyncSection() {
         <>
           <div className="flex items-center justify-between">
             <span className="text-xs text-white/60">{t('sync.enabled')}</span>
-            <button
-              onClick={() => setWindowSyncEnabled(!windowSyncEnabled)}
-              className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
-                windowSyncEnabled
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-white/10 text-white/70 hover:bg-white/20'
-              }`}
-            >
-              {windowSyncEnabled ? tc('on') : tc('off')}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setWindowSyncEnabled(true)}
+                className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
+                  windowSyncEnabled
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-white/10 text-white/70 hover:bg-white/20'
+                }`}
+              >
+                {tc('on')}
+              </button>
+              <button
+                onClick={() => setWindowSyncEnabled(false)}
+                className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
+                  !windowSyncEnabled
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-white/10 text-white/70 hover:bg-white/20'
+                }`}
+              >
+                {tc('off')}
+              </button>
+            </div>
           </div>
 
           {windowSyncEnabled && (

@@ -230,7 +230,7 @@ export function Visualizer({
 
     // Show info toast on quality tier changes
     if (tier !== prevAutoTierRef.current) {
-      const verb = tier < prevAutoTierRef.current ? 'adjusted' : 'restored';
+      const verb = tier < prevAutoTierRef.current ? 'reduced' : 'increased';
       useToastStore.getState().show(`Auto Quality ${verb} to ${TIER_LABELS[tier]}`, {
         type: 'info',
         durationMs: 3000,
@@ -252,21 +252,26 @@ export function Visualizer({
     renderer.setOnQualityChange(performance.autoQuality ? handleQualityChange : null);
 
     if (performance.autoQuality) {
-      // Always allow stepping up to High — the monitor will step down if needed
-      const highTier = QUALITY_TIERS.length - 1;
-      renderer.setAutoQualityMaxTier(highTier);
-      prevAutoTierRef.current = highTier;
+      // Allow stepping up to High — the monitor will step down if needed
+      renderer.setAutoQualityMaxTier(QUALITY_TIERS.length - 1);
 
-      // Apply High tier settings immediately so the monitor starts measuring from High
-      const high = QUALITY_TIERS[highTier];
-      autoQualityChangeRef.current = true;
-      const store = useSettingsStore.getState();
-      store.setMeshSize(high.meshWidth, high.meshHeight);
-      store.setTextureRatio(high.textureRatio);
-      store.setResolutionScale(high.resolutionScale);
-      queueMicrotask(() => {
-        autoQualityChangeRef.current = false;
-      });
+      // Determine current tier from existing settings so we don't override the user's choices.
+      // Start monitoring from wherever they are; the monitor will step up/down as needed.
+      let currentTier = 0;
+      for (let i = QUALITY_TIERS.length - 1; i >= 0; i--) {
+        const t = QUALITY_TIERS[i];
+        if (
+          performance.meshWidth >= t.meshWidth &&
+          performance.meshHeight >= t.meshHeight &&
+          performance.textureRatio >= t.textureRatio &&
+          performance.resolutionScale >= t.resolutionScale
+        ) {
+          currentTier = i;
+          break;
+        }
+      }
+      renderer.setAutoQualityCurrentTier(currentTier);
+      prevAutoTierRef.current = currentTier;
     }
 
     return () => {

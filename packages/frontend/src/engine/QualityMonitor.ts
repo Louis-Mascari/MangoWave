@@ -74,6 +74,10 @@ export class QualityMonitor {
     this.targetFps = fps > 0 ? fps : 60;
   }
 
+  setCurrentTier(tier: number): void {
+    this.currentTier = Math.max(0, Math.min(tier, QUALITY_TIERS.length - 1));
+  }
+
   setMaxTier(tier: number): void {
     this.maxTier = Math.min(tier, QUALITY_TIERS.length - 1);
     if (this.currentTier > this.maxTier) {

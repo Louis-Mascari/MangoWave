@@ -235,6 +235,10 @@ export class VisualizerRenderer {
     this._qualityMonitor.setMaxTier(tier);
   }
 
+  setAutoQualityCurrentTier(tier: number): void {
+    this._qualityMonitor.setCurrentTier(tier);
+  }
+
   setOnQualityChange(callback: QualityChangeCallback | null): void {
     this._qualityMonitor.setOnQualityChange(callback);
   }

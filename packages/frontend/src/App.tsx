@@ -302,7 +302,7 @@ function MainApp() {
       const data = audioEngine.getTimeDomainData();
       if (data.length === 0) return;
       // Time-domain silence = all samples at exactly 128. Any deviation means audio is flowing.
-      const hasSignal = data.some((v) => v < 127 || v > 129);
+      const hasSignal = data.some((v) => v < 126 || v > 130);
 
       if (hasSignal) {
         // Audio detected — cancel warning and dismiss toast if it was shown

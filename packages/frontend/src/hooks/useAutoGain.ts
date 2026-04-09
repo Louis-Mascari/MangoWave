@@ -7,14 +7,14 @@ import i18n from '../i18n/index.ts';
 // Thresholds for smoothed RMS level (0.0–1.0 scale).
 // Time-domain RMS from getByteTimeDomainData is typically 0.01–0.15 for normal audio.
 // These thresholds define the "good enough" dead zone where no adjustment happens.
-const LOW_THRESHOLD = 0.005; // Below this: effectively silent, boost gain
+const LOW_THRESHOLD = 0.003; // Below this: effectively silent, boost gain
 const HIGH_THRESHOLD = 0.25; // Above this: signal very hot, reduce gain
 const GAIN_STEP = 0.05; // Adjustment per tick
 const MIN_GAIN = 0.3;
 const MAX_GAIN = 3.0;
 const TICK_MS = 500;
 const EMA_ALPHA = 0.15; // ~5s convergence at 500ms ticks
-const WARMUP_TICKS = 6; // Wait ~3s before adjusting
+const WARMUP_TICKS = 3; // Wait ~1.5s before adjusting
 const TOAST_THRESHOLD = 0.5; // Show toast when gain moves this far from baseline
 
 /**

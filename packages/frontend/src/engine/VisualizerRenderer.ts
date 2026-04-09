@@ -10,16 +10,55 @@ import {
 import { THEMATIC_PACKS, presetThematicMap } from '../data/presetThematicPacks.ts';
 import { initOptimizer } from 'glsl-optimizer-wasm';
 
-// Pre-warm: start fetching the milkdrop-textures chunk at module load time (while the start
-// screen is visible) so it's ready before init() runs. Dynamic import keeps the 4.6MB
-// textureData.json out of the main bundle — the fetch is async, not a blocking parse.
-const milkdropTexturesPromise = import('milkdrop-textures');
-
 // Pre-warm: start loading the GLSL optimizer WASM module so it's ready for shader compilation.
 // Non-blocking — if it hasn't loaded by the time a shader compiles, the unoptimized shader is used.
 initOptimizer().catch(() => {
   /* optimizer is optional — silent failure */
 });
+
+// Pre-decode milkdrop textures to ImageBitmap at module load time (while the start screen is
+// visible). This moves the heavy JPEG decoding off the main thread via createImageBitmap, so
+// the WebGL uploads at init time are fast GPU copies instead of synchronous Image decode +
+// format conversion that blocks the main thread for seconds on mobile.
+// Includes wrap/clamp variants (fw_/fc_/pw_/pc_) — same bitmap, different sampler settings.
+const preDecodedTexturesPromise: Promise<Map<string, ImageBitmap>> = import('milkdrop-textures')
+  .then(async ({ getImages }) => {
+    const textures = getImages();
+    const decoded = new Map<string, ImageBitmap>();
+    const entries = Object.entries(textures);
+    const BATCH = 10;
+
+    for (let i = 0; i < entries.length; i += BATCH) {
+      const batch = entries.slice(i, i + BATCH);
+      const results = await Promise.all(
+        batch.map(async ([name, { data }]) => {
+          const commaIdx = data.indexOf(',');
+          const header = data.slice(0, commaIdx);
+          const b64 = data.slice(commaIdx + 1);
+          const mime = header.match(/:(.*?);/)?.[1] ?? 'image/jpeg';
+          const binary = atob(b64);
+          const bytes = new Uint8Array(binary.length);
+          for (let j = 0; j < binary.length; j++) bytes[j] = binary.charCodeAt(j);
+          const blob = new Blob([bytes], { type: mime });
+          const bitmap = await createImageBitmap(blob);
+          return [name, bitmap] as const;
+        }),
+      );
+      for (const [name, bitmap] of results) {
+        decoded.set(name, bitmap);
+        const lower = name.toLowerCase();
+        if (lower !== name) decoded.set(lower, bitmap);
+        // Register wrap/clamp variants — same image, sampler controls wrap behavior
+        for (const prefix of ['fw_', 'fc_', 'pw_', 'pc_']) {
+          decoded.set(prefix + name, bitmap);
+          if (lower !== name) decoded.set(prefix + lower, bitmap);
+        }
+      }
+    }
+
+    return decoded;
+  })
+  .catch(() => new Map<string, ImageBitmap>());
 
 const PACK_SOURCES = [
   presetsMinimal,
@@ -108,46 +147,27 @@ export class VisualizerRenderer {
     // Load built-in extra textures (cells, fire, etc.) so presets referencing sampler_<name> render correctly
     this.loadExtraImages(butterchurnExtraImages.getImages());
 
-    // Load 66 standard MilkDrop textures from the projectM texture pack.
-    // Loaded async to avoid blocking the launch animation with 4.6MB JSON parse.
-    // butterchurn skips names already loaded (5 overlap with butterchurnExtraImages).
-    // Uploads are batched with setTimeout(0) yields to keep the UI responsive on mobile —
-    // 330 synchronous WebGL texture uploads (66 base + 264 wrap/clamp variants) would
-    // otherwise block the main thread for several seconds right after the visualizer loads.
-    milkdropTexturesPromise.then(({ getImages }) => {
-      const milkdropTextures = getImages();
-      const entries = Object.entries(milkdropTextures);
-      const BATCH_SIZE = 12;
-      type TexEntry = [string, { data: string; width: number; height: number }];
-
-      const uploadBatch = (startIdx: number, source: TexEntry[], onComplete?: () => void) => {
+    // Load 66 standard MilkDrop textures (+ wrap/clamp variants) from pre-decoded ImageBitmaps.
+    // The heavy JPEG decoding happened at module load time (on the start screen) via
+    // createImageBitmap, so these are fast GPU copies. Batched with setTimeout(0) yields
+    // as a safety net to keep the UI responsive on slow devices.
+    preDecodedTexturesPromise.then((decoded) => {
+      if (!this.visualizer || decoded.size === 0) return;
+      const entries = [...decoded.entries()];
+      const BATCH_SIZE = 20; // ImageBitmap uploads are fast — larger batches OK
+      const uploadBatch = (startIdx: number) => {
         if (!this.visualizer) return;
-        const batch: Record<string, { data: string; width: number; height: number }> = {};
-        for (let i = startIdx; i < Math.min(startIdx + BATCH_SIZE, source.length); i++) {
-          batch[source[i][0]] = source[i][1];
+        const batch: Record<string, ImageBitmap> = {};
+        for (let i = startIdx; i < Math.min(startIdx + BATCH_SIZE, entries.length); i++) {
+          batch[entries[i][0]] = entries[i][1];
         }
         this.loadExtraImages(batch);
         const next = startIdx + BATCH_SIZE;
-        if (next < source.length) {
-          setTimeout(() => uploadBatch(next, source, onComplete), 0);
-        } else {
-          onComplete?.();
+        if (next < entries.length) {
+          setTimeout(() => uploadBatch(next), 0);
         }
       };
-
-      // Upload base textures in batches, then build and upload wrap/clamp variants.
-      // Register wrap/clamp variants (fw_/fc_/pw_/pc_) so sampler_fw_X etc. resolve
-      // to the correct image instead of the clouds2 fallback.
-      uploadBatch(0, entries, () => {
-        const variants: TexEntry[] = [];
-        for (const [name, data] of entries) {
-          for (const prefix of ['fw_', 'fc_', 'pw_', 'pc_']) {
-            const variantKey = prefix + name;
-            if (!(variantKey in milkdropTextures)) variants.push([variantKey, data]);
-          }
-        }
-        if (variants.length > 0) uploadBatch(0, variants);
-      });
+      uploadBatch(0);
     });
 
     // Register MilkDrop-Original preset names from a lightweight manifest (18KB).
@@ -190,7 +210,9 @@ export class VisualizerRenderer {
   }
 
   loadExtraImages(
-    imageData: Record<string, { data: string; width: number; height: number }>,
+    imageData:
+      | Record<string, { data: string; width: number; height: number }>
+      | Record<string, ImageBitmap>,
   ): void {
     if (this.visualizer) {
       this.visualizer.loadExtraImages(imageData);

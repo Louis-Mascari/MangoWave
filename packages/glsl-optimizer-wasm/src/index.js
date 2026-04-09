@@ -46,7 +46,10 @@ export function tryOptimizeGlsl(source) {
   try {
     // shaderType 3 = kGlslTargetOpenGLES30, vertexShader = false
     const result = optimizeGlsl(source, 3, false);
-    if (!result || result.startsWith('Error:')) {
+    if (!result || result.startsWith('Error:') || !result.trimStart().startsWith('#version')) {
+      if (result && !result.startsWith('Error:')) {
+        console.warn('[glsl-optimizer] Optimizer returned invalid output, using original shader');
+      }
       return source;
     }
     return result;

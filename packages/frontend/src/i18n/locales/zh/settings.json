@@ -21,6 +21,8 @@
 
   "rendering": {
     "title": "渲染",
+    "autoQuality": "自动画质",
+    "autoQualityTooltip": "根据设备性能自动调整分辨率、网格和纹理质量。关闭后可手动控制设置",
     "frameRate": "帧率",
     "frameRateTooltip": "较低的帧率可减少 GPU 使用",
     "frameRatePlaceholder": "15–300",

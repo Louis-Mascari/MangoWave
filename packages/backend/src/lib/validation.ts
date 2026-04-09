@@ -117,6 +117,8 @@ function validatePerformance(
   }
   const boolErr = requireBoolean(p.fxaa, 'performance.fxaa');
   if (boolErr) return boolErr;
+  const autoQualityErr = requireBoolean(p.autoQuality, 'performance.autoQuality');
+  if (autoQualityErr) return autoQualityErr;
 
   const fpsCap = Math.round(clamp(p.fpsCap as number, 0, 300));
   return {
@@ -127,6 +129,7 @@ function validatePerformance(
       meshHeight: Math.round(clamp(p.meshHeight as number, 12, 96)),
       textureRatio: clamp(p.textureRatio as number, 0.25, 2.0),
       fxaa: p.fxaa as boolean,
+      autoQuality: p.autoQuality as boolean,
     },
   };
 }

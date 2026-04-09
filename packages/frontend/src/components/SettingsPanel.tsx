@@ -275,6 +275,7 @@ function RenderingTab() {
   const setMeshSize = useSettingsStore((s) => s.setMeshSize);
   const setTextureRatio = useSettingsStore((s) => s.setTextureRatio);
   const setFxaa = useSettingsStore((s) => s.setFxaa);
+  const setAutoQuality = useSettingsStore((s) => s.setAutoQuality);
   const brightness = useSettingsStore((s) => s.brightness);
   const setBrightness = useSettingsStore((s) => s.setBrightness);
   const audio = useSettingsStore((s) => s.audio);
@@ -317,6 +318,35 @@ function RenderingTab() {
           </svg>
           {tc('reset')}
         </button>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <span className="flex items-center text-xs text-white/60">
+          {t('rendering.autoQuality')}
+          <Tooltip text={t('rendering.autoQualityTooltip')} />
+        </span>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setAutoQuality(true)}
+            className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
+              performance.autoQuality
+                ? 'bg-orange-500 text-white'
+                : 'bg-white/10 text-white/70 hover:bg-white/20'
+            }`}
+          >
+            {tc('on')}
+          </button>
+          <button
+            onClick={() => setAutoQuality(false)}
+            className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
+              !performance.autoQuality
+                ? 'bg-orange-500 text-white'
+                : 'bg-white/10 text-white/70 hover:bg-white/20'
+            }`}
+          >
+            {tc('off')}
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-1">

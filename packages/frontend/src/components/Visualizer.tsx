@@ -1,7 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { VisualizerRenderer } from '../engine/VisualizerRenderer.ts';
 import type { AudioEngine } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
+import { QUALITY_TIERS, TIER_LABELS } from '../engine/QualityMonitor.ts';
+import type { QualityTier } from '../engine/QualityMonitor.ts';
+import { useToastStore } from '../store/useToastStore.ts';
 import { useImportedTexturesStore } from '../store/useImportedTexturesStore.ts';
 import quarantinedData from '../data/quarantined-presets.json';
 import mobileBlockedData from '../data/mobile-blocked-presets.json';
@@ -213,6 +216,88 @@ export function Visualizer({
     if (!renderer) return;
     renderer.setOutputAA(performance.fxaa);
   }, [performance.fxaa, rendererRef]);
+
+  // Auto quality: connect quality monitor to store
+  const autoQualityChangeRef = useRef(false);
+  const prevAutoTierRef = useRef(QUALITY_TIERS.length - 1);
+  const handleQualityChange = useCallback((tier: number, settings: QualityTier) => {
+    // Flag so manual-change detection in useEffect skips this update
+    autoQualityChangeRef.current = true;
+    const store = useSettingsStore.getState();
+    store.setMeshSize(settings.meshWidth, settings.meshHeight);
+    store.setTextureRatio(settings.textureRatio);
+    store.setResolutionScale(settings.resolutionScale);
+
+    // Show info toast on quality tier changes
+    if (tier !== prevAutoTierRef.current) {
+      const verb = tier < prevAutoTierRef.current ? 'adjusted' : 'restored';
+      useToastStore.getState().show(`Auto Quality ${verb} to ${TIER_LABELS[tier]}`, {
+        type: 'info',
+        durationMs: 3000,
+      });
+    }
+    prevAutoTierRef.current = tier;
+
+    // Reset flag after microtask (store updates are synchronous)
+    queueMicrotask(() => {
+      autoQualityChangeRef.current = false;
+    });
+  }, []);
+
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    if (!renderer) return;
+
+    renderer.setAutoQuality(performance.autoQuality);
+    renderer.setOnQualityChange(performance.autoQuality ? handleQualityChange : null);
+
+    if (performance.autoQuality) {
+      // Always allow stepping up to High — the monitor will step down if needed
+      const highTier = QUALITY_TIERS.length - 1;
+      renderer.setAutoQualityMaxTier(highTier);
+      prevAutoTierRef.current = highTier;
+
+      // Apply High tier settings immediately so the monitor starts measuring from High
+      const high = QUALITY_TIERS[highTier];
+      autoQualityChangeRef.current = true;
+      const store = useSettingsStore.getState();
+      store.setMeshSize(high.meshWidth, high.meshHeight);
+      store.setTextureRatio(high.textureRatio);
+      store.setResolutionScale(high.resolutionScale);
+      queueMicrotask(() => {
+        autoQualityChangeRef.current = false;
+      });
+    }
+
+    return () => {
+      renderer.setOnQualityChange(null);
+    };
+    // Only re-run when autoQuality is toggled, not on every settings change
+  }, [performance.autoQuality, rendererRef, handleQualityChange]);
+
+  // When user manually changes performance settings while auto quality is on,
+  // disable auto quality (manual override)
+  const prevPerfRef = useRef(performance);
+  useEffect(() => {
+    const prev = prevPerfRef.current;
+    prevPerfRef.current = performance;
+
+    // Skip if this change came from auto quality itself
+    if (autoQualityChangeRef.current) return;
+
+    // Skip if auto quality is off or was just toggled
+    if (!performance.autoQuality || prev.autoQuality !== performance.autoQuality) return;
+
+    // Check if any quality-related setting changed manually
+    if (
+      prev.meshWidth !== performance.meshWidth ||
+      prev.meshHeight !== performance.meshHeight ||
+      prev.textureRatio !== performance.textureRatio ||
+      prev.resolutionScale !== performance.resolutionScale
+    ) {
+      useSettingsStore.getState().setAutoQuality(false);
+    }
+  }, [performance]);
 
   // Sync audio settings to engine
   useEffect(() => {

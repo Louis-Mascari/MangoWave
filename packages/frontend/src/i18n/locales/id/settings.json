@@ -21,6 +21,8 @@
 
   "rendering": {
     "title": "Rendering",
+    "autoQuality": "Kualitas Otomatis",
+    "autoQualityTooltip": "Menyesuaikan resolusi, mesh, dan kualitas tekstur secara otomatis berdasarkan performa perangkat Anda. Nonaktifkan untuk kontrol manual",
     "frameRate": "Frame Rate",
     "frameRateTooltip": "Frame rate lebih rendah mengurangi penggunaan GPU",
     "frameRatePlaceholder": "15–300",

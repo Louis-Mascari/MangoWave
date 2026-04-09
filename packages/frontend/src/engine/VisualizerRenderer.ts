@@ -9,6 +9,8 @@ import {
 } from 'butterchurn-presets';
 import { THEMATIC_PACKS, presetThematicMap } from '../data/presetThematicPacks.ts';
 import { initOptimizer } from 'glsl-optimizer-wasm';
+import { QualityMonitor } from './QualityMonitor.ts';
+import type { QualityChangeCallback } from './QualityMonitor.ts';
 
 // Pre-warm: start loading the GLSL optimizer WASM module so it's ready for shader compilation.
 // Non-blocking — if it hasn't loaded by the time a shader compiles, the unoptimized shader is used.
@@ -82,6 +84,7 @@ export class VisualizerRenderer {
   private _presetPackMap: Map<string, string> = new Map();
   private _milkdropPresetNames: Set<string> = new Set();
   private _importedPresetNames: Set<string> = new Set();
+  private _qualityMonitor = new QualityMonitor();
 
   get currentPresetName(): string {
     return this.presetKeys[this.currentPresetIndex] ?? '';
@@ -217,6 +220,23 @@ export class VisualizerRenderer {
 
   setFpsCap(fps: number): void {
     this.fpsInterval = fps > 0 ? 1000 / fps : 0;
+    this._qualityMonitor.setTargetFps(fps);
+  }
+
+  get qualityMonitor(): QualityMonitor {
+    return this._qualityMonitor;
+  }
+
+  setAutoQuality(enabled: boolean): void {
+    this._qualityMonitor.setEnabled(enabled);
+  }
+
+  setAutoQualityMaxTier(tier: number): void {
+    this._qualityMonitor.setMaxTier(tier);
+  }
+
+  setOnQualityChange(callback: QualityChangeCallback | null): void {
+    this._qualityMonitor.setOnQualityChange(callback);
   }
 
   /** Register imported preset names into the preset list and pack map (without preset objects). */
@@ -358,9 +378,10 @@ export class VisualizerRenderer {
     }
 
     if (this.visualizer) {
-      const dt = (now - this.lastRenderTime) / 1000;
+      const dtMs = now - this.lastRenderTime;
       this.lastRenderTime = now;
-      this.visualizer.render({ elapsedTime: dt });
+      this.visualizer.render({ elapsedTime: dtMs / 1000 });
+      this._qualityMonitor.recordFrame(dtMs);
     }
   };
 
@@ -375,5 +396,7 @@ export class VisualizerRenderer {
     this._importedPresetNames = new Set();
     this.onPresetChange = undefined;
     this.onPresetsRegistered = undefined;
+    this._qualityMonitor.setEnabled(false);
+    this._qualityMonitor.setOnQualityChange(null);
   }
 }

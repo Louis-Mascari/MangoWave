@@ -1,7 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { VisualizerRenderer } from '../engine/VisualizerRenderer.ts';
 import type { AudioEngine } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
+import { QUALITY_TIERS } from '../engine/QualityMonitor.ts';
+import type { QualityTier } from '../engine/QualityMonitor.ts';
 import { useImportedTexturesStore } from '../store/useImportedTexturesStore.ts';
 import quarantinedData from '../data/quarantined-presets.json';
 import mobileBlockedData from '../data/mobile-blocked-presets.json';
@@ -213,6 +215,78 @@ export function Visualizer({
     if (!renderer) return;
     renderer.setOutputAA(performance.fxaa);
   }, [performance.fxaa, rendererRef]);
+
+  // Auto quality: connect quality monitor to store
+  const autoQualityChangeRef = useRef(false);
+  const handleQualityChange = useCallback((_tier: number, settings: QualityTier) => {
+    // Flag so manual-change detection in useEffect skips this update
+    autoQualityChangeRef.current = true;
+    const store = useSettingsStore.getState();
+    store.setMeshSize(settings.meshWidth, settings.meshHeight);
+    store.setTextureRatio(settings.textureRatio);
+    store.setResolutionScale(settings.resolutionScale);
+    // Reset flag after microtask (store updates are synchronous)
+    queueMicrotask(() => {
+      autoQualityChangeRef.current = false;
+    });
+  }, []);
+
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    if (!renderer) return;
+
+    renderer.setAutoQuality(performance.autoQuality);
+    renderer.setOnQualityChange(performance.autoQuality ? handleQualityChange : null);
+
+    if (performance.autoQuality) {
+      // Determine max tier from current settings (highest tier whose settings fit)
+      let maxTier = QUALITY_TIERS.length - 1;
+      for (let i = QUALITY_TIERS.length - 1; i >= 0; i--) {
+        const t = QUALITY_TIERS[i];
+        if (
+          performance.meshWidth >= t.meshWidth &&
+          performance.meshHeight >= t.meshHeight &&
+          performance.textureRatio >= t.textureRatio &&
+          performance.resolutionScale >= t.resolutionScale
+        ) {
+          maxTier = i;
+          break;
+        }
+      }
+      renderer.setAutoQualityMaxTier(maxTier);
+    }
+
+    return () => {
+      renderer.setOnQualityChange(null);
+    };
+    // Only re-run when autoQuality is toggled, not on every settings change —
+    // the max tier snapshot is taken once when auto quality is enabled.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [performance.autoQuality, rendererRef, handleQualityChange]);
+
+  // When user manually changes performance settings while auto quality is on,
+  // disable auto quality (manual override)
+  const prevPerfRef = useRef(performance);
+  useEffect(() => {
+    const prev = prevPerfRef.current;
+    prevPerfRef.current = performance;
+
+    // Skip if this change came from auto quality itself
+    if (autoQualityChangeRef.current) return;
+
+    // Skip if auto quality is off or was just toggled
+    if (!performance.autoQuality || prev.autoQuality !== performance.autoQuality) return;
+
+    // Check if any quality-related setting changed manually
+    if (
+      prev.meshWidth !== performance.meshWidth ||
+      prev.meshHeight !== performance.meshHeight ||
+      prev.textureRatio !== performance.textureRatio ||
+      prev.resolutionScale !== performance.resolutionScale
+    ) {
+      useSettingsStore.getState().setAutoQuality(false);
+    }
+  }, [performance]);
 
   // Sync audio settings to engine
   useEffect(() => {

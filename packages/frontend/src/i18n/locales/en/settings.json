@@ -21,6 +21,8 @@
 
   "rendering": {
     "title": "Rendering",
+    "autoQuality": "Auto Quality",
+    "autoQualityTooltip": "Automatically adjusts resolution, mesh, and texture quality based on your device's performance. Disable to control settings manually",
     "frameRate": "Frame Rate",
     "frameRateTooltip": "Lower frame rates reduce GPU usage",
     "frameRatePlaceholder": "15–300",

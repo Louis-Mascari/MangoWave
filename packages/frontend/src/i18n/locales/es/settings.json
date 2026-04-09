@@ -21,6 +21,8 @@
 
   "rendering": {
     "title": "Renderizado",
+    "autoQuality": "Calidad automática",
+    "autoQualityTooltip": "Ajusta automáticamente la resolución, malla y calidad de texturas según el rendimiento de tu dispositivo. Desactiva para controlar manualmente",
     "frameRate": "Tasa de cuadros",
     "frameRateTooltip": "Tasas de cuadros más bajas reducen el uso de GPU",
     "frameRatePlaceholder": "15–300",

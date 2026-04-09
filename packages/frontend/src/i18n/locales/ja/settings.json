@@ -21,6 +21,8 @@
 
   "rendering": {
     "title": "レンダリング",
+    "autoQuality": "自動品質",
+    "autoQualityTooltip": "デバイスのパフォーマンスに基づいて解像度、メッシュ、テクスチャ品質を自動調整します。手動で制御するにはオフにしてください",
     "frameRate": "フレームレート",
     "frameRateTooltip": "フレームレートを下げるとGPU使用率が低下します",
     "frameRatePlaceholder": "15–300",

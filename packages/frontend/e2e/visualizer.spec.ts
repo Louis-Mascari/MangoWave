@@ -42,9 +42,13 @@ test.describe('Visualizer', () => {
     // so it merges on top of the clean state.
     await app.addInitScript(() => {
       const raw = localStorage.getItem('mangowave-settings');
-      const settings = raw ? JSON.parse(raw) : { state: {}, version: 6 };
-      settings.state.autopilotEnabled = true;
-      settings.state.autopilotInterval = 1;
+      const settings = raw ? JSON.parse(raw) : { state: {}, version: 16 };
+      settings.state.autopilot = {
+        enabled: true,
+        interval: 1,
+        mode: 'all',
+        favoriteWeight: 2,
+      };
       localStorage.setItem('mangowave-settings', JSON.stringify(settings));
     });
 

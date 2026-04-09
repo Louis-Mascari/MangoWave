@@ -289,6 +289,14 @@ function convertShaderTextLevel(shader) {
         ),
         (m, v, rest, scalar) => `pow(${v}${rest}, vec3(${scalar}))`,
       );
+      // Match pow(scalar_literal, expr_containing_vec3_var) — reverse case
+      result = result.replace(
+        new RegExp(
+          '\\bpow\\s*\\(\\s*(-?[\\d.]+(?:e[+-]?\\d+)?)\\s*,\\s*(' + vec3Pattern + ')\\b([^)]*)\\)',
+          'g',
+        ),
+        (m, scalar, v, rest) => `pow(vec3(${scalar}), ${v}${rest})`,
+      );
     }
   }
 
@@ -1259,6 +1267,64 @@ function structureHlslparserOutput(rawGlsl, shaderBodyName) {
   // After bvec fix, remaining float() casts are either legitimate (float(int)) or
   // truncation (float(vec3)). _mw_truncf handles both via overloading.
   body = body.replace(/\bfloat\s*\(/g, '_mw_truncf(');
+
+  // Fix pow(scalar, vecN) / pow(vecN, scalar) type mismatch.
+  // GLSL ES 3.0 requires both pow arguments to be the same genType.
+  // hlslparser doesn't broadcast scalars in pow() calls.
+  // Collect vec3 variable names, then wrap the mismatched argument.
+  {
+    const vec3Vars = new Set(['ret']);
+    const declRe = /\bvec3\s+([\w]+(?:\s*,\s*\w+)*)/g;
+    let dm;
+    while ((dm = declRe.exec(body)) !== null) {
+      for (const n of dm[1].split(',')) {
+        const t = n.trim();
+        if (t) vec3Vars.add(t);
+      }
+    }
+    // Also scan header for vec3 declarations
+    if (header) {
+      const hDeclRe = /\bvec3\s+([\w]+(?:\s*,\s*\w+)*)/g;
+      let hm;
+      while ((hm = hDeclRe.exec(header)) !== null) {
+        for (const n of hm[1].split(',')) {
+          const t = n.trim();
+          if (t) vec3Vars.add(t);
+        }
+      }
+    }
+    if (vec3Vars.size > 0) {
+      const v3Pat = [...vec3Vars].map((v) => v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+      // pow(scalar_expr, vec3_var) → pow(vec3(scalar_expr), vec3_var)
+      body = body.replace(
+        new RegExp(
+          '\\bpow\\s*\\(\\s*((?:(?!\\b(?:' +
+            v3Pat +
+            ')\\b)[^,])+),\\s*((?:' +
+            v3Pat +
+            ')\\b[^)]*)\\)',
+          'g',
+        ),
+        (m, scalarExpr, vecExpr) => {
+          const hasVec3 = [...vec3Vars].some((v) => new RegExp('\\b' + v + '\\b').test(scalarExpr));
+          if (hasVec3) return m;
+          return `pow(vec3(${scalarExpr.trim()}), ${vecExpr.trim()})`;
+        },
+      );
+      // pow(vec3_var, scalar_expr) → pow(vec3_var, vec3(scalar_expr))
+      body = body.replace(
+        new RegExp(
+          '\\bpow\\s*\\(\\s*((?:' + v3Pat + ')\\b[^,]*),\\s*((?:(?!\\b(?:' + v3Pat + ')\\b).)+)\\)',
+          'g',
+        ),
+        (m, vecExpr, scalarExpr) => {
+          const hasVec3 = [...vec3Vars].some((v) => new RegExp('\\b' + v + '\\b').test(scalarExpr));
+          if (hasVec3) return m;
+          return `pow(${vecExpr.trim()}, vec3(${scalarExpr.trim()}))`;
+        },
+      );
+    }
+  }
 
   // Make uv mutable if the shader body assigns to it
   body = makeUvMutable(body);

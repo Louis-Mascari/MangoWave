@@ -27,7 +27,7 @@ export const QUALITY_TIERS: readonly QualityTier[] = [
   { meshWidth: 48, meshHeight: 36, textureRatio: 1.0, resolutionScale: 1.0 }, // 3: High
 ] as const;
 
-const TIER_LABELS = ['Minimum', 'Low', 'Medium', 'High'] as const;
+export const TIER_LABELS = ['Minimum', 'Low', 'Medium', 'High'] as const;
 type TierLabel = (typeof TIER_LABELS)[number];
 
 // Thresholds

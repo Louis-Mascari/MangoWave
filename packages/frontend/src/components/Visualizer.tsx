@@ -2,8 +2,9 @@ import { useCallback, useEffect, useRef } from 'react';
 import { VisualizerRenderer } from '../engine/VisualizerRenderer.ts';
 import type { AudioEngine } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
-import { QUALITY_TIERS } from '../engine/QualityMonitor.ts';
+import { QUALITY_TIERS, TIER_LABELS } from '../engine/QualityMonitor.ts';
 import type { QualityTier } from '../engine/QualityMonitor.ts';
+import { useToastStore } from '../store/useToastStore.ts';
 import { useImportedTexturesStore } from '../store/useImportedTexturesStore.ts';
 import quarantinedData from '../data/quarantined-presets.json';
 import mobileBlockedData from '../data/mobile-blocked-presets.json';
@@ -218,13 +219,24 @@ export function Visualizer({
 
   // Auto quality: connect quality monitor to store
   const autoQualityChangeRef = useRef(false);
-  const handleQualityChange = useCallback((_tier: number, settings: QualityTier) => {
+  const prevAutoTierRef = useRef(QUALITY_TIERS.length - 1);
+  const handleQualityChange = useCallback((tier: number, settings: QualityTier) => {
     // Flag so manual-change detection in useEffect skips this update
     autoQualityChangeRef.current = true;
     const store = useSettingsStore.getState();
     store.setMeshSize(settings.meshWidth, settings.meshHeight);
     store.setTextureRatio(settings.textureRatio);
     store.setResolutionScale(settings.resolutionScale);
+
+    // Show info toast when quality steps down
+    if (tier < prevAutoTierRef.current) {
+      useToastStore.getState().show(`Auto Quality adjusted to ${TIER_LABELS[tier]}`, {
+        type: 'info',
+        durationMs: 3000,
+      });
+    }
+    prevAutoTierRef.current = tier;
+
     // Reset flag after microtask (store updates are synchronous)
     queueMicrotask(() => {
       autoQualityChangeRef.current = false;
@@ -239,29 +251,27 @@ export function Visualizer({
     renderer.setOnQualityChange(performance.autoQuality ? handleQualityChange : null);
 
     if (performance.autoQuality) {
-      // Determine max tier from current settings (highest tier whose settings fit)
-      let maxTier = QUALITY_TIERS.length - 1;
-      for (let i = QUALITY_TIERS.length - 1; i >= 0; i--) {
-        const t = QUALITY_TIERS[i];
-        if (
-          performance.meshWidth >= t.meshWidth &&
-          performance.meshHeight >= t.meshHeight &&
-          performance.textureRatio >= t.textureRatio &&
-          performance.resolutionScale >= t.resolutionScale
-        ) {
-          maxTier = i;
-          break;
-        }
-      }
-      renderer.setAutoQualityMaxTier(maxTier);
+      // Always allow stepping up to High — the monitor will step down if needed
+      const highTier = QUALITY_TIERS.length - 1;
+      renderer.setAutoQualityMaxTier(highTier);
+      prevAutoTierRef.current = highTier;
+
+      // Apply High tier settings immediately so the monitor starts measuring from High
+      const high = QUALITY_TIERS[highTier];
+      autoQualityChangeRef.current = true;
+      const store = useSettingsStore.getState();
+      store.setMeshSize(high.meshWidth, high.meshHeight);
+      store.setTextureRatio(high.textureRatio);
+      store.setResolutionScale(high.resolutionScale);
+      queueMicrotask(() => {
+        autoQualityChangeRef.current = false;
+      });
     }
 
     return () => {
       renderer.setOnQualityChange(null);
     };
-    // Only re-run when autoQuality is toggled, not on every settings change —
-    // the max tier snapshot is taken once when auto quality is enabled.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Only re-run when autoQuality is toggled, not on every settings change
   }, [performance.autoQuality, rendererRef, handleQualityChange]);
 
   // When user manually changes performance settings while auto quality is on,

@@ -16,7 +16,9 @@
     "scaleMid": "0 dB",
     "scaleLow": "-12",
     "preAmp": "Pre-Amp",
-    "preAmpTooltip": "Scales the overall signal. Higher makes visuals more reactive, lower calms them. Purely visual, does not affect audio output"
+    "preAmpTooltip": "Scales the overall signal. Higher makes visuals more reactive, lower calms them. Purely visual, does not affect audio output",
+    "autoGain": "Auto Gain",
+    "autoGainTooltip": "Automatically adjusts pre-amp based on signal level so visuals stay reactive. Disables when you manually adjust the slider"
   },
 
   "rendering": {

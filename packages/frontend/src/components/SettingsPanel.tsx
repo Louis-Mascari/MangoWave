@@ -176,6 +176,7 @@ function EqualizerTab() {
   const { t: tc } = useTranslation('common');
   const eq = useSettingsStore((s) => s.eq);
   const setPreAmpGain = useSettingsStore((s) => s.setPreAmpGain);
+  const setAutoGain = useSettingsStore((s) => s.setAutoGain);
   const setEQBandGain = useSettingsStore((s) => s.setEQBandGain);
   const resetEQ = useSettingsStore((s) => s.resetEQ);
 
@@ -241,10 +242,15 @@ function EqualizerTab() {
 
       <div className="mt-1 border-t border-white/10 pt-3">
         <div className="flex flex-col gap-1">
-          <span className="flex items-center text-xs text-white/60">
-            {t('equalizer.preAmp')}
-            <Tooltip text={t('equalizer.preAmpTooltip')} />
-          </span>
+          <div className="flex items-center justify-between">
+            <span className="flex items-center text-xs text-white/60">
+              {t('equalizer.preAmp')}
+              {eq.autoGain && (
+                <span className="ml-1 text-[10px] text-orange-400/70">({tc('auto')})</span>
+              )}
+              <Tooltip text={t('equalizer.preAmpTooltip')} />
+            </span>
+          </div>
           <div className="flex items-center gap-2">
             <input
               type="range"
@@ -261,6 +267,34 @@ function EqualizerTab() {
             <span className="w-8 text-right text-xs text-white/50">
               {eq.preAmpGain.toFixed(1)}x
             </span>
+          </div>
+        </div>
+        <div className="mt-2 flex items-center justify-between">
+          <span className="flex items-center text-xs text-white/60">
+            {t('equalizer.autoGain')}
+            <Tooltip text={t('equalizer.autoGainTooltip')} />
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setAutoGain(true)}
+              className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
+                eq.autoGain
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-white/10 text-white/70 hover:bg-white/20'
+              }`}
+            >
+              {tc('on')}
+            </button>
+            <button
+              onClick={() => setAutoGain(false)}
+              className={`cursor-pointer rounded border-none px-3 py-1 text-xs ${
+                !eq.autoGain
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-white/10 text-white/70 hover:bg-white/20'
+              }`}
+            >
+              {tc('off')}
+            </button>
           </div>
         </div>
       </div>

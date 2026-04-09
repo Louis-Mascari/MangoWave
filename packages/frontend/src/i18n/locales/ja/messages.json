@@ -70,7 +70,8 @@
     "silenceDetectedMic": "マイクからの音声が検出されません。マイクがミュートになっていないこと、音を拾っていることを確認してください。",
     "silenceDetectedLocal": "音声が検出されません。ファイルが対応形式であること、デバイスの音量が上がっていることを確認してください。",
     "noPresetsAvailable": "利用可能なプリセットがありません。少なくとも1つのパックが有効で、すべてのプリセットがブロックされていないか確認してください。",
-    "presetNotFound": "このデバイスにプリセットが見つかりません：「{{name}}」"
+    "presetNotFound": "このデバイスにプリセットが見つかりません：「{{name}}」",
+    "autoGainAdjusted": "オートゲインがプリアンプを{{value}}xに調整しました"
   },
   "playback": {
     "addSongsToQueue": "キューに曲を追加",

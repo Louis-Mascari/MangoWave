@@ -27,7 +27,7 @@ function getSettingsSnapshot(): CloudSettings {
   } = useSettingsStore.getState();
   return {
     performance: { ...performance },
-    eqSettings: { preAmpGain: eq.preAmpGain, bandGains: [...eq.bandGains] },
+    eqSettings: { preAmpGain: eq.preAmpGain, bandGains: [...eq.bandGains], autoGain: eq.autoGain },
     audio: { ...audio },
     autopilot: { ...autopilot },
     transitionTime,
@@ -49,7 +49,11 @@ function applyCloudSettings(cloud: CloudSettings): void {
   useSettingsStore.setState({
     ...(cloud.performance && { performance: { ...cloud.performance } }),
     ...(cloud.eqSettings && {
-      eq: { preAmpGain: cloud.eqSettings.preAmpGain, bandGains: [...cloud.eqSettings.bandGains] },
+      eq: {
+        preAmpGain: cloud.eqSettings.preAmpGain,
+        bandGains: [...cloud.eqSettings.bandGains],
+        autoGain: cloud.eqSettings.autoGain ?? useSettingsStore.getState().eq.autoGain,
+      },
     }),
     ...(cloud.audio && { audio: { ...cloud.audio } }),
     ...(cloud.autopilot && { autopilot: { ...cloud.autopilot } }),

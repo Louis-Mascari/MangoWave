@@ -13,7 +13,7 @@ const mockState = {
     fxaa: false,
   },
   audio: { smoothingConstant: 0.3, fftSize: 1024 },
-  eq: { preAmpGain: 1.5, bandGains: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  eq: { preAmpGain: 1.5, bandGains: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], autoGain: true },
   autopilot: { enabled: true, interval: 15, mode: 'all' as const, favoriteWeight: 2 },
   presetNameDisplay: 5,
   songInfoDisplay: 5,

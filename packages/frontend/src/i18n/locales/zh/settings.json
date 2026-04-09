@@ -16,7 +16,9 @@
     "scaleMid": "0 dB",
     "scaleLow": "-12",
     "preAmp": "前置放大",
-    "preAmpTooltip": "缩放整体信号。数值越高视觉响应越强，越低则越平缓。纯视觉效果，不影响音频输出"
+    "preAmpTooltip": "缩放整体信号。数值越高视觉响应越强，越低则越平缓。纯视觉效果，不影响音频输出",
+    "autoGain": "自动增益",
+    "autoGainTooltip": "根据信号级别自动调整前置放大器，使视觉效果保持响应。手动调整滑块时自动禁用"
   },
 
   "rendering": {

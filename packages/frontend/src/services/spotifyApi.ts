@@ -257,6 +257,7 @@ export interface CloudSettings {
   eqSettings: {
     preAmpGain: number;
     bandGains: number[];
+    autoGain?: boolean;
   };
   audio: {
     smoothingConstant: number;

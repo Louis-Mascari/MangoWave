@@ -14,6 +14,7 @@ import { useAutopilot } from './hooks/useAutopilot.ts';
 import { useWindowSync } from './hooks/useWindowSync.ts';
 import { useDeviceSync } from './hooks/useDeviceSync.ts';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.ts';
+import { useAutoGain } from './hooks/useAutoGain.ts';
 import { useHideCursor } from './hooks/useHideCursor.ts';
 import { useFullscreen } from './hooks/useFullscreen.ts';
 import { useSpotifyPlayback } from './hooks/useSpotifyPlayback.ts';
@@ -116,6 +117,9 @@ function MainApp() {
   // Whichever source is active provides the engine
   const audioEngine = capture.audioEngine ?? local.audioEngine;
   const isActive = capture.isCapturing || local.isActive;
+
+  // Auto-gain: adjusts pre-amp based on signal level for all audio sources
+  useAutoGain(audioEngine, isActive);
 
   // Only poll Spotify when the visualizer is running — no need on the start screen
   useNowPlaying(isSpotifyConnected && isActive);

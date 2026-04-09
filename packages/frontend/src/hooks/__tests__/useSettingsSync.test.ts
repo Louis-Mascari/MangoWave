@@ -27,7 +27,7 @@ describe('useSettingsSync', () => {
 
     useSettingsStore.setState({
       transitionTime: 2.0,
-      eq: { preAmpGain: 1.0, bandGains: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+      eq: { preAmpGain: 1.0, bandGains: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], autoGain: true },
       blockedPresets: [],
       favoritePresets: [],
     });

@@ -18,6 +18,7 @@ export interface PerformanceSettings {
 export interface EQSettings {
   preAmpGain: number; // 0.0 to 3.0 (linear gain)
   bandGains: number[]; // dB values for each of the 10 bands, -12 to +12
+  autoGain: boolean; // auto-adjust pre-amp based on signal level (default true)
 }
 
 export interface AudioSettings {
@@ -70,6 +71,7 @@ export interface SettingsState {
   // EQ
   eq: EQSettings;
   setPreAmpGain: (gain: number) => void;
+  setAutoGain: (enabled: boolean) => void;
   setEQBandGain: (index: number, gainDb: number) => void;
   resetEQ: () => void;
 
@@ -283,10 +285,15 @@ export const useSettingsStore = create<SettingsState>()(
       eq: {
         preAmpGain: 1.5,
         bandGains: [...DEFAULT_BAND_GAINS],
+        autoGain: true,
       },
       setPreAmpGain: (gain) =>
         set((state) => ({
           eq: { ...state.eq, preAmpGain: gain },
+        })),
+      setAutoGain: (enabled) =>
+        set((state) => ({
+          eq: { ...state.eq, autoGain: enabled },
         })),
       setEQBandGain: (index, gainDb) =>
         set((state) => {
@@ -298,7 +305,7 @@ export const useSettingsStore = create<SettingsState>()(
         }),
       resetEQ: () =>
         set(() => ({
-          eq: { preAmpGain: 1.5, bandGains: [...DEFAULT_BAND_GAINS] },
+          eq: { preAmpGain: 1.5, bandGains: [...DEFAULT_BAND_GAINS], autoGain: true },
         })),
 
       // Presets
@@ -643,9 +650,16 @@ export const useSettingsStore = create<SettingsState>()(
             perf.autoQuality = perf.autoQuality ?? true;
           }
         }
+        // v16 → v17: Add autoGain to EQ settings
+        if ((version ?? 0) < 17) {
+          const eq = state.eq as Record<string, unknown> | undefined;
+          if (eq) {
+            eq.autoGain = eq.autoGain ?? true;
+          }
+        }
         return state as unknown as SettingsState;
       },
-      version: 16,
+      version: 17,
     },
   ),
 );

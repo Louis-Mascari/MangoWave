@@ -27,7 +27,7 @@ export function getSettingsSnapshot(): SyncableSettings {
   } = useSettingsStore.getState();
   return {
     ...(syncPerformance && { performance: { ...performance } }),
-    eq: { preAmpGain: eq.preAmpGain, bandGains: [...eq.bandGains] },
+    eq: { preAmpGain: eq.preAmpGain, bandGains: [...eq.bandGains], autoGain: eq.autoGain },
     audio: { ...audio },
     autopilot: { ...autopilot },
     transitionTime,
@@ -63,7 +63,11 @@ export function applyInboundSettings(settings: SyncableSettings): void {
     ...(settings.syncPerformance !== undefined && { syncPerformance: settings.syncPerformance }),
     ...(syncPerf && settings.performance && { performance: { ...settings.performance } }),
     ...(settings.eq && {
-      eq: { preAmpGain: settings.eq.preAmpGain, bandGains: [...settings.eq.bandGains] },
+      eq: {
+        preAmpGain: settings.eq.preAmpGain,
+        bandGains: [...settings.eq.bandGains],
+        autoGain: settings.eq.autoGain ?? useSettingsStore.getState().eq.autoGain,
+      },
     }),
     ...(settings.audio && { audio: { ...settings.audio } }),
     ...(settings.autopilot && { autopilot: { ...settings.autopilot } }),
@@ -107,7 +111,7 @@ export function getDeviceSyncSnapshot(): SyncableSettings {
     useSettingsStore.getState();
   return {
     ...(syncPerformance && { performance: { ...performance } }),
-    eq: { preAmpGain: eq.preAmpGain, bandGains: [...eq.bandGains] },
+    eq: { preAmpGain: eq.preAmpGain, bandGains: [...eq.bandGains], autoGain: eq.autoGain },
     audio: { ...audio },
     autopilot: { ...autopilot },
     brightness,
@@ -137,7 +141,14 @@ export function applyDeviceSyncSettings(settings: SyncableSettings): void {
       typeof settings.eq === 'object' &&
       typeof settings.eq.preAmpGain === 'number' &&
       Array.isArray(settings.eq.bandGains) && {
-        eq: { preAmpGain: settings.eq.preAmpGain, bandGains: [...settings.eq.bandGains] },
+        eq: {
+          preAmpGain: settings.eq.preAmpGain,
+          bandGains: [...settings.eq.bandGains],
+          autoGain:
+            typeof settings.eq.autoGain === 'boolean'
+              ? settings.eq.autoGain
+              : useSettingsStore.getState().eq.autoGain,
+        },
       }),
     ...(settings.audio &&
       typeof settings.audio === 'object' && {

@@ -32,7 +32,7 @@ Three source modes:
 Key details:
 
 - **EQ is purely visual** — shapes FFT data for butterchurn, does not change audio output
-- **Pre-amp** scales overall visual reactivity (0-3x linear gain)
+- **Pre-amp** scales overall visual reactivity (0-3x linear gain). **Auto Gain** (`useAutoGain`) monitors RMS signal level and adjusts pre-amp automatically for all sources
 - butterchurn calls `connectAudio(analyserNode)` and reads FFT data directly
 - `createMediaElementSource` can only be called once per element — engine is created once, track changes update `audioElement.src`
 
@@ -88,7 +88,7 @@ Zustand with `localStorage` persistence. Key sections:
 | `performance`            | `fpsCap`, `resolutionScale`, `meshWidth`, `meshHeight`, `textureRatio`, `fxaa`, `autoQuality` | 60, 1.0, 48, 36, 1.0, false, true |
 | `audio`                  | `smoothingConstant`, `fftSize`                                                                | 0.3, 1024                         |
 | `autopilot`              | `enabled`, `interval`, `mode`, `favoriteWeight`                                               | true, 15s, `'all'`, 2             |
-| `eq`                     | `preAmpGain`, `bandGains[10]`                                                                 | 1.5, all 0dB                      |
+| `eq`                     | `preAmpGain`, `bandGains[10]`, `autoGain`                                                     | 1.5, all 0dB, true                |
 | `blockedPresets`         | string[]                                                                                      | []                                |
 | `favoritePresets`        | string[]                                                                                      | []                                |
 | `presetNameDisplay`      | `'off' \| 'always' \| number`                                                                 | 5                                 |

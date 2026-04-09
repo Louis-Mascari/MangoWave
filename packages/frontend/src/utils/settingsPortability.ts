@@ -341,6 +341,7 @@ function sanitizeEQ(raw: unknown): Record<string, unknown> | undefined {
     while (gains.length < 10) gains.push(0);
     out.bandGains = gains;
   }
+  if ('autoGain' in e) out.autoGain = typeof e.autoGain === 'boolean' ? e.autoGain : true;
   return out;
 }
 

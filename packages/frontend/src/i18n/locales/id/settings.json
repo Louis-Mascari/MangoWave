@@ -16,7 +16,9 @@
     "scaleMid": "0 dB",
     "scaleLow": "-12",
     "preAmp": "Pre-Amp",
-    "preAmpTooltip": "Mengatur skala sinyal keseluruhan. Lebih tinggi membuat visual lebih reaktif, lebih rendah meredamnya. Murni visual, tidak mempengaruhi output audio"
+    "preAmpTooltip": "Mengatur skala sinyal keseluruhan. Lebih tinggi membuat visual lebih reaktif, lebih rendah meredamnya. Murni visual, tidak mempengaruhi output audio",
+    "autoGain": "Gain Otomatis",
+    "autoGainTooltip": "Secara otomatis menyesuaikan pre-amp berdasarkan level sinyal agar visual tetap reaktif. Dinonaktifkan saat kamu mengatur slider secara manual"
   },
 
   "rendering": {

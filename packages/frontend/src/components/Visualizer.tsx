@@ -238,10 +238,13 @@ export function Visualizer({
     }
     prevAutoTierRef.current = tier;
 
-    // Reset flag after microtask (store updates are synchronous)
-    queueMicrotask(() => {
+    // Reset flag after React effects have processed the store update.
+    // Must use setTimeout (macrotask) — queueMicrotask runs before React's
+    // useEffect phase, which would let the manual-change detection effect
+    // see the flag as false and incorrectly disable auto quality.
+    setTimeout(() => {
       autoQualityChangeRef.current = false;
-    });
+    }, 0);
   }, []);
 
   useEffect(() => {

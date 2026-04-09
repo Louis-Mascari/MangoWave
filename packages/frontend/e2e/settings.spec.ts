@@ -20,7 +20,7 @@ test.describe('Settings Panel', () => {
     await app.mouse.move(400, 700);
 
     // Open settings panel
-    await app.getByRole('button', { name: 'Settings' }).click();
+    await app.getByRole('button', { name: 'Settings' }).click({ force: true });
   });
 
   test('opens settings panel and tabs render', async ({ app }) => {

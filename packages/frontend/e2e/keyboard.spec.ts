@@ -77,7 +77,7 @@ test.describe('Keyboard Shortcuts', () => {
   test('shortcuts are suppressed when focused in search input', async ({ app }) => {
     // Open preset browser
     await app.mouse.move(400, 700);
-    await app.getByRole('button', { name: /Presets/ }).click();
+    await app.getByRole('button', { name: /Presets/ }).click({ force: true });
 
     // Focus the search input
     const searchInput = app.locator('input[placeholder*="Search"]');

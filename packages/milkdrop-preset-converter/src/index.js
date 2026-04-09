@@ -1586,8 +1586,8 @@ export async function convertShader(shader) {
 }
 
 export async function convertPreset(text) {
-  const mainPresetText = _.split(text, '[preset00]')[1];
-  const presetParts = splitPreset(mainPresetText);
+  // splitPreset (milkdrop-preset-utils ≥0.2.x) handles the [preset00] split internally.
+  const presetParts = splitPreset(text);
 
   // Preprocess EEL equations and pass through as EEL source strings.
   // eel-wasm compiles these to WASM at preset load time (main thread).

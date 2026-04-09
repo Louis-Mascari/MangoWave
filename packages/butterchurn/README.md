@@ -13,14 +13,14 @@ butterchurn is effectively unmaintained (last stable release 2018). The source f
 
 ## Structure
 
-- `src/butterchurn/` — ES6 source modules (~30 files) with 13 MangoWave patches
+- `src/butterchurn/` — ES6 source modules (~30 files) with 14 MangoWave patches
 - `src/index.js` — ESM wrapper
 - `src/index.d.ts` — TypeScript declarations
 - `lib/butterchurnExtraImages.min.js` — built-in texture data (static, not part of the source fork)
 
 ## MangoWave Patches
 
-13 patches applied to the source. All searchable via `[MW-PATCH:` comments. See [PATCHES.md](PATCHES.md) for details, math, and verification instructions.
+14 patches applied to the source. All searchable via `[MW-PATCH:` comments. See [PATCHES.md](PATCHES.md) for details, math, and verification instructions.
 
 ### Patch Summary
 
@@ -37,6 +37,11 @@ butterchurn is effectively unmaintained (last stable release 2018). The source f
 11. `DYNAMIC_DRAW` for per-frame buffers
 12. Clean up previous shader program on preset change
 13. Guard `createSampler()` null returns on WebGL context loss
+14. GLSL optimizer integration (dead code elimination via `glsl-optimizer-wasm`)
+
+## Dependencies
+
+- `glsl-optimizer-wasm` — Mesa GLSL optimizer compiled to WASM. Called in `warp.js` and `comp.js` `createShader()` to optimize fully-assembled fragment shaders before WebGL compilation. Dead code elimination removes ~96% of unused converter output (matrix/mult overloads). Graceful fallback — returns unoptimized shader if WASM isn't loaded or optimization fails.
 
 ## Upstream
 

@@ -83,7 +83,11 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1)(vite@8.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.5.2)(jiti@2.6.1)(yaml@2.8.3))
 
-  packages/butterchurn: {}
+  packages/butterchurn:
+    dependencies:
+      glsl-optimizer-wasm:
+        specifier: workspace:*
+        version: link:../glsl-optimizer-wasm
 
   packages/butterchurn-presets: {}
 
@@ -101,6 +105,9 @@ importers:
       eel-wasm:
         specifier: ^0.0.17
         version: 0.0.17
+      glsl-optimizer-wasm:
+        specifier: workspace:*
+        version: link:../glsl-optimizer-wasm
       i18next:
         specifier: ^26.0.3
         version: 26.0.3(typescript@6.0.2)
@@ -231,6 +238,8 @@ importers:
       vitest:
         specifier: ^4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1)(vite@8.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@25.5.2)(jiti@2.6.1)(yaml@2.8.3))
+
+  packages/glsl-optimizer-wasm: {}
 
   packages/hlslparser-wasm: {}
 

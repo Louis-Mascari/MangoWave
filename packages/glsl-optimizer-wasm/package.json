@@ -1,0 +1,14 @@
+{
+  "name": "glsl-optimizer-wasm",
+  "version": "1.0.0",
+  "description": "GLSL optimizer compiled to WASM via Emscripten (based on jberg/glsl-optimizer-js)",
+  "license": "MIT",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "type": "module",
+  "files": [
+    "src/index.js",
+    "src/index.d.ts",
+    "dist/glsl-optimizer.mjs"
+  ]
+}

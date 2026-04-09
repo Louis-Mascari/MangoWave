@@ -8,8 +8,9 @@ yarn-error.log*
 
 # Build outputs
 dist/
-# Exception: hlslparser-wasm built artifact checked in (CI doesn't need Emscripten)
+# Exception: WASM built artifacts checked in (CI doesn't need Emscripten)
 !packages/hlslparser-wasm/dist/
+!packages/glsl-optimizer-wasm/dist/
 build/
 .vite/
 *.tsbuildinfo
@@ -64,3 +65,4 @@ MangoWave Plan.md
 CLAUDE.md
 settings.local.json
 task-chunks.md
+SPIKE-RESULTS.md

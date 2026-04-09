@@ -570,6 +570,12 @@ function MainApp() {
                 setShowOnboarding(false);
                 setOnboardingShown(true);
               }}
+              onClosing={() => {
+                // On mobile, reset the idle timer so the FAB is visible after
+                // onboarding closes — users who take longer than 5s in the modal
+                // would otherwise find no controls visible.
+                if (isMobileDevice) resetPlaybackIdle();
+              }}
             />
           )}
           {showLaunchAnimation && (

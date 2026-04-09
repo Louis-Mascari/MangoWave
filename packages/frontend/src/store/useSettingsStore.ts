@@ -335,7 +335,7 @@ export const useSettingsStore = create<SettingsState>()(
         })),
 
       // Pack filtering (built-in butterchurn packs)
-      enabledPacks: [],
+      enabledPacks: [...THEMATIC_PACKS],
       setEnabledPacks: (packs) => set({ enabledPacks: packs }),
       togglePack: (pack) =>
         set((state) => ({

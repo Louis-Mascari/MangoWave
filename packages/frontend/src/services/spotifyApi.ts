@@ -252,6 +252,7 @@ export interface CloudSettings {
     meshHeight: number;
     textureRatio: number;
     fxaa: boolean;
+    autoQuality: boolean;
   };
   eqSettings: {
     preAmpGain: number;

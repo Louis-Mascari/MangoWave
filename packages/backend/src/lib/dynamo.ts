@@ -93,6 +93,7 @@ export interface PerformanceSettings {
   meshHeight: number;
   textureRatio: number;
   fxaa: boolean;
+  autoQuality: boolean;
 }
 
 export interface AudioSettings {

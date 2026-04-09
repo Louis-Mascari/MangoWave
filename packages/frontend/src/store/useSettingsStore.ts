@@ -12,6 +12,7 @@ export interface PerformanceSettings {
   meshHeight: number; // vertex grid height for warp distortions (default 36)
   textureRatio: number; // internal render resolution multiplier (default 1.0)
   fxaa: boolean; // fast anti-aliasing on output (default false)
+  autoQuality: boolean; // auto-adjust quality based on FPS (default true)
 }
 
 export interface EQSettings {
@@ -64,6 +65,7 @@ export interface SettingsState {
   setMeshSize: (width: number, height: number) => void;
   setTextureRatio: (ratio: number) => void;
   setFxaa: (enabled: boolean) => void;
+  setAutoQuality: (enabled: boolean) => void;
 
   // EQ
   eq: EQSettings;
@@ -176,6 +178,7 @@ const DESKTOP_PERFORMANCE: PerformanceSettings = {
   meshHeight: 36,
   textureRatio: 1.0,
   fxaa: false,
+  autoQuality: true,
 };
 
 const DEFAULT_AUDIO: AudioSettings = {
@@ -240,6 +243,10 @@ export const useSettingsStore = create<SettingsState>()(
       setFxaa: (enabled) =>
         set((state) => ({
           performance: { ...state.performance, fxaa: enabled },
+        })),
+      setAutoQuality: (enabled) =>
+        set((state) => ({
+          performance: { ...state.performance, autoQuality: enabled },
         })),
 
       // Audio
@@ -629,9 +636,16 @@ export const useSettingsStore = create<SettingsState>()(
           state.deviceSyncEnabled = state.deviceSyncEnabled ?? false;
           state.deviceSyncSettingsSync = state.deviceSyncSettingsSync ?? false;
         }
+        // v15 → v16: Add autoQuality to performance settings
+        if ((version ?? 0) < 16) {
+          const perf = state.performance as Record<string, unknown> | undefined;
+          if (perf) {
+            perf.autoQuality = perf.autoQuality ?? true;
+          }
+        }
         return state as unknown as SettingsState;
       },
-      version: 15,
+      version: 16,
     },
   ),
 );

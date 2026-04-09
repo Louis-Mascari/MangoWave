@@ -37,7 +37,7 @@
 - **Shortcuts** — keyboard and mouse shortcuts for preset navigation, fullscreen, favorites, and more
 - **Mobile-optimized UI** with tap-to-reveal circular controls, full-screen modal panels, and automatic filtering of 36 GPU-heavy presets on mobile devices
 - **Optional Spotify integration** — Now Playing metadata for all authorized users; seek, shuffle, and repeat controls for Premium users. Cloud-synced settings. Owner-mode only due to Spotify's dev mode policy (1 Client ID per developer, max 5 authorized users, Premium required to register the app). Self-hosters can set up their own Spotify developer app via the included PKCE code
-- **Visual quality controls** — mesh resolution, texture quality, FXAA anti-aliasing, plus FPS cap, resolution scaling, FFT size, smoothing
+- **Visual quality controls** — mesh resolution, texture quality, FXAA anti-aliasing, FPS cap, resolution scaling, FFT size, smoothing, and auto quality (runtime FPS monitoring that automatically steps between 4 quality tiers)
 - **Multi-window sync** — sync presets and settings across browser windows on the same device via BroadcastChannel. Any window can make changes; automatic leader election drives autopilot from one window
 - **Cross-device sync** — sync presets and settings across phones, laptops, and TVs via peer-to-peer WebRTC (PeerJS). Create a room to get a `MANGO-XXXX` code + QR code, join from another device. Star topology with host-controlled autopilot. Any device can manually change presets. Mobile-blocked presets automatically substituted. Zero backend — connections are peer-to-peer
 - **Settings export/import** — transfer settings between browsers or devices via JSON file

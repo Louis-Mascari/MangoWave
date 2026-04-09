@@ -396,6 +396,7 @@ describe('useSettingsStore', () => {
         meshHeight: 36,
         textureRatio: 1.0,
         fxaa: false,
+        autoQuality: true,
       });
       expect(result.current.audio).toEqual({
         smoothingConstant: 0.3,

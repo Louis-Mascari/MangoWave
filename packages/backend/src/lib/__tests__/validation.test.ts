@@ -9,6 +9,7 @@ const validSettings = {
     meshHeight: 36,
     textureRatio: 1.0,
     fxaa: false,
+    autoQuality: true,
   },
   eqSettings: { preAmpGain: 1.0, bandGains: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
   audio: { smoothingConstant: 0.3, fftSize: 1024 },
@@ -82,6 +83,7 @@ describe('validateSettings', () => {
         meshHeight: 200,
         textureRatio: 10.0,
         fxaa: true,
+        autoQuality: false,
       },
     });
     expect(result.valid).toBe(true);

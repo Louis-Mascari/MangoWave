@@ -314,6 +314,8 @@ function sanitizePerformance(raw: unknown): Record<string, unknown> | undefined 
   if ('meshHeight' in p) out.meshHeight = clamp(p.meshHeight, 12, 96, 36);
   if ('textureRatio' in p) out.textureRatio = clamp(p.textureRatio, 0.25, 2.0, 1.0);
   if ('fxaa' in p) out.fxaa = typeof p.fxaa === 'boolean' ? p.fxaa : false;
+  if ('autoQuality' in p)
+    out.autoQuality = typeof p.autoQuality === 'boolean' ? p.autoQuality : true;
   return out;
 }
 

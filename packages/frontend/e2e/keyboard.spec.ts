@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures/base';
+import { test, expect, clickToolbarButton } from './fixtures/base';
 import { installAudioMocks } from './fixtures/audio-mock';
 
 test.describe('Keyboard Shortcuts', () => {
@@ -75,12 +75,12 @@ test.describe('Keyboard Shortcuts', () => {
   });
 
   test('shortcuts are suppressed when focused in search input', async ({ app }) => {
-    // Open preset browser
-    await app.mouse.move(400, 700);
-    await app.getByRole('button', { name: /Presets/ }).click({ force: true });
+    // Open preset browser — use clickToolbarButton to reset idle timer
+    await clickToolbarButton(app, /Presets/);
 
-    // Focus the search input
+    // Wait for search input to be visible before interacting
     const searchInput = app.locator('input[placeholder*="Search"]');
+    await expect(searchInput).toBeVisible({ timeout: 5000 });
     await searchInput.click();
     await searchInput.fill('');
 

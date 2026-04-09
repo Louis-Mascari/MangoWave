@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures/base';
+import { test, expect, clickToolbarButton } from './fixtures/base';
 import { installAudioMocks } from './fixtures/audio-mock';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -16,11 +16,10 @@ test.describe('Settings Panel', () => {
     // Wait for toolbar
     await expect(app.locator('[role="toolbar"]')).toBeVisible({ timeout: 15000 });
 
-    // Move mouse to keep toolbar visible
-    await app.mouse.move(400, 700);
-
-    // Open settings panel
-    await app.getByRole('button', { name: 'Settings' }).click({ force: true });
+    // Open settings panel — use clickToolbarButton to reset idle timer first
+    await clickToolbarButton(app, 'Settings');
+    // Wait for settings panel to be open before proceeding
+    await expect(app.getByRole('button', { name: /Equalizer/i })).toBeVisible({ timeout: 5000 });
   });
 
   test('opens settings panel and tabs render', async ({ app }) => {

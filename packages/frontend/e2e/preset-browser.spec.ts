@@ -1,10 +1,10 @@
 import { type Page } from '@playwright/test';
-import { test, expect } from './fixtures/base';
+import { test, expect, clickToolbarButton } from './fixtures/base';
 import { installAudioMocks } from './fixtures/audio-mock';
 
 /** Open the Presets panel and switch to the Packs tab, waiting for each transition. */
 async function openPacksTab(app: Page) {
-  await app.getByRole('button', { name: /Presets/ }).click({ force: true });
+  await clickToolbarButton(app, /Presets/);
   // Wait for panel to render before clicking tab
   const packsTab = app.getByRole('button', { name: /packs/i });
   await expect(packsTab).toBeVisible({ timeout: 5000 });
@@ -28,19 +28,17 @@ test.describe('Preset Browser', () => {
 
     // Wait for toolbar
     await expect(app.locator('[role="toolbar"]')).toBeVisible({ timeout: 15000 });
-
-    // Move mouse to keep toolbar visible
-    await app.mouse.move(400, 700);
   });
 
   test('opens preset browser and search input is visible', async ({ app }) => {
-    await app.getByRole('button', { name: /Presets/ }).click({ force: true });
+    await clickToolbarButton(app, /Presets/);
     await expect(app.locator('input[placeholder*="Search"]')).toBeVisible();
   });
 
   test('search filters preset results', async ({ app }) => {
-    await app.getByRole('button', { name: /Presets/ }).click({ force: true });
+    await clickToolbarButton(app, /Presets/);
     const searchInput = app.locator('input[placeholder*="Search"]');
+    await expect(searchInput).toBeVisible({ timeout: 5000 });
     await searchInput.fill('milk');
 
     // Should show filtered results (at least some preset names containing "milk")
@@ -52,7 +50,7 @@ test.describe('Preset Browser', () => {
   });
 
   test('clicking a preset row loads that preset', async ({ app }) => {
-    await app.getByRole('button', { name: /Presets/ }).click({ force: true });
+    await clickToolbarButton(app, /Presets/);
 
     // Wait for preset rows to render in the virtualized list
     const presetRows = app.locator('[role="button"]').filter({
@@ -77,7 +75,7 @@ test.describe('Preset Browser', () => {
   });
 
   test('tab switching between All and Favorites', async ({ app }) => {
-    await app.getByRole('button', { name: /Presets/ }).click({ force: true });
+    await clickToolbarButton(app, /Presets/);
 
     // Click Favorites tab
     const favoritesTab = app.getByRole('button', { name: 'favorites', exact: true });

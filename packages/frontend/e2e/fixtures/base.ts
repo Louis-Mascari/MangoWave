@@ -37,3 +37,35 @@ export const test = base.extend<{ app: Page }>({
 });
 
 export { expect } from '@playwright/test';
+
+/**
+ * Click a toolbar button reliably. The toolbar gets CSS `pointer-events-none`
+ * when the idle timer fires, which prevents clicks from reaching buttons even
+ * with Playwright's `force: true` (the browser's hit-testing respects CSS
+ * pointer-events and routes the click to the canvas underneath).
+ *
+ * This helper moves the mouse to trigger the idle timer reset, waits for
+ * React to re-render the toolbar without `pointer-events-none`, then clicks.
+ */
+export async function clickToolbarButton(app: Page, name: RegExp | string): Promise<void> {
+  // Move mouse to toolbar area to reset the idle timer
+  await app.mouse.move(400, 700);
+  // Wait for toolbar wrapper to become interactive (React re-render removes
+  // pointer-events-none after the idle timer reset from the mouse move above)
+  await app
+    .locator('[role="toolbar"]')
+    .locator('..')
+    .evaluate((el) => {
+      return new Promise<void>((resolve) => {
+        const check = () => {
+          if (!el.classList.contains('pointer-events-none')) {
+            resolve();
+          } else {
+            requestAnimationFrame(check);
+          }
+        };
+        check();
+      });
+    });
+  await app.getByRole('button', { name }).click();
+}

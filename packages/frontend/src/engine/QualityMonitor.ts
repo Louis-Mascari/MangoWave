@@ -5,14 +5,15 @@
  * steps down to a lower quality tier. When FPS recovers, steps back up.
  *
  * Quality tiers (degradation order):
- *   ULTRA:   mesh 64×48, texture 1.0, resolution 1.0
+ *   MAX:     mesh 96×72, texture 1.5, resolution 1.0
+ *   ULTRA:   mesh 64×48, texture 1.5, resolution 1.0
  *   HIGH:    mesh 48×36, texture 1.0, resolution 1.0
  *   MEDIUM:  mesh 32×24, texture 1.0, resolution 1.0
  *   LOW:     mesh 32×24, texture 0.5, resolution 0.75
  *   MINIMUM: mesh 32×24, texture 0.5, resolution 0.5
  *
- * The 96×72 "Ultra" mesh option in settings is excluded from auto quality —
- * it's an enthusiast option that should remain opt-in only.
+ * Covers the full range of settings available in the UI so auto quality can
+ * reach every level if the hardware supports it.
  *
  * FPS cap and FXAA are never auto-adjusted — those are user preferences.
  */
@@ -29,10 +30,11 @@ export const QUALITY_TIERS: readonly QualityTier[] = [
   { meshWidth: 32, meshHeight: 24, textureRatio: 0.5, resolutionScale: 0.75 }, // 1: Low
   { meshWidth: 32, meshHeight: 24, textureRatio: 1.0, resolutionScale: 1.0 }, // 2: Medium
   { meshWidth: 48, meshHeight: 36, textureRatio: 1.0, resolutionScale: 1.0 }, // 3: High
-  { meshWidth: 64, meshHeight: 48, textureRatio: 1.0, resolutionScale: 1.0 }, // 4: Ultra
+  { meshWidth: 64, meshHeight: 48, textureRatio: 1.5, resolutionScale: 1.0 }, // 4: Ultra
+  { meshWidth: 96, meshHeight: 72, textureRatio: 1.5, resolutionScale: 1.0 }, // 5: Max
 ] as const;
 
-export const TIER_LABELS = ['Minimum', 'Low', 'Medium', 'High', 'Ultra'] as const;
+export const TIER_LABELS = ['Minimum', 'Low', 'Medium', 'High', 'Ultra', 'Max'] as const;
 type TierLabel = (typeof TIER_LABELS)[number];
 
 // Thresholds
@@ -58,7 +60,7 @@ export class QualityMonitor {
   private enabled = false;
   private onQualityChange: QualityChangeCallback | null = null;
 
-  constructor(initialTier = 4) {
+  constructor(initialTier = 5) {
     this.currentTier = initialTier;
     this.maxTier = initialTier;
   }

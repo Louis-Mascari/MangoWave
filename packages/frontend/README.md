@@ -45,7 +45,7 @@ src/
 │                  #     ImportModal (drag-and-drop import with progress/results),
 │                  #     OnboardingOverlay (first-time tips), etc.
 ├── engine/        # AudioEngine (Web Audio pipeline), VisualizerRenderer (butterchurn),
-│                  # QualityMonitor (runtime FPS monitoring with 5-tier auto quality stepping),
+│                  # QualityMonitor (runtime FPS monitoring with 6-tier auto quality stepping),
 │                  # milkdropConverter (.milk → butterchurn JSON via workspace milkdrop-preset-converter),
 │                  # eelWasmAdapter (EEL→WASM compilation via eel-wasm, butterchurn adapter functions),
 │                  # textureLoader (image validation), importProcessor (batch import with progress callbacks),

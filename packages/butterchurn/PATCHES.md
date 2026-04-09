@@ -1,6 +1,6 @@
 # butterchurn Patches
 
-MangoWave patches applied to the butterchurn source fork (`src/butterchurn/`, forked from jberg/butterchurn v2.6.7, commit `d90f271`). All patches are searchable via `[MW-PATCH:` comments.
+14 MangoWave patches applied to the butterchurn source fork (`src/butterchurn/`, forked from jberg/butterchurn v2.6.7, commit `d90f271`). Patches 1-13 searchable via `[MW-PATCH:` comments. Patch 14 is a dependency integration (`glsl-optimizer-wasm`).
 
 ---
 
@@ -273,3 +273,29 @@ Null-check every `createSampler()` result before calling `samplerParameteri()`. 
 - `src/butterchurn/rendering/shapes/customShape.js` — `mainSampler` (constructor) + runtime wrapping
 
 Search for `[MW-PATCH: guard-sampler]`.
+
+---
+
+## 14. GLSL Optimizer Integration
+
+### Problem
+
+The HLSL→GLSL converter (`milkdrop-preset-converter`) emits helper function overloads (`matrix_row0`, `mult0`, etc.) for every preset regardless of whether the preset uses them. The resulting fragment shaders contain ~96% dead code, increasing GPU shader compilation time and program size.
+
+### Solution
+
+Added `glsl-optimizer-wasm` as a dependency. Both `warp.js` and `comp.js` `createShader()` methods now pass the fully-assembled fragment shader through `tryOptimizeGlsl()` before `gl.shaderSource()`. The optimizer performs function inlining, dead code elimination, constant folding, copy propagation, and arithmetic simplification.
+
+The optimizer requires complete GLSL programs (`#version`, uniforms, `void main()`), not fragments — that's why it runs at shader assembly time in butterchurn, not in the converter pipeline.
+
+Graceful fallback: `tryOptimizeGlsl()` returns the input unchanged if the WASM module isn't loaded yet or optimization fails. The WASM module is pre-warmed at module load time in `VisualizerRenderer.ts`.
+
+### Results
+
+- 100% acceptance rate (360 bundled + 95 runtime-converted presets)
+- ~96-98% dead code reduction per shader
+- Benefits all presets (bundled + imported)
+
+### Location
+
+`src/butterchurn/rendering/shaders/warp.js` and `src/butterchurn/rendering/shaders/comp.js` — `import { tryOptimizeGlsl } from 'glsl-optimizer-wasm'` and `tryOptimizeGlsl()` call wrapping the template literal in `createShader`.

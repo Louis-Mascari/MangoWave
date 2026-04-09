@@ -1,5 +1,6 @@
 import ShaderUtils from './shaderUtils';
 import normalizeFpsConstants from './fpsNormalization';
+import { tryOptimizeGlsl } from 'glsl-optimizer-wasm';
 
 /* [MW-PATCH: shader error handling helpers] */
 function _mwCheckShader(gl, shader, label) {
@@ -191,8 +192,7 @@ export default class WarpShader {
     this.gl.compileShader(vertShader);
 
     const fragShader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
-    this.gl.shaderSource(
-      fragShader,
+    const fragSource = tryOptimizeGlsl(
       `#version 300 es
                                       precision ${this.floatPrecision} float;
                                       precision highp int;
@@ -321,6 +321,7 @@ export default class WarpShader {
                                         fragColor = vec4(ret, 1.0) * vColor;
                                       }`,
     );
+    this.gl.shaderSource(fragShader, fragSource);
     this.gl.compileShader(fragShader);
 
     /* [MW-PATCH: shader error handling + graceful fallback] */

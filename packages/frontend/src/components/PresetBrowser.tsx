@@ -80,11 +80,15 @@ function PresetRow({
     <div
       role="button"
       tabIndex={0}
-      onClick={onSelect}
+      onClick={(e) => {
+        (e.currentTarget as HTMLElement).blur();
+        onSelect();
+      }}
       onKeyDown={(e) => {
         if (e.currentTarget !== e.target) return;
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
+          (e.currentTarget as HTMLElement).blur();
           onSelect();
         }
       }}
@@ -182,11 +186,15 @@ function HistoryRow({
     <div
       role="button"
       tabIndex={0}
-      onClick={onSelect}
+      onClick={(e) => {
+        (e.currentTarget as HTMLElement).blur();
+        onSelect();
+      }}
       onKeyDown={(e) => {
         if (e.currentTarget !== e.target) return;
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
+          (e.currentTarget as HTMLElement).blur();
           onSelect();
         }
       }}
@@ -336,11 +344,15 @@ function PackAddPresets({
               <div
                 role="button"
                 tabIndex={0}
-                onClick={() => onSelectPreset(name)}
+                onClick={(e) => {
+                  (e.currentTarget as HTMLElement).blur();
+                  onSelectPreset(name);
+                }}
                 onKeyDown={(e) => {
                   if (e.currentTarget !== e.target) return;
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
+                    (e.currentTarget as HTMLElement).blur();
                     onSelectPreset(name);
                   }
                 }}
@@ -1033,11 +1045,15 @@ export function PresetBrowser({
           key={name}
           role="button"
           tabIndex={0}
-          onClick={() => handleSelectPreset(name)}
+          onClick={(e) => {
+            (e.currentTarget as HTMLElement).blur();
+            handleSelectPreset(name);
+          }}
           onKeyDown={(e) => {
             if (e.currentTarget !== e.target) return;
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
+              (e.currentTarget as HTMLElement).blur();
               handleSelectPreset(name);
             }
           }}
@@ -1385,11 +1401,15 @@ export function PresetBrowser({
                     key={name}
                     role="button"
                     tabIndex={0}
-                    onClick={() => onSelectPreset(name)}
+                    onClick={(e) => {
+                      (e.currentTarget as HTMLElement).blur();
+                      onSelectPreset(name);
+                    }}
                     onKeyDown={(e) => {
                       if (e.currentTarget !== e.target) return;
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
+                        (e.currentTarget as HTMLElement).blur();
                         onSelectPreset(name);
                       }
                     }}

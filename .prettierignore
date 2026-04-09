@@ -6,3 +6,4 @@ package-lock.json
 pnpm-lock.yaml
 packages/milkdrop-presets/lib/presets.json
 packages/milkdrop-textures/src/textureData.json
+packages/glsl-optimizer-wasm/glsl-optimizer

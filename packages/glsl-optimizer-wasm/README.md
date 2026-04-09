@@ -27,12 +27,37 @@ Integrated at butterchurn's `createShader()` in `warp.js`/`comp.js` — optimize
 
 The optimizer requires **complete GLSL programs** (`#version`, uniforms, `void main()`), not the GLSL fragments output by the converter. That's why it runs at shader assembly time, not in the conversion pipeline.
 
+## Structure
+
+```
+src/
+├── index.js          # JS wrapper (initOptimizer, tryOptimizeGlsl, isOptimizerReady)
+├── index.d.ts        # TypeScript declarations
+└── Main.cpp          # Emscripten entry point (C wrapper around glslopt API)
+glsl-optimizer/
+├── src/              # Mesa GLSL optimizer C/C++ source (from aras-p/glsl-optimizer)
+├── include/          # Public headers
+└── license.txt       # Mesa/MIT license
+dist/
+└── glsl-optimizer.mjs  # Built WASM artifact (717KB / 216KB gzipped, committed)
+build.js              # Emscripten build script
+```
+
 ## Building
 
-Requires [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html) (v5.0.5). Source at `/home/lmascari/glsl-optimizer-js/`.
+Requires [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html) (tested with v5.0.5).
 
-The built artifact (`dist/glsl-optimizer.mjs`, 717KB / 216KB gzipped) is checked into the repo so CI and normal development never need Emscripten. Uses Emscripten SINGLE_FILE mode (WASM inlined as base64).
+```bash
+# Activate Emscripten (adjust path to your emsdk install)
+source ~/emsdk/emsdk_env.sh
+
+# Build from the package directory
+cd packages/glsl-optimizer-wasm
+node build.js
+```
+
+The built artifact (`dist/glsl-optimizer.mjs`) is checked into the repo so CI and normal development never need Emscripten. Uses Emscripten SINGLE_FILE mode (WASM inlined as base64).
 
 ## License
 
-MIT
+MIT (see `LICENSE` and `glsl-optimizer/license.txt`)

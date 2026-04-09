@@ -355,9 +355,9 @@ describe('useSettingsStore', () => {
   });
 
   describe('pack filtering', () => {
-    it('starts with empty enabledPacks', () => {
+    it('starts with all thematic packs enabled', () => {
       const { result } = renderHook(() => useSettingsStore());
-      expect(result.current.enabledPacks).toEqual([]);
+      expect(result.current.enabledPacks).toEqual([...THEMATIC_PACKS]);
     });
 
     it('sets enabled packs', () => {

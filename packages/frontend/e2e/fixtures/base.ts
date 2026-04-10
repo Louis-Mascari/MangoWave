@@ -29,7 +29,18 @@ export const test = base.extend<{ app: Page }>({
           // Disable auto quality in tests — on CI headless runners, the quality
           // monitor detects low FPS and steps down, resizing the canvas mid-test.
           // Canvas resizes cause it to intercept pointer events on toolbar buttons.
-          performance: { autoQuality: false },
+          // Must include ALL performance fields — Zustand persist shallow-merges the
+          // top-level state, so a partial performance object would lose defaults
+          // (resolutionScale=undefined → canvas 0×0).
+          performance: {
+            fpsCap: 60,
+            resolutionScale: 1.0,
+            meshWidth: 48,
+            meshHeight: 36,
+            textureRatio: 1.0,
+            fxaa: false,
+            autoQuality: false,
+          },
         },
         version: 8,
       };

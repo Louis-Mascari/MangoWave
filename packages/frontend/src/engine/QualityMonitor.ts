@@ -52,6 +52,7 @@ export class QualityMonitor {
   private frameHead = 0;
   private frameCount = 0;
   private targetFps = 60;
+  private screenRefreshRate = 0; // 0 = not yet detected
   private currentTier: number;
   private maxTier: number; // never auto-upgrade past this
   private lastChangeTime = 0;
@@ -79,6 +80,15 @@ export class QualityMonitor {
   setTargetFps(fps: number): void {
     // 0 = uncapped → target 60 for quality monitoring purposes
     this.targetFps = fps > 0 ? fps : 60;
+  }
+
+  /**
+   * Set the detected screen refresh rate. The effective target for quality
+   * decisions will be capped to this value — a 60 Hz phone with fpsCap=120
+   * should not expect 120 fps and immediately downgrade.
+   */
+  setScreenRefreshRate(hz: number): void {
+    this.screenRefreshRate = hz > 0 ? hz : 0;
   }
 
   setCurrentTier(tier: number): void {
@@ -125,7 +135,12 @@ export class QualityMonitor {
     }
 
     const avgFps = this.getAverageFps();
-    const targetFps = this.targetFps;
+    // Cap target to detected screen refresh rate — a 60 Hz device can't exceed
+    // ~60 fps regardless of fpsCap, so quality decisions should not penalise it.
+    const targetFps =
+      this.screenRefreshRate > 0
+        ? Math.min(this.targetFps, this.screenRefreshRate)
+        : this.targetFps;
 
     // Check for low FPS → step down
     if (avgFps < targetFps * STEP_DOWN_RATIO) {

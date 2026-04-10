@@ -85,6 +85,9 @@ export class VisualizerRenderer {
   private _milkdropPresetNames: Set<string> = new Set();
   private _importedPresetNames: Set<string> = new Set();
   private _qualityMonitor = new QualityMonitor();
+  private _refreshRateDetected = false;
+  private _refreshRateSamples: number[] = [];
+  private _refreshRatePrevTime = 0;
 
   get currentPresetName(): string {
     return this.presetKeys[this.currentPresetIndex] ?? '';
@@ -375,6 +378,33 @@ export class VisualizerRenderer {
     this.animationFrameId = requestAnimationFrame(this.render);
 
     const now = performance.now();
+
+    // Detect screen refresh rate from raw rAF intervals (before fps capping).
+    // Samples the first 20 uncapped rAF callbacks to derive the display Hz.
+    if (!this._refreshRateDetected) {
+      if (this._refreshRatePrevTime > 0) {
+        const dt = now - this._refreshRatePrevTime;
+        // Ignore outliers (> 50ms = < 20Hz, likely tab-switch or startup jank)
+        if (dt > 0 && dt < 50) {
+          this._refreshRateSamples.push(dt);
+        }
+        if (this._refreshRateSamples.length >= 20) {
+          this._refreshRateDetected = true;
+          const sorted = this._refreshRateSamples.slice().sort((a, b) => a - b);
+          // Use median to ignore outliers
+          const median = sorted[Math.floor(sorted.length / 2)];
+          // Round to nearest common refresh rate (30, 60, 90, 120, 144, 165, 240)
+          const rawHz = 1000 / median;
+          const commonRates = [30, 60, 90, 120, 144, 165, 240];
+          const detectedHz = commonRates.reduce((best, rate) =>
+            Math.abs(rate - rawHz) < Math.abs(best - rawHz) ? rate : best,
+          );
+          this._qualityMonitor.setScreenRefreshRate(detectedHz);
+        }
+      }
+      this._refreshRatePrevTime = now;
+    }
+
     if (this.fpsInterval > 0) {
       const elapsed = now - this.lastFrameTime;
       if (elapsed < this.fpsInterval) return;

@@ -70,8 +70,7 @@
     "silenceDetectedMic": "Nenhum áudio detectado do microfone. Certifique-se de que seu mic não está mutado e está captando som.",
     "silenceDetectedLocal": "Nenhum áudio detectado. Certifique-se de que o arquivo é um formato suportado e que o volume do dispositivo está ligado.",
     "noPresetsAvailable": "Nenhum preset disponível. Verifique se pelo menos um pacote está ativado e se nem todos os presets estão bloqueados.",
-    "presetNotFound": "Preset não encontrado neste dispositivo: \"{{name}}\"",
-    "autoGainAdjusted": "Ganho automático ajustou pré-amp para {{value}}x"
+    "presetNotFound": "Preset não encontrado neste dispositivo: \"{{name}}\""
   },
   "playback": {
     "addSongsToQueue": "Adicione músicas à sua fila",

@@ -51,6 +51,46 @@ The core visualizer is **100% client-side**. Audio sources (system capture, loca
 
 The backend only serves **optional Spotify integration** — 4 Lambda endpoints behind API Gateway handle OAuth token exchange, token refresh, and settings sync to DynamoDB.
 
+### Rendering Pipeline
+
+```mermaid
+flowchart TD
+    subgraph Sources["Audio Sources"]
+        direction LR
+        SYS["System Audio"] ~~~ MIC["Microphone"] ~~~ LOCAL["Local Files"]
+    end
+
+    Sources --> GAIN
+
+    subgraph Audio["AudioEngine"]
+        GAIN["Pre-amp GainNode"] --> EQ["10-band EQ"] --> FFT["AnalyserNode · FFT"]
+    end
+
+    subgraph Presets["Preset Pipeline"]
+        direction LR
+        MILK[".milk files"] --> CONV["Converter · HLSL → GLSL"]
+        BUNDLE["Bundled Presets"] --> EELC["eel-wasm · EEL → WASM"]
+        CONV --> EELC
+    end
+
+    FFT --> LEVELS
+    EELC --> FRAME
+
+    subgraph Render["Butterchurn · per frame"]
+        LEVELS["Audio Levels · bass / mid / treb"]
+        LEVELS --> FRAME["Frame Equations · zoom, rot, decay"]
+        FRAME --> PIXEL["Pixel Equations · per mesh vertex"]
+        PIXEL --> W
+
+        subgraph GL["WebGL 2 Passes"]
+            direction LR
+            W["Warp"] --> B["Blur"] --> SW["Shapes · Waves"] --> C["Comp"] --> O["Output · FXAA"]
+        end
+    end
+
+    O --> CANVAS["Canvas"]
+```
+
 ### Audio Pipeline
 
 ```

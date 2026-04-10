@@ -13,14 +13,14 @@ butterchurn is effectively unmaintained (last stable release 2018). The source f
 
 ## Structure
 
-- `src/butterchurn/` — ES6 source modules (~30 files) with 14 MangoWave patches
+- `src/butterchurn/` — ES6 source modules (~30 files) with 16 MangoWave patches
 - `src/index.js` — ESM wrapper
 - `src/index.d.ts` — TypeScript declarations
 - `lib/butterchurnExtraImages.min.js` — built-in texture data (static, not part of the source fork)
 
 ## MangoWave Patches
 
-14 patches applied to the source. All searchable via `[MW-PATCH:` comments. See [PATCHES.md](PATCHES.md) for details, math, and verification instructions.
+16 patches applied to the source. All searchable via `[MW-PATCH:` comments. See [PATCHES.md](PATCHES.md) for details, math, and verification instructions.
 
 ### Patch Summary
 
@@ -38,6 +38,8 @@ butterchurn is effectively unmaintained (last stable release 2018). The source f
 12. Clean up previous shader program on preset change
 13. Guard `createSampler()` null returns on WebGL context loss
 14. GLSL optimizer integration (dead code elimination via `glsl-optimizer-wasm`)
+15. ImageBitmap texture upload
+16. Deduplicate texture uploads by ImageBitmap reference
 
 ## Dependencies
 

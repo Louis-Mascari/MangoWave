@@ -75,8 +75,7 @@
     "silenceDetectedLocal": "No audio detected. Make sure the file is a supported format and your device volume is up.",
     "noPresetsAvailable": "No presets available. Check that at least one pack is enabled and not all presets are blocked.",
     "presetNotFound": "Preset not found on this device: \"{{name}}\"",
-    "joinedRoom": "Joined room {{code}}",
-    "autoGainAdjusted": "Auto Gain adjusted pre-amp to {{value}}x"
+    "joinedRoom": "Joined room {{code}}"
   },
 
   "playback": {

@@ -1,21 +1,19 @@
 import { useEffect, useRef } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
-import { useToastStore } from '../store/useToastStore.ts';
 import type { AudioEngine } from '../engine/AudioEngine.ts';
-import i18n from '../i18n/index.ts';
 
 // Thresholds for smoothed RMS level (0.0–1.0 scale).
 // Time-domain RMS from getByteTimeDomainData is typically 0.01–0.15 for normal audio.
 // These thresholds define the "good enough" dead zone where no adjustment happens.
-const LOW_THRESHOLD = 0.003; // Below this: effectively silent, boost gain
+const LOW_THRESHOLD = 0.015; // Below this: signal too weak for reactive visuals, boost gain
 const HIGH_THRESHOLD = 0.25; // Above this: signal very hot, reduce gain
-const GAIN_STEP = 0.05; // Adjustment per tick
+const GAIN_STEP = 0.1; // Adjustment per tick (matches slider increments)
 const MIN_GAIN = 0.3;
 const MAX_GAIN = 3.0;
 const TICK_MS = 500;
 const EMA_ALPHA = 0.15; // ~5s convergence at 500ms ticks
 const WARMUP_TICKS = 3; // Wait ~1.5s before adjusting
-const TOAST_THRESHOLD = 0.5; // Show toast when gain moves this far from baseline
+const COOLDOWN_TICKS = 4; // ~2s after each adjustment for EMA to settle
 
 /**
  * Compute RMS from unsigned 8-bit time-domain data.
@@ -42,8 +40,7 @@ export function useAutoGain(audioEngine: AudioEngine | null, isActive: boolean):
   const autoGainChangeRef = useRef(false);
   const smoothedRmsRef = useRef(0);
   const warmupRef = useRef(0);
-  const baseGainRef = useRef(0);
-  const toastShownRef = useRef(false);
+  const cooldownRef = useRef(0);
   const autoGain = useSettingsStore((s) => s.eq.autoGain);
 
   // Detect manual pre-amp changes and disable auto-gain.
@@ -69,8 +66,7 @@ export function useAutoGain(audioEngine: AudioEngine | null, isActive: boolean):
     // Reset state for new activation / source change
     smoothedRmsRef.current = 0;
     warmupRef.current = 0;
-    baseGainRef.current = useSettingsStore.getState().eq.preAmpGain;
-    toastShownRef.current = false;
+    cooldownRef.current = 0;
 
     const interval = setInterval(() => {
       // Re-check autoGain each tick (may have been disabled by manual change)
@@ -89,6 +85,13 @@ export function useAutoGain(audioEngine: AudioEngine | null, isActive: boolean):
       warmupRef.current++;
       if (warmupRef.current < WARMUP_TICKS) return;
 
+      // After each gain adjustment, wait for EMA to settle with the new signal level.
+      // Without this, stale EMA causes rapid consecutive adjustments → oscillation.
+      if (cooldownRef.current > 0) {
+        cooldownRef.current--;
+        return;
+      }
+
       const currentGain = useSettingsStore.getState().eq.preAmpGain;
       let newGain = currentGain;
 
@@ -100,23 +103,12 @@ export function useAutoGain(audioEngine: AudioEngine | null, isActive: boolean):
 
       if (newGain !== currentGain) {
         autoGainChangeRef.current = true;
-        useSettingsStore.getState().setPreAmpGain(Math.round(newGain * 100) / 100);
+        useSettingsStore.getState().setPreAmpGain(Math.round(newGain * 10) / 10);
+        cooldownRef.current = COOLDOWN_TICKS;
         // Reset flag after React effects run (same macrotask pattern as auto-quality)
         setTimeout(() => {
           autoGainChangeRef.current = false;
         }, 0);
-
-        // Toast when gain has moved significantly from baseline
-        if (!toastShownRef.current && Math.abs(newGain - baseGainRef.current) >= TOAST_THRESHOLD) {
-          toastShownRef.current = true;
-          useToastStore.getState().show(
-            i18n.t('toasts.autoGainAdjusted', {
-              ns: 'messages',
-              value: newGain.toFixed(1),
-            }),
-            { type: 'info', durationMs: 3000 },
-          );
-        }
       }
     }, TICK_MS);
 

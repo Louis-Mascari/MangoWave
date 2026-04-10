@@ -4,7 +4,7 @@
 
 ## How it works
 
-Raw `.milk` files live in `milk/`. The build script (`scripts/build-milkdrop-presets.mjs`) converts them via `milkdrop-preset-converter`, deduplicates against butterchurn packs, and outputs:
+The build script (`scripts/build-milkdrop-presets.mjs`) converts `.milk` files via `milkdrop-preset-converter`, deduplicates against butterchurn packs, and outputs:
 
 - `lib/presets.json` — full preset data (~5MB, lazy-loaded on first access)
 - `lib/presetNames.json` — name manifest (~18KB, loaded at init)
@@ -23,7 +23,7 @@ Names are registered with the renderer at startup from the lightweight manifest.
 ## Rebuilding
 
 ```bash
-node scripts/build-milkdrop-presets.mjs
+node scripts/build-milkdrop-presets.mjs <path-to-milk-directory>
 ```
 
-The script is extensible — pass any directory of `.milk` files. Auto-deduplicates against all existing butterchurn packs.
+Pass any directory of `.milk` files. Auto-deduplicates against all existing butterchurn packs.

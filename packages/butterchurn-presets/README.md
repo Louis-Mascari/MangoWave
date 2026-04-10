@@ -19,5 +19,5 @@ Static data from an unmaintained npm package. Vendoring ensures CI/deploy is nev
 ## Structure
 
 - `lib/` — original minified pack files (`.min.js`)
-- `src/index.js` — ESM wrapper with CJS interop
+- `src/index.js` — ESM wrapper
 - `src/index.d.ts` — TypeScript declarations

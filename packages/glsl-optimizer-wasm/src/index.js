@@ -48,7 +48,7 @@ export function tryOptimizeGlsl(source) {
     const result = optimizeGlsl(source, 3, false);
     if (!result || result.startsWith('Error:') || !result.trimStart().startsWith('#version')) {
       if (result && !result.startsWith('Error:')) {
-        console.warn('[glsl-optimizer] Optimizer returned invalid output, using original shader');
+        console.debug('[glsl-optimizer] Optimizer returned invalid output, using original shader');
       }
       return source;
     }

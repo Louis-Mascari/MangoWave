@@ -167,11 +167,16 @@ export default class Renderer {
   }
 
   loadPreset(preset, blendTime) {
-    this.blendPattern.createBlendPattern();
-    this.blending = true;
-    this.blendStartTime = this.time;
-    this.blendDuration = blendTime;
-    this.blendProgress = 0;
+    /* [MW-PATCH: true hard cut when blendTime <= 0] */
+    if (blendTime > 0) {
+      this.blendPattern.createBlendPattern();
+      this.blending = true;
+      this.blendStartTime = this.time;
+      this.blendDuration = blendTime;
+      this.blendProgress = 0;
+    } else {
+      this.blending = false;
+    }
 
     this.prevPresetEquationRunner = this.presetEquationRunner;
 

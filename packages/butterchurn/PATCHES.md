@@ -1,6 +1,6 @@
 # butterchurn Patches
 
-16 MangoWave patches applied to the butterchurn source fork (`src/butterchurn/`, forked from jberg/butterchurn v2.6.7, commit `d90f271`). Patches 1-13 searchable via `[MW-PATCH:` comments. Patch 14 is a dependency integration (`glsl-optimizer-wasm`).
+17 MangoWave patches applied to the butterchurn source fork (`src/butterchurn/`, forked from jberg/butterchurn v2.6.7, commit `d90f271`). Patches 1-13 searchable via `[MW-PATCH:` comments. Patch 14 is a dependency integration (`glsl-optimizer-wasm`).
 
 ---
 
@@ -331,3 +331,19 @@ Added a `Map<ImageBitmap, WebGLTexture>` lookup in `loadExtraImages()`. When an 
 ### Location
 
 `src/butterchurn/image/imageTextures.js` — search for `[MW-PATCH:16]`.
+
+---
+
+## 17. True Hard Cut When Blend Time Is Zero
+
+### Problem
+
+`loadPreset(preset, 0)` still enters the blend code path: `createBlendPattern()` runs, `this.blending` is set to `true`, and the next render frame executes the full dual-preset pipeline (both equation runners, both warp shaders, both comp shaders, both sets of shapes/waves) before `blendProgress` overflows to Infinity via division-by-zero and exits the blend. This means even with the transition slider at 0.0s, there's one frame of double GPU work plus unnecessary blend pattern generation — the user sees a brief flash of crossfade rather than an instant cut.
+
+### Solution
+
+Guard the blend setup behind `blendTime > 0`. When `blendTime <= 0`, skip `createBlendPattern()` entirely and set `this.blending = false` so the render loop never enters the dual-preset path.
+
+### Location
+
+`src/butterchurn/rendering/renderer.js` — search for `[MW-PATCH: true hard cut when blendTime <= 0]` in `loadPreset`.

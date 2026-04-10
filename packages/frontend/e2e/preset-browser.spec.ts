@@ -191,8 +191,9 @@ test.describe('Preset Browser', () => {
     await expect(addBtn).toBeVisible({ timeout: 5000 });
     await addBtn.click();
 
-    // Go back to pack list and start
-    await app.getByLabel(/Back/).click();
+    // Go back to pack list and start — force: true because the virtualized
+    // preset list may still be rendering after add, keeping the button "unstable"
+    await app.getByLabel(/Back/).click({ force: true });
     const startBtn2 = app.getByRole('button', { name: /^Start$/ });
     await expect(startBtn2).toBeVisible();
     await startBtn2.click({ force: true });

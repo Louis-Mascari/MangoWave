@@ -54,26 +54,33 @@ export const test = base.extend<{ app: Page }>({
 export { expect } from '@playwright/test';
 
 /**
- * Click a toolbar button reliably. The toolbar gets CSS `pointer-events-none`
- * when the idle timer fires, which prevents clicks from reaching buttons even
- * with Playwright's `force: true` (the browser's hit-testing respects CSS
- * pointer-events and routes the click to the canvas underneath).
+ * Click a toolbar button reliably. On CI, the fullscreen canvas intercepts
+ * pointer events even when the toolbar is interactive (canvas is geometrically
+ * on top). Using `dispatchEvent('click')` bypasses browser hit-testing entirely
+ * — the event fires directly on the button element.
  *
- * This helper moves the mouse to trigger the idle timer reset, waits for
- * React to re-render the toolbar without `pointer-events-none`, then clicks.
+ * Before dispatching, we move the mouse to reset the idle timer and wait for
+ * the toolbar wrapper to drop `pointer-events-none` (so the button is actually
+ * wired up to handle the click in React's event system).
  */
 export async function clickToolbarButton(app: Page, name: RegExp | string): Promise<void> {
   // Move mouse to toolbar area to reset the idle timer
   await app.mouse.move(400, 700);
   // Wait for toolbar wrapper to become interactive (React re-render removes
-  // pointer-events-none after the idle timer reset from the mouse move above)
+  // pointer-events-none after the idle timer reset from the mouse move above).
+  // Timeout after 10s to avoid hanging the full test timeout.
   await app
     .locator('[role="toolbar"]')
     .locator('..')
     .evaluate((el) => {
-      return new Promise<void>((resolve) => {
+      return new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(
+          () => reject(new Error('toolbar still has pointer-events-none')),
+          10000,
+        );
         const check = () => {
           if (!el.classList.contains('pointer-events-none')) {
+            clearTimeout(timeout);
             resolve();
           } else {
             requestAnimationFrame(check);
@@ -82,5 +89,6 @@ export async function clickToolbarButton(app: Page, name: RegExp | string): Prom
         check();
       });
     });
-  await app.getByRole('button', { name }).click();
+  // Use dispatchEvent to bypass canvas hit-test interception on CI
+  await app.getByRole('button', { name }).dispatchEvent('click');
 }

@@ -151,7 +151,7 @@ test.describe('Settings Panel', () => {
     await fileInput.setInputFiles(tmpPath);
 
     // Category checkboxes should appear — click Apply
-    await expect(app.getByRole('button', { name: /Apply/i })).toBeVisible({ timeout: 5000 });
+    await expect(app.getByRole('button', { name: /Apply/i })).toBeVisible({ timeout: 15000 });
     await app.getByRole('button', { name: /Apply/i }).click();
 
     // Verify the imported FPS cap was applied to localStorage

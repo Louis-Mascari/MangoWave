@@ -13,6 +13,10 @@ test.describe('Keyboard Shortcuts', () => {
     // Wait for toolbar and preset to load
     await expect(app.locator('[role="toolbar"]')).toBeVisible({ timeout: 15000 });
     await expect(app.locator('[data-testid="preset-name"]')).toBeVisible({ timeout: 15000 });
+
+    // Clear focus from any button so keyboard shortcuts go to the global handler,
+    // not to a focused button (Space on a focused button activates it instead).
+    await app.locator('body').click();
   });
 
   test('? opens ShortcutOverlay, Escape closes it', async ({ app }) => {

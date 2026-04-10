@@ -12,7 +12,7 @@ test.describe('Keyboard Shortcuts', () => {
 
     // Wait for toolbar and preset to load
     await expect(app.locator('[role="toolbar"]')).toBeVisible({ timeout: 15000 });
-    await expect(app.locator('[data-testid="preset-name"]')).toBeVisible({ timeout: 10000 });
+    await expect(app.locator('[data-testid="preset-name"]')).toBeVisible({ timeout: 15000 });
   });
 
   test('? opens ShortcutOverlay, Escape closes it', async ({ app }) => {

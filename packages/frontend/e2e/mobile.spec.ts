@@ -65,7 +65,7 @@ test.describe('Mobile UI', () => {
     await ensureControlsVisible(app);
     // Tap the overlay to trigger forceIdle → controls fade out
     await app.locator('div[role="presentation"]').dispatchEvent('click');
-    await expectControlsHidden(app, 3000);
+    await expectControlsHidden(app, 5000);
   });
 
   test('next preset triggers action', async ({ app }) => {

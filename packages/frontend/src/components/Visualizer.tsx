@@ -260,14 +260,17 @@ export function Visualizer({
 
       // Determine current tier from existing settings so we don't override the user's choices.
       // Start monitoring from wherever they are; the monitor will step up/down as needed.
+      // Read from store (not closure) — this effect only re-runs on autoQuality toggle,
+      // not on every settings change, so closure values would be stale.
+      const perf = useSettingsStore.getState().performance;
       let currentTier = 0;
       for (let i = QUALITY_TIERS.length - 1; i >= 0; i--) {
         const t = QUALITY_TIERS[i];
         if (
-          performance.meshWidth >= t.meshWidth &&
-          performance.meshHeight >= t.meshHeight &&
-          performance.textureRatio >= t.textureRatio &&
-          performance.resolutionScale >= t.resolutionScale
+          perf.meshWidth >= t.meshWidth &&
+          perf.meshHeight >= t.meshHeight &&
+          perf.textureRatio >= t.textureRatio &&
+          perf.resolutionScale >= t.resolutionScale
         ) {
           currentTier = i;
           break;

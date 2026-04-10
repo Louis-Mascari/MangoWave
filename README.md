@@ -91,13 +91,7 @@ flowchart TD
     O --> CANVAS["Canvas"]
 ```
 
-### Audio Pipeline
-
-```
-Source → GainNode (pre-amp) → 10× BiquadFilter (EQ) → AnalyserNode → butterchurn
-```
-
-Three audio sources feed the pipeline:
+The three audio sources shown above:
 
 - **System audio** ([`getDisplayMedia`](https://caniuse.com/mdn-api_mediadevices_getdisplaymedia_audio_capture_support)) — captures audio from a screen, window, or tab share
 - **Local files** (`HTMLAudioElement`) — plays audio files directly in the browser. EQ feeds the visualizer while audio plays directly to speakers

@@ -118,6 +118,29 @@ System audio capture uses `getDisplayMedia` with audio. Firefox and Safari suppo
 | **macOS < 14.2**       | No     | No     | Audio |
 | **Linux**              | No     | No     | Audio |
 
+#### Firefox Audio Capture Workaround
+
+Firefox does not natively support system audio capture via screen sharing. To visualize desktop audio in Firefox, you can route your system output through a virtual audio cable and select it as a microphone input in MangoWave.
+
+**Windows (Recommended: [VB-Cable](https://vb-audio.com/Cable/))**
+
+1. **Install VB-Cable** and restart your PC.
+2. **Route output**: Open **System > Sound > Output** and set the output device to **CABLE Input (VB-Audio Virtual Cable)**.
+3. **Listen to yourself**: Open **System > Sound > More sound settings** (or **System > Sound > All sound devices > CABLE Output**). Under CABLE Output → Properties → Listen, check **"Listen to this device"** and select your real speakers/headphones. This lets you hear your audio while the virtual cable captures it.
+4. **MangoWave**: Open the **Microphone** card → **Advanced** tab → grant permissions → select **CABLE Output** from the device list.
+
+**macOS (Recommended: [BlackHole](https://existential.audio/blackhole/))**
+
+1. **Install BlackHole** (2ch is sufficient).
+2. **Create a Multi-Output Device**: Open **Audio MIDI Setup** (Spotlight → "Audio MIDI Setup"), click **+** → **Create Multi-Output Device**. Check both **BlackHole 2ch** and your speakers/headphones. Set your system output to this Multi-Output Device.
+3. **MangoWave**: Open the **Microphone** card → **Advanced** tab → grant permissions → select **BlackHole 2ch** from the device list.
+
+**Linux**
+
+1. Use PulseAudio/PipeWire to create a virtual sink and loopback module, or install a virtual cable equivalent.
+2. Route your system output through the virtual sink.
+3. **MangoWave**: Open the **Microphone** card → **Advanced** tab → grant permissions → select the virtual device from the list.
+
 ### Spotify Integration
 
 Spotify's dev mode policy (as of March 2026) restricts each developer app to 1 Client ID, the app owner plus up to 5 authorized users, and requires a Premium account to register the app. Because of these limits, MangoWave's hosted site exposes Spotify only in **owner mode** — the app owner connects via backend-proxied OAuth, and authorized users must be added to the developer app's User Management tab. Authorized users don't need Premium themselves, but playback controls (seek, shuffle, repeat) require Premium; non-Premium users still see Now Playing metadata.

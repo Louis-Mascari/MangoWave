@@ -192,10 +192,13 @@ function MainApp() {
     if (ok) startLaunch();
   }, [capture, startLaunch]);
 
-  const handleMicCapture = useCallback(async () => {
-    const ok = await capture.startMicCapture();
-    if (ok) startLaunch();
-  }, [capture, startLaunch]);
+  const handleMicCapture = useCallback(
+    async (deviceId?: string) => {
+      const ok = await capture.startMicCapture(deviceId);
+      if (ok) startLaunch();
+    },
+    [capture, startLaunch],
+  );
 
   const handleLocalFiles = useCallback(
     (files: File[]) => {

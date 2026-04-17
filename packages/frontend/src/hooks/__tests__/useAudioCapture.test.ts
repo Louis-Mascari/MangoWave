@@ -8,6 +8,8 @@ let shouldRejectCapture = false;
 let trackEndedListeners: (() => void)[] = [];
 const mockRemoveEventListener = vi.fn();
 
+const mockInitFromMicrophone = vi.fn(() => Promise.resolve());
+
 vi.mock('../../engine/AudioEngine.ts', () => {
   return {
     AudioEngine: class MockAudioEngine {
@@ -33,7 +35,7 @@ vi.mock('../../engine/AudioEngine.ts', () => {
         });
       });
       initAudioPipeline = vi.fn();
-      initFromMicrophone = vi.fn(() => Promise.resolve());
+      initFromMicrophone = mockInitFromMicrophone;
       destroy = mockDestroy;
     },
     EQ_BANDS: [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000],
@@ -111,13 +113,14 @@ describe('useAudioCapture', () => {
     expect(result.current.isCapturing).toBe(true);
   });
 
-  it('starts mic capture successfully', async () => {
+  it('starts mic capture successfully with deviceId', async () => {
     const { result } = renderHook(() => useAudioCapture());
 
     await act(async () => {
-      await result.current.startMicCapture();
+      await result.current.startMicCapture('test-device-id');
     });
 
+    expect(mockInitFromMicrophone).toHaveBeenCalledWith('test-device-id');
     expect(result.current.isCapturing).toBe(true);
     expect(result.current.captureSource).toBe('mic');
     expect(result.current.error).toBeNull();

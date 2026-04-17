@@ -201,7 +201,7 @@ describe('AudioEngine', () => {
   });
 
   describe('initFromMicrophone', () => {
-    it('creates pipeline without destination connection', async () => {
+    it('creates pipeline without destination connection and supports deviceId', async () => {
       const mockCtx = createMockAudioContext();
       globalThis.AudioContext = vi.fn(function (this: Record<string, unknown>) {
         Object.assign(this, mockCtx);
@@ -220,10 +220,11 @@ describe('AudioEngine', () => {
         configurable: true,
       });
 
-      await engine.initFromMicrophone();
+      await engine.initFromMicrophone('test-device-id');
 
       expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledWith({
         audio: {
+          deviceId: { exact: 'test-device-id' },
           autoGainControl: false,
           noiseSuppression: false,
           echoCancellation: false,
@@ -239,6 +240,39 @@ describe('AudioEngine', () => {
         (call: unknown[]) => call[0] === mockCtx.destination,
       );
       expect(connectedToDestination).toBe(false);
+    });
+  });
+
+  describe('getAudioInputs', () => {
+    it('returns audio input devices', async () => {
+      const mockDevices = [
+        { kind: 'audioinput', label: 'Mic 1', deviceId: '1' },
+        { kind: 'audioinput', label: 'Mic 2', deviceId: '2' },
+        { kind: 'videoinput', label: 'Cam 1', deviceId: '3' },
+      ];
+      Object.defineProperty(navigator, 'mediaDevices', {
+        value: {
+          enumerateDevices: vi.fn().mockResolvedValue(mockDevices),
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      const inputs = await AudioEngine.getAudioInputs();
+      expect(inputs).toHaveLength(2);
+      expect(inputs[0].deviceId).toBe('1');
+      expect(inputs[1].deviceId).toBe('2');
+    });
+
+    it('returns empty array if API is unavailable', async () => {
+      Object.defineProperty(navigator, 'mediaDevices', {
+        value: {},
+        writable: true,
+        configurable: true,
+      });
+
+      const inputs = await AudioEngine.getAudioInputs();
+      expect(inputs).toEqual([]);
     });
   });
 

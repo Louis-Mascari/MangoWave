@@ -56,8 +56,22 @@
     "step1": "and grant permission when prompted",
     "step2Bold": "Let the sound drive the visuals",
     "step2": "– live music, ambient noise, or anything your mic picks up",
-    "infoBox": "Silent mode: audio is captured but not played through your speakers.",
-    "startMicrophone": "Start Microphone"
+    "infoBox": "To prevent echo and feedback, MangoWave will not play the captured audio back to you.",
+    "startMicrophone": "Start Microphone",
+    "modeStandard": "Standard",
+    "modeAdvanced": "Advanced",
+    "firefoxLoopbackTitle": "Firefox System Audio Workaround",
+    "firefoxLoopbackDesc": "Firefox doesn't support system audio sharing. Select a virtual cable (like VB-Cable or BlackHole) and route your system output to it.",
+    "setupGuide": "View setup guide",
+    "selectInput": "Select Audio Input",
+    "device": "Device",
+    "deviceNamesHidden": "Device names are hidden by your browser until permission is granted.",
+    "grantPermission": "Grant Mic Permissions",
+    "permissionBlockedTitle": "Permission Blocked",
+    "permissionBlockedDesc": "Your browser is blocking microphone access. Click the icon in the address bar (usually a lock or camera) to allow permissions, then click 'Grant Mic Permissions' again.",
+    "refreshDevices": "Refresh List",
+    "mobileTipTitle": "Capturing other apps",
+    "mobileTipDesc": "To visualize music from other apps on this device, you can play it through the speakers for the microphone to capture. Note: Environmental noise and acoustic latency may reduce reactivity. This workaround is only effective when headphones are disconnected."
   },
 
   "spotify": {

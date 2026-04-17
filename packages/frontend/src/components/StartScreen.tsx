@@ -12,13 +12,14 @@ import {
 } from '../utils/audioFileValidation.ts';
 import { useFocusTrap } from '../hooks/useFocusTrap.ts';
 import { supportedLanguages, type SupportedLanguage } from '../i18n/index.ts';
+import { AudioEngine } from '../engine/AudioEngine.ts';
 import { CloseIcon } from './icons.tsx';
 import logoSrc from '../assets/logo.png';
 
 interface StartScreenProps {
   onStart: () => void;
   onLocalFiles: (files: File[]) => void;
-  onMicCapture: () => void;
+  onMicCapture: (deviceId?: string) => void;
   error: string | null;
   onClearError: () => void;
 }
@@ -44,6 +45,44 @@ export function StartScreen({
 
   const [activeModal, setActiveModalRaw] = useState<ModalView>('none');
   const [fileError, setFileError] = useState<string | null>(null);
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
+  const [micMode, setMicMode] = useState<'standard' | 'advanced'>('standard');
+  const [permissionError, setPermissionError] = useState(false);
+
+  const refreshDevices = useCallback(() => {
+    AudioEngine.getAudioInputs().then((list) => {
+      setDevices(list);
+      // If we got labels, the user has granted permission (perhaps in another tab)
+      if (list.some((d) => d.label)) {
+        setPermissionError(false);
+      }
+      setSelectedDeviceId((prev) => {
+        // Keep current selection if it's still in the list
+        if (prev && list.find((d) => d.deviceId === prev)) return prev;
+        // Auto-select first device (no preference for 'default' — Advanced users
+        // are here specifically to pick a non-default device)
+        return list.length > 0 ? list[0].deviceId : '';
+      });
+    });
+  }, []);
+
+  const requestPermission = useCallback(async () => {
+    try {
+      setPermissionError(false);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Stop tracks immediately — we only wanted to trigger the permission prompt
+      stream.getTracks().forEach((track) => track.stop());
+      refreshDevices();
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'NotAllowedError') {
+        setPermissionError(true);
+      } else {
+        console.error('Failed to get microphone permission:', err);
+      }
+    }
+  }, [refreshDevices]);
+
   const setActiveModal = useCallback(
     (view: ModalView) => {
       if (view !== 'none') {
@@ -54,6 +93,28 @@ export function StartScreen({
     },
     [error, onClearError],
   );
+
+  // Enumerate devices when microphone modal opens in advanced mode.
+  // Only enumerates — does NOT call getUserMedia. The user triggers the permission
+  // prompt explicitly via the "Grant Mic Permissions" button (requestPermission).
+  useEffect(() => {
+    if (activeModal === 'microphone' && micMode === 'advanced') {
+      refreshDevices();
+    }
+  }, [activeModal, refreshDevices, micMode]);
+
+  // Re-check devices when window regains focus
+  useEffect(() => {
+    const onFocus = () => {
+      // Only refresh if we're in the advanced tab and still missing labels
+      if (activeModal === 'microphone' && micMode === 'advanced' && !devices.some((d) => d.label)) {
+        refreshDevices();
+      }
+    };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [activeModal, refreshDevices, micMode, devices]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isSpotifyConnected = !!(sessionId || accessToken);
@@ -331,17 +392,159 @@ export function StartScreen({
 
       {activeModal === 'microphone' && (
         <Modal title={t('useMicrophone')} onClose={closeModal}>
-          <ol className="flex list-none flex-col gap-3 text-sm text-[#aaa]">
-            <StepItem number={1}>
-              <span className="font-medium text-[#e0e0e0]">{t('micModal.step1Bold')}</span>{' '}
-              {t('micModal.step1')}
-            </StepItem>
-            <StepItem number={2}>
-              <span className="font-medium text-[#e0e0e0]">{t('micModal.step2Bold')}</span>{' '}
-              {t('micModal.step2')}
-            </StepItem>
-          </ol>
-          <div className="mt-3 rounded-lg border border-blue-500/20 bg-blue-500/5 px-3 py-2">
+          {/* Tab Switcher */}
+          <div className="mb-6 flex rounded-lg bg-white/5 p-1">
+            <button
+              onClick={() => {
+                setMicMode('standard');
+                setSelectedDeviceId('');
+                setPermissionError(false);
+              }}
+              className={`flex-1 cursor-pointer rounded-md border-none py-1.5 text-xs font-semibold transition-all ${
+                micMode === 'standard'
+                  ? 'bg-orange-500 text-white shadow-lg'
+                  : 'text-[#888] hover:text-[#bbb]'
+              }`}
+            >
+              {t('micModal.modeStandard')}
+            </button>
+            <button
+              onClick={() => {
+                setMicMode('advanced');
+                setPermissionError(false);
+              }}
+              className={`flex-1 cursor-pointer rounded-md border-none py-1.5 text-xs font-semibold transition-all ${
+                micMode === 'advanced'
+                  ? 'bg-orange-500 text-white shadow-lg'
+                  : 'text-[#888] hover:text-[#bbb]'
+              }`}
+            >
+              {t('micModal.modeAdvanced')}
+            </button>
+          </div>
+
+          {micMode === 'standard' ? (
+            <div className="flex flex-col gap-4">
+              <ol className="flex list-none flex-col gap-3 text-sm text-[#aaa]">
+                <StepItem number={1}>
+                  <span className="font-medium text-[#e0e0e0]">{t('micModal.step1Bold')}</span>{' '}
+                  {t('micModal.step1')}
+                </StepItem>
+                <StepItem number={2}>
+                  <span className="font-medium text-[#e0e0e0]">{t('micModal.step2Bold')}</span>{' '}
+                  {t('micModal.step2')}
+                </StepItem>
+              </ol>
+
+              {isMobileDevice && (
+                <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-4 py-3">
+                  <p className="text-xs font-semibold text-blue-400">
+                    {t('micModal.mobileTipTitle')}
+                  </p>
+                  <p className="mt-1 text-xs text-blue-300/70">{t('micModal.mobileTipDesc')}</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5">
+                <p className="text-xs font-semibold text-amber-400">
+                  {t('micModal.firefoxLoopbackTitle')}
+                </p>
+                <p className="mt-1.5 text-xs leading-normal text-amber-300/70">
+                  {t('micModal.firefoxLoopbackDesc')}
+                </p>
+                <a
+                  href="https://github.com/Louis-Mascari/MangoWave#firefox-audio-capture-workaround"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block text-[11px] font-semibold text-amber-400 underline underline-offset-2 hover:text-amber-300"
+                >
+                  {t('micModal.setupGuide')}
+                </a>
+              </div>
+
+              {!devices.some((d) => d.label) && devices.length > 0 ? (
+                <div className="flex flex-col gap-2.5">
+                  <p className="text-xs leading-normal text-[#999]">
+                    {t('micModal.deviceNamesHidden')}
+                  </p>
+                  <button
+                    onClick={requestPermission}
+                    className="w-fit cursor-pointer border-none bg-transparent text-sm font-bold text-orange-500 underline underline-offset-4 hover:text-orange-400"
+                  >
+                    {t('micModal.grantPermission')}
+                  </button>
+                  {permissionError && (
+                    <div className="mt-1 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2">
+                      <p className="text-[11px] font-semibold text-red-400">
+                        {t('micModal.permissionBlockedTitle')}
+                      </p>
+                      <p className="mt-1 text-[10px] leading-relaxed text-red-300/70">
+                        {t('micModal.permissionBlockedDesc')}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                devices.length > 0 && (
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold text-white/80">
+                        {t('micModal.selectInput')}
+                      </label>
+                      <button
+                        onClick={refreshDevices}
+                        className="flex cursor-pointer items-center gap-1 border-none bg-transparent text-xs text-[#666] hover:text-[#aaa]"
+                      >
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                          <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                        </svg>
+                        {t('micModal.refreshDevices')}
+                      </button>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      {devices.map((device) => {
+                        const isSelected = selectedDeviceId === device.deviceId;
+                        const idSuffix = device.deviceId ? ` (${device.deviceId.slice(0, 4)})` : '';
+                        const label = device.label || `${t('micModal.device')}${idSuffix}`;
+                        return (
+                          <button
+                            key={device.deviceId}
+                            onClick={() => setSelectedDeviceId(device.deviceId)}
+                            className={`flex w-full cursor-pointer items-center justify-between rounded-xl border px-4 py-3 text-left text-sm transition-all ${
+                              isSelected
+                                ? 'border-orange-500 bg-orange-500/10 text-white font-medium'
+                                : 'border-white/10 bg-white/5 text-[#999] hover:border-white/20 hover:bg-white/10'
+                            }`}
+                          >
+                            <span className="truncate pr-2">{label}</span>
+                            {isSelected && (
+                              <svg
+                                viewBox="0 0 24 24"
+                                width="18"
+                                height="18"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="3"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="shrink-0 text-orange-500"
+                              >
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          )}
+
+          <div className="mt-5 rounded-lg border border-blue-500/20 bg-blue-500/5 px-3 py-2">
             <p className="text-xs text-blue-300/70">{t('micModal.infoBox')}</p>
           </div>
           <CollapsibleTip />
@@ -352,7 +555,9 @@ export function StartScreen({
             </div>
           )}
           <button
-            onClick={onMicCapture}
+            onClick={() => {
+              onMicCapture(micMode === 'advanced' ? selectedDeviceId || undefined : undefined);
+            }}
             className="start-btn mt-5 w-full cursor-pointer rounded-xl border-none px-10 py-3 text-lg font-semibold text-white"
           >
             {t('micModal.startMicrophone')}
@@ -698,10 +903,14 @@ function Modal({
   const { t: tc } = useTranslation('common');
   const containerRef = useRef<HTMLDivElement>(null);
   useFocusTrap(containerRef, true);
+  const isFirefox = browserInfo.browser === 'Firefox';
+
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/70 ${
+        isFirefox ? '' : 'backdrop-blur-sm'
+      }`}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}

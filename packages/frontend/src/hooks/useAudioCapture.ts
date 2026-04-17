@@ -13,7 +13,7 @@ export interface UseAudioCaptureReturn {
   error: string | null;
   clearError: () => void;
   startCapture: () => Promise<boolean>;
-  startMicCapture: () => Promise<boolean>;
+  startMicCapture: (deviceId?: string) => Promise<boolean>;
   stopCapture: () => void;
 }
 
@@ -167,7 +167,7 @@ export function useAudioCapture(): UseAudioCaptureReturn {
     }
   }, [cleanup, removeTrackListeners]);
 
-  const startMicCapture = useCallback(async (): Promise<boolean> => {
+  const startMicCapture = useCallback(async (deviceId?: string): Promise<boolean> => {
     if (startingRef.current) return false;
     startingRef.current = true;
     try {
@@ -178,7 +178,7 @@ export function useAudioCapture(): UseAudioCaptureReturn {
 
       setError(null);
       const engine = new AudioEngine();
-      await engine.initFromMicrophone();
+      await engine.initFromMicrophone(deviceId);
 
       engineRef.current = engine;
       setAudioEngine(engine);

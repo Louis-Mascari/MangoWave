@@ -115,14 +115,30 @@ export class AudioEngine {
     this.audioContext.resume();
   }
 
-  async initFromMicrophone(): Promise<void> {
+  /**
+   * Enumerates available audio input devices.
+   * Note: Browser permissions may hide device labels until getUserMedia is granted.
+   */
+  static async getAudioInputs(): Promise<MediaDeviceInfo[]> {
+    if (!navigator.mediaDevices?.enumerateDevices) return [];
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      return devices.filter((device) => device.kind === 'audioinput');
+    } catch (err) {
+      console.error('Failed to enumerate audio devices:', err);
+      return [];
+    }
+  }
+
+  async initFromMicrophone(deviceId?: string): Promise<void> {
     if (!navigator.mediaDevices?.getUserMedia) {
       throw new DOMException(
         'Microphone access is not available in this browser',
         'NotSupportedError',
       );
     }
-    const stream = await navigator.mediaDevices.getUserMedia({
+
+    const constraints: MediaStreamConstraints = {
       audio: {
         // Disable voice-call DSP — these filters suppress ambient music on mobile devices,
         // causing the visualizer to show no reactivity when playing music nearby.
@@ -130,7 +146,14 @@ export class AudioEngine {
         noiseSuppression: false,
         echoCancellation: false,
       },
-    });
+    };
+
+    // Use specific device if provided (Advanced tab passes the exact deviceId)
+    if (deviceId) {
+      (constraints.audio as MediaTrackConstraints).deviceId = { exact: deviceId };
+    }
+
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
     this.stream = stream;
     this.audioContext = new AudioContext();
     this.sourceNode = this.audioContext.createMediaStreamSource(stream);

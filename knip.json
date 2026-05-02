@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/knip@latest/schema.json",
   "ignoreBinaries": ["tsc"],
   "exclude": ["types"],
-  "ignore": ["scripts/**", "infrastructure/lib/**"],
+  "ignore": ["scripts/**"],
   "workspaces": {
     "packages/frontend": {
       "entry": ["e2e/**/*.spec.ts"],
@@ -14,9 +14,14 @@
     "packages/butterchurn-presets": {},
     "packages/milkdrop-presets": {},
     "packages/milkdrop-textures": {},
-    "packages/backend": {},
+    "packages/backend": {
+      "entry": ["src/handlers/*.ts"],
+      "project": ["src/**/*.ts"]
+    },
     "infrastructure": {
       "entry": ["bin/mangowave.ts"],
+      "project": ["bin/*.ts", "lib/**/*.ts"],
+      "ignore": ["lib/cloudfront-functions/host-router.js"],
       "ignoreDependencies": ["esbuild", "ts-node"]
     }
   }

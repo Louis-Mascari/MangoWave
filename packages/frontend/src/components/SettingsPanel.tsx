@@ -1372,9 +1372,12 @@ function DeviceSyncSection() {
   const [isOperating, setIsOperating] = useState(false);
 
   // Generate QR code when room code is available (host only)
+  if ((!roomCode || !isHost) && qrDataUrl !== '') {
+    setQrDataUrl('');
+  }
+
   useEffect(() => {
     if (!roomCode || !isHost) {
-      setQrDataUrl('');
       return;
     }
     let cancelled = false;

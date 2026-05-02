@@ -255,10 +255,12 @@ function PackNameInput({
 }) {
   const { t } = useTranslation('messages');
   const [localName, setLocalName] = useState(name);
+  const [prevName, setPrevName] = useState(name);
 
-  useEffect(() => {
+  if (name !== prevName) {
     setLocalName(name);
-  }, [name]);
+    setPrevName(name);
+  }
 
   return (
     <input
@@ -816,7 +818,7 @@ export function PresetBrowser({
   // Scroll persistence for grouped virtuoso list
   const virtuosoRef = useRef<GroupedVirtuosoHandle>(null);
   const scrollTopRef = useRef(0);
-  const initialScrollTop = useRef(usePresetBrowserStore.getState().scrollTop);
+  const [initialScrollTopValue] = useState(() => usePresetBrowserStore.getState().scrollTop);
 
   useEffect(() => {
     return () => {
@@ -881,7 +883,7 @@ export function PresetBrowser({
           <GroupedVirtuoso
             ref={virtuosoRef}
             style={{ height: isMobileDevice ? 'max(280px, calc(100dvh - 320px))' : '100%' }}
-            initialScrollTop={initialScrollTop.current}
+            initialScrollTop={initialScrollTopValue}
             onScroll={(e) => {
               scrollTopRef.current = (e.target as HTMLElement).scrollTop;
             }}

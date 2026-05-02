@@ -57,10 +57,10 @@
     "node": ">=20"
   },
   "devDependencies": {
-    "eslint": "^10.2.0",
+    "eslint": "^10.3.0",
     "husky": "^9.1.7",
-    "knip": "^6.1.1",
+    "knip": "^6.11.0",
     "lint-staged": "^16.4.0",
-    "prettier": "^3.8.1"
+    "prettier": "^3.8.3"
   }
 }

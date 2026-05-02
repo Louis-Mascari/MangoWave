@@ -37,8 +37,8 @@ function ImportModalInner() {
   const textureSectionRef = useRef<HTMLDivElement>(null);
 
   // Mutable results array — avoids O(n²) array copies from [...prev, result].
-  // resultCount state triggers re-renders; Virtuoso reads from the ref.
-  const resultsRef = useRef<ImportResult[]>([]);
+  // results state triggers re-renders; Virtuoso reads from the state.
+  const [results, setResults] = useState<ImportResult[]>([]);
   const [resultCount, setResultCount] = useState(0);
 
   // Inline texture upload state
@@ -80,14 +80,13 @@ function ImportModalInner() {
   // Aggregate all missing texture names from results, deduplicated.
   const missingTextureNames = useMemo(() => {
     const names = new Set<string>();
-    for (const r of resultsRef.current) {
+    for (const r of results) {
       for (const w of r.warnings) {
         names.add(w);
       }
     }
     return names;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resultCount]);
+  }, [results]);
 
   const unresolvedTextureCount = useMemo(() => {
     let count = 0;
@@ -97,13 +96,13 @@ function ImportModalInner() {
     return count;
   }, [missingTextureNames, uploadedTextures, importedTextureNameSet]);
 
-  // Derive summary stats from the ref, recomputed only when resultCount changes.
+  // Derive summary stats from the results, recomputed only when results change.
   const { successCount, warningCount, failedCount, hasTextureWarnings } = useMemo(() => {
     let success = 0;
     let warning = 0;
     let failed = 0;
     let texWarn = false;
-    for (const r of resultsRef.current) {
+    for (const r of results) {
       if (r.status === 'success') success++;
       else if (r.status === 'warning') warning++;
       else if (r.status === 'failed') failed++;
@@ -115,22 +114,20 @@ function ImportModalInner() {
       failedCount: failed,
       hasTextureWarnings: mode === 'preset' && texWarn,
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resultCount, mode]);
+  }, [results, mode]);
 
   // Filtered result indices for the active tab — avoids copying the array.
   const filteredIndices = useMemo(() => {
     if (resultFilter === 'all') return null; // null = show all (Virtuoso uses resultCount directly)
     const indices: number[] = [];
-    for (let i = 0; i < resultsRef.current.length; i++) {
-      const r = resultsRef.current[i];
+    for (let i = 0; i < results.length; i++) {
+      const r = results[i];
       if (resultFilter === 'success' && r.status === 'success') indices.push(i);
       else if (resultFilter === 'warning' && r.status === 'warning') indices.push(i);
       else if (resultFilter === 'failed' && r.status === 'failed') indices.push(i);
     }
     return indices;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resultFilter, resultCount]);
+  }, [resultFilter, results]);
 
   const visibleCount = filteredIndices ? filteredIndices.length : resultCount;
 
@@ -140,14 +137,14 @@ function ImportModalInner() {
 
       setPhase('processing');
       setProgress({ current: 0, total: files.length });
-      resultsRef.current = [];
+      setResults([]);
       setResultCount(0);
       setIdbError(false);
       setResultFilter('all');
 
       const onProgress = (result: ImportResult, current: number, total: number) => {
-        resultsRef.current.push(result);
-        setResultCount(resultsRef.current.length);
+        setResults((prev) => [...prev, result]);
+        setResultCount(current);
         setProgress({ current, total });
       };
 
@@ -210,22 +207,28 @@ function ImportModalInner() {
 
       setTextureUploading(false);
     },
-    [importedTextureNameSet, t],
+    [importedTextureNameSet, t, setUploadedTextures, setTextureUploading, setTextureUploadError],
   );
 
-  const handleDragEnter = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dragCounterRef.current++;
-    if (dragCounterRef.current === 1) setIsDragOver(true);
-  }, []);
+  const handleDragEnter = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounterRef.current++;
+      if (dragCounterRef.current === 1) setIsDragOver(true);
+    },
+    [setIsDragOver],
+  );
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dragCounterRef.current--;
-    if (dragCounterRef.current === 0) setIsDragOver(false);
-  }, []);
+  const handleDragLeave = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounterRef.current--;
+      if (dragCounterRef.current === 0) setIsDragOver(false);
+    },
+    [setIsDragOver],
+  );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -240,22 +243,28 @@ function ImportModalInner() {
       setIsDragOver(false);
       handleFiles(Array.from(e.dataTransfer.files));
     },
-    [handleFiles],
+    [handleFiles, setIsDragOver],
   );
 
-  const handleTextureDragEnter = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    textureDragCounterRef.current++;
-    if (textureDragCounterRef.current === 1) setTextureDragOver(true);
-  }, []);
+  const handleTextureDragEnter = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      textureDragCounterRef.current++;
+      if (textureDragCounterRef.current === 1) setTextureDragOver(true);
+    },
+    [setTextureDragOver],
+  );
 
-  const handleTextureDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    textureDragCounterRef.current--;
-    if (textureDragCounterRef.current === 0) setTextureDragOver(false);
-  }, []);
+  const handleTextureDragLeave = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      textureDragCounterRef.current--;
+      if (textureDragCounterRef.current === 0) setTextureDragOver(false);
+    },
+    [setTextureDragOver],
+  );
 
   const handleTextureDrop = useCallback(
     (e: React.DragEvent) => {
@@ -265,7 +274,7 @@ function ImportModalInner() {
       setTextureDragOver(false);
       handleInlineTextureFiles(Array.from(e.dataTransfer.files));
     },
-    [handleInlineTextureFiles],
+    [handleInlineTextureFiles, setTextureDragOver],
   );
 
   const handleBrowse = useCallback(() => {
@@ -315,7 +324,7 @@ function ImportModalInner() {
   );
 
   const handleImportMore = useCallback(() => {
-    resultsRef.current = [];
+    setResults([]);
     setResultCount(0);
     setPhase('select');
     setProgress({ current: 0, total: 0 });
@@ -335,7 +344,7 @@ function ImportModalInner() {
   const renderResultItem = useCallback(
     (index: number) => {
       const actualIndex = filteredIndices ? filteredIndices[index] : index;
-      const result = resultsRef.current[actualIndex];
+      const result = results[actualIndex];
       if (!result) return <div />;
       return (
         <ResultRow
@@ -346,8 +355,7 @@ function ImportModalInner() {
         />
       );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [filteredIndices, mode, resultCount, uploadedTextures, importedTextureNameSet],
+    [filteredIndices, mode, results, uploadedTextures, importedTextureNameSet],
   );
 
   return (

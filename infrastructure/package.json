@@ -9,8 +9,8 @@
   },
   "devDependencies": {
     "@types/jest": "^30",
-    "@types/node": "^25.6.0",
-    "aws-cdk": "^2.1120.0",
+    "@types/node": "^25.9.1",
+    "aws-cdk": "^2.1125.0",
     "esbuild": "^0.28.0",
     "jest": "^30",
     "ts-jest": "^29",
@@ -18,7 +18,7 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "aws-cdk-lib": "^2.252.0",
+    "aws-cdk-lib": "^2.257.0",
     "constructs": "^10.6.0"
   }
 }

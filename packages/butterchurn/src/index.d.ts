@@ -3,8 +3,7 @@ export interface VisualizerInstance {
   loadPreset(preset: object, blendTime: number): void;
   loadExtraImages(
     imageData:
-      | Record<string, { data: string; width: number; height: number }>
-      | Record<string, ImageBitmap>,
+      Record<string, { data: string; width: number; height: number }> | Record<string, ImageBitmap>,
   ): void;
   setRendererSize(
     width: number,

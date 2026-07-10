@@ -213,8 +213,7 @@ export class VisualizerRenderer {
 
   loadExtraImages(
     imageData:
-      | Record<string, { data: string; width: number; height: number }>
-      | Record<string, ImageBitmap>,
+      Record<string, { data: string; width: number; height: number }> | Record<string, ImageBitmap>,
   ): void {
     if (this.visualizer) {
       this.visualizer.loadExtraImages(imageData);

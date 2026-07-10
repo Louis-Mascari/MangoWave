@@ -4,12 +4,10 @@
  */
 
 type InMessage =
-  | { type: 'warmup' }
-  | { id: number; type: 'convert'; name: string; milkText: string };
+  { type: 'warmup' } | { id: number; type: 'convert'; name: string; milkText: string };
 
 type OutMessage =
-  | { type: 'ready' }
-  | { id: number; type: 'result'; name: string; preset?: object; error?: string };
+  { type: 'ready' } | { id: number; type: 'result'; name: string; preset?: object; error?: string };
 
 let convertPreset: ((text: string) => object | Promise<object>) | null = null;
 

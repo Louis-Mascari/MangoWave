@@ -593,8 +593,7 @@ export function downloadPackExport(data: PackExportData): void {
 }
 
 export type PackParseResult =
-  | { ok: true; name: string; presets: string[] }
-  | { ok: false; error: string };
+  { ok: true; name: string; presets: string[] } | { ok: false; error: string };
 
 export function parsePackImportFile(file: File): Promise<PackParseResult> {
   return new Promise((resolve) => {

@@ -151,10 +151,11 @@ export class MangoWaveStack extends cdk.Stack {
 
     // Grant DynamoDB access to all functions
     table.grantReadWriteData(authCallbackFn);
-    // authRefreshFn only reads sessions and updates tokens — no PutItem/DeleteItem needed
+    // authRefreshFn reads sessions, updates tokens, and deletes sessions whose
+    // refresh token Spotify has rejected as expired/revoked — no PutItem needed
     authRefreshFn.addToRolePolicy(
       new iam.PolicyStatement({
-        actions: ['dynamodb:GetItem', 'dynamodb:UpdateItem'],
+        actions: ['dynamodb:GetItem', 'dynamodb:UpdateItem', 'dynamodb:DeleteItem'],
         resources: [table.tableArn],
       }),
     );

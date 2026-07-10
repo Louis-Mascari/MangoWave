@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { SpotifyUser, NowPlayingTrack } from '../services/spotifyApi.ts';
-import { refreshToken } from '../services/spotifyApi.ts';
+import { refreshToken, SessionExpiredError } from '../services/spotifyApi.ts';
 import { refreshTokenPkce } from '../services/spotifyPkce.ts';
 
 export type AuthMode = 'owner' | 'byoc' | 'locked';
@@ -161,8 +161,13 @@ export const useSpotifyStore = create<SpotifyState>()(
             });
             return result.accessToken;
           }
-        } catch {
-          get().logout();
+        } catch (err) {
+          // Only drop the session when the refresh token is permanently dead.
+          // Transient failures (network, 5xx) keep the session so the next
+          // now-playing poll retries the refresh instead of forcing re-auth.
+          if (err instanceof SessionExpiredError) {
+            get().logout();
+          }
         }
         return null;
       },

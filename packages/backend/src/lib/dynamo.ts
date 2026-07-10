@@ -4,6 +4,7 @@ import {
   PutCommand,
   GetCommand,
   UpdateCommand,
+  DeleteCommand,
 } from '@aws-sdk/lib-dynamodb';
 
 const client = new DynamoDBClient({});
@@ -81,6 +82,18 @@ export async function updateSessionToken(sessionId: string, refreshToken: string
         ':rt': refreshToken,
         ':ua': new Date().toISOString(),
         ':ttl': ttlEpoch(),
+      },
+    }),
+  );
+}
+
+export async function deleteSession(sessionId: string): Promise<void> {
+  await docClient.send(
+    new DeleteCommand({
+      TableName: getTableName(),
+      Key: {
+        PK: `SESSION#${sessionId}`,
+        SK: 'AUTH',
       },
     }),
   );

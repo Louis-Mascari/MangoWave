@@ -66,6 +66,7 @@ jobs:
   e2e:
     needs: lint-and-test
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
@@ -92,7 +93,13 @@ jobs:
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps
+        run: |
+          for i in 1 2 3; do
+            pnpm exec playwright install --with-deps && exit 0
+            echo "playwright install attempt $i failed; retrying in 15s"
+            sleep 15
+          done
+          exit 1
         working-directory: packages/frontend
 
       - name: Install Playwright system deps (cache hit)

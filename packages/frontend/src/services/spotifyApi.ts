@@ -93,6 +93,13 @@ export async function refreshToken(
     body: JSON.stringify({ sessionId }),
   });
 
+  // 401 means the refresh token is expired/revoked — the backend has already
+  // discarded it. Signal a permanent failure so the caller logs out and
+  // prompts re-auth. Any other non-ok status is transient (retry later).
+  if (response.status === 401) {
+    throw new SessionExpiredError();
+  }
+
   if (!response.ok) {
     throw new Error('Failed to refresh token');
   }
@@ -323,6 +330,18 @@ export class TokenExpiredError extends Error {
   constructor() {
     super('Access token expired');
     this.name = 'TokenExpiredError';
+  }
+}
+
+/**
+ * Thrown when the stored refresh token is permanently invalid (expired or
+ * revoked). The caller must discard local session state and prompt re-auth.
+ * Distinct from transient refresh failures, which should NOT log the user out.
+ */
+export class SessionExpiredError extends Error {
+  constructor() {
+    super('Spotify session expired');
+    this.name = 'SessionExpiredError';
   }
 }
 

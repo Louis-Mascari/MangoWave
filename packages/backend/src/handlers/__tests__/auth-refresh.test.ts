@@ -2,17 +2,22 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 import { handler } from '../auth-refresh';
 
-vi.mock('../../lib/spotify', () => ({
-  refreshAccessToken: vi.fn(),
-}));
+vi.mock('../../lib/spotify', async () => {
+  const actual = await vi.importActual<typeof import('../../lib/spotify')>('../../lib/spotify');
+  return {
+    ...actual,
+    refreshAccessToken: vi.fn(),
+  };
+});
 
 vi.mock('../../lib/dynamo', () => ({
   getSession: vi.fn(),
   updateSessionToken: vi.fn(),
+  deleteSession: vi.fn(),
 }));
 
-import { refreshAccessToken } from '../../lib/spotify';
-import { getSession, updateSessionToken } from '../../lib/dynamo';
+import { refreshAccessToken, InvalidGrantError } from '../../lib/spotify';
+import { getSession, updateSessionToken, deleteSession } from '../../lib/dynamo';
 
 function makeEvent(body: Record<string, unknown>): APIGatewayProxyEventV2 {
   return {
@@ -64,15 +69,30 @@ describe('auth-refresh handler', () => {
     expect(updateSessionToken).toHaveBeenCalledWith('sess_abc', 'rt_new');
   });
 
-  it('returns 500 on refresh failure', async () => {
+  it('returns 500 on a transient refresh failure without discarding the session', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.mocked(getSession).mockResolvedValue({
       spotifyUserId: 'user1',
       refreshToken: 'rt_old',
     });
-    vi.mocked(refreshAccessToken).mockRejectedValue(new Error('expired'));
+    vi.mocked(refreshAccessToken).mockRejectedValue(new Error('Spotify 503'));
 
     const result = await invoke({ sessionId: 'sess_abc' });
     expect(result.statusCode).toBe(500);
+    // Transient failures must NOT discard the (still-valid) refresh token.
+    expect(deleteSession).not.toHaveBeenCalled();
+  });
+
+  it('returns 401 and discards the session when the refresh token is expired', async () => {
+    vi.mocked(getSession).mockResolvedValue({
+      spotifyUserId: 'user1',
+      refreshToken: 'rt_dead',
+    });
+    vi.mocked(refreshAccessToken).mockRejectedValue(new InvalidGrantError());
+    vi.mocked(deleteSession).mockResolvedValue(undefined);
+
+    const result = await invoke({ sessionId: 'sess_abc' });
+    expect(result.statusCode).toBe(401);
+    expect(deleteSession).toHaveBeenCalledWith('sess_abc');
   });
 });

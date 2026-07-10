@@ -7,6 +7,19 @@ const SPOTIFY_API_BASE = 'https://api.spotify.com/v1';
 const ssmClient = new SSMClient({});
 const paramCache: Record<string, string> = {};
 
+/**
+ * Thrown when Spotify rejects a refresh token with `invalid_grant` (HTTP 400).
+ * As of 2026-07-20 refresh tokens expire six months after issuance; an expired
+ * or revoked token is permanently dead. Callers must discard the stored token
+ * and force re-auth — never retry the refresh.
+ */
+export class InvalidGrantError extends Error {
+  constructor(message = 'Refresh token is invalid or expired') {
+    super(message);
+    this.name = 'InvalidGrantError';
+  }
+}
+
 async function getSsmParam(name: string): Promise<string> {
   if (paramCache[name]) return paramCache[name];
 
@@ -88,6 +101,12 @@ export async function refreshAccessToken(refreshToken: string): Promise<SpotifyT
 
   if (!response.ok) {
     const text = await response.text();
+    // Spotify returns 400 { "error": "invalid_grant" } when the refresh token
+    // has expired or been revoked. Signal this distinctly so the caller can
+    // discard the stored token instead of retrying (per Spotify policy).
+    if (response.status === 400 && text.includes('invalid_grant')) {
+      throw new InvalidGrantError(`Spotify token refresh rejected: ${text}`);
+    }
     throw new Error(`Spotify token refresh failed (${response.status}): ${text}`);
   }
 

@@ -1,4 +1,4 @@
-import type { SpotifyUser } from './spotifyApi.ts';
+import { SessionExpiredError, type SpotifyUser } from './spotifyApi.ts';
 
 const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
 const SPOTIFY_API_BASE = 'https://api.spotify.com/v1';
@@ -102,6 +102,14 @@ export async function refreshTokenPkce(
   });
 
   if (!response.ok) {
+    // Spotify returns 400 { "error": "invalid_grant" } for an expired/revoked
+    // refresh token — permanent, force re-auth. Other failures are transient.
+    if (response.status === 400) {
+      const text = await response.text().catch(() => '');
+      if (text.includes('invalid_grant')) {
+        throw new SessionExpiredError();
+      }
+    }
     throw new Error('PKCE token refresh failed');
   }
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
-import { exchangeCode, refreshToken } from '../services/spotifyApi.ts';
+import { exchangeCode, refreshToken, SessionExpiredError } from '../services/spotifyApi.ts';
 import { exchangeCodePkce, getSpotifyProfile, refreshTokenPkce } from '../services/spotifyPkce.ts';
 
 /**
@@ -12,6 +12,23 @@ import { exchangeCodePkce, getSpotifyProfile, refreshTokenPkce } from '../servic
 const AUTH_FAIL_MSG =
   'Spotify connection failed. Please try again — if the issue persists, ' +
   "check that your account has been added to the app's authorized users.";
+
+/**
+ * Handle a failed token refresh on mount. Only a permanent failure (expired/
+ * revoked refresh token) should log the user out and prompt re-auth. Transient
+ * failures (network, 5xx) are ignored so the session survives — the now-playing
+ * poll will retry the refresh on its next tick.
+ */
+function handleRefreshFailure(err: unknown, logout: () => void) {
+  if (!(err instanceof SessionExpiredError)) return;
+  logout();
+  useToastStore
+    .getState()
+    .show(
+      'Your Spotify session has expired. Please reconnect to continue using Spotify features.',
+      { type: 'warning' },
+    );
+}
 
 /** Show auth failure toast. In a popup, notify the opener and close; otherwise show locally. */
 function notifyAuthFailure() {
@@ -113,14 +130,8 @@ export function useSpotifyAuth() {
           setAccessToken(accessToken, expiresIn);
           setByocRefreshToken(newRt);
         })
-        .catch(() => {
-          logout();
-          useToastStore
-            .getState()
-            .show(
-              'Your Spotify session has expired. Please reconnect to continue using Spotify features.',
-              { type: 'warning' },
-            );
+        .catch((err) => {
+          handleRefreshFailure(err, logout);
         });
     } else if (sessionId) {
       // Owner backend refresh
@@ -128,14 +139,8 @@ export function useSpotifyAuth() {
         .then(({ accessToken, expiresIn }) => {
           setAccessToken(accessToken, expiresIn);
         })
-        .catch(() => {
-          logout();
-          useToastStore
-            .getState()
-            .show(
-              'Your Spotify session has expired. Please reconnect to continue using Spotify features.',
-              { type: 'warning' },
-            );
+        .catch((err) => {
+          handleRefreshFailure(err, logout);
         });
     }
   }, [

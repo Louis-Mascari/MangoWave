@@ -1,5 +1,14 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+vi.mock('../../services/spotifyApi.ts', async () => {
+  const actual = await vi.importActual<typeof import('../../services/spotifyApi.ts')>(
+    '../../services/spotifyApi.ts',
+  );
+  return { ...actual, refreshToken: vi.fn() };
+});
+
 import { useSpotifyStore } from '../useSpotifyStore.ts';
+import { refreshToken, SessionExpiredError } from '../../services/spotifyApi.ts';
 
 describe('useSpotifyStore', () => {
   beforeEach(() => {
@@ -161,5 +170,47 @@ describe('useSpotifyStore', () => {
     const state = useSpotifyStore.getState();
     expect(state.isRateLimited).toBe(false);
     expect(state.rateLimitResetsAt).toBeNull();
+  });
+
+  describe('refreshAccessToken failure handling', () => {
+    beforeEach(() => {
+      vi.mocked(refreshToken).mockReset();
+      useSpotifyStore.setState({
+        sessionId: 'sess_abc',
+        accessToken: 'at_old',
+        tokenExpiresAt: Date.now() - 1000,
+        byocClientId: null,
+        byocRefreshToken: null,
+      });
+    });
+
+    it('logs out when the refresh token is expired (SessionExpiredError)', async () => {
+      vi.mocked(refreshToken).mockRejectedValue(new SessionExpiredError());
+
+      const result = await useSpotifyStore.getState().refreshAccessToken();
+
+      expect(result).toBeNull();
+      expect(useSpotifyStore.getState().sessionId).toBeNull();
+      expect(useSpotifyStore.getState().accessToken).toBeNull();
+    });
+
+    it('keeps the session on a transient failure so the next poll can retry', async () => {
+      vi.mocked(refreshToken).mockRejectedValue(new Error('network error'));
+
+      const result = await useSpotifyStore.getState().refreshAccessToken();
+
+      expect(result).toBeNull();
+      // Session must survive — a transient error should NOT force re-auth.
+      expect(useSpotifyStore.getState().sessionId).toBe('sess_abc');
+    });
+
+    it('updates the token on a successful refresh', async () => {
+      vi.mocked(refreshToken).mockResolvedValue({ accessToken: 'at_new', expiresIn: 3600 });
+
+      const result = await useSpotifyStore.getState().refreshAccessToken();
+
+      expect(result).toBe('at_new');
+      expect(useSpotifyStore.getState().accessToken).toBe('at_new');
+    });
   });
 });

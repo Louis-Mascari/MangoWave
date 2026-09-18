@@ -12,6 +12,6 @@
     "prepare": "node scripts/build-texture-data.cjs"
   },
   "devDependencies": {
-    "image-size": "^2.0.2"
+    "image-size": "^2.0.3"
   }
 }

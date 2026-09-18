@@ -6,6 +6,10 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    # Let a release age before adopting it (supply-chain safety); security
+    # updates are exempt and still arrive promptly.
+    cooldown:
+      default-days: 7
     groups:
       actions-all:
         update-types:
@@ -20,6 +24,24 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    # Don't adopt a just-published release immediately — shrinks the window in
+    # which a compromised/yanked version could be pulled in unattended.
+    # Security updates are NOT subject to cooldown; those still arrive promptly.
+    cooldown:
+      default-days: 7
+    # Majors held for a concrete reason (their minor/patch updates still flow):
+    ignore:
+      # TypeScript 7 is the native (Go) compiler rewrite. `tsc` is GA and fast,
+      # but 7.0 intentionally ships NO stable programmatic API until 7.1
+      # (~Oct 2026), so @typescript-eslint's type-aware linting crashes on it:
+      #   TypeError: Cannot read properties of undefined (reading 'Cjs')
+      # Hold at 6.x until 7.1 lands and @typescript-eslint supports it.
+      - dependency-name: 'typescript'
+        update-types: ['version-update:semver-major']
+      # @testing-library/jest-dom v7 requires Node 22+; CI/build run Node 20.
+      # Hold until the project's Node baseline moves to 22.
+      - dependency-name: '@testing-library/jest-dom'
+        update-types: ['version-update:semver-major']
     groups:
       # Dev tooling — CI catches breakage, review as a batch
       npm-dev-major:

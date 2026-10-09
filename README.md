@@ -16,9 +16,7 @@
   <a href="https://ko-fi.com/louismascari">Buy Mango a Treat 🐾</a>
 </p>
 
-<p align="center">
-  <video src="https://github.com/user-attachments/assets/72154209-0dc2-49a0-8ad4-4f47c4e95f57" autoplay loop muted playsinline width="100%"></video>
-</p>
+https://github.com/user-attachments/assets/72154209-0dc2-49a0-8ad4-4f47c4e95f57
 
 ## Features
 

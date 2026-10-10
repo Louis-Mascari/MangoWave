@@ -16,7 +16,7 @@
     "e2e:headed": "playwright test --headed"
   },
   "dependencies": {
-    "@sentry/react": "^10.68.0",
+    "@sentry/react": "^11.0.0",
     "butterchurn": "workspace:*",
     "butterchurn-presets": "workspace:*",
     "eel-wasm": "^0.0.17",

@@ -32,7 +32,7 @@ describe('MangoWaveStack', () => {
 
     for (const key of lambdaKeys) {
       expect(lambdas[key].Properties.MemorySize).toBe(128);
-      expect(lambdas[key].Properties.Runtime).toBe('nodejs20.x');
+      expect(lambdas[key].Properties.Runtime).toBe('nodejs24.x');
     }
   });
 

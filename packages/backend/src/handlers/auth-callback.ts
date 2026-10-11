@@ -2,16 +2,11 @@ import { randomUUID } from 'crypto';
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { exchangeCodeForTokens, getUserProfile, InvalidGrantError } from '../lib/spotify';
 import { storeSession } from '../lib/dynamo';
-import { jsonResponse, errorResponse } from '../types/api';
+import { jsonResponse, errorResponse, parseJsonBody } from '../types/api';
 
 export async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
-  let body: Record<string, unknown>;
-  try {
-    body = event.body ? JSON.parse(event.body) : {};
-  } catch {
-    return errorResponse(400, 'Invalid JSON in request body');
-  }
-  if (typeof body !== 'object' || body === null) {
+  const body = parseJsonBody(event.body);
+  if (!body) {
     return errorResponse(400, 'Request body must be a JSON object');
   }
 

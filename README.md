@@ -147,7 +147,7 @@ The BYOC (bring your own client) PKCE flow is retained in the codebase (`spotify
 
 ## Project Structure
 
-pnpm workspaces monorepo. Node >= 20, pnpm >= 10 required.
+pnpm workspaces monorepo. Node >= 22.22, pnpm >= 10 required.
 
 ```
 MangoWave/
@@ -251,7 +251,7 @@ See **[SELF-HOSTING.md](SELF-HOSTING.md)** for full instructions.
 
 ## Requirements
 
-- **Node >= 20** and **pnpm >= 10** for local development
+- **Node >= 22.22** and **pnpm >= 10** for local development
 - **WebGL 2** and browser compatibility — see [Browser & Device Compatibility](#browser--device-compatibility) above
 
 ## Acknowledgments

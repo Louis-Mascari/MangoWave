@@ -38,16 +38,6 @@ updates:
       # Hold at 6.x until 7.1 lands and @typescript-eslint supports it.
       - dependency-name: 'typescript'
         update-types: ['version-update:semver-major']
-      # @testing-library/jest-dom v7 requires Node 22+; CI/build run Node 20.
-      # Hold until the project's Node baseline moves to 22.
-      - dependency-name: '@testing-library/jest-dom'
-        update-types: ['version-update:semver-major']
-      # jsdom 30 requires Node 22.22+ (engines: ^22.22.2 || ^24.15.0 || >=26);
-      # on Node 20 every Vitest worker fails to start with
-      #   TypeError: webidl.util.markAsUncloneable is not a function
-      # Hold until the project's Node baseline moves to 22.
-      - dependency-name: 'jsdom'
-        update-types: ['version-update:semver-major']
     groups:
       # Dev tooling — CI catches breakage, review as a batch
       npm-dev-major:

@@ -18,11 +18,34 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
-  deploy-backend:
+  guard:
     # Only deploy if CI succeeded and was triggered by a push (not a PR)
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    outputs:
+      current: ${{ steps.tip.outputs.current }}
+    steps:
+      # Re-running CI for an old commit fires this workflow with that commit's SHA.
+      # Deploying it would roll production back, so only the tip of main may deploy.
+      - name: Check the tested commit is still the tip of main
+        id: tip
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          TIP=$(gh api "repos/${{ github.repository }}/commits/main" --jq .sha)
+          if [ "$TIP" = "$HEAD_SHA" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "current=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping deploy of $HEAD_SHA: main is now at $TIP"
+          fi
+
+  deploy-backend:
+    needs: guard
+    if: needs.guard.outputs.current == 'true'
     runs-on: ubuntu-latest
     outputs:
       s3-bucket: ${{ steps.cdk-outputs.outputs.bucket }}

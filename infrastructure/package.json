@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "build": "tsc --noEmit",
-    "watch": "tsc -w",
+    "watch": "tsc -w --noEmit",
     "test": "jest",
     "cdk": "cdk"
   },

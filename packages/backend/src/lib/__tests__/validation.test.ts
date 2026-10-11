@@ -339,6 +339,27 @@ describe('validateSettings', () => {
     ).toBe(false);
   });
 
+  it('accepts a pack holding every bundled preset', () => {
+    const presets = Array.from({ length: 832 }, (_, i) => `preset-${i}`);
+    const result = validateSettings({
+      ...validSettings,
+      customPacks: [{ id: 'a', name: 'MilkDrop Classic', presets, createdAt: 1 }],
+    });
+    expect(result.valid).toBe(true);
+  });
+
+  it('rejects a pack over the preset list cap', () => {
+    const presets = Array.from({ length: 2001 }, (_, i) => `preset-${i}`);
+    const result = validateSettings({
+      ...validSettings,
+      customPacks: [{ id: 'a', name: 'x', presets, createdAt: 1 }],
+    });
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.error).toContain('customPacks[0].presets exceeds maximum of 2000 items');
+    }
+  });
+
   it('truncates customPacks to 50 max', () => {
     const packs = Array.from({ length: 60 }, (_, i) => ({
       id: `pack-${i}`,

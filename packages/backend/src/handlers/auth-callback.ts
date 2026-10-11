@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
-import { exchangeCodeForTokens, getUserProfile } from '../lib/spotify';
+import { exchangeCodeForTokens, getUserProfile, InvalidGrantError } from '../lib/spotify';
 import { storeSession } from '../lib/dynamo';
 import { jsonResponse, errorResponse } from '../types/api';
 
@@ -12,9 +12,9 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
     return errorResponse(400, 'Invalid JSON in request body');
   }
 
-  const code = body.code as string | undefined;
+  const code = body.code;
 
-  if (!code) {
+  if (typeof code !== 'string' || !code) {
     return errorResponse(400, 'Missing "code" in request body');
   }
 
@@ -40,6 +40,9 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
       },
     });
   } catch (err) {
+    if (err instanceof InvalidGrantError) {
+      return errorResponse(400, 'Authorization code is invalid or expired');
+    }
     console.error('Auth callback error:', err);
     return errorResponse(500, 'Failed to exchange authorization code');
   }

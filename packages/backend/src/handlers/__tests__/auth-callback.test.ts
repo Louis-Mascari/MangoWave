@@ -2,16 +2,20 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 import { handler } from '../auth-callback';
 
-vi.mock('../../lib/spotify', () => ({
-  exchangeCodeForTokens: vi.fn(),
-  getUserProfile: vi.fn(),
-}));
+vi.mock('../../lib/spotify', async () => {
+  const actual = await vi.importActual<typeof import('../../lib/spotify')>('../../lib/spotify');
+  return {
+    ...actual,
+    exchangeCodeForTokens: vi.fn(),
+    getUserProfile: vi.fn(),
+  };
+});
 
 vi.mock('../../lib/dynamo', () => ({
   storeSession: vi.fn(),
 }));
 
-import { exchangeCodeForTokens, getUserProfile } from '../../lib/spotify';
+import { exchangeCodeForTokens, getUserProfile, InvalidGrantError } from '../../lib/spotify';
 import { storeSession } from '../../lib/dynamo';
 
 function makeEvent(body: Record<string, unknown>): APIGatewayProxyEventV2 {
@@ -64,6 +68,21 @@ describe('auth-callback handler', () => {
     expect(body.user.product).toBe('premium');
 
     expect(storeSession).toHaveBeenCalledWith(expect.any(String), 'user1', 'rt_456');
+  });
+
+  it('returns 400 if code is not a string', async () => {
+    const result = await invoke({ code: { nested: true } });
+    expect(result.statusCode).toBe(400);
+    expect(exchangeCodeForTokens).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 when Spotify rejects the code', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.mocked(exchangeCodeForTokens).mockRejectedValue(new InvalidGrantError('invalid_grant'));
+
+    const result = await invoke({ code: 'made-up' });
+    expect(result.statusCode).toBe(400);
+    expect(errorSpy).not.toHaveBeenCalled();
   });
 
   it('returns 500 on spotify API failure', async () => {

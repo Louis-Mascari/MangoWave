@@ -78,6 +78,10 @@ export async function exchangeCodeForTokens(code: string): Promise<SpotifyTokenR
 
   if (!response.ok) {
     const text = await response.text();
+    // A made-up, reused or expired code is a client error, not an outage
+    if (response.status === 400 && text.includes('invalid_grant')) {
+      throw new InvalidGrantError(`Spotify token exchange rejected: ${text}`);
+    }
     throw new Error(`Spotify token exchange failed (${response.status}): ${text}`);
   }
 

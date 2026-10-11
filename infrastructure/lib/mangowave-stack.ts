@@ -71,6 +71,8 @@ export class MangoWaveStack extends cdk.Stack {
           },
         ],
         cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+        // HSTS, nosniff, X-Frame-Options: SAMEORIGIN, strict referrer policy
+        responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.SECURITY_HEADERS,
       },
       domainNames,
       certificate,

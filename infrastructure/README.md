@@ -5,7 +5,7 @@ AWS CDK v2 stack for MangoWave infrastructure (backend + frontend hosting).
 ## Development
 
 ```bash
-pnpm run build         # tsc
+pnpm run build         # tsc --noEmit (typecheck only)
 pnpm run test          # Jest (CDK template assertion tests)
 pnpm exec cdk synth    # Synthesize CloudFormation template
 pnpm exec cdk deploy -c alertEmail=<email> -c acmCertArn=<arn> -c webAclArn=<arn>  # Deploy (alertEmail required)

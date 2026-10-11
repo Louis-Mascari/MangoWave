@@ -27,7 +27,7 @@
     "milkdrop-preset-converter": "workspace:*",
     "milkdrop-presets": "workspace:*",
     "milkdrop-textures": "workspace:*",
-    "music-metadata": "^11.14.0",
+    "music-metadata": "^11.16.0",
     "peerjs": "^1.5.5",
     "posthog-js": "^1.407.5",
     "qrcode-generator": "^2.0.4",

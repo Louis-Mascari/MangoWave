@@ -27,7 +27,6 @@ describe('StartScreen', () => {
       accessToken: null,
       user: null,
       isSpotifyUnlocked: false,
-      byocClientId: null,
     });
   });
 

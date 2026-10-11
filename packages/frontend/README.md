@@ -62,7 +62,7 @@ src/
 │                  # useWindowSync (multi-window sync bridge),
 │                  # useDeviceSync (cross-device PeerJS WebRTC sync bridge)
 ├── lib/           # PostHog & Sentry init (no-op when env vars absent)
-├── services/      # Spotify Web API client (owner-mode OAuth + PKCE utilities for self-hosters),
+├── services/      # Spotify Web API client (owner-mode OAuth),
 │                  # WindowSyncService (BroadcastChannel-based multi-window sync),
 │                  # DeviceSyncService (PeerJS WebRTC cross-device sync),
 │                  # syncTypes (shared sync type definitions), syncUtils (shared sync utilities)
@@ -147,7 +147,7 @@ All are optional — the app runs fully without them. Spotify integration requir
 
 ### Spotify Integration
 
-Spotify is optional and only available in **owner mode** (backend-proxied OAuth). The hosted site's UI has no BYOC (bring your own client) option due to Spotify's dev mode limits (1 Client ID, 5 users, Premium to register). The PKCE code is retained in `services/spotifyPkce.ts` for self-hosters.
+Spotify is optional and only available in **owner mode** (backend-proxied OAuth). The hosted site's UI has no BYOC (bring your own client) option due to Spotify's dev mode limits (1 Client ID, 5 users, Premium to register).
 
 Key details:
 

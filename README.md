@@ -34,7 +34,7 @@ https://github.com/user-attachments/assets/72154209-0dc2-49a0-8ad4-4f47c4e95f57
 - **Preset history** with previous/next navigation and browseable history tab
 - **Shortcuts** — keyboard and mouse shortcuts for preset navigation, fullscreen, favorites, and more
 - **Mobile-optimized UI** with tap-to-reveal circular controls, full-screen modal panels, and automatic filtering of 36 GPU-heavy presets on mobile devices
-- **Optional Spotify integration** — Now Playing metadata for all authorized users; seek, shuffle, and repeat controls for Premium users. Cloud-synced settings. Owner-mode only due to Spotify's dev mode policy (1 Client ID per developer, max 5 authorized users, Premium required to register the app). Self-hosters can set up their own Spotify developer app via the included PKCE code
+- **Optional Spotify integration** — Now Playing metadata for all authorized users; seek, shuffle, and repeat controls for Premium users. Cloud-synced settings. Owner-mode only due to Spotify's dev mode policy (1 Client ID per developer, max 5 authorized users, Premium required to register the app). Self-hosters can connect their own Spotify developer app; see [SELF-HOSTING.md](SELF-HOSTING.md)
 - **Visual quality controls** — mesh resolution, texture quality, FXAA anti-aliasing, FPS cap, resolution scaling, FFT size, smoothing, and auto quality (runtime FPS monitoring that automatically steps between 6 quality tiers from Minimum to Max)
 - **Multi-window sync** — sync presets and settings across browser windows on the same device via BroadcastChannel. Any window can make changes; automatic leader election drives autopilot from one window
 - **Cross-device sync** — sync presets and settings across phones, laptops, and TVs via peer-to-peer WebRTC (PeerJS). Create a room to get a `MANGO-XXXX` code + QR code, join from another device. Star topology with host-controlled autopilot. Any device can manually change presets. Mobile-blocked presets automatically substituted. Zero backend — connections are peer-to-peer
@@ -142,8 +142,6 @@ Firefox does not natively support system audio capture via screen sharing. To vi
 ### Spotify Integration
 
 Spotify's dev mode policy (as of March 2026) restricts each developer app to 1 Client ID, the app owner plus up to 5 authorized users, and requires a Premium account to register the app. Because of these limits, MangoWave's hosted site exposes Spotify only in **owner mode** — the app owner connects via backend-proxied OAuth, and authorized users must be added to the developer app's User Management tab. Authorized users don't need Premium themselves, but playback controls (seek, shuffle, repeat) require Premium; non-Premium users still see Now Playing metadata.
-
-The BYOC (bring your own client) PKCE flow is retained in the codebase (`spotifyPkce.ts`) but the UI for it has been removed from the hosted site. Self-hosters who fork the repo can re-enable it and connect their own Spotify developer app.
 
 ## Project Structure
 

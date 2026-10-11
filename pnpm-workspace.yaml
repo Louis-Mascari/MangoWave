@@ -1,3 +1,6 @@
 packages:
   - packages/*
   - infrastructure
+
+# Match Dependabot's 7-day cooldown for manual installs and updates (minutes)
+minimumReleaseAge: 10080

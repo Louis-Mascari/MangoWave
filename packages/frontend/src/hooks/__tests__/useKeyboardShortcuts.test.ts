@@ -103,6 +103,33 @@ describe('useKeyboardShortcuts', () => {
     expect(handlers.onNextTrack).toHaveBeenCalledTimes(1);
   });
 
+  it('Q calls onToggleQueue', () => {
+    renderHook(() => useKeyboardShortcuts(handlers));
+    act(() => fireKey('q'));
+    expect(handlers.onToggleQueue).toHaveBeenCalledTimes(1);
+  });
+
+  it('Q is a no-op when onToggleQueue is undefined', () => {
+    renderHook(() => useKeyboardShortcuts({ ...handlers, onToggleQueue: undefined }));
+    // Should not throw
+    act(() => fireKey('q'));
+    expect(handlers.onToggleQueue).not.toHaveBeenCalled();
+  });
+
+  it('ignores all keys when disabled', () => {
+    const { result } = renderHook(() => useKeyboardShortcuts(handlers, false));
+    act(() => fireKey(' '));
+    act(() => fireKey('a'));
+    act(() => fireKey('s'));
+    act(() => fireKey('b'));
+    act(() => fireKey('q'));
+    act(() => fireKey('?'));
+    for (const handler of Object.values(handlers)) {
+      expect(handler).not.toHaveBeenCalled();
+    }
+    expect(result.current.showShortcutOverlay).toBe(false);
+  });
+
   it('media keys are no-ops when handlers are undefined', () => {
     const minimalHandlers = {
       onNextPreset: vi.fn(),

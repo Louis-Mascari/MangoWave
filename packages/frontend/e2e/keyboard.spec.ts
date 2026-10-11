@@ -97,4 +97,15 @@ test.describe('Keyboard Shortcuts', () => {
     await expect(searchInput).toHaveValue('n?');
     await expect(app.locator('[role="dialog"][aria-label*="Shortcut" i]')).not.toBeVisible();
   });
+
+  test('Q does not open the queue for system audio (local files only)', async ({ app }) => {
+    await app.keyboard.press('q');
+
+    // Open the overlay afterwards to prove the keypress was handled before asserting absence
+    await app.keyboard.press('?');
+    await expect(app.locator('[role="dialog"][aria-label*="Shortcut" i]')).toBeVisible({
+      timeout: 5000,
+    });
+    await expect(app.getByRole('button', { name: 'Close queue' })).toHaveCount(0);
+  });
 });

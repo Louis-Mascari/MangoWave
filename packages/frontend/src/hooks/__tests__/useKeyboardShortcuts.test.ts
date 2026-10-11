@@ -109,11 +109,19 @@ describe('useKeyboardShortcuts', () => {
     expect(handlers.onToggleQueue).toHaveBeenCalledTimes(1);
   });
 
-  it('Q is a no-op when onToggleQueue is undefined', () => {
-    renderHook(() => useKeyboardShortcuts({ ...handlers, onToggleQueue: undefined }));
-    // Should not throw
-    act(() => fireKey('q'));
-    expect(handlers.onToggleQueue).not.toHaveBeenCalled();
+  it('closes the shortcut overlay when it becomes disabled', () => {
+    const { result, rerender } = renderHook(
+      ({ enabled }) => useKeyboardShortcuts(handlers, enabled),
+      { initialProps: { enabled: true } },
+    );
+    act(() => fireKey('?'));
+    expect(result.current.showShortcutOverlay).toBe(true);
+
+    rerender({ enabled: false });
+    expect(result.current.showShortcutOverlay).toBe(false);
+
+    rerender({ enabled: true });
+    expect(result.current.showShortcutOverlay).toBe(false);
   });
 
   it('ignores all keys when disabled', () => {

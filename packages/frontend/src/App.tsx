@@ -496,7 +496,8 @@ function MainApp() {
     playbackAdapter.onPrevious();
   }, [playbackAdapter]);
 
-  // Shortcuts are inert on the start screen; the queue only exists for local files
+  // Shortcuts are inert on the start screen and behind the context-lost overlay;
+  // the queue only exists for local files
   const { showShortcutOverlay, toggleShortcutOverlay } = useKeyboardShortcuts(
     {
       onNextPreset: handleNextPreset,
@@ -512,7 +513,7 @@ function MainApp() {
       onNextTrack: handleNextTrack,
       onPreviousTrack: handlePreviousTrack,
     },
-    isActive,
+    isActive && !webglContextLost,
   );
 
   if (!webgl2) {

@@ -18,6 +18,9 @@ interface KeyboardHandlers {
 export function useKeyboardShortcuts(handlers: KeyboardHandlers, enabled = true) {
   const [showShortcutOverlay, setShowShortcutOverlay] = useState(false);
 
+  // Drop overlay state while disabled so it can't reappear on the next start
+  if (!enabled && showShortcutOverlay) setShowShortcutOverlay(false);
+
   const toggleShortcutOverlay = useCallback(() => {
     setShowShortcutOverlay((prev) => !prev);
   }, []);

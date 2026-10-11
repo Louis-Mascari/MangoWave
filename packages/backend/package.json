@@ -7,14 +7,14 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.162",
-    "@types/node": "^26.1.2",
+    "@types/aws-lambda": "^8.10.163",
+    "@types/node": "^26.6.2",
     "typescript": "^6.0.3",
     "vitest": "^5.0.1"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.1097.0",
-    "@aws-sdk/client-ssm": "^3.1097.0",
-    "@aws-sdk/lib-dynamodb": "^3.1097.0"
+    "@aws-sdk/client-dynamodb": "^3.1139.0",
+    "@aws-sdk/client-ssm": "^3.1139.0",
+    "@aws-sdk/lib-dynamodb": "^3.1139.0"
   }
 }

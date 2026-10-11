@@ -193,6 +193,17 @@ describe('MangoWaveStack', () => {
     });
   });
 
+  it('attaches the managed security headers policy to the default behavior', () => {
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+      DistributionConfig: Match.objectLike({
+        DefaultCacheBehavior: Match.objectLike({
+          // Managed-SecurityHeadersPolicy
+          ResponseHeadersPolicyId: '67f7725c-6f97-4210-82d7-5512b31e9d03',
+        }),
+      }),
+    });
+  });
+
   it('creates a CloudFront Function for host routing', () => {
     template.hasResourceProperties('AWS::CloudFront::Function', {
       Name: 'mangowave-host-router',

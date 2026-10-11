@@ -65,6 +65,16 @@ describe('settings-save handler', () => {
     vi.clearAllMocks();
   });
 
+  it('returns 400 for a body that is not a JSON object or a non-string sessionId', async () => {
+    for (const body of ['null', '[]', '"x"', '{"sessionId":{"a":1}}', '{nope']) {
+      const result = (await handler({
+        body,
+        requestContext: { http: { method: 'POST' } },
+      } as unknown as APIGatewayProxyEventV2)) as APIGatewayProxyStructuredResultV2;
+      expect(result.statusCode, body).toBe(400);
+    }
+  });
+
   it('returns 400 if sessionId is missing', async () => {
     const result = await invoke({ settings: mockSettings });
     expect(result.statusCode).toBe(400);

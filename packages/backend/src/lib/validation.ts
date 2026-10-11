@@ -5,7 +5,11 @@ const MAX_TRANSITION_TIME = 30;
 const MIN_EQ_GAIN = -12;
 const MAX_EQ_GAIN = 12;
 const BAND_COUNT = 10;
-const MAX_PRESET_LIST_LENGTH = 500;
+// Must fit every bundled preset (832) plus imports in one list: the seeded
+// "MilkDrop Classic" pack alone holds 500+
+const MAX_PRESET_LIST_LENGTH = 2000;
+// DynamoDB rejects items over 400 KB; leave headroom for keys and number encoding
+const MAX_SETTINGS_SIZE = 350 * 1024;
 const MAX_PRESET_NAME_LENGTH = 200;
 const MAX_PACK_LIST_LENGTH = 100;
 const MAX_CUSTOM_PACKS = 50;
@@ -21,6 +25,13 @@ interface ValidationResult {
 interface ValidationError {
   valid: false;
   error: string;
+}
+
+export function checkSettingsSize(settings: UserSettings): string | null {
+  if (Buffer.byteLength(JSON.stringify(settings), 'utf-8') > MAX_SETTINGS_SIZE) {
+    return `Settings exceed maximum stored size of ${MAX_SETTINGS_SIZE} bytes`;
+  }
+  return null;
 }
 
 export function checkBodySize(body: string | undefined): string | null {

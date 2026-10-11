@@ -128,9 +128,7 @@ export function useDeviceSync(
       service.onSettingsChange = (settings) => {
         isSyncingRef.current = true;
         // Always apply autopilot settings regardless of deviceSyncSettingsSync toggle
-        if (settings.autopilot) {
-          useSettingsStore.setState({ autopilot: { ...settings.autopilot } });
-        }
+        applyDeviceSyncSettings({ autopilot: settings.autopilot });
         // Apply EQ/performance/audio only if settings sync is enabled
         if (deviceSyncSettingsSyncRef.current) {
           applyDeviceSyncSettings({ ...settings, autopilot: undefined });

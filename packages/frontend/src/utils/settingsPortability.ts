@@ -301,7 +301,7 @@ function clamp(val: unknown, min: number, max: number, fallback: number): number
   return Math.min(max, Math.max(min, val));
 }
 
-function sanitizePerformance(raw: unknown): Record<string, unknown> | undefined {
+export function sanitizePerformance(raw: unknown): Record<string, unknown> | undefined {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
   const p = raw as Record<string, unknown>;
   const out: Record<string, unknown> = {};
@@ -319,7 +319,7 @@ function sanitizePerformance(raw: unknown): Record<string, unknown> | undefined 
   return out;
 }
 
-function sanitizeAudio(raw: unknown): Record<string, unknown> | undefined {
+export function sanitizeAudio(raw: unknown): Record<string, unknown> | undefined {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
   const a = raw as Record<string, unknown>;
   const out: Record<string, unknown> = {};
@@ -331,7 +331,7 @@ function sanitizeAudio(raw: unknown): Record<string, unknown> | undefined {
   return out;
 }
 
-function sanitizeEQ(raw: unknown): Record<string, unknown> | undefined {
+export function sanitizeEQ(raw: unknown): Record<string, unknown> | undefined {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
   const e = raw as Record<string, unknown>;
   const out: Record<string, unknown> = {};
@@ -345,7 +345,7 @@ function sanitizeEQ(raw: unknown): Record<string, unknown> | undefined {
   return out;
 }
 
-function sanitizeAutopilot(raw: unknown): Record<string, unknown> | undefined {
+export function sanitizeAutopilot(raw: unknown): Record<string, unknown> | undefined {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
   const a = raw as Record<string, unknown>;
   const out: Record<string, unknown> = {};

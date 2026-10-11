@@ -178,6 +178,19 @@ function MainApp() {
   const [webglContextLost, setWebglContextLost] = useState(false);
   const [presetsLoading, setPresetsLoading] = useState(true);
   const [renderPaused, setRenderPaused] = useState(false);
+  // Pause and panel state belong to one session. Reset them on every stop, including
+  // ones that bypass handleStop (the browser's "Stop sharing" bar, a capture track ending)
+  const [wasActive, setWasActive] = useState(isActive);
+  if (wasActive !== isActive) {
+    setWasActive(isActive);
+    if (!isActive) {
+      setRenderPaused(false);
+      setActivePanel('none');
+    }
+  }
+  useEffect(() => {
+    if (!isActive && getFullscreenElement()) exitFullscreen();
+  }, [isActive]);
   const brightness = useSettingsStore((s) => s.brightness);
   const silenceCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const setOnboardingShown = useSettingsStore((s) => s.setOnboardingShown);
@@ -222,7 +235,6 @@ function MainApp() {
     if (local.isActive) {
       local.stop();
     }
-    setActivePanel('none');
   }, [capture, local]);
 
   const handlePresetChange = useCallback(

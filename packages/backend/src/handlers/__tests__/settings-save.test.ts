@@ -111,6 +111,16 @@ describe('settings-save handler', () => {
     expect(result.statusCode).toBe(413);
   });
 
+  it('returns 413 when valid settings would exceed the DynamoDB item limit', async () => {
+    const favoritePresets = Array.from({ length: 2000 }, (_, i) => `${i}`.padEnd(190, 'x'));
+    const result = await invoke({
+      sessionId: 'sess_1',
+      settings: { ...mockSettings, favoritePresets },
+    });
+    expect(result.statusCode).toBe(413);
+    expect(storeUserSettings).not.toHaveBeenCalled();
+  });
+
   it('returns 400 if settings is not an object', async () => {
     const result = await invoke({ sessionId: 'sess_1', settings: 'not-an-object' });
     expect(result.statusCode).toBe(400);

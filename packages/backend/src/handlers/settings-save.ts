@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { getSession, storeUserSettings } from '../lib/dynamo';
-import { checkBodySize, validateSettings } from '../lib/validation';
+import { checkBodySize, checkSettingsSize, validateSettings } from '../lib/validation';
 import { jsonResponse, errorResponse } from '../types/api';
 
 export async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
@@ -24,6 +24,11 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
   const result = validateSettings(body.settings);
   if (!result.valid) {
     return errorResponse(400, result.error);
+  }
+
+  const storedSizeError = checkSettingsSize(result.settings);
+  if (storedSizeError) {
+    return errorResponse(413, storedSizeError);
   }
 
   try {

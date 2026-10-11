@@ -113,6 +113,19 @@ test.describe('Keyboard Shortcuts', () => {
     });
     await expect(app.getByRole('button', { name: 'Close queue' })).toHaveCount(0);
   });
+
+  test('pause does not survive stop and restart', async ({ app }) => {
+    await app.keyboard.press('v');
+    await expect(app.getByTitle(/Resume rendering/)).toBeVisible();
+
+    await clickToolbarButton(app, 'Exit');
+    await app.getByRole('button', { name: /Share Audio/ }).click();
+    await app.getByRole('button', { name: /Start Visualizer/ }).click({ force: true });
+    await expect(app.locator('[role="toolbar"]')).toBeVisible({ timeout: 15000 });
+
+    await expect(app.getByTitle(/Pause rendering/)).toBeVisible();
+    await expect(app.getByTitle(/Resume rendering/)).toHaveCount(0);
+  });
 });
 
 test.describe('Keyboard Shortcuts (mode gating)', () => {

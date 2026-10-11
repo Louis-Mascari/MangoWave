@@ -7,7 +7,6 @@
     "packages/frontend": {
       "entry": ["e2e/**/*.spec.ts"],
       "project": ["src/**/*.{ts,tsx}", "e2e/**/*.ts"],
-      "ignore": ["src/types/**/*.d.ts"],
       "ignoreDependencies": ["tailwindcss"]
     },
     "packages/butterchurn": {},
@@ -21,7 +20,6 @@
     "infrastructure": {
       "entry": ["bin/mangowave.ts"],
       "project": ["bin/*.ts", "lib/**/*.ts"],
-      "ignore": ["lib/cloudfront-functions/host-router.js"],
       "ignoreDependencies": ["esbuild", "ts-node"]
     }
   }

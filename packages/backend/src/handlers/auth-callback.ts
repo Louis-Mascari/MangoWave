@@ -1,20 +1,18 @@
 import { randomUUID } from 'crypto';
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
-import { exchangeCodeForTokens, getUserProfile } from '../lib/spotify';
+import { exchangeCodeForTokens, getUserProfile, InvalidGrantError } from '../lib/spotify';
 import { storeSession } from '../lib/dynamo';
-import { jsonResponse, errorResponse } from '../types/api';
+import { jsonResponse, errorResponse, parseJsonBody } from '../types/api';
 
 export async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
-  let body: Record<string, unknown>;
-  try {
-    body = event.body ? JSON.parse(event.body) : {};
-  } catch {
-    return errorResponse(400, 'Invalid JSON in request body');
+  const body = parseJsonBody(event.body);
+  if (!body) {
+    return errorResponse(400, 'Request body must be a JSON object');
   }
 
-  const code = body.code as string | undefined;
+  const code = body.code;
 
-  if (!code) {
+  if (typeof code !== 'string' || !code) {
     return errorResponse(400, 'Missing "code" in request body');
   }
 
@@ -40,6 +38,12 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
       },
     });
   } catch (err) {
+    if (err instanceof InvalidGrantError) {
+      // Spotify also answers invalid_grant for a redirect URI mismatch, which is our
+      // misconfiguration. Keep the description in the logs without tripping the 5xx alarm.
+      console.warn('Auth callback rejected:', err.message);
+      return errorResponse(400, 'Authorization code is invalid or expired');
+    }
     console.error('Auth callback error:', err);
     return errorResponse(500, 'Failed to exchange authorization code');
   }

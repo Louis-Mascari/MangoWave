@@ -16,3 +16,15 @@ export function jsonResponse(
 export function errorResponse(statusCode: number, message: string): APIGatewayProxyResultV2 {
   return jsonResponse(statusCode, { error: message });
 }
+
+/** Parse a request body that must be a JSON object. Returns null for anything else. */
+export function parseJsonBody(body: string | undefined): Record<string, unknown> | null {
+  if (!body) return {};
+  try {
+    const parsed: unknown = JSON.parse(body);
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return null;
+    return parsed as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}

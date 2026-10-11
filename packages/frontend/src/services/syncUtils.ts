@@ -2,6 +2,12 @@ import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useImportedPresetsStore } from '../store/useImportedPresetsStore.ts';
 import { useImportedTexturesStore } from '../store/useImportedTexturesStore.ts';
 import type { SyncableSettings } from './syncTypes.ts';
+import {
+  sanitizeAudio,
+  sanitizeAutopilot,
+  sanitizeEQ,
+  sanitizePerformance,
+} from '../utils/settingsPortability.ts';
 
 /** Snapshot the syncable subset of settings from the store. */
 export function getSettingsSnapshot(): SyncableSettings {
@@ -122,42 +128,30 @@ export function getDeviceSyncSnapshot(): SyncableSettings {
 /**
  * Apply inbound device sync settings (subset — only EQ, performance, audio, brightness, autopilot).
  * Does NOT apply the full window sync settings (favorites, blocked, packs, etc.).
- * Includes basic validation since WebRTC data comes from remote peers (not same-origin).
+ * WebRTC data comes from remote peers (not same-origin, possibly a different app version), so
+ * every field goes through the same sanitizers as a settings file import. Fields the peer
+ * omitted keep their current value.
  */
 export function applyDeviceSyncSettings(settings: SyncableSettings): void {
   if (!settings || typeof settings !== 'object') return;
+  const current = useSettingsStore.getState();
   const syncPerf =
-    settings.syncPerformance !== undefined
+    typeof settings.syncPerformance === 'boolean'
       ? settings.syncPerformance
-      : useSettingsStore.getState().syncPerformance;
+      : current.syncPerformance;
+  const performance = syncPerf ? sanitizePerformance(settings.performance) : undefined;
+  const eq = sanitizeEQ(settings.eq);
+  const audio = sanitizeAudio(settings.audio);
+  const autopilot = sanitizeAutopilot(settings.autopilot);
+  const { brightness } = settings;
   useSettingsStore.setState({
     ...(typeof settings.syncPerformance === 'boolean' && {
       syncPerformance: settings.syncPerformance,
     }),
-    ...(syncPerf &&
-      settings.performance &&
-      typeof settings.performance === 'object' && { performance: { ...settings.performance } }),
-    ...(settings.eq &&
-      typeof settings.eq === 'object' &&
-      typeof settings.eq.preAmpGain === 'number' &&
-      Array.isArray(settings.eq.bandGains) && {
-        eq: {
-          preAmpGain: settings.eq.preAmpGain,
-          bandGains: [...settings.eq.bandGains],
-          autoGain:
-            typeof settings.eq.autoGain === 'boolean'
-              ? settings.eq.autoGain
-              : useSettingsStore.getState().eq.autoGain,
-        },
-      }),
-    ...(settings.audio &&
-      typeof settings.audio === 'object' && {
-        audio: { ...settings.audio },
-      }),
-    ...(settings.autopilot &&
-      typeof settings.autopilot === 'object' && { autopilot: { ...settings.autopilot } }),
-    ...(typeof settings.brightness === 'number' &&
-      settings.brightness >= 0.1 &&
-      settings.brightness <= 1.0 && { brightness: settings.brightness }),
+    ...(performance && { performance: { ...current.performance, ...performance } }),
+    ...(eq && { eq: { ...current.eq, ...eq } }),
+    ...(audio && { audio: { ...current.audio, ...audio } }),
+    ...(autopilot && { autopilot: { ...current.autopilot, ...autopilot } }),
+    ...(typeof brightness === 'number' && brightness >= 0.1 && brightness <= 1.0 && { brightness }),
   });
 }

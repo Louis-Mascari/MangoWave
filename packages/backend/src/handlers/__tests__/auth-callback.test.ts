@@ -70,6 +70,14 @@ describe('auth-callback handler', () => {
     expect(storeSession).toHaveBeenCalledWith(expect.any(String), 'user1', 'rt_456');
   });
 
+  it('returns 400 if the body is not a JSON object', async () => {
+    const result = (await handler({
+      body: 'null',
+      requestContext: { http: { method: 'POST' } },
+    } as unknown as APIGatewayProxyEventV2)) as APIGatewayProxyStructuredResultV2;
+    expect(result.statusCode).toBe(400);
+  });
+
   it('returns 400 if code is not a string', async () => {
     const result = await invoke({ code: { nested: true } });
     expect(result.statusCode).toBe(400);
@@ -78,11 +86,13 @@ describe('auth-callback handler', () => {
 
   it('returns 400 when Spotify rejects the code', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.mocked(exchangeCodeForTokens).mockRejectedValue(new InvalidGrantError('invalid_grant'));
 
     const result = await invoke({ code: 'made-up' });
     expect(result.statusCode).toBe(400);
     expect(errorSpy).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith('Auth callback rejected:', 'invalid_grant');
   });
 
   it('returns 500 on spotify API failure', async () => {

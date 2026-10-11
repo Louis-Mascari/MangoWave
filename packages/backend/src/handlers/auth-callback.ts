@@ -11,6 +11,9 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
   } catch {
     return errorResponse(400, 'Invalid JSON in request body');
   }
+  if (typeof body !== 'object' || body === null) {
+    return errorResponse(400, 'Request body must be a JSON object');
+  }
 
   const code = body.code;
 
@@ -41,6 +44,9 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
     });
   } catch (err) {
     if (err instanceof InvalidGrantError) {
+      // Spotify also answers invalid_grant for a redirect URI mismatch, which is our
+      // misconfiguration. Keep the description in the logs without tripping the 5xx alarm.
+      console.warn('Auth callback rejected:', err.message);
       return errorResponse(400, 'Authorization code is invalid or expired');
     }
     console.error('Auth callback error:', err);

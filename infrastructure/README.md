@@ -20,7 +20,8 @@ pnpm exec cdk deploy -c alertEmail=<email> -c acmCertArn=<arn> -c webAclArn=<arn
 | HTTP API           | API Gateway v2   | CORS + stage-level throttling (20 burst, 10 rps)                    |
 | CloudWatch alarms  | Per-Lambda + API | Error and 5xx monitoring                                            |
 | Access logging     | API Gateway      | Structured JSON logs (30-day retention)                             |
-| SNS topic          | Alerts           | All alarms notify via email                                         |
+| Kill-switch Lambda | Node.js handler  | budget-kill-switch — disables the 4 API functions on budget breach  |
+| SNS topics         | Alerts           | Alarm + budget emails; a second topic triggers the kill-switch      |
 | Budget             | AWS Budgets      | Alerts and automated cost protection                                |
 | SSM parameters     | Spotify secrets  | OAuth credentials (encrypted)                                       |
 | S3 bucket          | Frontend hosting | Static assets for app + landing page                                |
@@ -34,8 +35,32 @@ API Gateway CORS is configured in the stack with allowed origins defaulting to `
 ## Cost Protection
 
 - **API throttling** — 20 burst / 10 rps at the API Gateway stage level
-- **Budget** — $1/month limit with SNS alerts at 50% and 100% of actual spend
-- **Kill-switch** — at 100% budget, AWS Budgets automatically attaches a deny policy to all Lambda roles (blocks `lambda:InvokeFunction` and `execute-api:Invoke`)
+- **Budget** — $1/month limit with email alerts at 50% and 100% of actual spend
+- **Kill-switch** — at 100% of actual spend the API is shut off automatically (see below)
+
+### Budget kill-switch
+
+**Trigger:** when actual month-to-date spend exceeds 100% of the budget, AWS Budgets publishes to a dedicated SNS topic (`MangoWave-BudgetKillSwitch`). Nothing else publishes to that topic. AWS Budgets refreshes billing data only a few times a day, so expect a delay of several hours between the spend and the trigger.
+
+**What it does:** the topic invokes the `budget-kill-switch` Lambda, which sets reserved concurrency to `0` on the four API functions. Lambda then refuses every invocation, so all API routes return errors.
+
+**What users see:** the visualizer is fully client-side and keeps working. Only Spotify login and cloud settings sync stop.
+
+**What it does not do:** it does not stop CloudFront, S3 or DynamoDB storage charges, and it does not reset itself when a new month starts. A stack deploy does not undo it either, since the stack does not manage reserved concurrency.
+
+**Recovery:** once the cause of the spend is understood, remove the limit from each of the four API functions:
+
+```bash
+# List the deployed function names (CDK generates them)
+aws lambda list-functions --query "Functions[?starts_with(FunctionName, '<stack-name>-')].FunctionName"
+
+# Run once per API function: auth-callback, auth-refresh, settings-save, settings-load
+aws lambda delete-function-concurrency --function-name <function-name>
+```
+
+The same names are in the kill-switch function's `API_FUNCTION_NAMES` environment variable. The budget notifies once per breach, so check the bill before re-enabling: the kill-switch will not fire again for spend that is already over the limit.
+
+If the kill-switch itself fails, it throws: the error is in its CloudWatch log group, and Lambda retries the invocation.
 
 ## Stack Layout
 

@@ -297,10 +297,105 @@ export class MangoWaveStack extends cdk.Stack {
     });
     apiErrorAlarm.addAlarmAction(new cloudwatchActions.SnsAction(alertTopic));
 
-    // ─── Budget alarm + kill-switch (cost guard) ──────────────────
-    new budgets.CfnBudget(this, 'FreeTierBudget', {
+    // ─── Alert topic access policy ────────────────────────────────
+    // Attaching any statement replaces SNS's implicit default policy, which is
+    // what lets same-account CloudWatch alarms publish today. So the default
+    // owner statement is restated here alongside explicit service grants.
+    const sourceAccount = { 'aws:SourceAccount': this.account };
+    const budgetsPrincipal = new iam.ServicePrincipal('budgets.amazonaws.com');
+    const budgetsSourceArn = {
+      'aws:SourceArn': this.formatArn({ service: 'budgets', region: '', resource: '*' }),
+    };
+
+    alertTopic.addToResourcePolicy(
+      new iam.PolicyStatement({
+        sid: 'DefaultOwnerAccess',
+        principals: [new iam.AnyPrincipal()],
+        actions: [
+          'SNS:GetTopicAttributes',
+          'SNS:SetTopicAttributes',
+          'SNS:AddPermission',
+          'SNS:RemovePermission',
+          'SNS:DeleteTopic',
+          'SNS:Subscribe',
+          'SNS:ListSubscriptionsByTopic',
+          'SNS:Publish',
+        ],
+        resources: [alertTopic.topicArn],
+        conditions: { StringEquals: { 'AWS:SourceOwner': this.account } },
+      }),
+    );
+    alertTopic.addToResourcePolicy(
+      new iam.PolicyStatement({
+        sid: 'AllowCloudWatchAlarmsPublish',
+        principals: [new iam.ServicePrincipal('cloudwatch.amazonaws.com')],
+        actions: ['SNS:Publish'],
+        resources: [alertTopic.topicArn],
+        conditions: {
+          StringEquals: sourceAccount,
+          ArnLike: {
+            'aws:SourceArn': this.formatArn({
+              service: 'cloudwatch',
+              resource: 'alarm',
+              resourceName: '*',
+              arnFormat: cdk.ArnFormat.COLON_RESOURCE_NAME,
+            }),
+          },
+        },
+      }),
+    );
+    // AWS Budgets cannot deliver to a topic without an explicit grant
+    const alertTopicPolicy = alertTopic.addToResourcePolicy(
+      new iam.PolicyStatement({
+        sid: 'AllowBudgetsPublish',
+        principals: [budgetsPrincipal],
+        actions: ['SNS:Publish'],
+        resources: [alertTopic.topicArn],
+        conditions: { StringEquals: sourceAccount, ArnLike: budgetsSourceArn },
+      }),
+    );
+
+    // ─── Budget kill-switch (cost guard) ──────────────────────────
+    // API Gateway invokes Lambda through resource-based permissions, so denying
+    // actions on the execution roles stops nothing. Instead, a breached budget
+    // notifies a dedicated topic whose subscriber reserves zero concurrency on
+    // every API function — invocations are throttled until it is removed.
+    const killSwitchTopic = new sns.Topic(this, 'BudgetKillSwitchTopic', {
+      topicName: 'MangoWave-BudgetKillSwitch',
+    });
+    const killSwitchTopicPolicy = killSwitchTopic.addToResourcePolicy(
+      new iam.PolicyStatement({
+        sid: 'AllowBudgetsPublish',
+        principals: [budgetsPrincipal],
+        actions: ['SNS:Publish'],
+        resources: [killSwitchTopic.topicArn],
+        conditions: { StringEquals: sourceAccount, ArnLike: budgetsSourceArn },
+      }),
+    );
+
+    const killSwitchFn = new NodejsFunction(this, 'BudgetKillSwitchFn', {
+      ...sharedLambdaProps,
+      environment: {
+        NODE_OPTIONS: '--enable-source-maps',
+        API_FUNCTION_NAMES: lambdaFunctions.map(({ fn }) => fn.functionName).join(','),
+      },
+      entry: path.join(handlersDir, 'budget-kill-switch.ts'),
+      handler: 'handler',
+    });
+    killSwitchFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['lambda:PutFunctionConcurrency'],
+        resources: lambdaFunctions.map(({ fn }) => fn.functionArn),
+      }),
+    );
+    killSwitchTopic.addSubscription(new snsSubscriptions.LambdaSubscription(killSwitchFn));
+
+    // ─── Budget alarm ─────────────────────────────────────────────
+    // Changing notifications or subscribers makes CloudFormation replace the
+    // budget, which fails while the name stays the same — rename it when you do.
+    const budget = new budgets.CfnBudget(this, 'FreeTierBudget', {
       budget: {
-        budgetName: 'MangoWave-FreeTierGuard',
+        budgetName: 'MangoWave-CostGuard',
         budgetType: 'COST',
         timeUnit: 'MONTHLY',
         budgetLimit: {
@@ -330,90 +425,27 @@ export class MangoWaveStack extends cdk.Stack {
             thresholdType: 'PERCENTAGE',
             notificationType: 'ACTUAL',
           },
+          // A notification takes a single SNS subscriber, so the kill-switch
+          // topic gets it and the alert email is subscribed directly
           subscribers: [
             {
               subscriptionType: 'SNS',
-              address: alertTopic.topicArn,
+              address: killSwitchTopic.topicArn,
+            },
+            {
+              subscriptionType: 'EMAIL',
+              address: alertEmail,
             },
           ],
         },
       ],
     });
-
-    // Budget kill-switch: IAM policy that denies API Gateway + Lambda invoke
-    // Applied via budget action when spending exceeds threshold
-    const killSwitchPolicy = new iam.ManagedPolicy(this, 'BudgetKillSwitch', {
-      managedPolicyName: 'MangoWave-BudgetKillSwitch',
-      statements: [
-        new iam.PolicyStatement({
-          sid: 'DenyApiGatewayOnBudgetBreach',
-          effect: iam.Effect.DENY,
-          actions: ['execute-api:Invoke', 'execute-api:ManageConnections'],
-          resources: ['*'],
-        }),
-        new iam.PolicyStatement({
-          sid: 'DenyLambdaInvokeOnBudgetBreach',
-          effect: iam.Effect.DENY,
-          actions: ['lambda:InvokeFunction'],
-          resources: ['*'],
-        }),
-      ],
-    });
-
-    // IAM role for AWS Budgets to apply the kill-switch policy
-    const lambdaRoleArns = lambdaFunctions
-      .map(({ fn }) => fn.role?.roleArn)
-      .filter((arn): arn is string => arn !== undefined);
-
-    const budgetActionRole = new iam.Role(this, 'BudgetActionRole', {
-      roleName: 'MangoWave-BudgetActionRole',
-      assumedBy: new iam.ServicePrincipal('budgets.amazonaws.com'),
-      inlinePolicies: {
-        AttachPolicy: new iam.PolicyDocument({
-          statements: [
-            new iam.PolicyStatement({
-              actions: ['iam:AttachRolePolicy', 'iam:DetachRolePolicy'],
-              resources: lambdaRoleArns,
-            }),
-          ],
-        }),
-      },
-    });
-
-    // Budget action: automatically attach deny policy when budget is breached
-    const lambdaRoleNames = lambdaFunctions
-      .map(({ fn }) => fn.role?.roleName)
-      .filter((name): name is string => name !== undefined);
-
-    const killSwitchAction = new cdk.CfnResource(this, 'BudgetKillSwitchAction', {
-      type: 'AWS::Budgets::BudgetsAction',
-      properties: {
-        BudgetName: 'MangoWave-FreeTierGuard',
-        ActionType: 'APPLY_IAM_POLICY',
-        ActionThreshold: {
-          Value: 100,
-          Type: 'PERCENTAGE',
-        },
-        ApprovalModel: 'AUTOMATIC',
-        ExecutionRoleArn: budgetActionRole.roleArn,
-        NotificationType: 'ACTUAL',
-        Definition: {
-          IamActionDefinition: {
-            PolicyArn: killSwitchPolicy.managedPolicyArn,
-            Roles: lambdaRoleNames,
-          },
-        },
-        Subscribers: [
-          {
-            Type: 'SNS',
-            Address: alertTopic.topicArn,
-          },
-        ],
-      },
-    });
-
-    // Ensure budget is created before the action that references it
-    killSwitchAction.addDependency(this.node.findChild('FreeTierBudget') as cdk.CfnResource);
+    // Budgets must already be allowed to publish when the budget is created
+    for (const { policyDependable } of [alertTopicPolicy, killSwitchTopicPolicy]) {
+      if (policyDependable) {
+        budget.node.addDependency(policyDependable);
+      }
+    }
 
     // ─── Outputs ──────────────────────────────────────────────────
     new cdk.CfnOutput(this, 'ApiUrl', {

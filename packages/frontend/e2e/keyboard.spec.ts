@@ -1,5 +1,10 @@
 import { test, expect, clickToolbarButton } from './fixtures/base';
+import type { Page } from '@playwright/test';
 import { installAudioMocks } from './fixtures/audio-mock';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 test.describe('Keyboard Shortcuts', () => {
   test.beforeEach(async ({ app }) => {
@@ -96,5 +101,55 @@ test.describe('Keyboard Shortcuts', () => {
     await app.keyboard.type('?');
     await expect(searchInput).toHaveValue('n?');
     await expect(app.locator('[role="dialog"][aria-label*="Shortcut" i]')).not.toBeVisible();
+  });
+
+  test('Q does not open the queue for system audio (local files only)', async ({ app }) => {
+    await app.keyboard.press('q');
+
+    // Open the overlay afterwards to prove the keypress was handled before asserting absence
+    await app.keyboard.press('?');
+    await expect(app.locator('[role="dialog"][aria-label*="Shortcut" i]')).toBeVisible({
+      timeout: 5000,
+    });
+    await expect(app.getByRole('button', { name: 'Close queue' })).toHaveCount(0);
+  });
+});
+
+test.describe('Keyboard Shortcuts (mode gating)', () => {
+  const startLocalPlayback = async (app: Page) => {
+    await app.getByRole('button', { name: /Play Local Files/ }).click();
+    await app
+      .locator('input[type="file"]')
+      .setInputFiles(path.resolve(__dirname, 'fixtures/test-silence.mp3'));
+    await expect(app.locator('[role="toolbar"]')).toBeVisible({ timeout: 15000 });
+    await expect(app.locator('[data-testid="preset-name"]')).toBeVisible({ timeout: 15000 });
+  };
+
+  test.beforeEach(async ({ app }) => {
+    await app.goto('/');
+  });
+
+  test('Q toggles the queue', async ({ app }) => {
+    await startLocalPlayback(app);
+    await app.locator('body').click();
+    const addFiles = app.getByRole('button', { name: 'Add Files', exact: true });
+
+    await app.keyboard.press('q');
+    await expect(addFiles).toBeVisible({ timeout: 5000 });
+
+    await app.keyboard.press('q');
+    await expect(addFiles).toHaveCount(0);
+  });
+
+  test('A on the start screen does not toggle autopilot', async ({ app }) => {
+    await expect(app.locator('[data-testid="start-screen"]')).toBeVisible();
+    const readAutopilot = () =>
+      app.evaluate(
+        () => JSON.parse(localStorage.getItem('mangowave-settings') ?? '{}').state?.autopilot,
+      );
+
+    const before = await readAutopilot();
+    await app.keyboard.press('a');
+    expect(await readAutopilot()).toEqual(before);
   });
 });

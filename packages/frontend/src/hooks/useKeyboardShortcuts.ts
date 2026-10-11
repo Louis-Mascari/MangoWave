@@ -9,20 +9,25 @@ interface KeyboardHandlers {
   onToggleFavorite: () => void;
   onToggleBlock: () => void;
   onTogglePause: () => void;
-  onToggleQueue: () => void;
+  onToggleQueue?: () => void;
   onPlayPause?: () => void;
   onNextTrack?: () => void;
   onPreviousTrack?: () => void;
 }
 
-export function useKeyboardShortcuts(handlers: KeyboardHandlers) {
+export function useKeyboardShortcuts(handlers: KeyboardHandlers, enabled = true) {
   const [showShortcutOverlay, setShowShortcutOverlay] = useState(false);
+
+  // Drop overlay state while disabled so it can't reappear on the next start
+  if (!enabled && showShortcutOverlay) setShowShortcutOverlay(false);
 
   const toggleShortcutOverlay = useCallback(() => {
     setShowShortcutOverlay((prev) => !prev);
   }, []);
 
   useEffect(() => {
+    if (!enabled) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       // Skip if typing in an input
       const tag = (e.target as HTMLElement).tagName;
@@ -73,7 +78,7 @@ export function useKeyboardShortcuts(handlers: KeyboardHandlers) {
           break;
         case 'q':
         case 'Q':
-          handlers.onToggleQueue();
+          handlers.onToggleQueue?.();
           break;
         case 'k':
         case 'K':
@@ -97,7 +102,7 @@ export function useKeyboardShortcuts(handlers: KeyboardHandlers) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handlers, showShortcutOverlay]);
+  }, [handlers, enabled, showShortcutOverlay]);
 
   return { showShortcutOverlay, toggleShortcutOverlay };
 }

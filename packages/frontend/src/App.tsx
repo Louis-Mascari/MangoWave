@@ -496,20 +496,25 @@ function MainApp() {
     playbackAdapter.onPrevious();
   }, [playbackAdapter]);
 
-  const { showShortcutOverlay, toggleShortcutOverlay } = useKeyboardShortcuts({
-    onNextPreset: handleNextPreset,
-    onPreviousPreset: handlePreviousPreset,
-    onToggleFullscreen: handleToggleFullscreen,
-    onClosePanel: handleClosePanel,
-    onToggleAutopilot: handleToggleAutopilot,
-    onToggleFavorite: handleToggleFavorite,
-    onToggleBlock: handleToggleBlock,
-    onTogglePause: handleTogglePause,
-    onToggleQueue: handleToggleQueue,
-    onPlayPause: handlePlayPause,
-    onNextTrack: handleNextTrack,
-    onPreviousTrack: handlePreviousTrack,
-  });
+  // Shortcuts are inert on the start screen and behind the context-lost overlay;
+  // the queue only exists for local files
+  const { showShortcutOverlay, toggleShortcutOverlay } = useKeyboardShortcuts(
+    {
+      onNextPreset: handleNextPreset,
+      onPreviousPreset: handlePreviousPreset,
+      onToggleFullscreen: handleToggleFullscreen,
+      onClosePanel: handleClosePanel,
+      onToggleAutopilot: handleToggleAutopilot,
+      onToggleFavorite: handleToggleFavorite,
+      onToggleBlock: handleToggleBlock,
+      onTogglePause: handleTogglePause,
+      onToggleQueue: playbackAdapter.source === 'local' ? handleToggleQueue : undefined,
+      onPlayPause: handlePlayPause,
+      onNextTrack: handleNextTrack,
+      onPreviousTrack: handlePreviousTrack,
+    },
+    isActive && !webglContextLost,
+  );
 
   if (!webgl2) {
     return (

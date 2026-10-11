@@ -226,9 +226,6 @@ function MainApp() {
   }, []);
 
   const handleStop = useCallback(() => {
-    if (getFullscreenElement()) {
-      exitFullscreen();
-    }
     if (capture.isCapturing) {
       capture.stopCapture();
     }

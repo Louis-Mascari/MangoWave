@@ -8,7 +8,7 @@ const BAND_COUNT = 10;
 // Must fit every bundled preset (832) plus imports in one list: the seeded
 // "MilkDrop Classic" pack alone holds 500+
 const MAX_PRESET_LIST_LENGTH = 2000;
-// DynamoDB rejects items over 400 KB; leave headroom for keys and attribute names
+// DynamoDB rejects items over 400 KB; leave headroom for keys and number encoding
 const MAX_SETTINGS_SIZE = 350 * 1024;
 const MAX_PRESET_NAME_LENGTH = 200;
 const MAX_PACK_LIST_LENGTH = 100;

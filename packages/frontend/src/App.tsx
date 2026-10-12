@@ -278,27 +278,31 @@ function MainApp() {
   // Held in state rather than React.lazy: a rejected lazy import is cached and would
   // take down the whole tree through the error boundary while audio capture is live.
   const [Visualizer, setVisualizer] = useState<VisualizerComponent | null>(null);
+  // Browsers cache a failed module fetch for the life of the page (Chromium never
+  // retries it), so a failure is usually final for this tab and the user has to reload.
+  const [visualizerLoadError, setVisualizerLoadError] = useState(false);
   useEffect(() => {
-    if (Visualizer) return;
+    // Nothing to render it with: do not spend the download
+    if (!webgl2 || Visualizer) return;
     let cancelled = false;
     loadVisualizer().then(
       (component) => {
         if (!cancelled) setVisualizer(() => component);
       },
       () => {
-        // Pre-loading from the start screen can fail quietly; it is retried on Start.
-        // Failing with a session running cannot: end it and say so.
-        if (cancelled || !isActive) return;
-        handleStop();
-        useToastStore
-          .getState()
-          .show(i18n.t('errors.unexpectedError', { ns: 'messages' }), { type: 'error' });
+        if (!cancelled) setVisualizerLoadError(true);
       },
     );
     return () => {
       cancelled = true;
     };
-  }, [Visualizer, isActive, handleStop]);
+  }, [webgl2, Visualizer]);
+
+  // A session cannot run without it. Covers both a failure while a session waits on the
+  // download and a Start pressed after the download has already failed.
+  useEffect(() => {
+    if (visualizerLoadError && isActive && !Visualizer) handleStop();
+  }, [visualizerLoadError, isActive, Visualizer, handleStop]);
 
   const handlePresetChange = useCallback(
     (name: string) => {
@@ -618,19 +622,40 @@ function MainApp() {
 
   return (
     <main className="h-screen w-screen bg-black">
-      {isActive && audioEngine ? (
-        <>
-          {Visualizer && (
-            <Visualizer
-              audioEngine={audioEngine}
-              rendererRef={rendererRef}
-              onPresetChange={handlePresetChange}
-              onPresetsLoaded={handlePresetsLoaded}
-              onToggleFullscreen={handleToggleFullscreen}
-              onContextLost={handleWebGLContextLost}
-              renderPaused={renderPaused}
+      {isActive && audioEngine && !Visualizer ? (
+        // Start was pressed before the visualizer finished downloading
+        <div
+          role="status"
+          className="flex h-full w-full flex-col items-center justify-center gap-3 font-sans text-sm text-white/60"
+        >
+          <svg className="h-6 w-6 animate-spin text-orange-400" viewBox="0 0 24 24" fill="none">
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
             />
-          )}
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+            />
+          </svg>
+          {i18n.t('loadingVisualizer', { ns: 'common' })}
+        </div>
+      ) : isActive && audioEngine && Visualizer ? (
+        <>
+          <Visualizer
+            audioEngine={audioEngine}
+            rendererRef={rendererRef}
+            onPresetChange={handlePresetChange}
+            onPresetsLoaded={handlePresetsLoaded}
+            onToggleFullscreen={handleToggleFullscreen}
+            onContextLost={handleWebGLContextLost}
+            renderPaused={renderPaused}
+          />
           {brightness < 1 && (
             <div
               className="pointer-events-none fixed inset-0 z-[1] bg-black"
@@ -762,7 +787,10 @@ function MainApp() {
           onStart={handleStart}
           onLocalFiles={handleLocalFiles}
           onMicCapture={handleMicCapture}
-          error={capture.error}
+          error={
+            capture.error ??
+            (visualizerLoadError ? i18n.t('errors.visualizerLoadFailed', { ns: 'messages' }) : null)
+          }
           onClearError={capture.clearError}
         />
       )}

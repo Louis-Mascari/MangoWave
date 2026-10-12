@@ -22,6 +22,15 @@ export interface UseLocalPlaybackReturn {
   toggleMute: () => void;
 }
 
+function showDecodeError(): void {
+  const { tracks, currentTrackIndex } = useMediaPlayerStore.getState();
+  const filename =
+    tracks[currentTrackIndex]?.file.name ?? i18n.t('errors.unknownFile', { ns: 'messages' });
+  useToastStore
+    .getState()
+    .show(i18n.t('errors.playbackDecodeError', { ns: 'messages', filename }), { type: 'error' });
+}
+
 export function useLocalPlayback(): UseLocalPlaybackReturn {
   const engineRef = useRef<AudioEngine | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -69,6 +78,8 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
 
       clearPlaylist();
       addTracks(files);
+      cueOnlyRef.current = false;
+      stoppedAtEndRef.current = false;
 
       const audio = new Audio();
       audio.volume = useSettingsStore.getState().volume;
@@ -185,14 +196,8 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
       }
     };
     const onError = () => {
-      const { tracks, currentTrackIndex } = useMediaPlayerStore.getState();
-      const track = tracks[currentTrackIndex];
-      const filename = track?.file.name ?? i18n.t('errors.unknownFile', { ns: 'messages' });
-      useToastStore
-        .getState()
-        .show(i18n.t('errors.playbackDecodeError', { ns: 'messages', filename }), {
-          type: 'error',
-        });
+      const { tracks } = useMediaPlayerStore.getState();
+      showDecodeError();
       // Auto-advance if there are more tracks in the queue. With repeat off this stops at
       // the end, and an unreadable track that was only cued there leaves the queue stopped,
       // so a queue of unreadable files cannot loop error toasts forever.
@@ -242,7 +247,9 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
   }, [clearPlaylist]);
 
   const play = useCallback(() => {
-    audioRef.current?.play();
+    // Rejects when the current track cannot be played, which is where a finished queue
+    // lands if its first file is unreadable. Say so; a silent dead button is worse.
+    audioRef.current?.play().catch(showDecodeError);
   }, []);
 
   const pause = useCallback(() => {

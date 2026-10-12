@@ -17,7 +17,7 @@ import {
   downloadPackExport,
   parsePackImportFile,
 } from '../utils/settingsPortability.ts';
-import { PACK_DESCRIPTIONS, THEMATIC_PACKS } from '../data/presetThematicPacks.ts';
+import { THEMATIC_PACKS } from '../data/presetThematicPacks.ts';
 import { useImportModalStore } from '../store/useImportModalStore.ts';
 import { CloseIcon } from './icons.tsx';
 import type {
@@ -839,7 +839,11 @@ export function PresetBrowser({
         {allPacks.map((pack) => (
           <label
             key={pack}
-            title={PACK_DESCRIPTIONS[pack]}
+            title={
+              (THEMATIC_PACKS as readonly string[]).includes(pack)
+                ? t(`presetBrowser.packDescriptions.${pack}`)
+                : undefined
+            }
             className="flex cursor-pointer items-center gap-1 text-xs"
           >
             <input

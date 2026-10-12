@@ -37,7 +37,7 @@ function updateStatusStore(
   partial: Partial<
     Pick<
       ReturnType<typeof useDeviceSyncStatusStore.getState>,
-      'status' | 'peerCount' | 'roomCode' | 'isHost' | 'errorMessage'
+      'status' | 'peerCount' | 'roomCode' | 'isHost' | 'errorCode'
     >
   >,
 ) {
@@ -144,10 +144,10 @@ export function useDeviceSync(
         lastSentKeyRef.current = outboundKey(getDeviceSyncSnapshot());
       };
 
-      service.onStatusChange = (newStatus, errorMessage) => {
+      service.onStatusChange = (newStatus, errorCode) => {
         updateStatusStore({
           status: newStatus,
-          errorMessage: errorMessage ?? '',
+          errorCode: errorCode ?? null,
         });
       };
 
@@ -168,7 +168,7 @@ export function useDeviceSync(
         peerCount: 0,
         roomCode: '',
         isHost: false,
-        errorMessage: '',
+        errorCode: null,
       });
     }
   }, [deviceSyncEnabled]);
@@ -273,7 +273,7 @@ export function useDeviceSync(
       peerCount: 0,
       roomCode: '',
       isHost: false,
-      errorMessage: '',
+      errorCode: null,
     });
   }, []);
 

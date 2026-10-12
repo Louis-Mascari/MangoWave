@@ -83,7 +83,7 @@ export function usePlaybackAdapter({
         onPause: () => {},
         onNext: () => {},
         onPrevious: () => {},
-        tooltip: 'Microphone input — no playback controls',
+        tooltipKey: 'playback.micNoControls',
       };
     }
     if (isSpotifyConnected && !premiumError) {
@@ -104,7 +104,7 @@ export function usePlaybackAdapter({
               : 'off',
         onToggleShuffle: handleSpotifyToggleShuffle,
         onCycleRepeat: handleSpotifyCycleRepeat,
-        tooltip: isRateLimited ? 'Spotify rate limited' : undefined,
+        tooltipKey: isRateLimited ? 'playback.spotifyRateLimited' : undefined,
       };
     }
     if (captureSource === 'system') {
@@ -116,7 +116,7 @@ export function usePlaybackAdapter({
         onPause: () => {},
         onNext: () => {},
         onPrevious: () => {},
-        tooltip: 'Sharing audio — no playback controls',
+        tooltipKey: 'playback.sharingNoControls',
       };
     }
     return {

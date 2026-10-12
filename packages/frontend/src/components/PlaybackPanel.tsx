@@ -139,13 +139,15 @@ export function PlaybackPanel({
   const hasShuffle = adapter.onToggleShuffle != null;
   const hasRepeat = adapter.onCycleRepeat != null;
 
+  const disabledTooltip = adapter.tooltipKey ? t(adapter.tooltipKey) : '';
+
   // Shared button elements
   const prevBtn = (
     <TransportButton
       onClick={adapter.onPrevious}
       disabled={isDisabled}
       label={t('playback.previousTrack')}
-      title={isDisabled ? (adapter.tooltip ?? '') : t('playback.previousTrackShortcut')}
+      title={isDisabled ? disabledTooltip : t('playback.previousTrackShortcut')}
     >
       <PreviousTrackIcon className="h-3.5 w-3.5" />
     </TransportButton>
@@ -158,7 +160,7 @@ export function PlaybackPanel({
       label={adapter.isPlaying ? t('playback.pause') : t('playback.play')}
       title={
         isDisabled
-          ? (adapter.tooltip ?? '')
+          ? disabledTooltip
           : adapter.isPlaying
             ? t('playback.pauseShortcut')
             : t('playback.playShortcut')
@@ -178,7 +180,7 @@ export function PlaybackPanel({
       onClick={adapter.onNext}
       disabled={isDisabled}
       label={t('playback.nextTrack')}
-      title={isDisabled ? (adapter.tooltip ?? '') : t('playback.nextTrackShortcut')}
+      title={isDisabled ? disabledTooltip : t('playback.nextTrackShortcut')}
     >
       <NextTrackIcon className="h-3.5 w-3.5" />
     </TransportButton>

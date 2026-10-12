@@ -38,7 +38,7 @@ import { useSettingsStore } from './store/useSettingsStore.ts';
 import { useSpotifyStore } from './store/useSpotifyStore.ts';
 import { usePresetHistoryStore } from './store/usePresetHistoryStore.ts';
 import { useToastStore } from './store/useToastStore.ts';
-import { useDeviceSyncStatusStore } from './store/useDeviceSyncStatusStore.ts';
+import { deviceSyncErrorKey, useDeviceSyncStatusStore } from './store/useDeviceSyncStatusStore.ts';
 import { PlaybackPanel } from './components/PlaybackPanel.tsx';
 import { MediaPlaylist } from './components/MediaPlaylist.tsx';
 import { isWebGL2Supported, isLikelyGpuCrash } from './engine/isWebGL2Supported.ts';
@@ -195,15 +195,10 @@ function MainApp() {
       useToastStore.getState().show(i18n.t('toasts.joinedRoom', { ns: 'messages', code }));
     } else if (deviceSyncStatus === 'error') {
       qrJoinCodeRef.current = '';
-      const { errorMessage } = useDeviceSyncStatusStore.getState();
+      const { errorCode } = useDeviceSyncStatusStore.getState();
       useToastStore
         .getState()
-        .show(
-          errorMessage === 'Room not found'
-            ? i18n.t('sync.deviceSync.roomNotFound', { ns: 'settings' })
-            : errorMessage,
-          { type: 'error' },
-        );
+        .show(i18n.t(deviceSyncErrorKey(errorCode), { ns: 'settings' }), { type: 'error' });
     }
   }, [deviceSyncStatus]);
 

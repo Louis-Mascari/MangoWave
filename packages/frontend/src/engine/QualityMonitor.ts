@@ -34,8 +34,8 @@ export const QUALITY_TIERS: readonly QualityTier[] = [
   { meshWidth: 96, meshHeight: 72, textureRatio: 1.5, resolutionScale: 1.0 }, // 5: Max
 ] as const;
 
-export const TIER_LABELS = ['Minimum', 'Low', 'Medium', 'High', 'Ultra', 'Max'] as const;
-type TierLabel = (typeof TIER_LABELS)[number];
+/** i18n keys (`common` namespace) for each tier's display name — resolve at display time. */
+export const TIER_LABEL_KEYS = ['minimum', 'low', 'medium', 'high', 'ultra', 'max'] as const;
 
 // Thresholds
 const STEP_DOWN_RATIO = 0.75; // FPS < 75% of target → step down
@@ -124,10 +124,6 @@ export class QualityMonitor {
 
   getCurrentTier(): number {
     return this.currentTier;
-  }
-
-  getCurrentTierLabel(): TierLabel {
-    return TIER_LABELS[this.currentTier];
   }
 
   /** Call once per frame with the frame's delta time in milliseconds. */

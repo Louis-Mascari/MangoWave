@@ -18,7 +18,8 @@ export interface PlaybackAdapter {
   onPause: () => void;
   onNext: () => void;
   onPrevious: () => void;
-  tooltip?: string;
+  /** Translation key (`messages` namespace) for the disabled-controls tooltip. */
+  tooltipKey?: string;
   shuffle?: boolean;
   repeatMode?: RepeatMode;
   onToggleShuffle?: () => void;
@@ -46,7 +47,7 @@ const defaultTooltipKeys: Record<PlaybackAdapter['source'], string> = {
 export function PlaybackControls({ adapter }: PlaybackControlsProps) {
   const { t } = useTranslation('messages');
   const isDisabled = !adapter.canControl;
-  const disabledTooltip = adapter.tooltip ?? t(defaultTooltipKeys[adapter.source]);
+  const disabledTooltip = t(adapter.tooltipKey ?? defaultTooltipKeys[adapter.source]);
 
   return (
     <div className="flex items-center gap-1">

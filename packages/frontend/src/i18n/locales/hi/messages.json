@@ -20,13 +20,12 @@
     "noAudioUnknown": "Windows और ChromeOS पर, सभी शेयरिंग मोड ऑडियो सपोर्ट करते हैं। macOS 14.2+ पर, Chrome में स्क्रीन और विंडो शेयरिंग ऑडियो सपोर्ट करती है। Linux पर, सिर्फ़ टैब शेयरिंग ऑडियो सपोर्ट करती है।",
     "webgl2NotSupported": "WebGL 2 सपोर्टेड नहीं है",
     "webgl2NotSupportedDesc": "MangoWave को विज़ुअलाइज़ेशन रेंडर करने के लिए WebGL 2 चाहिए। कृपया Chrome, Firefox, या Edge जैसा मॉडर्न ब्राउज़र आज़माओ।",
-    "webgl2GpuCrash": "WebGL 2 Temporarily Unavailable",
-    "webgl2GpuCrashDesc": "Your browser's GPU process may need to recover. Try closing other tabs or restarting your browser.",
+    "webgl2GpuCrash": "WebGL 2 अभी उपलब्ध नहीं है",
+    "webgl2GpuCrashDesc": "तुम्हारे ब्राउज़र के GPU प्रोसेस को रिकवर होने की ज़रूरत हो सकती है। दूसरे टैब बंद करके या ब्राउज़र रीस्टार्ट करके देखो।",
     "webglContextLost": "विज़ुअलाइज़र ने ग्राफ़िक्स कॉन्टेक्स्ट खो दिया",
     "webglContextLostDesc": "तुम्हारे डिवाइस का ग्राफ़िक्स सिस्टम बाधित हो गया। यह तब हो सकता है जब डिवाइस पर भारी लोड हो, GPU अन्य एप्लिकेशन के साथ शेयर हो रहा हो, या डिस्प्ले कॉन्फ़िगरेशन बदल गया हो। पेज रीलोड करने से विज़ुअलाइज़र फिर से चालू हो जाएगा।",
     "renderingError": "एक रेंडरिंग त्रुटि हुई, संभवतः WebGL या Web Audio समस्या।",
     "playbackDecodeError": "\"{{filename}}\" चलाया नहीं जा सका। हो सकता है कि तुम्हारा ब्राउज़र इस फ़ॉर्मेट को सपोर्ट न करता हो।",
-    "playbackBlocked": "प्लेबैक तुम्हारे ब्राउज़र द्वारा ब्लॉक कर दिया गया। कंट्रोल पैनल में प्ले बटन दबाकर देखो।",
     "unknownFile": "अज्ञात फ़ाइल",
     "fullscreenNotSupported": "दुर्भाग्य से, आपका डिवाइस ब्राउज़र से फ़ुलस्क्रीन का समर्थन नहीं करता।"
   },
@@ -60,26 +59,28 @@
     "cloudSyncRejected": "तुम्हारी सेटिंग्स क्लाउड में सिंक नहीं हो सकीं। वे अब भी इस डिवाइस पर सहेजी हुई हैं।",
     "autopilotOn": "ऑटोपायलट चालू",
     "autopilotOff": "ऑटोपायलट बंद",
-    "renderingPaused": "Rendering paused",
-    "renderingResumed": "Rendering resumed",
+    "renderingPaused": "रेंडरिंग रोकी गई",
+    "renderingResumed": "रेंडरिंग फिर शुरू हुई",
+    "autoQualityReduced": "स्वचालित गुणवत्ता घटाकर {{tier}} की गई",
+    "autoQualityIncreased": "स्वचालित गुणवत्ता बढ़ाकर {{tier}} की गई",
     "addedToFavorites": "फ़ेवरिट में जोड़ा गया",
     "removedFromFavorites": "फ़ेवरिट से हटाया गया",
     "presetBlocked": "प्रीसेट ब्लॉक किया",
     "presetUnblocked": "प्रीसेट अनब्लॉक किया",
-    "presetRestoredToPool": "प्रीसेट पूल में वापस लाया",
-    "presetReturnedToExcluded": "प्रीसेट एक्सक्लूडेड में वापस किया",
     "blockedPresetsCleared": "ब्लॉक किए प्रीसेट साफ़ किए",
     "favoritePresetsCleared": "फ़ेवरिट प्रीसेट साफ़ किए",
     "silenceDetected": "कोई ऑडियो नहीं मिला। सुनिश्चित करो कि शेयर की गई स्क्रीन, विंडो या टैब में ऑडियो चल रहा है, और ब्राउज़र डायलॉग में \"Share audio\" चेक किया है।",
     "silenceDetectedMic": "माइक्रोफ़ोन से कोई ऑडियो नहीं मिला। सुनिश्चित करो कि तुम्हारा mic म्यूट नहीं है और आवाज़ कैप्चर कर रहा है।",
     "silenceDetectedLocal": "कोई ऑडियो नहीं मिला। सुनिश्चित करो कि फ़ाइल सपोर्टेड फ़ॉर्मेट में है और तुम्हारे डिवाइस का वॉल्यूम चालू है।",
     "noPresetsAvailable": "कोई प्रीसेट उपलब्ध नहीं है। जांचें कि कम से कम एक पैक सक्रिय है और सभी प्रीसेट ब्लॉक नहीं हैं।",
-    "presetNotFound": "इस डिवाइस पर प्रीसेट नहीं मिला: \"{{name}}\""
+    "presetNotFound": "इस डिवाइस पर प्रीसेट नहीं मिला: \"{{name}}\"",
+    "joinedRoom": "रूम {{code}} में जुड़ गए"
   },
   "playback": {
     "addSongsToQueue": "क़तार में गाने जोड़ो",
     "micNoControls": "माइक्रोफ़ोन इनपुट: कोई प्लेबैक कंट्रोल नहीं",
     "sharingNoControls": "ऑडियो शेयरिंग: कोई प्लेबैक कंट्रोल नहीं",
+    "spotifyRateLimited": "Spotify रेट लिमिटेड",
     "controlsUnavailable": "प्लेबैक कंट्रोल उपलब्ध नहीं",
     "previousTrack": "पिछला ट्रैक",
     "nextTrack": "अगला ट्रैक",
@@ -124,8 +125,8 @@
     "removeFromFavorites": "फ़ेवरिट से हटाओ (S)",
     "toggleAutopilot": "ऑटोपायलट टॉगल (A)",
     "toggleFullscreen": "फ़ुलस्क्रीन टॉगल (F)",
-    "togglePause": "Pause rendering (V)",
-    "resumeRendering": "Resume rendering (V)",
+    "togglePause": "रेंडरिंग रोको (V)",
+    "resumeRendering": "रेंडरिंग फिर शुरू करो (V)",
     "exitFS": "FS बाहर"
   },
   "mobile": {
@@ -147,6 +148,12 @@
     "noPacksSelected": "कोई पैक नहीं चुना",
     "packsActive": "{{active}}/{{total}} पैक सक्रिय",
     "packsHint": "चयनित पैक ऑटोपायलट और अगले प्रीसेट का पूल तय करते हैं",
+    "packDescriptions": {
+      "Ambient": "समय के साथ चलने वाले स्मूद एनिमेशन: शांत और ध्यानमय",
+      "Reactive": "बीट्स पर रिएक्ट करता है: ऑडियो से चलने वाली गति और रंग",
+      "Psychedelic": "तीव्र शेडर, वार्पिंग और विज़ुअल जटिलता",
+      "Ethereal": "ट्रेल्स, इको लेयर और हल्की चमकती छाप"
+    },
     "searchPlaceholder": "प्रीसेट खोजो...",
     "clearSearch": "खोज साफ़ करो",
     "noPresetsVisible": "कोई प्रीसेट दिख नहीं रहा",
@@ -163,8 +170,7 @@
     "quarantineContent": "कॉन्टेंट",
     "quarantineMobilePerf": "मोबाइल परफ़ॉर्मेंस",
     "addToPack": "पैक में जोड़ो",
-    "addedToPack": "\"{{pack}}\" में जोड़ा गया",
-    "createPackFirst": "पहले एक कस्टम पैक बनाओ"
+    "addedToPack": "\"{{pack}}\" में जोड़ा गया"
   },
 
   "importedPresets": {
@@ -172,16 +178,11 @@
     "description": "समुदाय के MilkDrop प्रीसेट (.milk) और उनके द्वारा उपयोग की जाने वाली टेक्सचर जोड़ें। MilkDrop एक नेटिव डेस्कटॉप एप्लिकेशन के रूप में डिज़ाइन किया गया था, इसलिए शेडर ट्रांसलेशन में अंतर के कारण कुछ प्रीसेट ब्राउज़र में पूरी तरह से रेंडर नहीं हो सकते।",
     "emptyState": "कोई आयातित प्रीसेट नहीं। सामुदायिक MilkDrop प्रीसेट जोड़ने के लिए \"Import .milk\" का उपयोग करें।",
     "importMilk": ".milk आयात करें",
-    "importingPresets": "प्रीसेट आयात हो रहे हैं...",
-    "importSuccess": "{{count}} प्रीसेट आयात किए गए",
-    "importPartial": "{{total}} में से {{success}} प्रीसेट आयात किए गए। {{failed}} विफल।",
-    "importAllFailed": "सभी {{count}} प्रीसेट आयात करने में विफल",
     "fileTooLarge": "बहुत बड़ा (अधिकतम 500KB)",
     "invalidFileType": ".milk फ़ाइल नहीं है",
     "emptyFile": "फ़ाइल खाली है",
     "duplicateName": "पहले से मौजूद है",
     "conversionFailed": "कनवर्शन विफल",
-    "securityBlocked": "अवरुद्ध सामग्री है",
     "nativeNameCollision": "बिल्ट-इन प्रीसेट में पहले से मौजूद है",
     "missingTextures": "अनुपलब्ध टेक्सचर (अपलोड होने तक शोर के रूप में दिखेंगे): {{textures}}",
     "deletePreset": "आयातित प्रीसेट हटाएं",
@@ -189,17 +190,12 @@
     "clearAll": "सब हटाएं",
     "clearAllConfirm": "सभी {{count}} आयातित प्रीसेट हटाएं? .milk फ़ाइलों को फिर से आयात करना होगा।",
     "cleared": "सभी आयातित प्रीसेट हटा दिए गए",
-    "idbUnavailable": "आयातित प्रीसेट के लिए स्टोरेज एक्सेस आवश्यक है, जो निजी ब्राउज़िंग मोड में उपलब्ध नहीं है।",
-    "imported": "आयातित",
     "importInProgress": "आयात हो रहा है... अब तक {{count}} प्रीसेट"
   },
 
   "importedTextures": {
     "sectionTitle": "आयातित टेक्सचर",
     "importTextures": "टेक्सचर आयात करें",
-    "importSuccess": "{{count}} टेक्सचर आयात किए गए",
-    "importPartial": "{{total}} में से {{success}} टेक्सचर आयात किए गए। {{failed}} विफल।",
-    "importAllFailed": "सभी {{count}} टेक्सचर आयात करने में विफल",
     "fileTooLarge": "बहुत बड़ा (अधिकतम 2MB)",
     "invalidFileType": "समर्थित छवि नहीं है (JPEG, PNG या WebP)",
     "builtinTextureShadow": "अंतर्निहित टेक्सचर, बदला नहीं जा सकता",
@@ -211,7 +207,6 @@
     "clearAllConfirm": "सभी {{count}} आयातित टेक्सचर हटाएं? छवि फ़ाइलों को फिर से आयात करना होगा।",
     "cleared": "सभी आयातित टेक्सचर हटा दिए गए",
     "gpuNote": "GPU पर लोड किए गए टेक्सचर पेज रीलोड होने तक बने रहते हैं।",
-    "idbUnavailable": "आयातित टेक्सचर के लिए स्टोरेज एक्सेस आवश्यक है, जो प्राइवेट ब्राउज़िंग मोड में उपलब्ध नहीं है।",
     "duplicateName": "पहले से मौजूद है",
     "emptyStateTextures": "कोई आयातित टेक्सचर नहीं। कस्टम टेक्सचर जोड़ने के लिए \"टेक्सचर आयात करें\" का उपयोग करें।",
     "importInProgress": "आयात हो रहा है... अब तक {{count}} टेक्सचर"
@@ -254,7 +249,8 @@
     "deactivatePack": "पैक रोकें",
     "packOverridesFilters": "ऑटोपायलट और अगला प्रीसेट सक्रिय पैक का उपयोग करते हैं। फ़िल्टर केवल इस सूची को प्रभावित करते हैं।",
     "favoritesAutoSwitch": "फ़ेवरिट से ऑल मोड पर स्विच हो गया",
-    "newPack": "नया पैक"
+    "newPack": "नया पैक",
+    "importedPackDefaultName": "इम्पोर्ट किया गया पैक"
   },
 
   "importModal": {
@@ -271,7 +267,6 @@
     "summaryAllSuccess": "{{count}} {{type}} सफलतापूर्वक इम्पोर्ट हुए",
     "summaryPartial": "{{total}} {{type}} में से {{success}} इम्पोर्ट हुए। {{failed}} असफल, {{warnings}} चेतावनी के साथ।",
     "summaryAllFailed": "सभी {{count}} {{type}} इम्पोर्ट करने में असफल",
-    "uploadMissingTextures": "अनुपलब्ध टेक्सचर अपलोड करें",
     "missingTexturesSection": "अनुपलब्ध टेक्सचर ({{remaining}} शेष)",
     "missingTexturesAllResolved": "सभी अनुपलब्ध टेक्सचर अपलोड हो गए",
     "missingTexturesHint": "अनुपलब्ध टेक्सचर वाले प्रीसेट में टेक्सचर की जगह विज़ुअल नॉइज़ दिखेगा। इसे ठीक करने के लिए सही इमेज फ़ाइलें अपलोड करें।",

@@ -132,15 +132,70 @@ describe('useMediaPlayerStore', () => {
     expect(played.size).toBe(3);
   });
 
-  it('shuffle stops when all tracks played and repeat is off', () => {
+  describe('advanceAfterTrackEnd', () => {
+    const files = () => [createMockFile('a.mp3'), createMockFile('b.mp3'), createMockFile('c.mp3')];
+
+    it('stops and rewinds after the last track with repeat off', () => {
+      useMediaPlayerStore.getState().addTracks(files());
+      useMediaPlayerStore.setState({ repeatMode: 'off', isPlaying: true });
+      const { advanceAfterTrackEnd } = useMediaPlayerStore.getState();
+
+      expect(advanceAfterTrackEnd()).toBe(true);
+      expect(advanceAfterTrackEnd()).toBe(true);
+      expect(useMediaPlayerStore.getState().currentTrackIndex).toBe(2);
+
+      expect(advanceAfterTrackEnd()).toBe(false);
+      expect(useMediaPlayerStore.getState()).toMatchObject({
+        currentTrackIndex: 0,
+        isPlaying: false,
+      });
+    });
+
+    it('wraps after the last track with repeat all', () => {
+      useMediaPlayerStore.getState().addTracks(files());
+      useMediaPlayerStore.setState({ repeatMode: 'all', isPlaying: true });
+      useMediaPlayerStore.getState().setCurrentTrack(2);
+
+      expect(useMediaPlayerStore.getState().advanceAfterTrackEnd()).toBe(true);
+      expect(useMediaPlayerStore.getState()).toMatchObject({
+        currentTrackIndex: 0,
+        isPlaying: true,
+      });
+    });
+
+    it('plays every track exactly once in shuffle with repeat off, then stops', () => {
+      useMediaPlayerStore.getState().addTracks(files());
+      useMediaPlayerStore.setState({ shuffle: true, repeatMode: 'off', isPlaying: true });
+      const played = [useMediaPlayerStore.getState().currentTrackIndex];
+
+      while (useMediaPlayerStore.getState().advanceAfterTrackEnd()) {
+        played.push(useMediaPlayerStore.getState().currentTrackIndex);
+        expect(played.length).toBeLessThanOrEqual(3);
+      }
+
+      expect([...played].sort()).toEqual([0, 1, 2]);
+      expect(useMediaPlayerStore.getState()).toMatchObject({
+        currentTrackIndex: 0,
+        isPlaying: false,
+      });
+    });
+
+    it('stops a single-track queue with repeat off', () => {
+      useMediaPlayerStore.getState().addTracks([createMockFile('a.mp3')]);
+      useMediaPlayerStore.setState({ repeatMode: 'off', isPlaying: true });
+      expect(useMediaPlayerStore.getState().advanceAfterTrackEnd()).toBe(false);
+      expect(useMediaPlayerStore.getState().isPlaying).toBe(false);
+    });
+  });
+
+  it('Next keeps going in shuffle even with repeat off', () => {
     useMediaPlayerStore.getState().addTracks([createMockFile('a.mp3'), createMockFile('b.mp3')]);
-    useMediaPlayerStore.setState({ shuffle: true, repeatMode: 'off' });
+    useMediaPlayerStore.setState({ shuffle: true, repeatMode: 'off', isPlaying: true });
 
-    // Play through all tracks
-    useMediaPlayerStore.getState().nextTrack(); // plays second track
-    useMediaPlayerStore.getState().nextTrack(); // all played, should stop
+    useMediaPlayerStore.getState().nextTrack();
+    useMediaPlayerStore.getState().nextTrack();
 
-    expect(useMediaPlayerStore.getState().isPlaying).toBe(false);
+    expect(useMediaPlayerStore.getState().isPlaying).toBe(true);
   });
 
   it('moveTrack reorders tracks and adjusts currentTrackIndex when moving current track', () => {

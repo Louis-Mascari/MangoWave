@@ -37,8 +37,8 @@
     "textureQualityTooltip": "Multiplicador da resolução interna de renderização. Mais baixo = mais rápido, mais alto = qualidade com superamostragem",
     "antiAliasing": "Anti-Aliasing",
     "antiAliasingTooltip": "Suaviza bordas serrilhadas com FXAA. Pequeno custo de desempenho (~2-3%)",
-    "brightness": "Visual Brightness: {{value}}%",
-    "brightnessTooltip": "Dims the visualizer. Useful in dark rooms or when you want subtle ambient visuals",
+    "brightness": "Brilho Visual: {{value}}%",
+    "brightnessTooltip": "Escurece o visualizador. Útil em ambientes escuros ou quando você quer visuais ambientes sutis",
     "analysis": "Análise",
     "audioSmoothing": "Suavização de Áudio: {{value}}",
     "audioSmoothingTooltip": "Mais baixo = reação mais rápida às batidas, mais alto = movimento mais suave. O efeito é sutil: presets aplicam sua própria suavização interna",
@@ -113,7 +113,7 @@
     "toggleAutopilot": "Alternar piloto automático",
     "toggleFavorite": "Alternar favorito",
     "toggleBlock": "Alternar bloqueio",
-    "togglePause": "Pause / resume rendering",
+    "togglePause": "Pausar / retomar renderização",
     "toggleQueue": "Alternar fila (arquivos locais)",
     "playPause": "Reproduzir / pausar",
     "previousTrack": "Faixa anterior",
@@ -123,7 +123,6 @@
   },
 
   "sync": {
-    "title": "Sincronização",
     "windowSyncTitle": "Sincronização de Janelas",
     "windowSyncDescription": "Sincronize presets e configurações entre múltiplas janelas do navegador no mesmo dispositivo. Abra o MangoWave em múltiplas janelas para visualizar em múltiplos monitores. Funciona melhor com áudio do sistema ou microfone — cada janela captura a mesma fonte. A reprodução de arquivos locais é por janela.",
     "enabled": "Sincronização de Janelas",
@@ -138,14 +137,11 @@
       "title": "Sincronização de Dispositivos",
       "description": "Sincronize presets entre dispositivos diferentes (celular, notebook, TV) via WebRTC ponto a ponto. Um dispositivo cria a sala, os outros entram com o código. O criador da sala controla o piloto automático.",
       "createRoom": "Criar Sala",
-      "joinRoom": "Entrar na Sala",
-      "roomCode": "Código da Sala",
       "enterCode": "Entrar em uma sala existente",
       "connect": "Conectar",
       "leaveRoom": "Sair da Sala",
       "connecting": "Conectando...",
       "connected": "Conectado",
-      "disconnected": "Desconectado",
       "error": "Erro de conexão",
       "tryAgain": "Tentar Novamente",
       "peerCount_one": "{{count}} dispositivo conectado",
@@ -153,16 +149,16 @@
       "hostDisconnected": "O anfitrião da sala desconectou. A sala foi encerrada.",
       "invalidCode": "Código de sala inválido. Formato: MANGO-XXXX (4 letras, sem I ou O)",
       "roomNotFound": "Sala não encontrada. Verifique o código e tente novamente.",
+      "signalingTimeout": "Tempo de conexão esgotado: não foi possível alcançar o servidor de sinalização",
+      "joinTimeout": "Tempo de conexão esgotado: não foi possível conectar à sala",
+      "connectionLost": "Conexão perdida",
+      "connectionFailed": "Falha na conexão. Tente novamente.",
       "syncSettings": "Sincronizar EQ e renderização",
       "syncSettingsHint": "Compartilhe configurações de EQ, pré-amp, análise de áudio e renderização entre dispositivos. Desmarque se os dispositivos precisam de configurações de desempenho diferentes.",
       "copiedToClipboard": "Copiado!",
+      "qrAlt": "Código QR da sala {{code}}",
       "autopilotNote": "As configurações do piloto automático sempre sincronizam. Qualquer dispositivo pode ativar o piloto automático, mas apenas o temporizador do criador da sala dispara.",
       "audioTip": "A sincronização de dispositivos sincroniza apenas os visuais. Cada dispositivo precisa de sua própria fonte de áudio. Para a melhor experiência, configure todos os dispositivos com entrada de microfone na mesma sala para que reajam à mesma música de um alto-falante compartilhado. Apps como AmpMe, Easy Jam e BeatSync também podem sincronizar a reprodução de áudio entre vários alto-falantes de celular."
     }
-  },
-
-  "language": {
-    "title": "Idioma",
-    "tooltip": "Escolha o idioma de exibição da interface"
   }
 }

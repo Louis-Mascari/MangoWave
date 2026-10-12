@@ -37,8 +37,8 @@
     "textureQualityTooltip": "内部渲染分辨率倍数。越低 = 越快，越高 = 超采样质量",
     "antiAliasing": "抗锯齿",
     "antiAliasingTooltip": "使用 FXAA 平滑锯齿边缘。性能开销较小（约 2-3%）",
-    "brightness": "Visual Brightness: {{value}}%",
-    "brightnessTooltip": "Dims the visualizer. Useful in dark rooms or when you want subtle ambient visuals",
+    "brightness": "视觉亮度：{{value}}%",
+    "brightnessTooltip": "调暗可视化工具。适用于昏暗的房间，或想要柔和的氛围视觉效果时",
     "analysis": "分析",
     "audioSmoothing": "音频平滑度：{{value}}",
     "audioSmoothingTooltip": "越低 = 对节拍的反应越灵敏，越高 = 运动越平滑。效果较细微：预设会应用自身的内部平滑",
@@ -113,7 +113,7 @@
     "toggleAutopilot": "切换自动播放",
     "toggleFavorite": "切换收藏",
     "toggleBlock": "切换屏蔽",
-    "togglePause": "Pause / resume rendering",
+    "togglePause": "暂停 / 恢复渲染",
     "toggleQueue": "切换队列（本地文件）",
     "playPause": "播放 / 暂停",
     "previousTrack": "上一首",
@@ -123,7 +123,6 @@
   },
 
   "sync": {
-    "title": "同步",
     "windowSyncTitle": "窗口同步",
     "windowSyncDescription": "在同一设备上的多个浏览器窗口之间同步预设和设置。在多个窗口中打开 MangoWave，可在多个显示器上进行可视化。最适合系统音频或麦克风——每个窗口捕获相同的音源。本地文件播放为各窗口独立。",
     "enabled": "窗口同步",
@@ -138,14 +137,11 @@
       "title": "设备同步",
       "description": "通过点对点 WebRTC 在不同设备（手机、笔记本、电视）之间同步预设。一台设备创建房间，其他设备使用房间代码加入。房间创建者控制自动播放。",
       "createRoom": "创建房间",
-      "joinRoom": "加入房间",
-      "roomCode": "房间代码",
       "enterCode": "加入已有房间",
       "connect": "连接",
       "leaveRoom": "离开房间",
       "connecting": "连接中...",
       "connected": "已连接",
-      "disconnected": "已断开",
       "error": "连接错误",
       "tryAgain": "重试",
       "peerCount_one": "{{count}} 台设备已连接",
@@ -153,16 +149,16 @@
       "hostDisconnected": "房主已断开连接，房间已关闭。",
       "invalidCode": "房间代码无效。格式：MANGO-XXXX（4个字母，不含 I 和 O）",
       "roomNotFound": "未找到房间。请检查代码后重试。",
+      "signalingTimeout": "连接超时：无法连接到信令服务器",
+      "joinTimeout": "连接超时：无法连接到房间",
+      "connectionLost": "连接已断开",
+      "connectionFailed": "连接失败。请重试。",
       "syncSettings": "同步均衡器和渲染设置",
       "syncSettingsHint": "在设备间共享均衡器、前置放大、音频分析和渲染设置。如果设备需要不同的性能设置，请取消勾选。",
       "copiedToClipboard": "已复制！",
+      "qrAlt": "房间 {{code}} 的二维码",
       "autopilotNote": "自动播放设置始终同步。任何设备都可以切换自动播放，但只有房间创建者的计时器会触发。",
       "audioTip": "设备同步仅同步视觉效果。每台设备需要自己的音频源。为获得最佳体验，将同一房间内的所有设备设置为麦克风输入，使它们对共享音箱播放的同一音乐做出反应。AmpMe、Easy Jam、BeatSync 等应用也可以在多个手机扬声器之间同步音频播放。"
     }
-  },
-
-  "language": {
-    "title": "语言",
-    "tooltip": "选择界面的显示语言"
   }
 }

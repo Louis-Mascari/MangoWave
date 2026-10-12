@@ -52,7 +52,6 @@ vi.mock('../../data/presetThematicPacks.ts', () => ({
     'Preset B': 'Psychedelic',
     'Preset C': 'Ethereal',
   },
-  PACK_DESCRIPTIONS: {},
 }));
 
 describe('VisualizerRenderer', () => {

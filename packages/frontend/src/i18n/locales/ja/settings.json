@@ -37,8 +37,8 @@
     "textureQualityTooltip": "内部レンダリング解像度の倍率です。低い = 高速、高い = スーパーサンプリング品質",
     "antiAliasing": "アンチエイリアシング",
     "antiAliasingTooltip": "FXAAでジャギーを滑らかにします。わずかなパフォーマンスコスト（約2-3%）",
-    "brightness": "Visual Brightness: {{value}}%",
-    "brightnessTooltip": "Dims the visualizer. Useful in dark rooms or when you want subtle ambient visuals",
+    "brightness": "ビジュアルの明るさ: {{value}}%",
+    "brightnessTooltip": "ビジュアライザーを暗くします。暗い部屋や、控えめなアンビエント映像にしたいときに便利です",
     "analysis": "分析",
     "audioSmoothing": "オーディオスムージング: {{value}}",
     "audioSmoothingTooltip": "低い = ビートへの反応が速い、高い = 動きが滑らか。効果は微妙で、プリセットは独自の内部スムージングを適用します",
@@ -113,7 +113,7 @@
     "toggleAutopilot": "オートパイロット切り替え",
     "toggleFavorite": "お気に入り切り替え",
     "toggleBlock": "ブロック切り替え",
-    "togglePause": "Pause / resume rendering",
+    "togglePause": "レンダリングを一時停止 / 再開",
     "toggleQueue": "キュー切り替え（ローカルファイル）",
     "playPause": "再生 / 一時停止",
     "previousTrack": "前のトラック",
@@ -123,7 +123,6 @@
   },
 
   "sync": {
-    "title": "同期",
     "windowSyncTitle": "ウィンドウ同期",
     "windowSyncDescription": "同じデバイス上の複数のブラウザウィンドウ間でプリセットと設定を同期します。複数のモニターで表示するには、複数のウィンドウでMangoWaveを開いてください。システムオーディオまたはマイクに最適です — 各ウィンドウが同じソースをキャプチャします。ローカルファイルの再生はウィンドウごとに独立です。",
     "enabled": "ウィンドウ同期",
@@ -138,14 +137,11 @@
       "title": "デバイス同期",
       "description": "ピアツーピア WebRTC で異なるデバイス（スマホ、ノートPC、テレビ）間のプリセットを同期します。1台のデバイスがルームを作成し、他のデバイスがルームコードで参加します。ルーム作成者がオートパイロットを制御します。",
       "createRoom": "ルームを作成",
-      "joinRoom": "ルームに参加",
-      "roomCode": "ルームコード",
       "enterCode": "既存のルームに参加",
       "connect": "接続",
       "leaveRoom": "ルームを退出",
       "connecting": "接続中...",
       "connected": "接続済み",
-      "disconnected": "切断済み",
       "error": "接続エラー",
       "tryAgain": "再試行",
       "peerCount_one": "{{count}} 台のデバイスが接続中",
@@ -153,16 +149,16 @@
       "hostDisconnected": "ルームホストが切断しました。ルームは閉鎖されました。",
       "invalidCode": "ルームコードが無効です。形式: MANGO-XXXX（英字4文字、IとOは除く）",
       "roomNotFound": "ルームが見つかりません。コードを確認して再試行してください。",
+      "signalingTimeout": "接続がタイムアウトしました：シグナリングサーバーに接続できませんでした",
+      "joinTimeout": "接続がタイムアウトしました：ルームに接続できませんでした",
+      "connectionLost": "接続が切れました",
+      "connectionFailed": "接続に失敗しました。もう一度お試しください。",
       "syncSettings": "EQ とレンダリング設定を同期",
       "syncSettingsHint": "デバイス間でEQ、プリアンプ、オーディオ分析、レンダリング設定を共有します。デバイスごとに異なるパフォーマンス設定が必要な場合はオフにしてください。",
       "copiedToClipboard": "コピーしました！",
+      "qrAlt": "ルーム {{code}} のQRコード",
       "autopilotNote": "オートパイロット設定は常に同期されます。どのデバイスからもオートパイロットを切り替えられますが、タイマーが動作するのはルーム作成者のデバイスのみです。",
       "audioTip": "デバイス同期はビジュアルのみを同期します。各デバイスには独自のオーディオソースが必要です。最高の体験のために、同じ部屋のすべてのデバイスをマイク入力に設定し、共有スピーカーからの同じ音楽に反応するようにしてください。AmpMe、Easy Jam、BeatSyncなどのアプリで複数のスマホスピーカー間でオーディオ再生を同期することもできます。"
     }
-  },
-
-  "language": {
-    "title": "言語",
-    "tooltip": "インターフェースの表示言語を選択します"
   }
 }

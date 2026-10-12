@@ -9,7 +9,7 @@ import { buildSpotifyAuthUrl } from '../services/spotifyApi.ts';
 import { Tooltip } from './Tooltip.tsx';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { useWindowSyncStatusStore } from '../store/useWindowSyncStatusStore.ts';
-import { useDeviceSyncStatusStore } from '../store/useDeviceSyncStatusStore.ts';
+import { deviceSyncErrorKey, useDeviceSyncStatusStore } from '../store/useDeviceSyncStatusStore.ts';
 import { quarantinedSet, mobileBlockedSet } from '../data/excludedPresets.ts';
 import { SHORTCUTS } from '../constants/shortcuts.ts';
 import {
@@ -1363,7 +1363,7 @@ function DeviceSyncSection() {
   const setDeviceSyncEnabled = useSettingsStore((s) => s.setDeviceSyncEnabled);
   const deviceSyncSettingsSync = useSettingsStore((s) => s.deviceSyncSettingsSync);
   const setDeviceSyncSettingsSync = useSettingsStore((s) => s.setDeviceSyncSettingsSync);
-  const { status, peerCount, roomCode, isHost, errorMessage, actions } = useDeviceSyncStatusStore();
+  const { status, peerCount, roomCode, isHost, errorCode, actions } = useDeviceSyncStatusStore();
 
   const [joinCode, setJoinCode] = useState('');
   const [joinError, setJoinError] = useState('');
@@ -1461,7 +1461,7 @@ function DeviceSyncSection() {
 
       {status === 'error' && (
         <div className="flex flex-col gap-2">
-          <p className="text-xs text-red-400">{errorMessage || t('sync.deviceSync.error')}</p>
+          <p className="text-xs text-red-400">{t(deviceSyncErrorKey(errorCode))}</p>
           <button
             onClick={() => {
               actions.leaveRoom();
@@ -1551,7 +1551,7 @@ function DeviceSyncSection() {
           {isHost && qrDataUrl && (
             <img
               src={qrDataUrl}
-              alt={`QR code for room ${roomCode}`}
+              alt={t('sync.deviceSync.qrAlt', { code: roomCode })}
               className="h-28 w-28 rounded bg-white p-1"
             />
           )}

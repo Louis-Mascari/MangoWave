@@ -79,6 +79,7 @@
     "devInfo": "如果你不是应用所有者，请确保他们已将你的 Spotify 账户关联的姓名和电子邮件添加到其开发者应用的用户管理标签页中。"
   },
   "onboarding": {
+    "title": "入门指南",
     "desktop": {
       "skipPresetsTitle": "跳过预设",
       "skipPresetsDesc": "按 Space 或 N 跳到下一个预设。每个预设对你的音乐有不同的响应。",

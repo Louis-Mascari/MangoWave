@@ -20,13 +20,12 @@
     "noAudioUnknown": "No Windows e ChromeOS, todos os modos de compartilhamento suportam áudio. No macOS 14.2+, compartilhamento de tela e janela suportam áudio no Chrome. No Linux, apenas o compartilhamento de aba suporta áudio.",
     "webgl2NotSupported": "WebGL 2 Não Suportado",
     "webgl2NotSupportedDesc": "MangoWave requer WebGL 2 para renderizar visualizações. Por favor, tente um navegador moderno como Chrome, Firefox ou Edge.",
-    "webgl2GpuCrash": "WebGL 2 Temporarily Unavailable",
-    "webgl2GpuCrashDesc": "Your browser's GPU process may need to recover. Try closing other tabs or restarting your browser.",
+    "webgl2GpuCrash": "WebGL 2 Temporariamente Indisponível",
+    "webgl2GpuCrashDesc": "O processo de GPU do seu navegador pode precisar se recuperar. Tente fechar outras abas ou reiniciar o navegador.",
     "webglContextLost": "O Visualizador Perdeu o Contexto Gráfico",
     "webglContextLostDesc": "O sistema gráfico do seu dispositivo foi interrompido. Isso pode acontecer quando seu dispositivo está sob carga pesada, a GPU é compartilhada com outros aplicativos ou a configuração de exibição mudou. Recarregar a página restaurará o visualizador.",
     "renderingError": "Ocorreu um erro de renderização, possivelmente um problema de WebGL ou Web Audio.",
     "playbackDecodeError": "Não foi possível reproduzir \"{{filename}}\". Esse formato pode não ser suportado pelo seu navegador.",
-    "playbackBlocked": "A reprodução foi bloqueada pelo seu navegador. Tente tocar o botão de reproduzir no painel de controle.",
     "unknownFile": "Arquivo desconhecido",
     "fullscreenNotSupported": "Infelizmente, seu dispositivo não suporta tela cheia pelo navegador."
   },
@@ -60,26 +59,28 @@
     "cloudSyncRejected": "Não foi possível sincronizar suas configurações com a nuvem. Elas continuam salvas neste dispositivo.",
     "autopilotOn": "Piloto automático ligado",
     "autopilotOff": "Piloto automático desligado",
-    "renderingPaused": "Rendering paused",
-    "renderingResumed": "Rendering resumed",
+    "renderingPaused": "Renderização pausada",
+    "renderingResumed": "Renderização retomada",
+    "autoQualityReduced": "Qualidade automática reduzida para {{tier}}",
+    "autoQualityIncreased": "Qualidade automática aumentada para {{tier}}",
     "addedToFavorites": "Adicionado aos favoritos",
     "removedFromFavorites": "Removido dos favoritos",
     "presetBlocked": "Preset bloqueado",
     "presetUnblocked": "Preset desbloqueado",
-    "presetRestoredToPool": "Preset restaurado ao pool",
-    "presetReturnedToExcluded": "Preset retornado aos excluídos",
     "blockedPresetsCleared": "Presets bloqueados limpos",
     "favoritePresetsCleared": "Presets favoritos limpos",
     "silenceDetected": "Nenhum áudio detectado. Certifique-se de que o áudio está tocando na tela, janela ou aba compartilhada, e que você marcou \"Compartilhar áudio\" na caixa de diálogo do navegador.",
     "silenceDetectedMic": "Nenhum áudio detectado do microfone. Certifique-se de que seu mic não está mutado e está captando som.",
     "silenceDetectedLocal": "Nenhum áudio detectado. Certifique-se de que o arquivo é um formato suportado e que o volume do dispositivo está ligado.",
     "noPresetsAvailable": "Nenhum preset disponível. Verifique se pelo menos um pacote está ativado e se nem todos os presets estão bloqueados.",
-    "presetNotFound": "Preset não encontrado neste dispositivo: \"{{name}}\""
+    "presetNotFound": "Preset não encontrado neste dispositivo: \"{{name}}\"",
+    "joinedRoom": "Você entrou na sala {{code}}"
   },
   "playback": {
     "addSongsToQueue": "Adicione músicas à sua fila",
     "micNoControls": "Entrada de microfone: sem controles de reprodução",
     "sharingNoControls": "Compartilhando áudio: sem controles de reprodução",
+    "spotifyRateLimited": "Limite de requisições do Spotify atingido",
     "controlsUnavailable": "Controles de reprodução indisponíveis",
     "previousTrack": "Faixa anterior",
     "nextTrack": "Próxima faixa",
@@ -124,8 +125,8 @@
     "removeFromFavorites": "Remover dos favoritos (S)",
     "toggleAutopilot": "Alternar piloto automático (A)",
     "toggleFullscreen": "Alternar tela cheia (F)",
-    "togglePause": "Pause rendering (V)",
-    "resumeRendering": "Resume rendering (V)",
+    "togglePause": "Pausar renderização (V)",
+    "resumeRendering": "Retomar renderização (V)",
     "exitFS": "Sair TC"
   },
   "mobile": {
@@ -147,6 +148,12 @@
     "noPacksSelected": "Nenhum pacote selecionado",
     "packsActive": "{{active}}/{{total}} pacotes ativos",
     "packsHint": "Os pacotes selecionados definem o grupo para piloto automático e próximo preset",
+    "packDescriptions": {
+      "Ambient": "Animações suaves guiadas pelo tempo: calmas e meditativas",
+      "Reactive": "Responde às batidas: movimento e cor guiados pelo áudio",
+      "Psychedelic": "Shaders intensos, distorções e complexidade visual",
+      "Ethereal": "Rastros, camadas de eco e uma persistência suave e luminosa"
+    },
     "searchPlaceholder": "Buscar presets...",
     "clearSearch": "Limpar busca",
     "noPresetsVisible": "Nenhum preset visível",
@@ -163,8 +170,7 @@
     "quarantineContent": "Conteúdo",
     "quarantineMobilePerf": "Desempenho mobile",
     "addToPack": "Adicionar ao pacote",
-    "addedToPack": "Adicionado a \"{{pack}}\"",
-    "createPackFirst": "Crie um pacote personalizado primeiro"
+    "addedToPack": "Adicionado a \"{{pack}}\""
   },
 
   "importedPresets": {
@@ -172,16 +178,11 @@
     "description": "Adicione presets comunitários do MilkDrop (.milk) e as texturas que eles referenciam. O MilkDrop foi projetado como um aplicativo nativo de desktop, então alguns presets podem não ser renderizados perfeitamente no navegador devido a diferenças na tradução de shaders.",
     "emptyState": "Nenhum preset importado. Use \"Import .milk\" para adicionar presets comunitários do MilkDrop.",
     "importMilk": "Importar .milk",
-    "importingPresets": "Importando presets...",
-    "importSuccess": "{{count}} preset(s) importado(s)",
-    "importPartial": "Importados {{success}} de {{total}} presets. {{failed}} falharam.",
-    "importAllFailed": "Todos os {{count}} preset(s) falharam ao importar",
     "fileTooLarge": "Muito grande (máx. 500KB)",
     "invalidFileType": "Não é um arquivo .milk",
     "emptyFile": "Arquivo vazio",
     "duplicateName": "Já existe",
     "conversionFailed": "Falha na conversão",
-    "securityBlocked": "Contém conteúdo bloqueado",
     "nativeNameCollision": "Já existe nos presets integrados",
     "missingTextures": "Texturas ausentes (serão exibidas como ruído até serem enviadas): {{textures}}",
     "deletePreset": "Excluir preset importado",
@@ -189,17 +190,12 @@
     "clearAll": "Excluir tudo",
     "clearAllConfirm": "Excluir todos os {{count}} presets importados? Os arquivos .milk precisarão ser reimportados.",
     "cleared": "Todos os presets importados foram excluídos",
-    "idbUnavailable": "Presets importados requerem acesso ao armazenamento, que não está disponível no modo de navegação privada.",
-    "imported": "Importados",
     "importInProgress": "Importando... {{count}} preset(s) até agora"
   },
 
   "importedTextures": {
     "sectionTitle": "Texturas importadas",
     "importTextures": "Importar texturas",
-    "importSuccess": "{{count}} textura(s) importada(s)",
-    "importPartial": "{{success}} de {{total}} texturas importadas. {{failed}} falharam.",
-    "importAllFailed": "Todas as {{count}} textura(s) falharam ao importar",
     "fileTooLarge": "Muito grande (máx. 2MB)",
     "invalidFileType": "Não é uma imagem compatível (JPEG, PNG ou WebP)",
     "builtinTextureShadow": "Textura integrada, não pode ser substituída",
@@ -211,7 +207,6 @@
     "clearAllConfirm": "Excluir todas as {{count}} texturas importadas? Os arquivos de imagem precisarão ser reimportados.",
     "cleared": "Todas as texturas importadas foram removidas",
     "gpuNote": "Texturas carregadas na GPU persistem até a página ser recarregada.",
-    "idbUnavailable": "Texturas importadas requerem acesso ao armazenamento, que não está disponível no modo de navegação privada.",
     "duplicateName": "Já existe",
     "emptyStateTextures": "Nenhuma textura importada. Use \"Importar Texturas\" para adicionar imagens de texturas.",
     "importInProgress": "Importando... {{count}} textura(s) até agora"
@@ -254,7 +249,8 @@
     "deactivatePack": "Parar pacote",
     "packOverridesFilters": "O piloto automático e o próximo preset usam o pacote ativo. Os filtros afetam apenas esta lista.",
     "favoritesAutoSwitch": "Alternado de favoritos para o modo todos",
-    "newPack": "Novo Pacote"
+    "newPack": "Novo Pacote",
+    "importedPackDefaultName": "Pacote Importado"
   },
 
   "importModal": {
@@ -271,7 +267,6 @@
     "summaryAllSuccess": "{{count}} {{type}} importados com sucesso",
     "summaryPartial": "Importados {{success}} de {{total}} {{type}}. {{failed}} falharam, {{warnings}} com avisos.",
     "summaryAllFailed": "Todos os {{count}} {{type}} falharam ao importar",
-    "uploadMissingTextures": "Enviar texturas faltantes",
     "missingTexturesSection": "Texturas faltantes ({{remaining}} restantes)",
     "missingTexturesAllResolved": "Todas as texturas faltantes enviadas",
     "missingTexturesHint": "Presets com texturas faltantes exibirão ruído visual onde a textura deveria aparecer. Envie os arquivos de imagem correspondentes para corrigir.",

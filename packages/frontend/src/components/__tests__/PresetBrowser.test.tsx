@@ -120,7 +120,7 @@ describe('PresetBrowser', () => {
       />,
     );
 
-    // Pack filter buttons come from PACK_ORDER (all 5 thematic packs shown)
+    // Pack filter buttons come from THEMATIC_PACKS (all 5 thematic packs shown)
     expect(screen.getByText('Reactive')).toBeInTheDocument();
     expect(screen.getByText('Psychedelic')).toBeInTheDocument();
   });

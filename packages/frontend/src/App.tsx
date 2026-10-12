@@ -20,7 +20,6 @@ import { useFullscreen } from './hooks/useFullscreen.ts';
 import { useSpotifyPlayback } from './hooks/useSpotifyPlayback.ts';
 import { usePlaybackAdapter } from './hooks/usePlaybackAdapter.ts';
 import { usePresetNavigation } from './hooks/usePresetNavigation.ts';
-import { Visualizer } from './components/Visualizer.tsx';
 import { ControlBar } from './components/ControlBar.tsx';
 import type { PanelView } from './components/ControlBar.tsx';
 import { PresetNotification } from './components/PresetNotification.tsx';
@@ -70,6 +69,18 @@ function OAuthPopup() {
 // DEV-ONLY: shader diagnostics for QA (tree-shaken from production builds)
 if (import.meta.env.DEV) {
   installShaderDiagnostics();
+}
+
+type VisualizerComponent = (typeof import('./components/Visualizer.tsx'))['Visualizer'];
+
+// The visualizer (renderer, bundled presets, GLSL optimizer) is most of the bundle and is
+// only needed once a session starts, so it is not in the entry chunk. index.html preloads
+// it (see vite.config.ts) and the start screen imports it in the background, which also
+// keeps its module-level pre-warming (texture decode, optimizer init) ahead of the session.
+let visualizerPromise: Promise<VisualizerComponent> | null = null;
+function loadVisualizer(): Promise<VisualizerComponent> {
+  visualizerPromise ??= import('./components/Visualizer.tsx').then((module) => module.Visualizer);
+  return visualizerPromise;
 }
 
 function App() {
@@ -218,30 +229,59 @@ function MainApp() {
   const silenceCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const setOnboardingShown = useSettingsStore((s) => s.setOnboardingShown);
 
+  // Held in state rather than React.lazy: a rejected lazy import is cached and would
+  // take down the whole tree through the error boundary while audio capture is live.
+  const [Visualizer, setVisualizer] = useState<VisualizerComponent | null>(null);
+  // Browsers cache a failed module fetch for the life of the page (Chromium never
+  // retries it), so a failure is usually final for this tab and the user has to reload.
+  const [visualizerLoadError, setVisualizerLoadError] = useState(false);
+  useEffect(() => {
+    // Nothing to render it with: do not spend the download
+    if (!webgl2 || Visualizer) return;
+    let cancelled = false;
+    loadVisualizer().then(
+      (component) => {
+        if (!cancelled) setVisualizer(() => component);
+      },
+      () => {
+        if (!cancelled) setVisualizerLoadError(true);
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [webgl2, Visualizer]);
+
   const startLaunch = useCallback(() => {
     setShowLaunchAnimation(true);
     if (!useSettingsStore.getState().onboardingShown) setShowOnboarding(true);
   }, []);
 
+  // With the visualizer known to be unavailable there is nothing to start: do not open
+  // the share picker or ask for the microphone only to drop the session straight away.
+  // The start screen is already showing why.
   const handleStart = useCallback(async () => {
+    if (visualizerLoadError) return;
     const ok = await capture.startCapture();
     if (ok) startLaunch();
-  }, [capture, startLaunch]);
+  }, [capture, startLaunch, visualizerLoadError]);
 
   const handleMicCapture = useCallback(
     async (deviceId?: string) => {
+      if (visualizerLoadError) return;
       const ok = await capture.startMicCapture(deviceId);
       if (ok) startLaunch();
     },
-    [capture, startLaunch],
+    [capture, startLaunch, visualizerLoadError],
   );
 
   const handleLocalFiles = useCallback(
     (files: File[]) => {
+      if (visualizerLoadError) return;
       local.startWithFiles(files);
       startLaunch();
     },
-    [local, startLaunch],
+    [local, startLaunch, visualizerLoadError],
   );
 
   const handleAddLocalFiles = useCallback((files: File[]) => {
@@ -256,6 +296,12 @@ function MainApp() {
       local.stop();
     }
   }, [capture, local]);
+
+  // A session cannot run without it. Covers both a failure while a session waits on the
+  // download and a Start pressed after the download has already failed.
+  useEffect(() => {
+    if (visualizerLoadError && isActive && !Visualizer) handleStop();
+  }, [visualizerLoadError, isActive, Visualizer, handleStop]);
 
   const handlePresetChange = useCallback(
     (name: string) => {
@@ -575,7 +621,39 @@ function MainApp() {
 
   return (
     <main className="h-screen w-screen bg-black">
-      {isActive && audioEngine ? (
+      {isActive && audioEngine && !Visualizer ? (
+        // Start was pressed before the visualizer finished downloading
+        <div
+          role="status"
+          className="flex h-full w-full flex-col items-center justify-center gap-3 font-sans text-sm text-white/60"
+        >
+          <svg className="h-6 w-6 animate-spin text-orange-400" viewBox="0 0 24 24" fill="none">
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+            />
+          </svg>
+          {i18n.t('loadingVisualizer', { ns: 'common' })}
+          {/* A stalled download would otherwise leave no way out but a reload, with the
+              microphone live or a local file playing */}
+          <button
+            type="button"
+            onClick={handleStop}
+            className="mt-2 cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-1.5 text-xs text-white/70 hover:bg-white/10"
+          >
+            {i18n.t('cancel', { ns: 'common' })}
+          </button>
+        </div>
+      ) : isActive && audioEngine && Visualizer ? (
         <>
           <Visualizer
             audioEngine={audioEngine}
@@ -717,7 +795,10 @@ function MainApp() {
           onStart={handleStart}
           onLocalFiles={handleLocalFiles}
           onMicCapture={handleMicCapture}
-          error={capture.error}
+          error={
+            capture.error ??
+            (visualizerLoadError ? i18n.t('errors.visualizerLoadFailed', { ns: 'messages' }) : null)
+          }
           onClearError={capture.clearError}
         />
       )}

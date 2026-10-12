@@ -17,7 +17,7 @@ import {
   downloadPackExport,
   parsePackImportFile,
 } from '../utils/settingsPortability.ts';
-import { PACK_ORDER } from '../engine/VisualizerRenderer.ts';
+import { THEMATIC_PACKS } from '../data/presetThematicPacks.ts';
 import { useImportModalStore } from '../store/useImportModalStore.ts';
 import { CloseIcon } from './icons.tsx';
 import type {
@@ -586,7 +586,7 @@ export function PresetBrowser({
   }, [importedPresets, importedTextureNames]);
 
   const allPacks = useMemo(
-    () => (importedPresets.length > 0 ? [...PACK_ORDER, 'Imported'] : PACK_ORDER),
+    () => (importedPresets.length > 0 ? [...THEMATIC_PACKS, 'Imported'] : [...THEMATIC_PACKS]),
     [importedPresets.length],
   );
 
@@ -840,7 +840,9 @@ export function PresetBrowser({
           <label
             key={pack}
             title={
-              PACK_ORDER.includes(pack) ? t(`presetBrowser.packDescriptions.${pack}`) : undefined
+              (THEMATIC_PACKS as readonly string[]).includes(pack)
+                ? t(`presetBrowser.packDescriptions.${pack}`)
+                : undefined
             }
             className="flex cursor-pointer items-center gap-1 text-xs"
           >

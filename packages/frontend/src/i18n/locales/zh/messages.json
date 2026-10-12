@@ -1,5 +1,6 @@
 {
   "errors": {
+    "visualizerLoadFailed": "MangoWave 未能完成加载。请检查网络连接并重新加载页面。",
     "micDisconnected": "麦克风已断开连接。请重新连接后再开始。",
     "notAllowedSystem": "屏幕共享已取消或被拒绝。请重试并选择要共享的屏幕、窗口或标签页。",
     "notAllowedMic": "麦克风访问被拒绝。请在浏览器设置中允许麦克风访问，然后重试。",

@@ -126,10 +126,21 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Sync app to S3
+        env:
+          BUCKET: ${{ needs.deploy-backend.outputs.s3-bucket }}
         run: |
-          aws s3 sync packages/frontend/dist s3://${{ needs.deploy-backend.outputs.s3-bucket }} --delete --exclude 'landing/*'
+          # Hashed chunks go up first and are never deleted here: a tab opened
+          # before this deploy still lazy-loads the previous build's chunks.
+          # `cp` rather than `sync` so every current file is re-uploaded, which
+          # resets its LastModified (the prune step below reads it as "last
+          # deploy that shipped this file") and applies the Cache-Control header.
+          aws s3 cp packages/frontend/dist/assets "s3://${BUCKET}/assets" \
+            --recursive \
+            --cache-control "public, max-age=31536000, immutable"
+          aws s3 sync packages/frontend/dist "s3://${BUCKET}" \
+            --delete --exclude 'assets/*' --exclude 'landing/*'
           aws s3 cp packages/frontend/dist/index.html \
-            s3://${{ needs.deploy-backend.outputs.s3-bucket }}/index.html \
+            "s3://${BUCKET}/index.html" \
             --cache-control "no-store" \
             --content-type "text/html; charset=utf-8"
 
@@ -146,3 +157,12 @@ jobs:
           aws cloudfront create-invalidation \
             --distribution-id ${{ needs.deploy-backend.outputs.distribution-id }} \
             --paths "/*"
+
+      # Last, and never fatal: the new build is already live at this point.
+      - name: Prune stale hashed assets
+        env:
+          BUCKET: ${{ needs.deploy-backend.outputs.s3-bucket }}
+        run: |
+          if ! bash .github/scripts/prune-stale-assets.sh "$BUCKET" packages/frontend/dist/assets 14; then
+            echo "::warning title=Asset prune failed::Old files under assets/ were not pruned. The deploy itself succeeded; see this step's log."
+          fi

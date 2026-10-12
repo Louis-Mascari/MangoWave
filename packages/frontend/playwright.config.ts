@@ -48,15 +48,16 @@ export default defineConfig({
         ]),
   ],
 
-  // CI tests the production bundle: the dev server transforms modules on first request,
-  // which under two workers on a shared runner made unrelated tests time out at random.
-  // It also means CI exercises the code that actually ships.
+  // CI tests the production bundle, so it exercises the code that actually ships.
+  // The VITE_ values are blanked so a `CI=1` run on a developer machine does not build
+  // with that machine's .env and send real analytics or error reports.
   webServer: process.env.CI
     ? {
         command: 'npx vite build && npx vite preview --port 5173 --strictPort',
         url: 'http://localhost:5173',
         reuseExistingServer: false,
         timeout: 180_000,
+        env: { VITE_PUBLIC_POSTHOG_KEY: '', VITE_SENTRY_DSN: '', VITE_LOCKED_MODE: '' },
       }
     : {
         command: 'npm run dev',

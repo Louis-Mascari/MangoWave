@@ -62,14 +62,13 @@ test.describe('Mobile UI', () => {
   });
 
   test('tap hides visible controls', async ({ app }) => {
-    // The idle timer can hide the controls between the visibility check and the tap, in
-    // which case the tap reveals them instead. Retry from a known-visible state.
-    await expect(async () => {
-      await ensureControlsVisible(app);
-      // Tap the overlay to trigger forceIdle → controls fade out
-      await app.locator('div[role="presentation"]').dispatchEvent('click');
-      await expectControlsHidden(app, 2000);
-    }).toPass({ timeout: 20000 });
+    // Start from a fresh reveal so the idle timer is a known 5s away. Checking visibility
+    // and then tapping races that timer: if it fires in between, the tap reveals instead.
+    await expectControlsHidden(app, 20000);
+    await revealControls(app);
+    // Tap the overlay to trigger forceIdle → controls fade out, well before the 5s auto-hide
+    await app.locator('div[role="presentation"]').dispatchEvent('click');
+    await expectControlsHidden(app, 2000);
   });
 
   test('next preset triggers action', async ({ app }) => {

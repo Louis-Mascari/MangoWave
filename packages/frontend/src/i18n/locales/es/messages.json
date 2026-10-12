@@ -1,5 +1,6 @@
 {
   "errors": {
+    "visualizerLoadFailed": "MangoWave no pudo terminar de cargarse. Revisa tu conexión y recarga la página.",
     "micDisconnected": "El micrófono se desconectó. Vuelve a conectarlo e inicia de nuevo.",
     "notAllowedSystem": "Se canceló o denegó el uso compartido de pantalla. Por favor, inténtalo de nuevo y selecciona una pantalla, ventana o pestaña para compartir.",
     "notAllowedMic": "Se denegó el acceso al micrófono. Por favor, permite el acceso al micrófono en la configuración de tu navegador e inténtalo de nuevo.",

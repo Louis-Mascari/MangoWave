@@ -1,5 +1,6 @@
 {
   "errors": {
+    "visualizerLoadFailed": "MangoWave tidak dapat selesai dimuat. Periksa koneksimu dan muat ulang halaman.",
     "micDisconnected": "Mikrofon terputus. Sambungkan kembali lalu mulai lagi.",
     "notAllowedSystem": "Berbagi layar dibatalkan atau ditolak. Silakan coba lagi dan pilih layar, jendela, atau tab untuk dibagikan.",
     "notAllowedMic": "Akses mikrofon ditolak. Silakan izinkan akses mikrofon di pengaturan browser dan coba lagi.",

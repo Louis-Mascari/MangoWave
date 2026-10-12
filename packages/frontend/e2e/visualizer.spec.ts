@@ -71,4 +71,86 @@ test.describe('Visualizer', () => {
       expect(current).not.toBe(initialPreset);
     }).toPass({ timeout: 15000 });
   });
+
+  // The visualizer is its own chunk. Matches the built file and the dev-server module.
+  const VISUALIZER_CHUNK =
+    /\/(assets\/Visualizer-[^/]+\.js|src\/components\/Visualizer\.tsx)(\?.*)?$/;
+
+  test('pressing Start before the visualizer has downloaded shows a loading state', async ({
+    app,
+  }) => {
+    let release = () => {};
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await app.route(VISUALIZER_CHUNK, async (route) => {
+      await held;
+      await route.continue();
+    });
+    await app.goto('/');
+
+    await app.getByRole('button', { name: /Share Audio/ }).click();
+    await app.getByRole('button', { name: /Start Visualizer/ }).click({ force: true });
+
+    await expect(app.getByText('Loading visualizer…')).toBeVisible({ timeout: 10000 });
+    await expect(app.locator('[role="toolbar"]')).toHaveCount(0);
+
+    release();
+    await expect(app.locator('[role="toolbar"]')).toBeVisible({ timeout: 15000 });
+    await expect(app.getByText('Loading visualizer…')).toHaveCount(0);
+  });
+
+  test('a session waiting on the visualizer ends with an explanation if the download fails', async ({
+    app,
+  }) => {
+    let fail = () => {};
+    const held = new Promise<void>((resolve) => {
+      fail = resolve;
+    });
+    await app.route(VISUALIZER_CHUNK, async (route) => {
+      await held;
+      await route.abort();
+    });
+    await app.goto('/');
+
+    await app.getByRole('button', { name: /Share Audio/ }).click();
+    await app.getByRole('button', { name: /Start Visualizer/ }).click({ force: true });
+    await expect(app.getByText('Loading visualizer…')).toBeVisible({ timeout: 10000 });
+
+    fail();
+    await expect(app.locator('[data-testid="start-screen"]')).toBeVisible({ timeout: 10000 });
+    await expect(app.getByText(/could not finish loading/).first()).toBeVisible();
+  });
+
+  test('a stalled visualizer download can be cancelled', async ({ app }) => {
+    await app.route(VISUALIZER_CHUNK, () => {
+      // Never answered
+    });
+    await app.goto('/');
+
+    await app.getByRole('button', { name: /Share Audio/ }).click();
+    await app.getByRole('button', { name: /Start Visualizer/ }).click({ force: true });
+    await expect(app.getByText('Loading visualizer…')).toBeVisible({ timeout: 10000 });
+
+    await app.getByRole('button', { name: 'Cancel', exact: true }).click();
+    await expect(app.locator('[data-testid="start-screen"]')).toBeVisible({ timeout: 10000 });
+  });
+
+  test('a visualizer that cannot be downloaded is reported and no session starts', async ({
+    app,
+  }) => {
+    await app.route(VISUALIZER_CHUNK, (route) => route.abort());
+    await app.goto('/');
+
+    const message = app.getByText(/could not finish loading/);
+    await expect(message).toBeVisible({ timeout: 10000 });
+
+    await app.getByRole('button', { name: /Share Audio/ }).click();
+    await app.getByRole('button', { name: /Start Visualizer/ }).click({ force: true });
+
+    // Back on the start screen with the explanation still there, not a blank session
+    await expect(app.locator('[data-testid="start-screen"]')).toBeVisible({ timeout: 10000 });
+    await expect(app.locator('[role="toolbar"]')).toHaveCount(0);
+    await expect(message.first()).toBeVisible();
+  });
 });

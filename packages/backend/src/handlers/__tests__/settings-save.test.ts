@@ -85,10 +85,10 @@ describe('settings-save handler', () => {
     expect(result.statusCode).toBe(400);
   });
 
-  it('returns 404 if session not found', async () => {
+  it('returns 401 if the session no longer exists', async () => {
     vi.mocked(getSession).mockResolvedValue(null);
     const result = await invoke({ sessionId: 'sess_1', settings: mockSettings });
-    expect(result.statusCode).toBe(404);
+    expect(result.statusCode).toBe(401);
   });
 
   it('saves settings and returns success', async () => {

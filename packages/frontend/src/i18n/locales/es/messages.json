@@ -48,12 +48,15 @@
   "spotify": {
     "connectingToSpotify": "Conectando a Spotify...",
     "connectionFailed": "La conexión con Spotify falló. Por favor, inténtalo de nuevo. Si el problema persiste, verifica que tu cuenta haya sido agregada a los usuarios autorizados de la app.",
+    "sessionExpired": "Tu sesión de Spotify ha caducado. Vuelve a conectarte para seguir usando las funciones de Spotify.",
     "premiumRequired": "Se requiere Spotify Premium para los controles de reproducción. Aún puedes ver la información de reproducción actual y usar MangoWave con otras fuentes de audio.",
     "networkError": "No se pudo conectar con Spotify. Por favor, verifica tu conexión e inténtalo de nuevo.",
     "popupBlocked": "No se pudo abrir la ventana de inicio de sesión de Spotify. Por favor, verifica que las ventanas emergentes estén permitidas para este sitio e inténtalo de nuevo.",
     "rateLimited": "Límite de Spotify alcanzado. Reintentando en {{seconds}}s"
   },
   "toasts": {
+    "cloudSyncTooLarge": "Tus ajustes son demasiado grandes para sincronizarse con la nube. Elimina algunos packs personalizados o presets importados para reanudar la sincronización.",
+    "cloudSyncRejected": "No se pudieron sincronizar tus ajustes con la nube. Siguen guardados en este dispositivo.",
     "autopilotOn": "Autopilot activado",
     "autopilotOff": "Autopilot desactivado",
     "renderingPaused": "Rendering paused",

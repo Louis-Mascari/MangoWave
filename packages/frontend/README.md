@@ -62,7 +62,7 @@ src/
 │                  # useWindowSync (multi-window sync bridge),
 │                  # useDeviceSync (cross-device PeerJS WebRTC sync bridge)
 ├── lib/           # PostHog & Sentry init (no-op when env vars absent)
-├── services/      # Spotify Web API client (owner-mode OAuth + PKCE utilities for self-hosters),
+├── services/      # Spotify Web API client (owner-mode OAuth),
 │                  # WindowSyncService (BroadcastChannel-based multi-window sync),
 │                  # DeviceSyncService (PeerJS WebRTC cross-device sync),
 │                  # syncTypes (shared sync type definitions), syncUtils (shared sync utilities)
@@ -147,7 +147,7 @@ All are optional — the app runs fully without them. Spotify integration requir
 
 ### Spotify Integration
 
-Spotify is optional and only available in **owner mode** (backend-proxied OAuth). The hosted site's UI has no BYOC (bring your own client) option due to Spotify's dev mode limits (1 Client ID, 5 users, Premium to register). The PKCE code is retained in `services/spotifyPkce.ts` for self-hosters.
+Spotify is optional and only available in **owner mode** (backend-proxied OAuth). The hosted site's UI has no BYOC (bring your own client) option due to Spotify's dev mode limits (1 Client ID, 5 users, Premium to register).
 
 Key details:
 
@@ -155,7 +155,7 @@ Key details:
 - **`GET /me/player`** — full playback state (device name, shuffle, repeat, `disallows`) instead of `/me/player/currently-playing`
 - **`useSpotifyProgress`** — interpolates progress between 5s polls via `useSyncExternalStore` + `requestAnimationFrame` for smooth seek bar. Returns `[currentMs, setOptimistic]` — seek bar calls `setOptimistic` on pointer-up to jump immediately instead of snapping back to stale position
 - **Seek/shuffle/repeat** — `PUT /me/player/seek`, `PUT /me/player/shuffle`, `PUT /me/player/repeat`. `disallows` field parsed from player state (available for future UI hints but not used as action guards — stale poll data would block valid actions)
-- **Error handling** — 403 responses parsed via `handleForbidden`: only `PREMIUM_REQUIRED` reason sets `premiumError` flag; other 403s show generic toast. 401 triggers `withTokenRetry` (refresh + single retry). Token refresh centralized in `useSpotifyStore.refreshAccessToken` (owner + BYOC)
+- **Error handling** — 403 responses parsed via `handleForbidden`: only `PREMIUM_REQUIRED` reason sets `premiumError` flag; other 403s show generic toast. 401 triggers `withTokenRetry` (refresh + single retry). Token refresh centralized in `useSpotifyStore.refreshAccessToken`
 - **Polling** — 5s interval via `useNowPlaying`, only active when visualizer is running (`isSpotifyConnected && isActive`). No API calls on the start screen
 - **Auth mode** — UI branches on `authMode === 'owner'` (not `isSpotifyUnlocked`)
 - **Connect button** — click guard (`isConnecting` state) prevents double-auth

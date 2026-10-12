@@ -10,12 +10,10 @@ const REPOLL_DELAY_MS = 500;
  * while the user is authenticated and enabled is true.
  * Also supports on-demand re-poll via pollRequestedAt in the store.
  * Skips polls when rate limited and schedules auto-clear.
- * Supports both owner (backend) and BYOC (PKCE) token refresh.
  */
 export function useNowPlaying(enabled: boolean) {
   const accessToken = useSpotifyStore((s) => s.accessToken);
   const sessionId = useSpotifyStore((s) => s.sessionId);
-  const byocClientId = useSpotifyStore((s) => s.byocClientId);
   const isRateLimited = useSpotifyStore((s) => s.isRateLimited);
   const setNowPlaying = useSpotifyStore((s) => s.setNowPlaying);
   const refreshAccessToken = useSpotifyStore((s) => s.refreshAccessToken);
@@ -27,8 +25,7 @@ export function useNowPlaying(enabled: boolean) {
   const tokenRef = useRef(accessToken);
   const isRateLimitedRef = useRef(isRateLimited);
 
-  // Either owner (sessionId) or BYOC (byocClientId) auth must be present
-  const hasAuth = !!(sessionId || byocClientId);
+  const hasAuth = !!sessionId;
 
   // Keep refs in sync so poll() always uses the latest values
   useEffect(() => {

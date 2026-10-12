@@ -56,8 +56,6 @@ Spotify's dev mode policy (as of March 2026) limits each developer app to 1 Clie
 6. Frontend uses the access token, auto-refreshes via `POST /auth/refresh`
 7. If Spotify rotates the refresh token during a refresh, the new token is stored automatically
 
-A PKCE-based flow also exists in the frontend code (`spotifyPkce.ts`) for self-hosters who want to use their own Spotify developer app without a backend proxy, but the UI for it has been removed from the hosted site.
-
 ## Settings Sync
 
 Authenticated users can sync all visualizer settings to the cloud via `settings-save` / `settings-load`. The synced payload mirrors the frontend Zustand store:

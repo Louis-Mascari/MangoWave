@@ -178,6 +178,25 @@ describe('useDeviceSync', () => {
     expect(useSettingsStore.getState().eq.preAmpGain).not.toBe(2.0);
   });
 
+  it('enables two-way settings sync however a room is entered', async () => {
+    const rendererRef = { current: createMockRenderer() as unknown as VisualizerRenderer };
+    const resetAutopilotRef = { current: vi.fn() };
+    const { result } = renderHook(() => useDeviceSync(rendererRef, resetAutopilotRef));
+
+    // The QR link calls joinRoom directly, without the settings panel's toggle
+    expect(useSettingsStore.getState().deviceSyncEnabled).toBe(false);
+    await act(async () => {
+      await result.current.joinRoom('MANGO-ABCD');
+    });
+    expect(useSettingsStore.getState().deviceSyncEnabled).toBe(true);
+
+    act(() => useSettingsStore.getState().setAutopilotInterval(45));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000);
+    });
+    expect(mockSendSettingsChange).toHaveBeenCalled();
+  });
+
   it('cleans up service on leave', async () => {
     const renderer = createMockRenderer();
     const rendererRef = { current: renderer as unknown as VisualizerRenderer };

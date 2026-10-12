@@ -1,5 +1,6 @@
 {
   "errors": {
+    "micDisconnected": "The microphone was disconnected. Reconnect it and start again.",
     "notAllowedSystem": "Screen sharing was cancelled or denied. Please try again and select a screen, window, or tab to share.",
     "notAllowedMic": "Microphone access was denied. Please allow microphone access in your browser settings and try again.",
     "notFoundSystem": "No screen or window was available to share. Please make sure a display is connected and try again.",

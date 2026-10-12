@@ -130,6 +130,11 @@ export class AudioEngine {
     }
   }
 
+  /** The capture stream feeding the pipeline (screen share or microphone), if any. */
+  getStream(): MediaStream | null {
+    return this.stream;
+  }
+
   async initFromMicrophone(deviceId?: string): Promise<void> {
     if (!navigator.mediaDevices?.getUserMedia) {
       throw new DOMException(

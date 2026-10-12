@@ -2,15 +2,13 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { SpotifyUser, NowPlayingTrack } from '../services/spotifyApi.ts';
 import { refreshToken, SessionExpiredError } from '../services/spotifyApi.ts';
-import { refreshTokenPkce } from '../services/spotifyPkce.ts';
 
-export type AuthMode = 'owner' | 'byoc' | 'locked';
+export type AuthMode = 'owner' | 'locked';
 
 interface SpotifyState {
-  // Persisted (localStorage) — session identity + BYOC + unlock
+  // Persisted (localStorage) — session identity + unlock
   sessionId: string | null;
   isSpotifyUnlocked: boolean;
-  byocClientId: string | null;
 
   // Session-only (not persisted) — set after auth or refresh
   accessToken: string | null;
@@ -18,7 +16,6 @@ interface SpotifyState {
   user: SpotifyUser | null;
   nowPlaying: NowPlayingTrack | null;
   premiumError: boolean;
-  byocRefreshToken: string | null;
 
   // Rate limiting (session-only)
   isRateLimited: boolean;
@@ -37,14 +34,6 @@ interface SpotifyState {
   setRateLimited: (retryAfterMs: number) => void;
   clearRateLimited: () => void;
   setUnlocked: () => void;
-  setByocClientId: (id: string | null) => void;
-  setByocAuth: (
-    accessToken: string,
-    expiresIn: number,
-    refreshToken: string,
-    user: SpotifyUser,
-  ) => void;
-  setByocRefreshToken: (token: string) => void;
   getAuthMode: () => AuthMode;
   logout: () => void;
   isTokenValid: () => boolean;
@@ -56,13 +45,11 @@ export const useSpotifyStore = create<SpotifyState>()(
     (set, get) => ({
       sessionId: null,
       isSpotifyUnlocked: false,
-      byocClientId: null,
       accessToken: null,
       tokenExpiresAt: null,
       user: null,
       nowPlaying: null,
       premiumError: false,
-      byocRefreshToken: null,
       isRateLimited: false,
       rateLimitResetsAt: null,
       pollRequestedAt: 0,
@@ -107,25 +94,9 @@ export const useSpotifyStore = create<SpotifyState>()(
 
       setUnlocked: () => set({ isSpotifyUnlocked: true }),
 
-      setByocClientId: (id) => set({ byocClientId: id }),
-
-      setByocAuth: (accessToken, expiresIn, refreshToken, user) =>
-        set({
-          accessToken,
-          tokenExpiresAt: Date.now() + expiresIn * 1000,
-          byocRefreshToken: refreshToken,
-          user,
-          premiumError: false,
-        }),
-
-      setByocRefreshToken: (token) => set({ byocRefreshToken: token }),
-
       getAuthMode: () => {
-        const { isSpotifyUnlocked, byocClientId } = get();
         if (import.meta.env.VITE_LOCKED_MODE !== 'true') return 'owner';
-        if (isSpotifyUnlocked) return 'owner';
-        if (byocClientId) return 'byoc';
-        return 'locked';
+        return get().isSpotifyUnlocked ? 'owner' : 'locked';
       },
 
       logout: () =>
@@ -136,24 +107,15 @@ export const useSpotifyStore = create<SpotifyState>()(
           user: null,
           nowPlaying: null,
           premiumError: false,
-          byocRefreshToken: null,
           isRateLimited: false,
           rateLimitResetsAt: null,
           pollRequestedAt: 0,
         }),
 
       refreshAccessToken: async () => {
-        const { sessionId, byocClientId, byocRefreshToken: byocRefresh } = get();
+        const { sessionId } = get();
         try {
-          if (byocClientId && byocRefresh) {
-            const result = await refreshTokenPkce(byocClientId, byocRefresh);
-            set({
-              accessToken: result.accessToken,
-              tokenExpiresAt: Date.now() + result.expiresIn * 1000,
-              byocRefreshToken: result.refreshToken,
-            });
-            return result.accessToken;
-          } else if (sessionId) {
+          if (sessionId) {
             const result = await refreshToken(sessionId);
             set({
               accessToken: result.accessToken,
@@ -184,7 +146,6 @@ export const useSpotifyStore = create<SpotifyState>()(
       partialize: (state) => ({
         sessionId: state.sessionId,
         isSpotifyUnlocked: state.isSpotifyUnlocked,
-        byocClientId: state.byocClientId,
       }),
     },
   ),

@@ -48,9 +48,19 @@ export default defineConfig({
         ]),
   ],
 
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
-  },
+  // CI tests the production bundle: the dev server transforms modules on first request,
+  // which under two workers on a shared runner made unrelated tests time out at random.
+  // It also means CI exercises the code that actually ships.
+  webServer: process.env.CI
+    ? {
+        command: 'npx vite build && npx vite preview --port 5173 --strictPort',
+        url: 'http://localhost:5173',
+        reuseExistingServer: false,
+        timeout: 180_000,
+      }
+    : {
+        command: 'npm run dev',
+        url: 'http://localhost:5173',
+        reuseExistingServer: true,
+      },
 });

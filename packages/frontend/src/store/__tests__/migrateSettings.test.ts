@@ -12,6 +12,10 @@ describe('migrateSettings', () => {
     expect(useSettingsStore.persist.getOptions().version).toBe(17);
   });
 
+  it('is the function the store actually migrates with', () => {
+    expect(useSettingsStore.persist.getOptions().migrate).toBe(migrateSettings);
+  });
+
   it('v0: turns favoritesOnly into a mode and drops removed pack fields', () => {
     const fromFavorites = migrate({ autopilot: { favoritesOnly: true, packId: 'x' } }, 0);
     expect(fromFavorites.autopilot).toEqual({ mode: 'favorites', favoriteWeight: 2 });
@@ -79,6 +83,21 @@ describe('migrateSettings', () => {
     const state = migrate({ windowSyncEnabled: true, customPacks: [pack] }, 6);
     expect(state.windowSyncEnabled).toBe(true);
     expect(state.customPacks).toEqual([pack]);
+  });
+
+  it('v10: adds the MilkDrop pack to an existing selection, which v11 then remaps', () => {
+    // 'Imported' alone has no old pack name, so only the v10 step can change it
+    expect(migrate({ enabledPacks: ['Imported'] }, 10).enabledPacks).toEqual([
+      ...THEMATIC_PACKS,
+      'Imported',
+    ]);
+    expect(migrate({ enabledPacks: ['Imported'] }, 11).enabledPacks).toEqual(['Imported']);
+  });
+
+  it('v4: only the exact old mobile preset is reset', () => {
+    const almost = { fpsCap: 30, resolutionScale: 0.75, meshWidth: 32, meshHeight: 24 };
+    const state = migrate({ performance: { ...almost, textureRatio: 1.0 } }, 4);
+    expect(state.performance).toMatchObject({ ...almost, textureRatio: 1.0 });
   });
 
   it('v11: replaces the old source-based pack names with every thematic pack', () => {

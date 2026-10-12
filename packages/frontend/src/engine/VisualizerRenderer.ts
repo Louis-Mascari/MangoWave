@@ -7,7 +7,7 @@ import {
   presetsExtra2,
   presetsMD1,
 } from 'butterchurn-presets';
-import { THEMATIC_PACKS, presetThematicMap } from '../data/presetThematicPacks.ts';
+import { presetThematicMap } from '../data/presetThematicPacks.ts';
 import { initOptimizer } from 'glsl-optimizer-wasm';
 import { QualityMonitor } from './QualityMonitor.ts';
 import type { QualityChangeCallback } from './QualityMonitor.ts';
@@ -65,9 +65,6 @@ const PACK_SOURCES = [
   presetsExtra2,
   presetsMD1,
 ] as const;
-
-/** Authoritative pack display order — thematic packs derived from preset classification. */
-export const PACK_ORDER: string[] = [...THEMATIC_PACKS];
 
 export class VisualizerRenderer {
   private visualizer: ReturnType<typeof butterchurn.createVisualizer> | null = null;

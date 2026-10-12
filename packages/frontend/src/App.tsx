@@ -20,7 +20,6 @@ import { useFullscreen } from './hooks/useFullscreen.ts';
 import { useSpotifyPlayback } from './hooks/useSpotifyPlayback.ts';
 import { usePlaybackAdapter } from './hooks/usePlaybackAdapter.ts';
 import { usePresetNavigation } from './hooks/usePresetNavigation.ts';
-import { Visualizer } from './components/Visualizer.tsx';
 import { ControlBar } from './components/ControlBar.tsx';
 import type { PanelView } from './components/ControlBar.tsx';
 import { PresetNotification } from './components/PresetNotification.tsx';
@@ -70,6 +69,25 @@ function OAuthPopup() {
 // DEV-ONLY: shader diagnostics for QA (tree-shaken from production builds)
 if (import.meta.env.DEV) {
   installShaderDiagnostics();
+}
+
+type VisualizerComponent = (typeof import('./components/Visualizer.tsx'))['Visualizer'];
+
+// The visualizer (renderer, bundled presets, GLSL optimizer) is most of the bundle and is
+// only needed once a session starts, so it is not in the entry chunk. The start screen
+// loads it in the background, which also keeps its module-level pre-warming (texture
+// decode, optimizer init) happening before the user presses Start. A failed load is not
+// cached, so the next call retries.
+let visualizerPromise: Promise<VisualizerComponent> | null = null;
+function loadVisualizer(): Promise<VisualizerComponent> {
+  visualizerPromise ??= import('./components/Visualizer.tsx').then(
+    (module) => module.Visualizer,
+    (err: unknown) => {
+      visualizerPromise = null;
+      throw err;
+    },
+  );
+  return visualizerPromise;
 }
 
 function App() {
@@ -261,6 +279,31 @@ function MainApp() {
       local.stop();
     }
   }, [capture, local]);
+
+  // Held in state rather than React.lazy: a rejected lazy import is cached and would
+  // take down the whole tree through the error boundary while audio capture is live.
+  const [Visualizer, setVisualizer] = useState<VisualizerComponent | null>(null);
+  useEffect(() => {
+    if (Visualizer) return;
+    let cancelled = false;
+    loadVisualizer().then(
+      (component) => {
+        if (!cancelled) setVisualizer(() => component);
+      },
+      () => {
+        // Pre-loading from the start screen can fail quietly; it is retried on Start.
+        // Failing with a session running cannot: end it and say so.
+        if (cancelled || !isActive) return;
+        handleStop();
+        useToastStore
+          .getState()
+          .show(i18n.t('errors.unexpectedError', { ns: 'messages' }), { type: 'error' });
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [Visualizer, isActive, handleStop]);
 
   const handlePresetChange = useCallback(
     (name: string) => {
@@ -582,15 +625,17 @@ function MainApp() {
     <main className="h-screen w-screen bg-black">
       {isActive && audioEngine ? (
         <>
-          <Visualizer
-            audioEngine={audioEngine}
-            rendererRef={rendererRef}
-            onPresetChange={handlePresetChange}
-            onPresetsLoaded={handlePresetsLoaded}
-            onToggleFullscreen={handleToggleFullscreen}
-            onContextLost={handleWebGLContextLost}
-            renderPaused={renderPaused}
-          />
+          {Visualizer && (
+            <Visualizer
+              audioEngine={audioEngine}
+              rendererRef={rendererRef}
+              onPresetChange={handlePresetChange}
+              onPresetsLoaded={handlePresetsLoaded}
+              onToggleFullscreen={handleToggleFullscreen}
+              onContextLost={handleWebGLContextLost}
+              renderPaused={renderPaused}
+            />
+          )}
           {brightness < 1 && (
             <div
               className="pointer-events-none fixed inset-0 z-[1] bg-black"

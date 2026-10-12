@@ -17,8 +17,7 @@ import {
   downloadPackExport,
   parsePackImportFile,
 } from '../utils/settingsPortability.ts';
-import { PACK_ORDER } from '../engine/VisualizerRenderer.ts';
-import { PACK_DESCRIPTIONS } from '../data/presetThematicPacks.ts';
+import { PACK_DESCRIPTIONS, THEMATIC_PACKS } from '../data/presetThematicPacks.ts';
 import { useImportModalStore } from '../store/useImportModalStore.ts';
 import { CloseIcon } from './icons.tsx';
 import type {
@@ -587,7 +586,7 @@ export function PresetBrowser({
   }, [importedPresets, importedTextureNames]);
 
   const allPacks = useMemo(
-    () => (importedPresets.length > 0 ? [...PACK_ORDER, 'Imported'] : PACK_ORDER),
+    () => (importedPresets.length > 0 ? [...THEMATIC_PACKS, 'Imported'] : [...THEMATIC_PACKS]),
     [importedPresets.length],
   );
 

@@ -1,0 +1,15 @@
+name: MangoWave CodeQL config
+
+# Vendored, generated or bundled third-party code. Findings there are not
+# actionable in this repo and would drown out findings in our own source.
+paths-ignore:
+  # Vendored Mesa GLSL optimizer (C/C++) and its committed Emscripten build
+  - packages/glsl-optimizer-wasm/**
+  # Vendored HLSL parser and its committed Emscripten build
+  - packages/hlslparser-wasm/**
+  # Prebuilt bundles; the forked source in packages/butterchurn/src is analysed
+  - packages/butterchurn/lib/**
+  - packages/butterchurn-presets/lib/**
+  # Converted preset data and bundled texture assets
+  - packages/milkdrop-presets/**
+  - packages/milkdrop-textures/**

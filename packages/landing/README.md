@@ -17,7 +17,7 @@ landing/
 ├── favicon.ico      # Browser tab icon
 ├── images/          # Visual assets
 │   ├── logo.png     # MangoWave logo (transparent background)
-│   ├── howling.png  # Background dog image (subtle opacity layer)
+│   ├── howling.webp # Background dog image (subtle opacity layer)
 │   └── social-card.png  # 1200×630 OG/Twitter social share image
 └── icons/           # Favicons and touch icons
     ├── apple-touch-icon.png

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import howlingSrc from '../assets/howling.png';
+import howlingSrc from '../assets/howling.webp';
 
 export const LAUNCH_DURATION_MS = 2500;
 /** Time at which the overlay is translucent enough for clicks to pass through.

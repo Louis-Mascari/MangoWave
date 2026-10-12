@@ -72,6 +72,20 @@ describe('validateSettings', () => {
     }
   });
 
+  it('keeps a boolean eqSettings.autoGain and drops any other type', () => {
+    const kept = validateSettings({
+      ...validSettings,
+      eqSettings: { ...validSettings.eqSettings, autoGain: false },
+    });
+    expect(kept.valid && kept.settings.eqSettings.autoGain).toBe(false);
+
+    const dropped = validateSettings({
+      ...validSettings,
+      eqSettings: { ...validSettings.eqSettings, autoGain: 'yes' },
+    });
+    expect(dropped.valid && 'autoGain' in dropped.settings.eqSettings).toBe(false);
+  });
+
   // Performance
   it('clamps performance values to valid ranges', () => {
     const result = validateSettings({

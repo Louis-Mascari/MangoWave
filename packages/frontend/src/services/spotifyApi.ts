@@ -93,8 +93,8 @@ export async function refreshToken(
     body: JSON.stringify({ sessionId }),
   });
 
-  // 401 means the refresh token is expired/revoked — the backend has already
-  // discarded it. Signal a permanent failure so the caller logs out and
+  // 401 means the session is gone: the refresh token expired or was revoked (the
+  // backend has already discarded it), or the stored session itself has lapsed. Signal a permanent failure so the caller logs out and
   // prompts re-auth. Any other non-ok status is transient (retry later).
   if (response.status === 401) {
     throw new SessionExpiredError();
@@ -305,6 +305,13 @@ export async function saveSettings(sessionId: string, settings: CloudSettings): 
     body: JSON.stringify({ sessionId, settings }),
   });
 
+  if (response.status === 401) {
+    throw new SessionExpiredError();
+  }
+  // The backend rejects these deterministically, so retrying the same settings cannot help
+  if (response.status === 400 || response.status === 413) {
+    throw new SettingsRejectedError(response.status);
+  }
   if (!response.ok) {
     throw new Error('Failed to save settings');
   }
@@ -318,6 +325,9 @@ export async function loadSettings(sessionId: string): Promise<CloudSettings | n
     body: JSON.stringify({ sessionId }),
   });
 
+  if (response.status === 401) {
+    throw new SessionExpiredError();
+  }
   if (!response.ok) {
     throw new Error('Failed to load settings');
   }
@@ -342,6 +352,16 @@ export class SessionExpiredError extends Error {
   constructor() {
     super('Spotify session expired');
     this.name = 'SessionExpiredError';
+  }
+}
+
+/** The backend refused these settings (400 invalid, 413 too large). Not retryable. */
+export class SettingsRejectedError extends Error {
+  readonly status: number;
+  constructor(status: number) {
+    super(`Settings rejected by the server (${status})`);
+    this.name = 'SettingsRejectedError';
+    this.status = status;
   }
 }
 

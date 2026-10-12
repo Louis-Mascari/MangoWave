@@ -48,12 +48,15 @@
   "spotify": {
     "connectingToSpotify": "正在连接 Spotify...",
     "connectionFailed": "Spotify 连接失败。请重试。如果问题持续存在，请检查你的账户是否已添加到应用的授权用户中。",
+    "sessionExpired": "你的 Spotify 会话已过期。请重新连接以继续使用 Spotify 功能。",
     "premiumRequired": "播放控制需要 Spotify Premium。你仍可以查看正在播放的信息，并使用其他音频来源与 MangoWave 配合使用。",
     "networkError": "无法连接到 Spotify。请检查你的网络连接后重试。",
     "popupBlocked": "无法打开 Spotify 登录窗口。请检查是否允许此站点弹出窗口，然后重试。",
     "rateLimited": "Spotify 请求频率受限。将在 {{seconds}}s 后重试"
   },
   "toasts": {
+    "cloudSyncTooLarge": "你的设置过大，无法同步到云端。请删除一些自定义预设包或导入的预设以恢复同步。",
+    "cloudSyncRejected": "无法将你的设置同步到云端。设置仍保存在此设备上。",
     "autopilotOn": "自动播放已开启",
     "autopilotOff": "自动播放已关闭",
     "renderingPaused": "Rendering paused",

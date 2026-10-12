@@ -4,12 +4,20 @@ import { useSpotifyStore } from '../../store/useSpotifyStore.ts';
 import { useSettingsStore } from '../../store/useSettingsStore.ts';
 import { useSettingsSync } from '../useSettingsSync.ts';
 
-vi.mock('../../services/spotifyApi.ts', () => ({
-  saveSettings: vi.fn(),
-  loadSettings: vi.fn(),
-}));
+vi.mock('../../services/spotifyApi.ts', async () => {
+  const actual = await vi.importActual<typeof import('../../services/spotifyApi.ts')>(
+    '../../services/spotifyApi.ts',
+  );
+  return { ...actual, saveSettings: vi.fn(), loadSettings: vi.fn() };
+});
 
-import { saveSettings, loadSettings } from '../../services/spotifyApi.ts';
+import {
+  saveSettings,
+  loadSettings,
+  SessionExpiredError,
+  SettingsRejectedError,
+} from '../../services/spotifyApi.ts';
+import { useToastStore } from '../../store/useToastStore.ts';
 
 describe('useSettingsSync', () => {
   beforeEach(() => {
@@ -138,5 +146,47 @@ describe('useSettingsSync', () => {
         transitionTime: 4.0,
       }),
     );
+  });
+
+  it('logs out and says why when the cloud session has expired', async () => {
+    vi.mocked(loadSettings).mockRejectedValue(new SessionExpiredError());
+    useSpotifyStore.setState({ sessionId: 'sess_dead' });
+
+    renderHook(() => useSettingsSync());
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(useSpotifyStore.getState().sessionId).toBeNull();
+    expect(useToastStore.getState().message).toContain('session has expired');
+  });
+
+  it('tells the user once when a save is rejected as too large', async () => {
+    vi.mocked(loadSettings).mockResolvedValue(null);
+    vi.mocked(saveSettings).mockRejectedValue(new SettingsRejectedError(413));
+    const show = vi.spyOn(useToastStore.getState(), 'show');
+    useSpotifyStore.setState({ sessionId: 'sess_1' });
+
+    renderHook(() => useSettingsSync());
+    await vi.advanceTimersByTimeAsync(0);
+    useSettingsStore.setState({ transitionTime: 5 });
+    await vi.advanceTimersByTimeAsync(2500);
+
+    expect(saveSettings).toHaveBeenCalledTimes(2);
+    expect(show).toHaveBeenCalledTimes(1);
+    expect(show.mock.calls[0][0]).toContain('too large');
+    // Still signed in: only the save is refused
+    expect(useSpotifyStore.getState().sessionId).toBe('sess_1');
+  });
+
+  it('keeps the session and stays quiet on a transient failure', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.mocked(loadSettings).mockRejectedValue(new Error('network'));
+    const show = vi.spyOn(useToastStore.getState(), 'show');
+    useSpotifyStore.setState({ sessionId: 'sess_1' });
+
+    renderHook(() => useSettingsSync());
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(useSpotifyStore.getState().sessionId).toBe('sess_1');
+    expect(show).not.toHaveBeenCalled();
   });
 });

@@ -32,7 +32,9 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
   try {
     const session = await getSession(sessionId);
     if (!session) {
-      return errorResponse(404, 'No stored session found. Please re-authenticate.');
+      // 401, not 404: the client treats 401 as "session gone, reconnect", and a 404
+      // is also what API Gateway returns for an unknown route
+      return errorResponse(401, 'Session expired. Please reconnect.');
     }
 
     await storeUserSettings(session.spotifyUserId, result.settings);

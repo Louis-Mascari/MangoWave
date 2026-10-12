@@ -75,11 +75,39 @@ export async function updateSessionToken(sessionId: string, refreshToken: string
         SK: 'AUTH',
       },
       UpdateExpression: 'SET refreshToken = :rt, updatedAt = :ua, #ttl = :ttl',
+      // Never recreate a session that expired or was deleted while this request ran
+      ConditionExpression: 'attribute_exists(PK)',
       ExpressionAttributeNames: {
         '#ttl': 'ttl',
       },
       ExpressionAttributeValues: {
         ':rt': refreshToken,
+        ':ua': new Date().toISOString(),
+        ':ttl': ttlEpoch(),
+      },
+    }),
+  );
+}
+
+/**
+ * Push the session's expiry out without touching its token, so an active user is not
+ * logged out by the TTL alone. Leaves the token alone on purpose: a concurrent refresh
+ * may have rotated it, and writing back the one this request read would undo that.
+ */
+export async function extendSessionTtl(sessionId: string): Promise<void> {
+  await docClient.send(
+    new UpdateCommand({
+      TableName: getTableName(),
+      Key: {
+        PK: `SESSION#${sessionId}`,
+        SK: 'AUTH',
+      },
+      UpdateExpression: 'SET updatedAt = :ua, #ttl = :ttl',
+      ConditionExpression: 'attribute_exists(PK)',
+      ExpressionAttributeNames: {
+        '#ttl': 'ttl',
+      },
+      ExpressionAttributeValues: {
         ':ua': new Date().toISOString(),
         ':ttl': ttlEpoch(),
       },
@@ -133,6 +161,7 @@ export interface UserSettings {
   eqSettings: {
     preAmpGain: number;
     bandGains: number[];
+    autoGain?: boolean;
   };
   audio: AudioSettings;
   autopilot: AutopilotSettings;

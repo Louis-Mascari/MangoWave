@@ -179,8 +179,6 @@ describe('useSpotifyStore', () => {
         sessionId: 'sess_abc',
         accessToken: 'at_old',
         tokenExpiresAt: Date.now() - 1000,
-        byocClientId: null,
-        byocRefreshToken: null,
       });
     });
 

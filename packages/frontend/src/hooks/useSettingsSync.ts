@@ -10,6 +10,7 @@ import {
   SettingsRejectedError,
 } from '../services/spotifyApi.ts';
 import type { CloudSettings } from '../services/spotifyApi.ts';
+import { mergeInboundEq, mergeInboundPerformance, outboundKey } from '../services/syncUtils.ts';
 import i18n from '../i18n/index.ts';
 
 const DEBOUNCE_MS = 2000;
@@ -54,15 +55,12 @@ function getSettingsSnapshot(): CloudSettings {
 }
 
 function applyCloudSettings(cloud: CloudSettings): void {
+  const current = useSettingsStore.getState();
   useSettingsStore.setState({
-    ...(cloud.performance && { performance: { ...cloud.performance } }),
-    ...(cloud.eqSettings && {
-      eq: {
-        preAmpGain: cloud.eqSettings.preAmpGain,
-        bandGains: [...cloud.eqSettings.bandGains],
-        autoGain: cloud.eqSettings.autoGain ?? useSettingsStore.getState().eq.autoGain,
-      },
+    ...(cloud.performance && {
+      performance: mergeInboundPerformance(current.performance, cloud.performance),
     }),
+    ...(cloud.eqSettings && { eq: mergeInboundEq(current.eq, cloud.eqSettings) }),
     ...(cloud.audio && { audio: { ...cloud.audio } }),
     ...(cloud.autopilot && { autopilot: { ...cloud.autopilot } }),
     ...(cloud.transitionTime !== undefined && { transitionTime: cloud.transitionTime }),
@@ -133,6 +131,7 @@ export function useSettingsSync() {
   // A rejected save repeats on every settings change until the settings shrink, so tell
   // the user once rather than on each attempt
   const rejectionShownRef = useRef(false);
+  const lastSavedKeyRef = useRef<string | null>(null);
   const onSyncError = useCallback(
     (err: unknown) => {
       if (sessionId) handleSyncError(err, sessionId, rejectionShownRef);
@@ -148,6 +147,7 @@ export function useSettingsSync() {
     }
     // A new login starts fresh: it may be a different account with different settings
     rejectionShownRef.current = false;
+    lastSavedKeyRef.current = null;
 
     if (hasSyncedRef.current) return;
     hasSyncedRef.current = true;
@@ -180,12 +180,20 @@ export function useSettingsSync() {
 
       debounceTimerRef.current = setTimeout(() => {
         const snapshot = getSettingsSnapshot();
+        const key = outboundKey(snapshot);
+        if (key === lastSavedKeyRef.current) return;
         saveSettings(sessionId, snapshot)
           .then(() => {
+            lastSavedKeyRef.current = key;
             // Accepted again, so a later rejection is news worth telling
             rejectionShownRef.current = false;
           })
-          .catch(onSyncError);
+          .catch((err: unknown) => {
+            // A transient failure leaves the key unset so the next change retries. A
+            // rejection is final for these exact settings; sending them again cannot help.
+            if (err instanceof SettingsRejectedError) lastSavedKeyRef.current = key;
+            onSyncError(err);
+          });
       }, DEBOUNCE_MS);
     });
 

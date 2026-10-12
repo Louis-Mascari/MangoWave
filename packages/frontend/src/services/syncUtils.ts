@@ -1,6 +1,7 @@
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useImportedPresetsStore } from '../store/useImportedPresetsStore.ts';
 import { useImportedTexturesStore } from '../store/useImportedTexturesStore.ts';
+import type { EQSettings, PerformanceSettings } from '../store/useSettingsStore.ts';
 import type { SyncableSettings } from './syncTypes.ts';
 import {
   sanitizeAudio,
@@ -8,6 +9,61 @@ import {
   sanitizeEQ,
   sanitizePerformance,
 } from '../utils/settingsPortability.ts';
+
+// Auto Gain and Auto Quality tune these values to each device's own audio level and
+// GPU load, so while an auto mode is on they are not shared: the receiver keeps its own
+// value, and a change to them alone is not worth sending.
+const QUALITY_KEYS = ['meshWidth', 'meshHeight', 'textureRatio', 'resolutionScale'] as const;
+
+/** Merge inbound performance settings over local ones, keeping local Auto Quality values. */
+export function mergeInboundPerformance(
+  local: PerformanceSettings,
+  inbound: Partial<PerformanceSettings>,
+): PerformanceSettings {
+  const merged = { ...local, ...inbound };
+  if (merged.autoQuality) {
+    for (const key of QUALITY_KEYS) merged[key] = local[key];
+  }
+  return merged;
+}
+
+/** Merge inbound EQ settings over local ones, keeping the local Auto Gain value. */
+export function mergeInboundEq(local: EQSettings, inbound: Partial<EQSettings>): EQSettings {
+  const merged = {
+    ...local,
+    ...inbound,
+    bandGains: [...(inbound.bandGains ?? local.bandGains)],
+  };
+  if (merged.autoGain) merged.preAmpGain = local.preAmpGain;
+  return merged;
+}
+
+/**
+ * Identity of an outbound snapshot with auto-driven values ignored. Senders skip a
+ * snapshot whose key matches the last one sent, so an Auto Gain or Auto Quality step
+ * does not broadcast the whole settings state (or cost a cloud save) every few seconds.
+ */
+export function outboundKey(snapshot: {
+  performance?: PerformanceSettings;
+  eq?: EQSettings;
+  eqSettings?: Partial<EQSettings>;
+}): string {
+  const { performance } = snapshot;
+  const eq = snapshot.eq ?? snapshot.eqSettings;
+  return JSON.stringify({
+    ...snapshot,
+    ...(performance?.autoQuality && {
+      performance: {
+        ...performance,
+        meshWidth: 0,
+        meshHeight: 0,
+        textureRatio: 0,
+        resolutionScale: 0,
+      },
+    }),
+    ...(eq?.autoGain && { eq: { ...eq, preAmpGain: 0 }, eqSettings: undefined }),
+  });
+}
 
 /** Snapshot the syncable subset of settings from the store. */
 export function getSettingsSnapshot(): SyncableSettings {
@@ -61,20 +117,16 @@ export function getSettingsSnapshot(): SyncableSettings {
  */
 export function applyInboundSettings(settings: SyncableSettings): void {
   // Apply syncPerformance first so the performance gate uses the incoming value
+  const current = useSettingsStore.getState();
   const syncPerf =
-    settings.syncPerformance !== undefined
-      ? settings.syncPerformance
-      : useSettingsStore.getState().syncPerformance;
+    settings.syncPerformance !== undefined ? settings.syncPerformance : current.syncPerformance;
   useSettingsStore.setState({
     ...(settings.syncPerformance !== undefined && { syncPerformance: settings.syncPerformance }),
-    ...(syncPerf && settings.performance && { performance: { ...settings.performance } }),
-    ...(settings.eq && {
-      eq: {
-        preAmpGain: settings.eq.preAmpGain,
-        bandGains: [...settings.eq.bandGains],
-        autoGain: settings.eq.autoGain ?? useSettingsStore.getState().eq.autoGain,
-      },
-    }),
+    ...(syncPerf &&
+      settings.performance && {
+        performance: mergeInboundPerformance(current.performance, settings.performance),
+      }),
+    ...(settings.eq && { eq: mergeInboundEq(current.eq, settings.eq) }),
     ...(settings.audio && { audio: { ...settings.audio } }),
     ...(settings.autopilot && { autopilot: { ...settings.autopilot } }),
     ...(settings.transitionTime !== undefined && { transitionTime: settings.transitionTime }),
@@ -148,8 +200,10 @@ export function applyDeviceSyncSettings(settings: SyncableSettings): void {
     ...(typeof settings.syncPerformance === 'boolean' && {
       syncPerformance: settings.syncPerformance,
     }),
-    ...(performance && { performance: { ...current.performance, ...performance } }),
-    ...(eq && { eq: { ...current.eq, ...eq } }),
+    ...(performance && {
+      performance: mergeInboundPerformance(current.performance, performance),
+    }),
+    ...(eq && { eq: mergeInboundEq(current.eq, eq) }),
     ...(audio && { audio: { ...current.audio, ...audio } }),
     ...(autopilot && { autopilot: { ...current.autopilot, ...autopilot } }),
     ...(typeof brightness === 'number' && brightness >= 0.1 && brightness <= 1.0 && { brightness }),

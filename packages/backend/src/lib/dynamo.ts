@@ -133,6 +133,7 @@ export interface UserSettings {
   eqSettings: {
     preAmpGain: number;
     bandGains: number[];
+    autoGain?: boolean;
   };
   audio: AudioSettings;
   autopilot: AutopilotSettings;

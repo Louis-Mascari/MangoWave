@@ -2,14 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import { exchangeCode, refreshToken, SessionExpiredError } from '../services/spotifyApi.ts';
-
-/**
- * Handles the OAuth callback (code in URL) and automatic token refresh
- * on mount when a userId exists in localStorage.
- */
-const AUTH_FAIL_MSG =
-  'Spotify connection failed. Please try again — if the issue persists, ' +
-  "check that your account has been added to the app's authorized users.";
+import i18n from '../i18n/index.ts';
 
 /**
  * Handle a failed token refresh on mount. Only a permanent failure (expired/
@@ -17,15 +10,8 @@ const AUTH_FAIL_MSG =
  * failures (network, 5xx) are ignored so the session survives — the now-playing
  * poll will retry the refresh on its next tick.
  */
-function handleRefreshFailure(err: unknown, logout: () => void) {
-  if (!(err instanceof SessionExpiredError)) return;
-  logout();
-  useToastStore
-    .getState()
-    .show(
-      'Your Spotify session has expired. Please reconnect to continue using Spotify features.',
-      { type: 'warning' },
-    );
+function handleRefreshFailure(err: unknown) {
+  if (err instanceof SessionExpiredError) useSpotifyStore.getState().expireSession();
 }
 
 /** Show auth failure toast. In a popup, notify the opener and close; otherwise show locally. */
@@ -34,16 +20,21 @@ function notifyAuthFailure() {
     window.opener.postMessage({ type: 'spotify-auth-failed' }, window.location.origin);
     window.close();
   } else {
-    useToastStore.getState().show(AUTH_FAIL_MSG, { type: 'error' });
+    useToastStore
+      .getState()
+      .show(i18n.t('spotify.connectionFailed', { ns: 'messages' }), { type: 'error' });
   }
 }
 
+/**
+ * Handles the OAuth callback (code in URL) and automatic token refresh
+ * on mount when a userId exists in localStorage.
+ */
 export function useSpotifyAuth() {
   const setAuth = useSpotifyStore((s) => s.setAuth);
   const setAccessToken = useSpotifyStore((s) => s.setAccessToken);
   const sessionId = useSpotifyStore((s) => s.sessionId);
   const isTokenValid = useSpotifyStore((s) => s.isTokenValid);
-  const logout = useSpotifyStore((s) => s.logout);
   const hasHandledCallback = useRef(false);
 
   // Check if there's an OAuth callback code in the URL
@@ -97,7 +88,7 @@ export function useSpotifyAuth() {
         setAccessToken(accessToken, expiresIn);
       })
       .catch((err) => {
-        handleRefreshFailure(err, logout);
+        handleRefreshFailure(err);
       });
-  }, [sessionId, isTokenValid, setAccessToken, logout]);
+  }, [sessionId, isTokenValid, setAccessToken]);
 }

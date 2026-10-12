@@ -48,12 +48,15 @@
   "spotify": {
     "connectingToSpotify": "Menghubungkan ke Spotify...",
     "connectionFailed": "Koneksi Spotify gagal. Silakan coba lagi. Jika masalah berlanjut, pastikan akunmu telah ditambahkan ke daftar pengguna resmi aplikasi.",
+    "sessionExpired": "Sesi Spotify kamu telah berakhir. Hubungkan kembali untuk terus menggunakan fitur Spotify.",
     "premiumRequired": "Spotify Premium diperlukan untuk kontrol pemutaran. Kamu masih bisa melihat info lagu yang diputar dan menggunakan MangoWave dengan sumber audio lain.",
     "networkError": "Tidak dapat terhubung ke Spotify. Periksa koneksimu dan coba lagi.",
     "popupBlocked": "Tidak dapat membuka jendela login Spotify. Pastikan pop-up diizinkan untuk situs ini dan coba lagi.",
     "rateLimited": "Spotify dibatasi. Mencoba lagi dalam {{seconds}}d"
   },
   "toasts": {
+    "cloudSyncTooLarge": "Pengaturanmu terlalu besar untuk disinkronkan ke cloud. Hapus beberapa paket kustom atau preset impor untuk melanjutkan sinkronisasi.",
+    "cloudSyncRejected": "Pengaturanmu tidak dapat disinkronkan ke cloud. Pengaturan tetap tersimpan di perangkat ini.",
     "autopilotOn": "Autopilot aktif",
     "autopilotOff": "Autopilot nonaktif",
     "renderingPaused": "Rendering paused",

@@ -50,11 +50,11 @@ describe('auth-refresh handler', () => {
     expect(result.statusCode).toBe(400);
   });
 
-  it('returns 404 if no stored session exists', async () => {
+  it('returns 401 if the session no longer exists', async () => {
     vi.mocked(getSession).mockResolvedValue(null);
 
     const result = await invoke({ sessionId: 'sess_abc' });
-    expect(result.statusCode).toBe(404);
+    expect(result.statusCode).toBe(401);
   });
 
   it('refreshes token and returns new access token', async () => {
@@ -77,6 +77,36 @@ describe('auth-refresh handler', () => {
     const body = JSON.parse(result.body as string);
     expect(body.accessToken).toBe('at_new');
     expect(updateSessionToken).toHaveBeenCalledWith('sess_abc', 'rt_new');
+  });
+
+  it('extends the session TTL when Spotify does not rotate the refresh token', async () => {
+    vi.mocked(getSession).mockResolvedValue({ spotifyUserId: 'user1', refreshToken: 'rt_old' });
+    vi.mocked(refreshAccessToken).mockResolvedValue({
+      access_token: 'at_new',
+      token_type: 'Bearer',
+      scope: 'user-read-currently-playing',
+      expires_in: 3600,
+    });
+    vi.mocked(updateSessionToken).mockResolvedValue(undefined);
+
+    const result = await invoke({ sessionId: 'sess_abc' });
+    expect(result.statusCode).toBe(200);
+    expect(updateSessionToken).toHaveBeenCalledWith('sess_abc', 'rt_old');
+  });
+
+  it('still returns the token when extending the TTL fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.mocked(getSession).mockResolvedValue({ spotifyUserId: 'user1', refreshToken: 'rt_old' });
+    vi.mocked(refreshAccessToken).mockResolvedValue({
+      access_token: 'at_new',
+      token_type: 'Bearer',
+      scope: 'user-read-currently-playing',
+      expires_in: 3600,
+    });
+    vi.mocked(updateSessionToken).mockRejectedValue(new Error('throttled'));
+
+    const result = await invoke({ sessionId: 'sess_abc' });
+    expect(result.statusCode).toBe(200);
   });
 
   it('returns 500 on a transient refresh failure without discarding the session', async () => {

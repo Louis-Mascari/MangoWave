@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { SpotifyUser, NowPlayingTrack } from '../services/spotifyApi.ts';
 import { refreshToken, SessionExpiredError } from '../services/spotifyApi.ts';
+import { useToastStore } from './useToastStore.ts';
+import i18n from '../i18n/index.ts';
 
 export type AuthMode = 'owner' | 'locked';
 
@@ -36,6 +38,7 @@ interface SpotifyState {
   setUnlocked: () => void;
   getAuthMode: () => AuthMode;
   logout: () => void;
+  expireSession: () => void;
   isTokenValid: () => boolean;
   refreshAccessToken: () => Promise<string | null>;
 }
@@ -112,6 +115,16 @@ export const useSpotifyStore = create<SpotifyState>()(
           pollRequestedAt: 0,
         }),
 
+      // The one place a dead session is handled: log out and tell the user why. Several
+      // requests can discover the same dead session, so only the first one toasts.
+      expireSession: () => {
+        if (!get().sessionId) return;
+        get().logout();
+        useToastStore
+          .getState()
+          .show(i18n.t('spotify.sessionExpired', { ns: 'messages' }), { type: 'warning' });
+      },
+
       refreshAccessToken: async () => {
         const { sessionId } = get();
         try {
@@ -128,7 +141,7 @@ export const useSpotifyStore = create<SpotifyState>()(
           // Transient failures (network, 5xx) keep the session so the next
           // now-playing poll retries the refresh instead of forcing re-auth.
           if (err instanceof SessionExpiredError) {
-            get().logout();
+            get().expireSession();
           }
         }
         return null;

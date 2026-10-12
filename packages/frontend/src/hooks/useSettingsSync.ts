@@ -1,8 +1,16 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useSpotifyStore } from '../store/useSpotifyStore.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
-import { saveSettings, loadSettings } from '../services/spotifyApi.ts';
+import * as Sentry from '@sentry/react';
+import { useToastStore } from '../store/useToastStore.ts';
+import {
+  saveSettings,
+  loadSettings,
+  SessionExpiredError,
+  SettingsRejectedError,
+} from '../services/spotifyApi.ts';
 import type { CloudSettings } from '../services/spotifyApi.ts';
+import i18n from '../i18n/index.ts';
 
 const DEBOUNCE_MS = 2000;
 
@@ -81,6 +89,33 @@ function applyCloudSettings(cloud: CloudSettings): void {
 }
 
 /**
+ * Sort a failed cloud sync request into the three cases that need different handling:
+ * a dead session (log out and prompt), a save the server will never accept (tell the
+ * user once), and anything else, which is transient and retried on the next change.
+ */
+function handleSyncError(err: unknown, rejectionShown: { current: boolean }): void {
+  if (err instanceof SessionExpiredError) {
+    useSpotifyStore.getState().expireSession();
+    return;
+  }
+  if (err instanceof SettingsRejectedError) {
+    if (rejectionShown.current) return;
+    rejectionShown.current = true;
+    const tooLarge = err.status === 413;
+    // A 400 means this build produced settings the backend's validation refuses
+    if (!tooLarge) Sentry.captureException(err);
+    useToastStore.getState().show(
+      i18n.t(tooLarge ? 'toasts.cloudSyncTooLarge' : 'toasts.cloudSyncRejected', {
+        ns: 'messages',
+      }),
+      { type: 'warning', durationMs: 10000 },
+    );
+    return;
+  }
+  console.error('Cloud settings sync failed:', err);
+}
+
+/**
  * Syncs settings to/from the cloud when a Spotify session is active.
  * - On login: loads cloud settings (if they exist) and applies them locally.
  *   If no cloud settings exist, uploads local settings as the initial backup.
@@ -91,6 +126,10 @@ export function useSettingsSync() {
   const hasSyncedRef = useRef(false);
   const isSyncingRef = useRef(false);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // A rejected save repeats on every settings change until the settings shrink, so tell
+  // the user once rather than on each attempt
+  const rejectionShownRef = useRef(false);
+  const onSyncError = useCallback((err: unknown) => handleSyncError(err, rejectionShownRef), []);
 
   // Load cloud settings on login
   useEffect(() => {
@@ -111,15 +150,11 @@ export function useSettingsSync() {
         } else {
           // No cloud settings — upload local as initial backup
           const local = getSettingsSnapshot();
-          saveSettings(sessionId, local).catch((err) => {
-            console.error('Failed to upload initial settings:', err);
-          });
+          saveSettings(sessionId, local).catch(onSyncError);
         }
       })
-      .catch((err) => {
-        console.error('Failed to load cloud settings:', err);
-      });
-  }, [sessionId]);
+      .catch(onSyncError);
+  }, [sessionId, onSyncError]);
 
   // Debounce-save settings changes to cloud
   useEffect(() => {
@@ -134,9 +169,7 @@ export function useSettingsSync() {
 
       debounceTimerRef.current = setTimeout(() => {
         const snapshot = getSettingsSnapshot();
-        saveSettings(sessionId, snapshot).catch((err) => {
-          console.error('Failed to save settings to cloud:', err);
-        });
+        saveSettings(sessionId, snapshot).catch(onSyncError);
       }, DEBOUNCE_MS);
     });
 
@@ -146,5 +179,5 @@ export function useSettingsSync() {
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [sessionId]);
+  }, [sessionId, onSyncError]);
 }

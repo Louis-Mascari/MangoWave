@@ -9,6 +9,7 @@ vi.mock('../../services/spotifyApi.ts', async () => {
 
 import { useSpotifyStore } from '../useSpotifyStore.ts';
 import { refreshToken, SessionExpiredError } from '../../services/spotifyApi.ts';
+import { useToastStore } from '../useToastStore.ts';
 
 describe('useSpotifyStore', () => {
   beforeEach(() => {
@@ -190,6 +191,17 @@ describe('useSpotifyStore', () => {
       expect(result).toBeNull();
       expect(useSpotifyStore.getState().sessionId).toBeNull();
       expect(useSpotifyStore.getState().accessToken).toBeNull();
+    });
+
+    it('tells the user once when several requests find the same dead session', () => {
+      const show = vi.spyOn(useToastStore.getState(), 'show');
+
+      useSpotifyStore.getState().expireSession();
+      useSpotifyStore.getState().expireSession();
+
+      expect(useSpotifyStore.getState().sessionId).toBeNull();
+      expect(show).toHaveBeenCalledTimes(1);
+      expect(show.mock.calls[0][0]).toContain('session has expired');
     });
 
     it('keeps the session on a transient failure so the next poll can retry', async () => {

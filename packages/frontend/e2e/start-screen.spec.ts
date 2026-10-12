@@ -21,6 +21,16 @@ test.describe('StartScreen', () => {
     await app.goto('/');
   });
 
+  test('toasts are visible on the start screen', async ({ app }) => {
+    await expect(app.locator('[data-testid="start-screen"]')).toBeVisible();
+    // The OAuth popup reports failure to its opener with this message
+    await app.evaluate(() =>
+      window.postMessage({ type: 'spotify-auth-failed' }, window.location.origin),
+    );
+    await expect(app.locator('[role="status"] > div')).toBeVisible();
+    await expect(app.getByRole('status')).toContainText('Spotify connection failed');
+  });
+
   test('renders title, epilepsy warning, and source cards', async ({ app }) => {
     await expect(app.locator('[data-testid="start-screen"]')).toBeVisible();
     await expect(app.getByText('Photosensitivity Warning')).toBeVisible();

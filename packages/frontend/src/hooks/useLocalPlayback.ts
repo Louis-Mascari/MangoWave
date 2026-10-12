@@ -25,6 +25,8 @@ export interface UseLocalPlaybackReturn {
 export function useLocalPlayback(): UseLocalPlaybackReturn {
   const engineRef = useRef<AudioEngine | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Set when the queue finishes with repeat off, so the next load cues without playing
+  const cueOnlyRef = useRef(false);
   const [audioEngine, setAudioEngine] = useState<AudioEngine | null>(null);
   const [isActive, setIsActive] = useState(false);
   const savedVolume = useSettingsStore((s) => s.volume);
@@ -120,9 +122,14 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
     }));
 
     audio.src = url;
-    audio.play().catch(() => {
-      // Autoplay may be blocked on mobile — first track handled in startWithFiles
-    });
+    if (cueOnlyRef.current) {
+      // The queue finished with repeat off: cue the first track and wait for Play
+      cueOnlyRef.current = false;
+    } else {
+      audio.play().catch(() => {
+        // Autoplay may be blocked on mobile — first track handled in startWithFiles
+      });
+    }
 
     return () => {
       // Revoke on cleanup (unmount or track change)
@@ -149,6 +156,15 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
         }));
       }
     };
+    const advanceOrStop = () => {
+      const store = useMediaPlayerStore.getState();
+      const endedOn = store.tracks[store.currentTrackIndex]?.id;
+      if (store.advanceAfterTrackEnd()) return;
+      // Rewound to the first track. If that is a different track the load effect is about
+      // to run for it; tell it to cue without playing.
+      const now = useMediaPlayerStore.getState();
+      if (now.tracks[now.currentTrackIndex]?.id !== endedOn) cueOnlyRef.current = true;
+    };
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
     const onEnded = () => {
@@ -157,8 +173,7 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
         audio.currentTime = 0;
         audio.play().catch(() => {});
       } else {
-        // nextTrack handles shuffle history, repeat-off stopping, and wrapping
-        nextTrack();
+        advanceOrStop();
       }
     };
     const onError = () => {
@@ -170,9 +185,10 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
         .show(i18n.t('errors.playbackDecodeError', { ns: 'messages', filename }), {
           type: 'error',
         });
-      // Auto-advance if there are more tracks in the queue
+      // Auto-advance if there are more tracks in the queue. With repeat off this stops at
+      // the end, so a queue of unreadable files cannot loop error toasts forever.
       if (tracks.length > 1) {
-        nextTrack();
+        advanceOrStop();
       }
     };
 
@@ -191,7 +207,7 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
       audio.removeEventListener('ended', onEnded);
       audio.removeEventListener('error', onError);
     };
-  }, [isActive, setCurrentTime, setDuration, setIsPlaying, nextTrack]);
+  }, [isActive, setCurrentTime, setDuration, setIsPlaying]);
 
   const stop = useCallback(() => {
     if (audioRef.current) {

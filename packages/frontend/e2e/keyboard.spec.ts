@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 import { installAudioMocks } from './fixtures/audio-mock';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import fs from 'node:fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -152,6 +153,24 @@ test.describe('Keyboard Shortcuts (mode gating)', () => {
 
     await app.keyboard.press('q');
     await expect(addFiles).toHaveCount(0);
+  });
+
+  test('local playback stops after the last track with repeat off', async ({ app }) => {
+    await app.getByRole('button', { name: /Play Local Files/ }).click();
+    const clip = fs.readFileSync(path.resolve(__dirname, 'fixtures/test-silence.mp3'));
+    // Two one-second tracks; repeat is off by default
+    await app.locator('input[type="file"]').setInputFiles([
+      { name: 'one.mp3', mimeType: 'audio/mpeg', buffer: clip },
+      { name: 'two.mp3', mimeType: 'audio/mpeg', buffer: clip },
+    ]);
+    await expect(app.locator('[role="toolbar"]')).toBeVisible({ timeout: 15000 });
+
+    const play = app.getByRole('button', { name: 'Play', exact: true });
+    await expect(play).toBeVisible({ timeout: 15000 });
+    // Still stopped after longer than a whole track: it did not wrap around and restart
+    await app.waitForTimeout(2500);
+    await expect(play).toBeVisible();
+    await expect(app.getByRole('button', { name: 'Pause', exact: true })).toHaveCount(0);
   });
 
   test('A on the start screen does not toggle autopilot', async ({ app }) => {

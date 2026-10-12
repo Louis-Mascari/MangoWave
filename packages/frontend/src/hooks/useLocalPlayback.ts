@@ -22,9 +22,23 @@ export interface UseLocalPlaybackReturn {
   toggleMute: () => void;
 }
 
+function showDecodeError(): void {
+  const { tracks, currentTrackIndex } = useMediaPlayerStore.getState();
+  const filename =
+    tracks[currentTrackIndex]?.file.name ?? i18n.t('errors.unknownFile', { ns: 'messages' });
+  useToastStore
+    .getState()
+    .show(i18n.t('errors.playbackDecodeError', { ns: 'messages', filename }), { type: 'error' });
+}
+
 export function useLocalPlayback(): UseLocalPlaybackReturn {
   const engineRef = useRef<AudioEngine | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Set when the queue finishes with repeat off, so the next load cues without playing
+  const cueOnlyRef = useRef(false);
+  // True while that cued track is sitting unplayed. If it turns out to be unreadable the
+  // queue must stay stopped, not start advancing again.
+  const stoppedAtEndRef = useRef(false);
   const [audioEngine, setAudioEngine] = useState<AudioEngine | null>(null);
   const [isActive, setIsActive] = useState(false);
   const savedVolume = useSettingsStore((s) => s.volume);
@@ -64,6 +78,8 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
 
       clearPlaylist();
       addTracks(files);
+      cueOnlyRef.current = false;
+      stoppedAtEndRef.current = false;
 
       const audio = new Audio();
       audio.volume = useSettingsStore.getState().volume;
@@ -120,9 +136,16 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
     }));
 
     audio.src = url;
-    audio.play().catch(() => {
-      // Autoplay may be blocked on mobile — first track handled in startWithFiles
-    });
+    if (cueOnlyRef.current) {
+      // The queue finished with repeat off: cue the first track and wait for Play
+      cueOnlyRef.current = false;
+      stoppedAtEndRef.current = true;
+    } else {
+      stoppedAtEndRef.current = false;
+      audio.play().catch(() => {
+        // Autoplay may be blocked on mobile — first track handled in startWithFiles
+      });
+    }
 
     return () => {
       // Revoke on cleanup (unmount or track change)
@@ -149,7 +172,19 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
         }));
       }
     };
-    const onPlay = () => setIsPlaying(true);
+    const advanceOrStop = () => {
+      const store = useMediaPlayerStore.getState();
+      const endedOn = store.tracks[store.currentTrackIndex]?.id;
+      if (store.advanceAfterTrackEnd()) return;
+      // Rewound to the first track. If that is a different track the load effect is about
+      // to run for it; tell it to cue without playing.
+      const now = useMediaPlayerStore.getState();
+      if (now.tracks[now.currentTrackIndex]?.id !== endedOn) cueOnlyRef.current = true;
+    };
+    const onPlay = () => {
+      stoppedAtEndRef.current = false;
+      setIsPlaying(true);
+    };
     const onPause = () => setIsPlaying(false);
     const onEnded = () => {
       const { repeatMode } = useMediaPlayerStore.getState();
@@ -157,22 +192,17 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
         audio.currentTime = 0;
         audio.play().catch(() => {});
       } else {
-        // nextTrack handles shuffle history, repeat-off stopping, and wrapping
-        nextTrack();
+        advanceOrStop();
       }
     };
     const onError = () => {
-      const { tracks, currentTrackIndex } = useMediaPlayerStore.getState();
-      const track = tracks[currentTrackIndex];
-      const filename = track?.file.name ?? i18n.t('errors.unknownFile', { ns: 'messages' });
-      useToastStore
-        .getState()
-        .show(i18n.t('errors.playbackDecodeError', { ns: 'messages', filename }), {
-          type: 'error',
-        });
-      // Auto-advance if there are more tracks in the queue
-      if (tracks.length > 1) {
-        nextTrack();
+      const { tracks } = useMediaPlayerStore.getState();
+      showDecodeError();
+      // Auto-advance if there are more tracks in the queue. With repeat off this stops at
+      // the end, and an unreadable track that was only cued there leaves the queue stopped,
+      // so a queue of unreadable files cannot loop error toasts forever.
+      if (tracks.length > 1 && !stoppedAtEndRef.current) {
+        advanceOrStop();
       }
     };
 
@@ -191,7 +221,7 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
       audio.removeEventListener('ended', onEnded);
       audio.removeEventListener('error', onError);
     };
-  }, [isActive, setCurrentTime, setDuration, setIsPlaying, nextTrack]);
+  }, [isActive, setCurrentTime, setDuration, setIsPlaying]);
 
   const stop = useCallback(() => {
     if (audioRef.current) {
@@ -217,7 +247,12 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
   }, [clearPlaylist]);
 
   const play = useCallback(() => {
-    audioRef.current?.play();
+    // Rejects with NotSupportedError when the current track cannot be played, which is
+    // where a finished queue lands if its first file is unreadable. Say so; a silent dead
+    // button is worse. Other rejections (a pause or track change interrupting) are normal.
+    audioRef.current?.play().catch((err: unknown) => {
+      if (err instanceof DOMException && err.name === 'NotSupportedError') showDecodeError();
+    });
   }, []);
 
   const pause = useCallback(() => {

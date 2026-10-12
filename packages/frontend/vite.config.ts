@@ -17,7 +17,12 @@ function preloadVisualizerChunk(): Plugin {
         const chunk = Object.values(ctx.bundle ?? {}).find(
           (file) => file.type === 'chunk' && file.name === 'Visualizer',
         );
-        if (!chunk) return [];
+        // Without the link the chunk only starts downloading after the entry has run,
+        // which is a large, silent slowdown. Fail the build if the chunk is ever renamed.
+        if (!chunk) {
+          if (ctx.bundle) throw new Error('preloadVisualizerChunk: no chunk named "Visualizer"');
+          return [];
+        }
         return [
           {
             tag: 'link',

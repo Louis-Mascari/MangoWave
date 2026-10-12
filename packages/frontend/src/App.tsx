@@ -74,19 +74,12 @@ if (import.meta.env.DEV) {
 type VisualizerComponent = (typeof import('./components/Visualizer.tsx'))['Visualizer'];
 
 // The visualizer (renderer, bundled presets, GLSL optimizer) is most of the bundle and is
-// only needed once a session starts, so it is not in the entry chunk. The start screen
-// loads it in the background, which also keeps its module-level pre-warming (texture
-// decode, optimizer init) happening before the user presses Start. A failed load is not
-// cached, so the next call retries.
+// only needed once a session starts, so it is not in the entry chunk. index.html preloads
+// it (see vite.config.ts) and the start screen imports it in the background, which also
+// keeps its module-level pre-warming (texture decode, optimizer init) ahead of the session.
 let visualizerPromise: Promise<VisualizerComponent> | null = null;
 function loadVisualizer(): Promise<VisualizerComponent> {
-  visualizerPromise ??= import('./components/Visualizer.tsx').then(
-    (module) => module.Visualizer,
-    (err: unknown) => {
-      visualizerPromise = null;
-      throw err;
-    },
-  );
+  visualizerPromise ??= import('./components/Visualizer.tsx').then((module) => module.Visualizer);
   return visualizerPromise;
 }
 
@@ -650,6 +643,15 @@ function MainApp() {
             />
           </svg>
           {i18n.t('loadingVisualizer', { ns: 'common' })}
+          {/* A stalled download would otherwise leave no way out but a reload, with the
+              microphone live or a local file playing */}
+          <button
+            type="button"
+            onClick={handleStop}
+            className="mt-2 cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-1.5 text-xs text-white/70 hover:bg-white/10"
+          >
+            {i18n.t('cancel', { ns: 'common' })}
+          </button>
         </div>
       ) : isActive && audioEngine && Visualizer ? (
         <>

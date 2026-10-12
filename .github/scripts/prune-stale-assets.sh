@@ -1,13 +1,26 @@
 #!/usr/bin/env bash
-# Delete hashed build assets that no deployed build has used for a while.
+# Delete hashed build assets that were retired from the build long enough ago.
 #
 # Deploys keep earlier builds' files under assets/ so a tab opened before a
-# deploy can still lazy-load its chunks. This removes the ones that are BOTH
+# deploy can still lazy-load its chunks. This removes an object only when it is
 #   - absent from the build that was just deployed, and
-#   - last uploaded more than <retention-days> ago.
+#   - estimated to have been RETIRED more than <retention-days> ago.
 #
-# The deploy re-uploads every current asset each time, so an object's
-# LastModified is the last deploy that still shipped it, not its first upload.
+# The deploy re-uploads every current asset, so an object's LastModified is the
+# last deploy that shipped it. The retention clock must not start there: with
+# deploys further apart than the retention period, the previous build would
+# already look expired on the very deploy that replaces it. It starts when the
+# file was retired, i.e. at the next deploy after its LastModified. That is read
+# off the listing itself: the smallest LastModified among all assets/ objects
+# that is later than the object's own by more than one upload window. The
+# current build was uploaded moments ago, so such a timestamp always exists.
+# If an intermediate deploy left no object behind, a later deploy's time is
+# used instead, so the estimate is never too early: files may be kept longer
+# than necessary, never shorter.
+#
+# Net effect: a chunk dropped by this deploy always survives it, and is removed
+# by the first later deploy that runs <retention-days> after the one that
+# replaced it.
 #
 # Usage: prune-stale-assets.sh <bucket> <dist-assets-dir> [retention-days]
 # Set DRY_RUN=1 to list what would be deleted without deleting anything.
@@ -17,6 +30,8 @@ bucket="${1:?usage: prune-stale-assets.sh <bucket> <dist-assets-dir> [retention-
 dist_assets="${2:?usage: prune-stale-assets.sh <bucket> <dist-assets-dir> [retention-days]}"
 retention_days="${3:-14}"
 prefix='assets/'
+# Objects uploaded within this many seconds of each other are one deploy.
+upload_window=600
 
 if ! [[ "$retention_days" =~ ^[0-9]+$ ]]; then
   echo "retention-days must be a whole number, got: ${retention_days}" >&2
@@ -29,11 +44,14 @@ fi
 
 workdir="$(mktemp -d)"
 trap 'rm -rf "$workdir"' EXIT
-export LC_ALL=C
 
-# Keys of the build that is live now.
-find "$dist_assets" -type f -printf "${prefix}%P\n" | sort >"$workdir/current"
-if [ ! -s "$workdir/current" ]; then
+# Keys of the build that is live now, as a JSON array.
+if [ -n "$(find "$dist_assets" -type f -name $'*\n*' -print -quit)" ]; then
+  echo "A file name in ${dist_assets} contains a newline; refusing to prune." >&2
+  exit 1
+fi
+find "$dist_assets" -type f -printf "${prefix}%P\n" | jq -R . | jq -s . >"$workdir/current.json"
+if [ "$(jq 'length' "$workdir/current.json")" -eq 0 ]; then
   # An empty build would make every object in the bucket look stale.
   echo "No files in ${dist_assets}; refusing to prune." >&2
   exit 1
@@ -45,54 +63,71 @@ aws s3api list-objects-v2 \
   --bucket "$bucket" \
   --prefix "$prefix" \
   --output json >"$workdir/listing.json"
+if [ ! -s "$workdir/listing.json" ]; then
+  # With no objects under the prefix some CLI versions print nothing at all.
+  echo '{}' >"$workdir/listing.json"
+fi
 
 cutoff="$(date -u -d "-${retention_days} days" +%s)"
 
-# With no objects under the prefix the CLI prints nothing, or a document with
-# no Contents key; both yield an empty list here. A LastModified that cannot be
-# parsed aborts the run instead of being guessed at.
-jq -r --argjson cutoff "$cutoff" '
-  (.Contents // [])[]
-  | select(
-      (.LastModified | sub("(\\.[0-9]+)?(Z|\\+00:00)$"; "Z") | fromdateiso8601) < $cutoff
-    )
-  | .Key
-' "$workdir/listing.json" | sort >"$workdir/old"
+# Everything from here to the request payloads stays inside jq, so a key is
+# never split on whitespace or newlines. A LastModified that cannot be parsed,
+# or a key outside the prefix, aborts the run instead of being guessed at.
+jq -c \
+  --argjson cutoff "$cutoff" \
+  --argjson window "$upload_window" \
+  --arg prefix "$prefix" \
+  --slurpfile current "$workdir/current.json" '
+  ($current[0] | map({key: ., value: true}) | from_entries) as $live
+  | [ (.Contents // [])[]
+      | { Key,
+          t: (.LastModified | sub("(\\.[0-9]+)?(Z|\\+00:00)$"; "Z") | fromdateiso8601) } ] as $all
+  | ($all | map(.t) | unique) as $times
+  | [ $all[]
+      | select($live[.Key] | not)
+      | . as $o
+      | (first($times[] | select(. > $o.t + $window)) // null) as $retired
+      | select($retired != null and $retired < $cutoff)
+      | .Key ] as $stale
+  | if any($stale[]; startswith($prefix) | not)
+    then error("refusing to delete a key outside \($prefix)")
+    else { total: ($all | length), stale: $stale }
+    end
+' "$workdir/listing.json" >"$workdir/plan.json"
 
-# Old and not part of the current build.
-comm -23 "$workdir/old" "$workdir/current" >"$workdir/stale"
-
-total="$(jq -r '(.Contents // []) | length' "$workdir/listing.json")"
-total="${total:-0}"
-stale="$(wc -l <"$workdir/stale" | tr -d ' ')"
-echo "${total} objects under ${prefix}, ${stale} stale (not in this build, older than ${retention_days} days)."
+total="$(jq -r '.total' "$workdir/plan.json")"
+stale="$(jq -r '.stale | length' "$workdir/plan.json")"
+echo "${total} objects under ${prefix}, ${stale} stale (not in this build, retired more than ${retention_days} days ago)."
 
 if [ "$stale" -eq 0 ]; then
   exit 0
 fi
 
 if [ "${DRY_RUN:-0}" = "1" ]; then
-  sed 's/^/would delete: /' "$workdir/stale"
+  # Printed JSON-encoded so an odd key is unambiguous in the log.
+  jq -r '.stale[] | "would delete: \(@json)"' "$workdir/plan.json"
   exit 0
 fi
 
-# DeleteObjects accepts at most 1000 keys per request.
-split -l 1000 -d "$workdir/stale" "$workdir/batch-"
+# DeleteObjects accepts at most 1000 keys per request. Each batch is one line
+# of compact JSON; newlines inside keys are escaped there, so reading by line
+# is safe.
 failed=0
-for batch in "$workdir"/batch-*; do
-  jq -R . "$batch" | jq -s -c '{Objects: map({Key: .}), Quiet: true}' >"$workdir/request.json"
+while IFS= read -r request; do
+  printf '%s\n' "$request" >"$workdir/request.json"
   # A partial failure still exits 0 and reports the keys under Errors.
   aws s3api delete-objects \
     --bucket "$bucket" \
     --delete "file://$workdir/request.json" \
     --output json >"$workdir/response.json"
-  errors="$(jq -r '(.Errors // []) | length' "$workdir/response.json")"
-  errors="${errors:-0}"
-  if [ "$errors" -ne 0 ]; then
-    jq -r '.Errors[] | "failed to delete \(.Key): \(.Code)"' "$workdir/response.json" >&2
-    failed=$((failed + errors))
+  if [ -s "$workdir/response.json" ]; then
+    errors="$(jq -r '(.Errors // []) | length' "$workdir/response.json")"
+    if [ "$errors" -ne 0 ]; then
+      jq -r '.Errors[] | "failed to delete \(.Key | @json): \(.Code)"' "$workdir/response.json" >&2
+      failed=$((failed + errors))
+    fi
   fi
-done
+done < <(jq -c '.stale | _nwise(1000) | {Objects: map({Key: .}), Quiet: true}' "$workdir/plan.json")
 
 if [ "$failed" -ne 0 ]; then
   echo "${failed} of ${stale} stale objects could not be deleted." >&2

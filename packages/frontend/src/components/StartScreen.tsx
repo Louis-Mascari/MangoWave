@@ -14,7 +14,7 @@ import { useFocusTrap } from '../hooks/useFocusTrap.ts';
 import { supportedLanguages, type SupportedLanguage } from '../i18n/index.ts';
 import { AudioEngine } from '../engine/AudioEngine.ts';
 import { CloseIcon } from './icons.tsx';
-import logoSrc from '../assets/logo.png';
+import logoSrc from '../assets/logo.webp';
 
 interface StartScreenProps {
   onStart: () => void;

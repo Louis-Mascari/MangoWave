@@ -153,37 +153,40 @@ function MainApp() {
     })(),
   );
 
-  const qrJoinInProgressRef = useRef(false);
+  const qrJoinCodeRef = useRef('');
   useEffect(() => {
     const code = pendingRoomRef.current;
     if (!code || !isActive || deviceSyncStatus !== 'idle') return;
     pendingRoomRef.current = '';
-    qrJoinInProgressRef.current = true;
+    qrJoinCodeRef.current = code;
+    // The outcome is reported from the status below, not from this promise: the service
+    // retries some errors in the background, so the first rejection is not always final
+    // and a retry that succeeds never resolves it
     useDeviceSyncStatusStore
       .getState()
       .actions.joinRoom(code)
-      .then(() => {
-        qrJoinInProgressRef.current = false;
-        useToastStore.getState().show(i18n.t('toasts.joinedRoom', { ns: 'messages', code }));
-      })
-      // The failure is reported from the status below: the service retries some errors in
-      // the background, so the first rejection is not always the final outcome
       .catch(() => {});
   }, [isActive, deviceSyncStatus]);
 
-  // A QR join has no settings panel open to show its error, so toast it
+  // A QR join has no settings panel open to show how it went, so toast the outcome
   useEffect(() => {
-    if (!qrJoinInProgressRef.current || deviceSyncStatus !== 'error') return;
-    qrJoinInProgressRef.current = false;
-    const { errorMessage } = useDeviceSyncStatusStore.getState();
-    useToastStore
-      .getState()
-      .show(
-        errorMessage === 'Room not found'
-          ? i18n.t('sync.deviceSync.roomNotFound', { ns: 'settings' })
-          : errorMessage,
-        { type: 'error' },
-      );
+    const code = qrJoinCodeRef.current;
+    if (!code) return;
+    if (deviceSyncStatus === 'connected') {
+      qrJoinCodeRef.current = '';
+      useToastStore.getState().show(i18n.t('toasts.joinedRoom', { ns: 'messages', code }));
+    } else if (deviceSyncStatus === 'error') {
+      qrJoinCodeRef.current = '';
+      const { errorMessage } = useDeviceSyncStatusStore.getState();
+      useToastStore
+        .getState()
+        .show(
+          errorMessage === 'Room not found'
+            ? i18n.t('sync.deviceSync.roomNotFound', { ns: 'settings' })
+            : errorMessage,
+          { type: 'error' },
+        );
+    }
   }, [deviceSyncStatus]);
 
   const autopilot = useSettingsStore((s) => s.autopilot);

@@ -15,6 +15,12 @@ export interface PerformanceSettings {
   autoQuality: boolean; // auto-adjust quality based on FPS (default true)
 }
 
+/** The settings Auto Quality drives. */
+export type QualityTierSettings = Pick<
+  PerformanceSettings,
+  'meshWidth' | 'meshHeight' | 'textureRatio' | 'resolutionScale'
+>;
+
 export interface EQSettings {
   preAmpGain: number; // 0.0 to 3.0 (linear gain)
   bandGains: number[]; // dB values for each of the 10 bands, -12 to +12
@@ -65,12 +71,14 @@ export interface SettingsState {
   setResolutionScale: (scale: number) => void;
   setMeshSize: (width: number, height: number) => void;
   setTextureRatio: (ratio: number) => void;
+  applyAutoQualityTier: (tier: QualityTierSettings) => void;
   setFxaa: (enabled: boolean) => void;
   setAutoQuality: (enabled: boolean) => void;
 
   // EQ
   eq: EQSettings;
   setPreAmpGain: (gain: number) => void;
+  applyAutoGain: (gain: number) => void;
   setAutoGain: (enabled: boolean) => void;
   setEQBandGain: (index: number, gainDb: number) => void;
   resetEQ: () => void;
@@ -230,17 +238,26 @@ export const useSettingsStore = create<SettingsState>()(
             fpsCap: fps <= 0 ? 0 : Math.round(Math.min(300, Math.max(15, fps))),
           },
         })),
+      // The three quality setters are the user's controls: choosing a value by hand
+      // takes over from Auto Quality. Auto Quality itself writes via applyAutoQualityTier.
       setResolutionScale: (scale) =>
         set((state) => ({
-          performance: { ...state.performance, resolutionScale: scale },
+          performance: { ...state.performance, resolutionScale: scale, autoQuality: false },
         })),
       setMeshSize: (width, height) =>
         set((state) => ({
-          performance: { ...state.performance, meshWidth: width, meshHeight: height },
+          performance: {
+            ...state.performance,
+            meshWidth: width,
+            meshHeight: height,
+            autoQuality: false,
+          },
         })),
+      applyAutoQualityTier: (tier) =>
+        set((state) => ({ performance: { ...state.performance, ...tier } })),
       setTextureRatio: (ratio) =>
         set((state) => ({
-          performance: { ...state.performance, textureRatio: ratio },
+          performance: { ...state.performance, textureRatio: ratio, autoQuality: false },
         })),
       setFxaa: (enabled) =>
         set((state) => ({
@@ -287,7 +304,13 @@ export const useSettingsStore = create<SettingsState>()(
         bandGains: [...DEFAULT_BAND_GAINS],
         autoGain: true,
       },
+      // The slider's setter: moving it by hand takes over from Auto Gain.
+      // Auto Gain itself writes via applyAutoGain.
       setPreAmpGain: (gain) =>
+        set((state) => ({
+          eq: { ...state.eq, preAmpGain: gain, autoGain: false },
+        })),
+      applyAutoGain: (gain) =>
         set((state) => ({
           eq: { ...state.eq, preAmpGain: gain },
         })),

@@ -62,7 +62,7 @@ describe('useSettingsSync', () => {
         fxaa: true,
         autoQuality: false,
       },
-      eqSettings: { preAmpGain: 2.0, bandGains: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
+      eqSettings: { preAmpGain: 2.0, bandGains: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], autoGain: false },
       audio: { smoothingConstant: 0.5, fftSize: 2048 },
       autopilot: { enabled: false, interval: 30, mode: 'favorites' as const, favoriteWeight: 5 },
       transitionTime: 5.0,
@@ -188,5 +188,26 @@ describe('useSettingsSync', () => {
 
     expect(useSpotifyStore.getState().sessionId).toBe('sess_1');
     expect(show).not.toHaveBeenCalled();
+  });
+
+  it('does not save when only an Auto Gain step changed', async () => {
+    vi.mocked(loadSettings).mockResolvedValue(null);
+    vi.mocked(saveSettings).mockResolvedValue(undefined);
+    useSpotifyStore.setState({ sessionId: 'sess_1' });
+    renderHook(() => useSettingsSync());
+    await vi.advanceTimersByTimeAsync(0);
+
+    useSettingsStore.setState({ transitionTime: 4 });
+    await vi.advanceTimersByTimeAsync(2500);
+    const savesBefore = vi.mocked(saveSettings).mock.calls.length;
+
+    useSettingsStore.getState().applyAutoGain(2.2);
+    await vi.advanceTimersByTimeAsync(2500);
+    expect(saveSettings).toHaveBeenCalledTimes(savesBefore);
+
+    // A manual change turns Auto Gain off, which is worth saving
+    useSettingsStore.getState().setPreAmpGain(2.4);
+    await vi.advanceTimersByTimeAsync(2500);
+    expect(saveSettings).toHaveBeenCalledTimes(savesBefore + 1);
   });
 });

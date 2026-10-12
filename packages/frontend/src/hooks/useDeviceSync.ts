@@ -3,7 +3,11 @@ import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useDeviceSyncStatusStore } from '../store/useDeviceSyncStatusStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import type { DeviceSyncService } from '../services/DeviceSyncService.ts';
-import { getDeviceSyncSnapshot, applyDeviceSyncSettings } from '../services/syncUtils.ts';
+import {
+  getDeviceSyncSnapshot,
+  applyDeviceSyncSettings,
+  outboundKey,
+} from '../services/syncUtils.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { mobileBlockedSet } from '../data/excludedPresets.ts';
 import i18n from '../i18n/index.ts';
@@ -70,6 +74,7 @@ export function useDeviceSync(
   const isSyncingRef = useRef(false);
   const isRemotePresetRef = useRef(false);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastSentKeyRef = useRef<string | null>(null);
   const operationInFlightRef = useRef(false);
   const deviceSyncSettingsSyncRef = useRef(deviceSyncSettingsSync);
 
@@ -134,6 +139,8 @@ export function useDeviceSync(
           applyDeviceSyncSettings({ ...settings, autopilot: undefined });
         }
         isSyncingRef.current = false;
+        // Peers have moved on from whatever we last sent, so the next local change must go out
+        lastSentKeyRef.current = null;
       };
 
       service.onStatusChange = (newStatus, errorMessage) => {
@@ -192,6 +199,9 @@ export function useDeviceSync(
 
       debounceTimerRef.current = setTimeout(() => {
         const snapshot = getDeviceSyncSnapshot();
+        const key = outboundKey(snapshot);
+        if (key === lastSentKeyRef.current) return;
+        lastSentKeyRef.current = key;
         service.sendSettingsChange(snapshot);
       }, SETTINGS_DEBOUNCE_MS);
     });

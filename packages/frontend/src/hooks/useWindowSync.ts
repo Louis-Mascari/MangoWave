@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useWindowSyncStatusStore } from '../store/useWindowSyncStatusStore.ts';
 import { WindowSyncService } from '../services/WindowSyncService.ts';
-import { getSettingsSnapshot, applyInboundSettings } from '../services/syncUtils.ts';
+import { getSettingsSnapshot, applyInboundSettings, outboundKey } from '../services/syncUtils.ts';
 import type { VisualizerRenderer } from '../engine/VisualizerRenderer.ts';
 
 const SETTINGS_DEBOUNCE_MS = 200;
@@ -36,6 +36,7 @@ export function useWindowSync(
   const isSyncingRef = useRef(false);
   const isRemotePresetRef = useRef(false);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastSentKeyRef = useRef<string | null>(null);
   const currentPresetRef = useRef(currentPreset);
 
   // Keep currentPreset ref up to date for join/welcome handler
@@ -72,6 +73,8 @@ export function useWindowSync(
       isSyncingRef.current = true;
       applyInboundSettings(settings);
       isSyncingRef.current = false;
+      // Peers have moved on from whatever we last sent, so the next local change must go out
+      lastSentKeyRef.current = null;
     };
 
     // Inbound: join request — leader responds with current preset + settings
@@ -110,7 +113,11 @@ export function useWindowSync(
       }
 
       debounceTimerRef.current = setTimeout(() => {
-        service.sendSettingsChange(getSettingsSnapshot());
+        const snapshot = getSettingsSnapshot();
+        const key = outboundKey(snapshot);
+        if (key === lastSentKeyRef.current) return;
+        lastSentKeyRef.current = key;
+        service.sendSettingsChange(snapshot);
       }, SETTINGS_DEBOUNCE_MS);
     });
 

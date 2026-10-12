@@ -116,6 +116,41 @@ describe('useSettingsStore', () => {
       expect(result.current.eq.preAmpGain).toBe(2.5);
     });
 
+    it('turns Auto Gain off when the gain is set by hand, not when Auto Gain sets it', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setAutoGain(true));
+
+      act(() => result.current.applyAutoGain(2.0));
+      expect(result.current.eq).toMatchObject({ preAmpGain: 2.0, autoGain: true });
+
+      act(() => result.current.setPreAmpGain(2.5));
+      expect(result.current.eq).toMatchObject({ preAmpGain: 2.5, autoGain: false });
+    });
+
+    it('leaves Auto Gain on after Reset', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => result.current.setPreAmpGain(2.5));
+      act(() => result.current.resetEQ());
+      expect(result.current.eq).toMatchObject({ preAmpGain: 1.5, autoGain: true });
+    });
+
+    it('turns Auto Quality off for a manual quality change, not for an auto tier', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      const tier = { meshWidth: 32, meshHeight: 24, textureRatio: 0.5, resolutionScale: 0.5 };
+      const manual: (() => void)[] = [
+        () => result.current.setMeshSize(64, 48),
+        () => result.current.setTextureRatio(1.5),
+        () => result.current.setResolutionScale(0.75),
+      ];
+      for (const change of manual) {
+        act(() => result.current.setAutoQuality(true));
+        act(() => result.current.applyAutoQualityTier(tier));
+        expect(result.current.performance).toMatchObject({ ...tier, autoQuality: true });
+        act(change);
+        expect(result.current.performance.autoQuality).toBe(false);
+      }
+    });
+
     it('sets individual band gain', () => {
       const { result } = renderHook(() => useSettingsStore());
       act(() => result.current.setEQBandGain(3, 6));

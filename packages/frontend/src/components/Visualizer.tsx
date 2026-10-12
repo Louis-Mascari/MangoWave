@@ -218,15 +218,14 @@ export function Visualizer({
   }, [performance.fxaa, rendererRef]);
 
   // Auto quality: connect quality monitor to store
-  const autoQualityChangeRef = useRef(false);
   const prevAutoTierRef = useRef(QUALITY_TIERS.length - 1);
   const handleQualityChange = useCallback((tier: number, settings: QualityTier) => {
-    // Flag so manual-change detection in useEffect skips this update
-    autoQualityChangeRef.current = true;
-    const store = useSettingsStore.getState();
-    store.setMeshSize(settings.meshWidth, settings.meshHeight);
-    store.setTextureRatio(settings.textureRatio);
-    store.setResolutionScale(settings.resolutionScale);
+    useSettingsStore.getState().applyAutoQualityTier({
+      meshWidth: settings.meshWidth,
+      meshHeight: settings.meshHeight,
+      textureRatio: settings.textureRatio,
+      resolutionScale: settings.resolutionScale,
+    });
 
     // Show info toast on quality tier changes
     if (tier !== prevAutoTierRef.current) {
@@ -237,14 +236,6 @@ export function Visualizer({
       });
     }
     prevAutoTierRef.current = tier;
-
-    // Reset flag after React effects have processed the store update.
-    // Must use setTimeout (macrotask) — queueMicrotask runs before React's
-    // useEffect phase, which would let the manual-change detection effect
-    // see the flag as false and incorrectly disable auto quality.
-    setTimeout(() => {
-      autoQualityChangeRef.current = false;
-    }, 0);
   }, []);
 
   useEffect(() => {
@@ -285,30 +276,6 @@ export function Visualizer({
     };
     // Only re-run when autoQuality is toggled, not on every settings change
   }, [performance.autoQuality, rendererRef, handleQualityChange]);
-
-  // When user manually changes performance settings while auto quality is on,
-  // disable auto quality (manual override)
-  const prevPerfRef = useRef(performance);
-  useEffect(() => {
-    const prev = prevPerfRef.current;
-    prevPerfRef.current = performance;
-
-    // Skip if this change came from auto quality itself
-    if (autoQualityChangeRef.current) return;
-
-    // Skip if auto quality is off or was just toggled
-    if (!performance.autoQuality || prev.autoQuality !== performance.autoQuality) return;
-
-    // Check if any quality-related setting changed manually
-    if (
-      prev.meshWidth !== performance.meshWidth ||
-      prev.meshHeight !== performance.meshHeight ||
-      prev.textureRatio !== performance.textureRatio ||
-      prev.resolutionScale !== performance.resolutionScale
-    ) {
-      useSettingsStore.getState().setAutoQuality(false);
-    }
-  }, [performance]);
 
   // Sync audio settings to engine
   useEffect(() => {

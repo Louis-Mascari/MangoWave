@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useSettingsStore } from '../../store/useSettingsStore.ts';
-import { applyDeviceSyncSettings } from '../syncUtils.ts';
+import {
+  applyDeviceSyncSettings,
+  applyInboundSettings,
+  getSettingsSnapshot,
+  outboundKey,
+} from '../syncUtils.ts';
 import type { SyncableSettings } from '../syncTypes.ts';
 
 // Peer data is untyped at runtime; build it loosely like a mismatched or hostile peer would
@@ -42,7 +47,7 @@ describe('applyDeviceSyncSettings', () => {
     applyDeviceSyncSettings(
       fromPeer({
         autopilot: { enabled: true, interval: 0, mode: 'bogus', favoriteWeight: 999 },
-        eq: { preAmpGain: 50, bandGains: [99, -99] },
+        eq: { preAmpGain: 50, bandGains: [99, -99], autoGain: false },
         audio: { smoothingConstant: 7, fftSize: 3000 },
       }),
     );
@@ -85,7 +90,10 @@ describe('applyDeviceSyncSettings', () => {
     expect(useSettingsStore.getState().performance).toEqual(before);
 
     applyDeviceSyncSettings(
-      fromPeer({ syncPerformance: true, performance: { fpsCap: 5000, meshWidth: 1 } }),
+      fromPeer({
+        syncPerformance: true,
+        performance: { fpsCap: 5000, meshWidth: 1, autoQuality: false },
+      }),
     );
     const { performance } = useSettingsStore.getState();
     expect(performance.fpsCap).toBe(300);
@@ -102,5 +110,84 @@ describe('applyDeviceSyncSettings', () => {
     expect(after.autopilot).toEqual(before.autopilot);
     expect(after.audio).toEqual(before.audio);
     expect(after.brightness).toBe(before.brightness);
+  });
+});
+
+describe('auto-driven values under sync', () => {
+  beforeEach(() => {
+    useSettingsStore.setState(useSettingsStore.getInitialState());
+  });
+
+  it("keeps the local gain when the sender's Auto Gain is on", () => {
+    useSettingsStore.getState().applyAutoGain(1.2);
+    const remote = getSettingsSnapshot();
+    remote.eq = { ...remote.eq!, preAmpGain: 2.6, autoGain: true };
+
+    applyInboundSettings(remote);
+
+    const { eq } = useSettingsStore.getState();
+    expect(eq.preAmpGain).toBe(1.2);
+    expect(eq.autoGain).toBe(true);
+  });
+
+  it("applies the sender's gain together with Auto Gain off", () => {
+    const remote = getSettingsSnapshot();
+    remote.eq = { ...remote.eq!, preAmpGain: 2.6, autoGain: false };
+
+    applyInboundSettings(remote);
+
+    expect(useSettingsStore.getState().eq).toMatchObject({ preAmpGain: 2.6, autoGain: false });
+  });
+
+  it("keeps local quality values when the sender's Auto Quality is on", () => {
+    useSettingsStore.setState({ syncPerformance: true });
+    const before = useSettingsStore.getState().performance;
+    const remote = getSettingsSnapshot();
+    remote.performance = {
+      ...before,
+      fpsCap: 30,
+      meshWidth: 32,
+      meshHeight: 24,
+      textureRatio: 0.5,
+      resolutionScale: 0.5,
+      autoQuality: true,
+    };
+
+    applyInboundSettings(remote);
+
+    const after = useSettingsStore.getState().performance;
+    expect(after.fpsCap).toBe(30);
+    expect(after).toMatchObject({
+      meshWidth: before.meshWidth,
+      meshHeight: before.meshHeight,
+      textureRatio: before.textureRatio,
+      resolutionScale: before.resolutionScale,
+      autoQuality: true,
+    });
+  });
+
+  it('applies device-sync gain only when Auto Gain is off', () => {
+    applyDeviceSyncSettings(fromPeer({ eq: { preAmpGain: 2.5, autoGain: true } }));
+    expect(useSettingsStore.getState().eq.preAmpGain).toBe(1.5);
+
+    applyDeviceSyncSettings(fromPeer({ eq: { preAmpGain: 2.5, autoGain: false } }));
+    expect(useSettingsStore.getState().eq.preAmpGain).toBe(2.5);
+  });
+
+  it('gives an auto step the same outbound key and a manual change a new one', () => {
+    useSettingsStore.setState({ syncPerformance: true });
+    const base = outboundKey(getSettingsSnapshot());
+
+    useSettingsStore.getState().applyAutoGain(2.2);
+    useSettingsStore.getState().applyAutoQualityTier({
+      meshWidth: 32,
+      meshHeight: 24,
+      textureRatio: 0.5,
+      resolutionScale: 0.5,
+    });
+    expect(outboundKey(getSettingsSnapshot())).toBe(base);
+
+    useSettingsStore.getState().setPreAmpGain(2.2);
+    expect(outboundKey(getSettingsSnapshot())).not.toBe(base);
   });
 });

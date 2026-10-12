@@ -236,45 +236,6 @@ function MainApp() {
   const silenceCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const setOnboardingShown = useSettingsStore((s) => s.setOnboardingShown);
 
-  const startLaunch = useCallback(() => {
-    setShowLaunchAnimation(true);
-    if (!useSettingsStore.getState().onboardingShown) setShowOnboarding(true);
-  }, []);
-
-  const handleStart = useCallback(async () => {
-    const ok = await capture.startCapture();
-    if (ok) startLaunch();
-  }, [capture, startLaunch]);
-
-  const handleMicCapture = useCallback(
-    async (deviceId?: string) => {
-      const ok = await capture.startMicCapture(deviceId);
-      if (ok) startLaunch();
-    },
-    [capture, startLaunch],
-  );
-
-  const handleLocalFiles = useCallback(
-    (files: File[]) => {
-      local.startWithFiles(files);
-      startLaunch();
-    },
-    [local, startLaunch],
-  );
-
-  const handleAddLocalFiles = useCallback((files: File[]) => {
-    useMediaPlayerStore.getState().addTracks(files);
-  }, []);
-
-  const handleStop = useCallback(() => {
-    if (capture.isCapturing) {
-      capture.stopCapture();
-    }
-    if (local.isActive) {
-      local.stop();
-    }
-  }, [capture, local]);
-
   // Held in state rather than React.lazy: a rejected lazy import is cached and would
   // take down the whole tree through the error boundary while audio capture is live.
   const [Visualizer, setVisualizer] = useState<VisualizerComponent | null>(null);
@@ -297,6 +258,51 @@ function MainApp() {
       cancelled = true;
     };
   }, [webgl2, Visualizer]);
+
+  const startLaunch = useCallback(() => {
+    setShowLaunchAnimation(true);
+    if (!useSettingsStore.getState().onboardingShown) setShowOnboarding(true);
+  }, []);
+
+  // With the visualizer known to be unavailable there is nothing to start: do not open
+  // the share picker or ask for the microphone only to drop the session straight away.
+  // The start screen is already showing why.
+  const handleStart = useCallback(async () => {
+    if (visualizerLoadError) return;
+    const ok = await capture.startCapture();
+    if (ok) startLaunch();
+  }, [capture, startLaunch, visualizerLoadError]);
+
+  const handleMicCapture = useCallback(
+    async (deviceId?: string) => {
+      if (visualizerLoadError) return;
+      const ok = await capture.startMicCapture(deviceId);
+      if (ok) startLaunch();
+    },
+    [capture, startLaunch, visualizerLoadError],
+  );
+
+  const handleLocalFiles = useCallback(
+    (files: File[]) => {
+      if (visualizerLoadError) return;
+      local.startWithFiles(files);
+      startLaunch();
+    },
+    [local, startLaunch, visualizerLoadError],
+  );
+
+  const handleAddLocalFiles = useCallback((files: File[]) => {
+    useMediaPlayerStore.getState().addTracks(files);
+  }, []);
+
+  const handleStop = useCallback(() => {
+    if (capture.isCapturing) {
+      capture.stopCapture();
+    }
+    if (local.isActive) {
+      local.stop();
+    }
+  }, [capture, local]);
 
   // A session cannot run without it. Covers both a failure while a session waits on the
   // download and a Start pressed after the download has already failed.

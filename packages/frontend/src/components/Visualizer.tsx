@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { VisualizerRenderer } from '../engine/VisualizerRenderer.ts';
 import type { AudioEngine } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
-import { QUALITY_TIERS, TIER_LABELS } from '../engine/QualityMonitor.ts';
+import { QUALITY_TIERS, TIER_LABELS, tierForSettings } from '../engine/QualityMonitor.ts';
 import type { QualityTier } from '../engine/QualityMonitor.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import { useImportedTexturesStore } from '../store/useImportedTexturesStore.ts';
@@ -248,34 +248,25 @@ export function Visualizer({
     if (performance.autoQuality) {
       // Allow stepping up to High — the monitor will step down if needed
       renderer.setAutoQualityMaxTier(QUALITY_TIERS.length - 1);
-
-      // Determine current tier from existing settings so we don't override the user's choices.
-      // Start monitoring from wherever they are; the monitor will step up/down as needed.
-      // Read from store (not closure) — this effect only re-runs on autoQuality toggle,
-      // not on every settings change, so closure values would be stale.
-      const perf = useSettingsStore.getState().performance;
-      let currentTier = 0;
-      for (let i = QUALITY_TIERS.length - 1; i >= 0; i--) {
-        const t = QUALITY_TIERS[i];
-        if (
-          perf.meshWidth >= t.meshWidth &&
-          perf.meshHeight >= t.meshHeight &&
-          perf.textureRatio >= t.textureRatio &&
-          perf.resolutionScale >= t.resolutionScale
-        ) {
-          currentTier = i;
-          break;
-        }
-      }
-      renderer.setAutoQualityCurrentTier(currentTier);
-      prevAutoTierRef.current = currentTier;
     }
 
     return () => {
       renderer.setOnQualityChange(null);
     };
-    // Only re-run when autoQuality is toggled, not on every settings change
   }, [performance.autoQuality, rendererRef, handleQualityChange]);
+
+  // Keep the monitor's tier in step with the stored quality settings, so it starts from
+  // the user's own choices when turned on and follows a Reset, an import or a synced
+  // change while it is on. Its own steps land on exact tier values, so this is a no-op
+  // for them.
+  const { autoQuality, meshWidth, meshHeight, textureRatio, resolutionScale } = performance;
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    if (!renderer || !autoQuality) return;
+    const tier = tierForSettings({ meshWidth, meshHeight, textureRatio, resolutionScale });
+    renderer.setAutoQualityCurrentTier(tier);
+    prevAutoTierRef.current = tier;
+  }, [autoQuality, meshWidth, meshHeight, textureRatio, resolutionScale, rendererRef]);
 
   // Sync audio settings to engine
   useEffect(() => {

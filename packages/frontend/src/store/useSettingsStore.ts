@@ -242,7 +242,12 @@ export const useSettingsStore = create<SettingsState>()(
       // takes over from Auto Quality. Auto Quality itself writes via applyAutoQualityTier.
       setResolutionScale: (scale) =>
         set((state) => ({
-          performance: { ...state.performance, resolutionScale: scale, autoQuality: false },
+          performance: {
+            ...state.performance,
+            resolutionScale: scale,
+            autoQuality:
+              state.performance.autoQuality && scale === state.performance.resolutionScale,
+          },
         })),
       setMeshSize: (width, height) =>
         set((state) => ({
@@ -250,14 +255,21 @@ export const useSettingsStore = create<SettingsState>()(
             ...state.performance,
             meshWidth: width,
             meshHeight: height,
-            autoQuality: false,
+            autoQuality:
+              state.performance.autoQuality &&
+              width === state.performance.meshWidth &&
+              height === state.performance.meshHeight,
           },
         })),
       applyAutoQualityTier: (tier) =>
         set((state) => ({ performance: { ...state.performance, ...tier } })),
       setTextureRatio: (ratio) =>
         set((state) => ({
-          performance: { ...state.performance, textureRatio: ratio, autoQuality: false },
+          performance: {
+            ...state.performance,
+            textureRatio: ratio,
+            autoQuality: state.performance.autoQuality && ratio === state.performance.textureRatio,
+          },
         })),
       setFxaa: (enabled) =>
         set((state) => ({
@@ -308,7 +320,11 @@ export const useSettingsStore = create<SettingsState>()(
       // Auto Gain itself writes via applyAutoGain.
       setPreAmpGain: (gain) =>
         set((state) => ({
-          eq: { ...state.eq, preAmpGain: gain, autoGain: false },
+          eq: {
+            ...state.eq,
+            preAmpGain: gain,
+            autoGain: state.eq.autoGain && gain === state.eq.preAmpGain,
+          },
         })),
       applyAutoGain: (gain) =>
         set((state) => ({

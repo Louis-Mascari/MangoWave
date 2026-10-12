@@ -210,4 +210,23 @@ describe('useSettingsSync', () => {
     await vi.advanceTimersByTimeAsync(2500);
     expect(saveSettings).toHaveBeenCalledTimes(savesBefore + 1);
   });
+
+  it('retries a save that failed transiently, even if only an auto value changed since', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.mocked(loadSettings).mockResolvedValue({} as never);
+    vi.mocked(saveSettings)
+      .mockRejectedValueOnce(new Error('network'))
+      .mockResolvedValue(undefined);
+    useSpotifyStore.setState({ sessionId: 'sess_1' });
+    renderHook(() => useSettingsSync());
+    await vi.advanceTimersByTimeAsync(0);
+
+    useSettingsStore.setState({ transitionTime: 7 });
+    await vi.advanceTimersByTimeAsync(2500);
+    expect(saveSettings).toHaveBeenCalledTimes(1);
+
+    useSettingsStore.getState().applyAutoGain(2.7);
+    await vi.advanceTimersByTimeAsync(2500);
+    expect(saveSettings).toHaveBeenCalledTimes(2);
+  });
 });

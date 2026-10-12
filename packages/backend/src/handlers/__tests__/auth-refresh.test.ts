@@ -13,11 +13,12 @@ vi.mock('../../lib/spotify', async () => {
 vi.mock('../../lib/dynamo', () => ({
   getSession: vi.fn(),
   updateSessionToken: vi.fn(),
+  extendSessionTtl: vi.fn(),
   deleteSession: vi.fn(),
 }));
 
 import { refreshAccessToken, InvalidGrantError } from '../../lib/spotify';
-import { getSession, updateSessionToken, deleteSession } from '../../lib/dynamo';
+import { getSession, updateSessionToken, extendSessionTtl, deleteSession } from '../../lib/dynamo';
 
 function makeEvent(body: Record<string, unknown>): APIGatewayProxyEventV2 {
   return {
@@ -87,11 +88,13 @@ describe('auth-refresh handler', () => {
       scope: 'user-read-currently-playing',
       expires_in: 3600,
     });
-    vi.mocked(updateSessionToken).mockResolvedValue(undefined);
+    vi.mocked(extendSessionTtl).mockResolvedValue(undefined);
 
     const result = await invoke({ sessionId: 'sess_abc' });
     expect(result.statusCode).toBe(200);
-    expect(updateSessionToken).toHaveBeenCalledWith('sess_abc', 'rt_old');
+    expect(extendSessionTtl).toHaveBeenCalledWith('sess_abc');
+    // The token is left alone: a concurrent refresh may have rotated it
+    expect(updateSessionToken).not.toHaveBeenCalled();
   });
 
   it('still returns the token when extending the TTL fails', async () => {
@@ -103,7 +106,7 @@ describe('auth-refresh handler', () => {
       scope: 'user-read-currently-playing',
       expires_in: 3600,
     });
-    vi.mocked(updateSessionToken).mockRejectedValue(new Error('throttled'));
+    vi.mocked(extendSessionTtl).mockRejectedValue(new Error('throttled'));
 
     const result = await invoke({ sessionId: 'sess_abc' });
     expect(result.statusCode).toBe(200);

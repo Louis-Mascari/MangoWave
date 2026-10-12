@@ -187,7 +187,7 @@ describe('auto-driven values under sync', () => {
     });
     expect(outboundKey(getSettingsSnapshot())).toBe(base);
 
-    useSettingsStore.getState().setPreAmpGain(2.2);
+    useSettingsStore.getState().setPreAmpGain(2.4);
     expect(outboundKey(getSettingsSnapshot())).not.toBe(base);
   });
 });

@@ -127,6 +127,25 @@ describe('useSettingsStore', () => {
       expect(result.current.eq).toMatchObject({ preAmpGain: 2.5, autoGain: false });
     });
 
+    it('keeps the auto modes on when a control is set to the value it already has', () => {
+      const { result } = renderHook(() => useSettingsStore());
+      act(() => {
+        result.current.setAutoGain(true);
+        result.current.setAutoQuality(true);
+      });
+      const { eq, performance } = result.current;
+
+      act(() => {
+        result.current.setPreAmpGain(eq.preAmpGain);
+        result.current.setMeshSize(performance.meshWidth, performance.meshHeight);
+        result.current.setTextureRatio(performance.textureRatio);
+        result.current.setResolutionScale(performance.resolutionScale);
+      });
+
+      expect(result.current.eq.autoGain).toBe(true);
+      expect(result.current.performance.autoQuality).toBe(true);
+    });
+
     it('leaves Auto Gain on after Reset', () => {
       const { result } = renderHook(() => useSettingsStore());
       act(() => result.current.setPreAmpGain(2.5));

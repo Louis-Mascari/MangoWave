@@ -60,6 +60,7 @@
   },
 
   "toasts": {
+    "newVersionAvailable": "A new version of MangoWave is available. Reload the page when convenient to get it.",
     "cloudSyncTooLarge": "Your settings are too large to sync to the cloud. Remove some custom packs or imported presets to resume syncing.",
     "cloudSyncRejected": "Your settings could not be synced to the cloud. They are still saved on this device.",
     "autopilotOn": "Autopilot on",

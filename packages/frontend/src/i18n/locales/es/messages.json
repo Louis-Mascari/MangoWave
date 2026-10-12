@@ -56,6 +56,7 @@
     "rateLimited": "Límite de Spotify alcanzado. Reintentando en {{seconds}}s"
   },
   "toasts": {
+    "newVersionAvailable": "Hay una nueva versión de MangoWave disponible. Recarga la página cuando te venga bien para obtenerla.",
     "cloudSyncTooLarge": "Tus ajustes son demasiado grandes para sincronizarse con la nube. Elimina algunos packs personalizados o presets importados para reanudar la sincronización.",
     "cloudSyncRejected": "No se pudieron sincronizar tus ajustes con la nube. Siguen guardados en este dispositivo.",
     "autopilotOn": "Autopilot activado",

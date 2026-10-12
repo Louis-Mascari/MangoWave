@@ -56,6 +56,7 @@
     "rateLimited": "Spotify 요청 제한에 도달했습니다. {{seconds}}초 후 재시도합니다"
   },
   "toasts": {
+    "newVersionAvailable": "MangoWave의 새 버전이 있습니다. 편할 때 페이지를 새로고침해 주세요.",
     "cloudSyncTooLarge": "설정이 너무 커서 클라우드에 동기화할 수 없습니다. 동기화를 다시 시작하려면 일부 사용자 지정 팩이나 가져온 프리셋을 삭제해 주세요.",
     "cloudSyncRejected": "설정을 클라우드에 동기화하지 못했습니다. 설정은 이 기기에 그대로 저장되어 있습니다.",
     "autopilotOn": "자동 전환 켜짐",

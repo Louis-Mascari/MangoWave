@@ -3,6 +3,7 @@ import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { usePresetHistoryStore } from '../store/usePresetHistoryStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import { ensurePresetLoaded } from '../engine/lazyPresetLoader.ts';
+import { isBuildKnownStale } from '../lib/staleBuild.ts';
 import { pickPreset } from '../utils/pickPreset.ts';
 import { quarantinedSet, mobileBlockedSet } from '../data/excludedPresets.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
@@ -105,9 +106,13 @@ export function usePresetNavigation({
     ) => {
       const loaded = await ensurePresetLoaded(renderer, name);
       if (!loaded) {
-        useToastStore
-          .getState()
-          .show(i18n.t('importedPresets.conversionFailed', { name, ns: 'messages' }));
+        // In an outdated tab the preset's chunk is simply gone; the new-version notice
+        // has already said so, and "conversion failed" would point at the wrong cause
+        if (!isBuildKnownStale()) {
+          useToastStore
+            .getState()
+            .show(i18n.t('importedPresets.conversionFailed', { name, ns: 'messages' }));
+        }
         fallbackToNext?.();
         return;
       }

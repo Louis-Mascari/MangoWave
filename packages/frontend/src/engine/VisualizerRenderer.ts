@@ -171,10 +171,16 @@ export class VisualizerRenderer {
 
     // Register MilkDrop-Original preset names from a lightweight manifest (18KB).
     // The heavy 5MB preset data stays in a separate chunk, loaded lazily on first access.
-    import('milkdrop-presets/names').then(({ getPresetNames }) => {
-      this.registerMilkdropPresetNames(getPresetNames());
-      this.onPresetsRegistered?.();
-    });
+    import('milkdrop-presets/names')
+      .then(({ getPresetNames }) => {
+        this.registerMilkdropPresetNames(getPresetNames());
+        this.onPresetsRegistered?.();
+      })
+      // The MilkDrop names are an extra; the built-in presets still work without them.
+      // A chunk missing after a deploy is handled centrally (lib/staleBuild.ts).
+      .catch((err: unknown) => {
+        console.warn('MilkDrop preset names could not be loaded:', err);
+      });
 
     // Load a random initial preset, filtering out excluded presets.
     // Only pick from presets with loaded objects (excludes EEL packs that need WASM compilation).

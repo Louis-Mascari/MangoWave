@@ -56,6 +56,7 @@
     "rateLimited": "Spotifyのレート制限を受けました。{{seconds}}秒後に再試行します"
   },
   "toasts": {
+    "newVersionAvailable": "MangoWaveの新しいバージョンが利用可能です。都合の良いときにページを再読み込みしてください。",
     "cloudSyncTooLarge": "設定が大きすぎるためクラウドに同期できません。同期を再開するには、カスタムパックまたはインポートしたプリセットをいくつか削除してください。",
     "cloudSyncRejected": "設定をクラウドに同期できませんでした。設定はこのデバイスに保存されています。",
     "autopilotOn": "オートパイロット オン",

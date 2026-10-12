@@ -56,6 +56,7 @@
     "rateLimited": "Spotify dibatasi. Mencoba lagi dalam {{seconds}}d"
   },
   "toasts": {
+    "newVersionAvailable": "Versi baru MangoWave tersedia. Muat ulang halaman saat senggang untuk mendapatkannya.",
     "cloudSyncTooLarge": "Pengaturanmu terlalu besar untuk disinkronkan ke cloud. Hapus beberapa paket kustom atau preset impor untuk melanjutkan sinkronisasi.",
     "cloudSyncRejected": "Pengaturanmu tidak dapat disinkronkan ke cloud. Pengaturan tetap tersimpan di perangkat ini.",
     "autopilotOn": "Autopilot aktif",

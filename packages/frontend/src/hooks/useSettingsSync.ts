@@ -93,9 +93,13 @@ function applyCloudSettings(cloud: CloudSettings): void {
  * a dead session (log out and prompt), a save the server will never accept (tell the
  * user once), and anything else, which is transient and retried on the next change.
  */
-function handleSyncError(err: unknown, rejectionShown: { current: boolean }): void {
+function handleSyncError(
+  err: unknown,
+  sessionId: string,
+  rejectionShown: { current: boolean },
+): void {
   if (err instanceof SessionExpiredError) {
-    useSpotifyStore.getState().expireSession();
+    useSpotifyStore.getState().expireSession(sessionId);
     return;
   }
   if (err instanceof SettingsRejectedError) {
@@ -129,7 +133,12 @@ export function useSettingsSync() {
   // A rejected save repeats on every settings change until the settings shrink, so tell
   // the user once rather than on each attempt
   const rejectionShownRef = useRef(false);
-  const onSyncError = useCallback((err: unknown) => handleSyncError(err, rejectionShownRef), []);
+  const onSyncError = useCallback(
+    (err: unknown) => {
+      if (sessionId) handleSyncError(err, sessionId, rejectionShownRef);
+    },
+    [sessionId],
+  );
 
   // Load cloud settings on login
   useEffect(() => {
@@ -137,6 +146,8 @@ export function useSettingsSync() {
       hasSyncedRef.current = false;
       return;
     }
+    // A new login starts fresh: it may be a different account with different settings
+    rejectionShownRef.current = false;
 
     if (hasSyncedRef.current) return;
     hasSyncedRef.current = true;
@@ -169,7 +180,12 @@ export function useSettingsSync() {
 
       debounceTimerRef.current = setTimeout(() => {
         const snapshot = getSettingsSnapshot();
-        saveSettings(sessionId, snapshot).catch(onSyncError);
+        saveSettings(sessionId, snapshot)
+          .then(() => {
+            // Accepted again, so a later rejection is news worth telling
+            rejectionShownRef.current = false;
+          })
+          .catch(onSyncError);
       }, DEBOUNCE_MS);
     });
 

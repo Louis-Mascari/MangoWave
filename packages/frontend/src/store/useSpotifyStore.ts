@@ -38,7 +38,7 @@ interface SpotifyState {
   setUnlocked: () => void;
   getAuthMode: () => AuthMode;
   logout: () => void;
-  expireSession: () => void;
+  expireSession: (sessionId: string) => void;
   isTokenValid: () => boolean;
   refreshAccessToken: () => Promise<string | null>;
 }
@@ -116,9 +116,10 @@ export const useSpotifyStore = create<SpotifyState>()(
         }),
 
       // The one place a dead session is handled: log out and tell the user why. Several
-      // requests can discover the same dead session, so only the first one toasts.
-      expireSession: () => {
-        if (!get().sessionId) return;
+      // requests can discover the same dead session, so only the first one acts, and a
+      // late answer about an old session must not log out the one that replaced it.
+      expireSession: (sessionId) => {
+        if (get().sessionId !== sessionId) return;
         get().logout();
         useToastStore
           .getState()
@@ -141,7 +142,7 @@ export const useSpotifyStore = create<SpotifyState>()(
           // Transient failures (network, 5xx) keep the session so the next
           // now-playing poll retries the refresh instead of forcing re-auth.
           if (err instanceof SessionExpiredError) {
-            get().expireSession();
+            if (sessionId) get().expireSession(sessionId);
           }
         }
         return null;

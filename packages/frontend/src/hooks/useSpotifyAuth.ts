@@ -10,8 +10,8 @@ import i18n from '../i18n/index.ts';
  * failures (network, 5xx) are ignored so the session survives — the now-playing
  * poll will retry the refresh on its next tick.
  */
-function handleRefreshFailure(err: unknown) {
-  if (err instanceof SessionExpiredError) useSpotifyStore.getState().expireSession();
+function handleRefreshFailure(err: unknown, sessionId: string) {
+  if (err instanceof SessionExpiredError) useSpotifyStore.getState().expireSession(sessionId);
 }
 
 /** Show auth failure toast. In a popup, notify the opener and close; otherwise show locally. */
@@ -88,7 +88,7 @@ export function useSpotifyAuth() {
         setAccessToken(accessToken, expiresIn);
       })
       .catch((err) => {
-        handleRefreshFailure(err);
+        handleRefreshFailure(err, sessionId);
       });
   }, [sessionId, isTokenValid, setAccessToken]);
 }

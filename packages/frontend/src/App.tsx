@@ -30,6 +30,7 @@ import { ShortcutOverlay } from './components/ShortcutOverlay.tsx';
 import { LaunchAnimation } from './components/LaunchAnimation.tsx';
 import { RateLimitToast } from './components/RateLimitToast.tsx';
 import { ActionToast } from './components/ActionToast.tsx';
+import { setSessionActive } from './lib/staleBuild.ts';
 import { ConfirmDialog } from './components/ConfirmDialog.tsx';
 import { ImportModal } from './components/ImportModal.tsx';
 import { OnboardingOverlay } from './components/OnboardingOverlay.tsx';
@@ -209,6 +210,7 @@ function MainApp() {
     }
   }
   useEffect(() => {
+    setSessionActive(isActive);
     if (isActive) return;
     if (getFullscreenElement()) exitFullscreen();
     // A toast raised during the session (silence warning, quality change) no longer applies

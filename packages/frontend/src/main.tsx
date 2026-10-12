@@ -4,11 +4,13 @@ import './index.css';
 import './i18n/index.ts';
 import { initPostHog } from './lib/posthog.ts';
 import { initSentry } from './lib/sentry.ts';
+import { initStaleBuildRecovery } from './lib/staleBuild.ts';
 import { ErrorBoundary } from './components/ErrorBoundary.tsx';
 import App from './App.tsx';
 
 initSentry();
 initPostHog();
+initStaleBuildRecovery();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

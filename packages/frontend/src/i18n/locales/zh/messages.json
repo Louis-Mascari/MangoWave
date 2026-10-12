@@ -55,6 +55,7 @@
     "rateLimited": "Spotify 请求频率受限。将在 {{seconds}}s 后重试"
   },
   "toasts": {
+    "newVersionAvailable": "MangoWave 有新版本可用。方便时请重新加载页面以获取更新。",
     "cloudSyncTooLarge": "你的设置过大，无法同步到云端。请删除一些自定义预设包或导入的预设以恢复同步。",
     "cloudSyncRejected": "无法将你的设置同步到云端。设置仍保存在此设备上。",
     "autopilotOn": "自动播放已开启",

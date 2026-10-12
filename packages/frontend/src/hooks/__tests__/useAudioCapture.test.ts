@@ -36,6 +36,17 @@ vi.mock('../../engine/AudioEngine.ts', () => {
       });
       initAudioPipeline = vi.fn();
       initFromMicrophone = mockInitFromMicrophone;
+      getStream = () => {
+        trackEndedListeners = [];
+        const micTrack = {
+          addEventListener: (event: string, handler: () => void) => {
+            if (event === 'ended') trackEndedListeners.push(handler);
+          },
+          removeEventListener: mockRemoveEventListener,
+          stop: vi.fn(),
+        };
+        return { getTracks: () => [micTrack] };
+      };
       destroy = mockDestroy;
     },
     EQ_BANDS: [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000],
@@ -134,6 +145,23 @@ describe('useAudioCapture', () => {
     });
 
     expect(result.current.captureSource).toBe('system');
+  });
+
+  it('ends the session with an explanation when the microphone is disconnected', async () => {
+    const { result } = renderHook(() => useAudioCapture());
+
+    await act(async () => {
+      await result.current.startMicCapture();
+    });
+    expect(result.current.isCapturing).toBe(true);
+
+    act(() => {
+      trackEndedListeners.forEach((listener) => listener());
+    });
+
+    expect(result.current.isCapturing).toBe(false);
+    expect(mockDestroy).toHaveBeenCalled();
+    expect(result.current.error).toContain('microphone was disconnected');
   });
 
   it('cleans up when browser stop-sharing fires track ended', async () => {

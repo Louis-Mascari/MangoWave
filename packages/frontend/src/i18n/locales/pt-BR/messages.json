@@ -1,5 +1,6 @@
 {
   "errors": {
+    "micDisconnected": "O microfone foi desconectado. Reconecte-o e inicie novamente.",
     "notAllowedSystem": "O compartilhamento de tela foi cancelado ou negado. Por favor, tente novamente e selecione uma tela, janela ou aba para compartilhar.",
     "notAllowedMic": "O acesso ao microfone foi negado. Por favor, permita o acesso ao microfone nas configurações do seu navegador e tente novamente.",
     "notFoundSystem": "Nenhuma tela ou janela estava disponível para compartilhar. Por favor, verifique se um monitor está conectado e tente novamente.",

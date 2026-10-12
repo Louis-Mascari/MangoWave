@@ -153,17 +153,38 @@ function MainApp() {
     })(),
   );
 
+  const qrJoinInProgressRef = useRef(false);
   useEffect(() => {
     const code = pendingRoomRef.current;
     if (!code || !isActive || deviceSyncStatus !== 'idle') return;
     pendingRoomRef.current = '';
+    qrJoinInProgressRef.current = true;
     useDeviceSyncStatusStore
       .getState()
       .actions.joinRoom(code)
       .then(() => {
+        qrJoinInProgressRef.current = false;
         useToastStore.getState().show(i18n.t('toasts.joinedRoom', { ns: 'messages', code }));
-      });
+      })
+      // The failure is reported from the status below: the service retries some errors in
+      // the background, so the first rejection is not always the final outcome
+      .catch(() => {});
   }, [isActive, deviceSyncStatus]);
+
+  // A QR join has no settings panel open to show its error, so toast it
+  useEffect(() => {
+    if (!qrJoinInProgressRef.current || deviceSyncStatus !== 'error') return;
+    qrJoinInProgressRef.current = false;
+    const { errorMessage } = useDeviceSyncStatusStore.getState();
+    useToastStore
+      .getState()
+      .show(
+        errorMessage === 'Room not found'
+          ? i18n.t('sync.deviceSync.roomNotFound', { ns: 'settings' })
+          : errorMessage,
+        { type: 'error' },
+      );
+  }, [deviceSyncStatus]);
 
   const autopilot = useSettingsStore((s) => s.autopilot);
   const setAutopilotEnabled = useSettingsStore((s) => s.setAutopilotEnabled);

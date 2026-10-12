@@ -219,6 +219,9 @@ export function useDeviceSync(
   const createRoom = useCallback(async (): Promise<string> => {
     if (operationInFlightRef.current) return '';
     operationInFlightRef.current = true;
+    // Outbound settings sync is gated on this flag. Set it here so every way of entering
+    // a room (settings panel, QR link) syncs in both directions.
+    useSettingsStore.getState().setDeviceSyncEnabled(true);
     try {
       // Destroy any existing service before creating a new one
       if (serviceRef.current) {
@@ -241,6 +244,7 @@ export function useDeviceSync(
     async (code: string): Promise<void> => {
       if (operationInFlightRef.current) return;
       operationInFlightRef.current = true;
+      useSettingsStore.getState().setDeviceSyncEnabled(true);
       try {
         // Destroy any existing service before joining a new room
         if (serviceRef.current) {

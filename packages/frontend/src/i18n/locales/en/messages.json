@@ -26,7 +26,6 @@
     "webglContextLostDesc": "Your device's graphics system was interrupted. This can happen when your device is under heavy load, the GPU is shared with other applications, or the display configuration changed. Reloading the page will restore the visualizer.",
     "renderingError": "A rendering error occurred, possibly a WebGL or Web Audio issue.",
     "playbackDecodeError": "Could not play \"{{filename}}\". This format may not be supported by your browser.",
-    "playbackBlocked": "Playback was blocked by your browser. Try tapping the play button in the control panel.",
     "unknownFile": "Unknown file",
     "fullscreenNotSupported": "Unfortunately, your device doesn't support fullscreen from the browser."
   },
@@ -66,12 +65,12 @@
     "autopilotOff": "Autopilot off",
     "renderingPaused": "Rendering paused",
     "renderingResumed": "Rendering resumed",
+    "autoQualityReduced": "Auto Quality reduced to {{tier}}",
+    "autoQualityIncreased": "Auto Quality increased to {{tier}}",
     "addedToFavorites": "Added to favorites",
     "removedFromFavorites": "Removed from favorites",
     "presetBlocked": "Preset blocked",
     "presetUnblocked": "Preset unblocked",
-    "presetRestoredToPool": "Preset restored to pool",
-    "presetReturnedToExcluded": "Preset returned to excluded",
     "blockedPresetsCleared": "Blocked presets cleared",
     "favoritePresetsCleared": "Favorite presets cleared",
     "silenceDetected": "No audio detected. Make sure audio is playing in the shared screen, window, or tab, and that you checked \"Share audio\" in the browser dialog.",
@@ -86,6 +85,7 @@
     "addSongsToQueue": "Add songs to your queue",
     "micNoControls": "Microphone input — no playback controls",
     "sharingNoControls": "Sharing audio — no playback controls",
+    "spotifyRateLimited": "Spotify rate limited",
     "controlsUnavailable": "Playback controls unavailable",
     "previousTrack": "Previous track",
     "nextTrack": "Next track",
@@ -157,6 +157,12 @@
     "noPacksSelected": "No packs selected",
     "packsActive": "{{active}}/{{total}} packs active",
     "packsHint": "Selected packs set the pool for autopilot and next preset",
+    "packDescriptions": {
+      "Ambient": "Smooth, time-driven animations — calm and meditative",
+      "Reactive": "Responds to beats — audio-driven motion and color",
+      "Psychedelic": "Intense shaders, warping, and visual complexity",
+      "Ethereal": "Trails, echo layers, and soft glowing persistence"
+    },
     "searchPlaceholder": "Search presets...",
     "clearSearch": "Clear search",
     "noPresetsVisible": "No presets visible",
@@ -173,8 +179,7 @@
     "quarantineContent": "Content",
     "quarantineMobilePerf": "Mobile perf",
     "addToPack": "Add to pack",
-    "addedToPack": "Added to \"{{pack}}\"",
-    "createPackFirst": "Create a custom pack first"
+    "addedToPack": "Added to \"{{pack}}\""
   },
 
   "importedPresets": {
@@ -182,16 +187,11 @@
     "description": "Add community MilkDrop presets (.milk) and the textures they reference. MilkDrop was designed as a native desktop application, so some presets may not render perfectly in the browser due to differences in shader translation.",
     "emptyState": "No imported presets. Use \"Import .milk\" to add community MilkDrop presets.",
     "importMilk": "Import .milk",
-    "importingPresets": "Importing presets...",
-    "importSuccess": "Imported {{count}} preset(s)",
-    "importPartial": "Imported {{success}} of {{total}} presets. {{failed}} failed.",
-    "importAllFailed": "All {{count}} preset(s) failed to import",
     "fileTooLarge": "Too large (max 500KB)",
     "invalidFileType": "Not a .milk file",
     "emptyFile": "File is empty",
     "duplicateName": "Already exists",
     "conversionFailed": "Conversion failed",
-    "securityBlocked": "Contains blocked content",
     "nativeNameCollision": "Already exists in built-in presets",
     "missingTextures": "Missing textures (will render as noise until uploaded): {{textures}}",
     "deletePreset": "Delete imported preset",
@@ -199,17 +199,12 @@
     "clearAll": "Clear All",
     "clearAllConfirm": "Delete all {{count}} imported presets? The .milk files will need to be re-imported.",
     "cleared": "All imported presets cleared",
-    "idbUnavailable": "Imported presets require storage access, which is unavailable in private browsing mode.",
-    "imported": "Imported",
     "importInProgress": "Importing... {{count}} preset(s) so far"
   },
 
   "importedTextures": {
     "sectionTitle": "Imported Textures",
     "importTextures": "Import Textures",
-    "importSuccess": "Imported {{count}} texture(s)",
-    "importPartial": "Imported {{success}} of {{total}} textures. {{failed}} failed.",
-    "importAllFailed": "All {{count}} texture(s) failed to import",
     "fileTooLarge": "Too large (max 2MB)",
     "invalidFileType": "Not a supported image (JPEG, PNG, or WebP)",
     "builtinTextureShadow": "Built-in texture, cannot be replaced",
@@ -221,7 +216,6 @@
     "clearAllConfirm": "Delete all {{count}} imported textures? The image files will need to be re-imported.",
     "cleared": "All imported textures cleared",
     "gpuNote": "Textures loaded on the GPU persist until the page is reloaded.",
-    "idbUnavailable": "Imported textures require storage access, which is unavailable in private browsing mode.",
     "duplicateName": "Already exists",
     "emptyStateTextures": "No imported textures. Use \"Import Textures\" to add custom texture images.",
     "importInProgress": "Importing... {{count}} texture(s) so far"
@@ -264,7 +258,8 @@
     "deactivatePack": "Stop pack",
     "packOverridesFilters": "Autopilot and next preset use the active pack. Filters only affect this list.",
     "favoritesAutoSwitch": "Switched from favorites to all mode",
-    "newPack": "New Pack"
+    "newPack": "New Pack",
+    "importedPackDefaultName": "Imported Pack"
   },
 
   "importModal": {
@@ -281,7 +276,6 @@
     "summaryAllSuccess": "Successfully imported {{count}} {{type}}",
     "summaryPartial": "Imported {{success}} of {{total}} {{type}}. {{failed}} failed, {{warnings}} with warnings.",
     "summaryAllFailed": "All {{count}} {{type}} failed to import",
-    "uploadMissingTextures": "Upload Missing Textures",
     "missingTexturesSection": "Missing Textures ({{remaining}} remaining)",
     "missingTexturesAllResolved": "All missing textures uploaded",
     "missingTexturesHint": "Presets with missing textures will render with visual noise where the texture should appear. Upload the matching image files to fix this.",

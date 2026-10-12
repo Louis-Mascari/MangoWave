@@ -20,13 +20,12 @@
     "noAudioUnknown": "На Windows и ChromeOS все режимы демонстрации поддерживают звук. На macOS 14.2+ в Chrome поддерживается захват звука с экрана и окна. На Linux только демонстрация вкладки поддерживает звук.",
     "webgl2NotSupported": "WebGL 2 не поддерживается",
     "webgl2NotSupportedDesc": "MangoWave требует WebGL 2 для рендеринга визуализаций. Попробуйте современный браузер: Chrome, Firefox или Edge.",
-    "webgl2GpuCrash": "WebGL 2 Temporarily Unavailable",
-    "webgl2GpuCrashDesc": "Your browser's GPU process may need to recover. Try closing other tabs or restarting your browser.",
+    "webgl2GpuCrash": "WebGL 2 временно недоступен",
+    "webgl2GpuCrashDesc": "Возможно, GPU-процессу браузера нужно восстановиться. Попробуйте закрыть другие вкладки или перезапустить браузер.",
     "webglContextLost": "Визуализатор потерял графический контекст",
     "webglContextLostDesc": "Графическая система устройства была прервана. Это может произойти при высокой нагрузке, когда GPU используется другими приложениями или изменилась конфигурация дисплея. Перезагрузка страницы восстановит визуализатор.",
     "renderingError": "Произошла ошибка рендеринга, возможно, связанная с WebGL или Web Audio.",
     "playbackDecodeError": "Не удалось воспроизвести «{{filename}}». Возможно, ваш браузер не поддерживает этот формат.",
-    "playbackBlocked": "Воспроизведение заблокировано браузером. Попробуйте нажать кнопку воспроизведения на панели управления.",
     "unknownFile": "Неизвестный файл",
     "fullscreenNotSupported": "К сожалению, ваше устройство не поддерживает полноэкранный режим из браузера."
   },
@@ -60,26 +59,28 @@
     "cloudSyncRejected": "Не удалось синхронизировать настройки с облаком. Они по-прежнему сохранены на этом устройстве.",
     "autopilotOn": "Автопилот включён",
     "autopilotOff": "Автопилот выключен",
-    "renderingPaused": "Rendering paused",
-    "renderingResumed": "Rendering resumed",
+    "renderingPaused": "Рендеринг приостановлен",
+    "renderingResumed": "Рендеринг возобновлён",
+    "autoQualityReduced": "Автокачество снижено: {{tier}}",
+    "autoQualityIncreased": "Автокачество повышено: {{tier}}",
     "addedToFavorites": "Добавлено в избранное",
     "removedFromFavorites": "Удалено из избранного",
     "presetBlocked": "Пресет заблокирован",
     "presetUnblocked": "Пресет разблокирован",
-    "presetRestoredToPool": "Пресет возвращён в пул",
-    "presetReturnedToExcluded": "Пресет возвращён в исключённые",
     "blockedPresetsCleared": "Заблокированные пресеты очищены",
     "favoritePresetsCleared": "Избранные пресеты очищены",
     "silenceDetected": "Звук не обнаружен. Убедитесь, что музыка играет в демонстрируемом экране, окне или вкладке, и что вы отметили «Поделиться звуком» в диалоге браузера.",
     "silenceDetectedMic": "Звук с микрофона не обнаружен. Убедитесь, что микрофон не отключён и улавливает звук.",
     "silenceDetectedLocal": "Звук не обнаружен. Убедитесь, что файл имеет поддерживаемый формат и громкость устройства включена.",
     "noPresetsAvailable": "Нет доступных пресетов. Убедитесь, что включён хотя бы один пак и не все пресеты заблокированы.",
-    "presetNotFound": "Пресет не найден на этом устройстве: \"{{name}}\""
+    "presetNotFound": "Пресет не найден на этом устройстве: \"{{name}}\"",
+    "joinedRoom": "Вы вошли в комнату {{code}}"
   },
   "playback": {
     "addSongsToQueue": "Добавьте треки в очередь",
     "micNoControls": "Вход с микрофона — управление воспроизведением недоступно",
     "sharingNoControls": "Демонстрация аудио — управление воспроизведением недоступно",
+    "spotifyRateLimited": "Spotify ограничил запросы",
     "controlsUnavailable": "Управление воспроизведением недоступно",
     "previousTrack": "Предыдущий трек",
     "nextTrack": "Следующий трек",
@@ -124,8 +125,8 @@
     "removeFromFavorites": "Из избранного (S)",
     "toggleAutopilot": "Автопилот (A)",
     "toggleFullscreen": "Полный экран (F)",
-    "togglePause": "Pause rendering (V)",
-    "resumeRendering": "Resume rendering (V)",
+    "togglePause": "Приостановить рендеринг (V)",
+    "resumeRendering": "Возобновить рендеринг (V)",
     "exitFS": "Выйти"
   },
   "mobile": {
@@ -147,6 +148,12 @@
     "noPacksSelected": "Паки не выбраны",
     "packsActive": "{{active}}/{{total}} паков активно",
     "packsHint": "Выбранные паки определяют пул для автопилота и следующего пресета",
+    "packDescriptions": {
+      "Ambient": "Плавная анимация, движимая временем — спокойная и медитативная",
+      "Reactive": "Реагирует на биты — движение и цвет управляются звуком",
+      "Psychedelic": "Интенсивные шейдеры, искажения и визуальная сложность",
+      "Ethereal": "Шлейфы, слои эха и мягкое светящееся послесвечение"
+    },
     "searchPlaceholder": "Поиск пресетов...",
     "clearSearch": "Очистить поиск",
     "noPresetsVisible": "Нет видимых пресетов",
@@ -163,8 +170,7 @@
     "quarantineContent": "Контент",
     "quarantineMobilePerf": "Мобильная произв.",
     "addToPack": "Добавить в пак",
-    "addedToPack": "Добавлено в «{{pack}}»",
-    "createPackFirst": "Сначала создайте пользовательский пак"
+    "addedToPack": "Добавлено в «{{pack}}»"
   },
 
   "importedPresets": {
@@ -172,16 +178,11 @@
     "description": "Добавляйте пресеты MilkDrop (.milk) от сообщества и текстуры, которые они используют. MilkDrop был разработан как нативное десктопное приложение, поэтому некоторые пресеты могут отображаться в браузере не идеально из-за различий в трансляции шейдеров.",
     "emptyState": "Нет импортированных пресетов. Используйте «Import .milk», чтобы добавить пресеты MilkDrop от сообщества.",
     "importMilk": "Импорт .milk",
-    "importingPresets": "Импорт пресетов...",
-    "importSuccess": "Импортировано пресетов: {{count}}",
-    "importPartial": "Импортировано {{success}} из {{total}} пресетов. {{failed}} не удалось.",
-    "importAllFailed": "Не удалось импортировать все {{count}} пресет(ов)",
     "fileTooLarge": "Слишком большой (макс. 500КБ)",
     "invalidFileType": "Не файл .milk",
     "emptyFile": "Файл пустой",
     "duplicateName": "Уже существует",
     "conversionFailed": "Ошибка конвертации",
-    "securityBlocked": "Содержит заблокированный контент",
     "nativeNameCollision": "Уже существует среди встроенных пресетов",
     "missingTextures": "Отсутствующие текстуры (будут отображаться как шум до загрузки): {{textures}}",
     "deletePreset": "Удалить импортированный пресет",
@@ -189,17 +190,12 @@
     "clearAll": "Удалить все",
     "clearAllConfirm": "Удалить все {{count}} импортированных пресетов? Файлы .milk нужно будет импортировать заново.",
     "cleared": "Все импортированные пресеты удалены",
-    "idbUnavailable": "Импортированные пресеты требуют доступа к хранилищу, недоступного в режиме приватного просмотра.",
-    "imported": "Импортированные",
     "importInProgress": "Импорт... {{count}} пресет(ов) обработано"
   },
 
   "importedTextures": {
     "sectionTitle": "Импортированные текстуры",
     "importTextures": "Импорт текстур",
-    "importSuccess": "Импортировано {{count}} текстур(а)",
-    "importPartial": "Импортировано {{success}} из {{total}} текстур. {{failed}} не удалось.",
-    "importAllFailed": "Не удалось импортировать все {{count}} текстур(ы)",
     "fileTooLarge": "Слишком большой (макс. 2МБ)",
     "invalidFileType": "Не поддерживаемое изображение (JPEG, PNG или WebP)",
     "builtinTextureShadow": "Встроенная текстура, нельзя заменить",
@@ -211,7 +207,6 @@
     "clearAllConfirm": "Удалить все {{count}} импортированных текстур? Файлы изображений нужно будет импортировать повторно.",
     "cleared": "Все импортированные текстуры удалены",
     "gpuNote": "Текстуры, загруженные в GPU, сохраняются до перезагрузки страницы.",
-    "idbUnavailable": "Для импортированных текстур требуется доступ к хранилищу, который недоступен в режиме приватного просмотра.",
     "duplicateName": "Уже существует",
     "emptyStateTextures": "Нет импортированных текстур. Используйте \"Импорт текстур\" для добавления пользовательских изображений.",
     "importInProgress": "Импорт... {{count}} текстур(а) обработано"
@@ -256,7 +251,8 @@
     "deactivatePack": "Остановить пак",
     "packOverridesFilters": "Автопилот и следующий пресет используют активный пак. Фильтры влияют только на этот список.",
     "favoritesAutoSwitch": "Переключено с избранного на режим «Все»",
-    "newPack": "Новый пак"
+    "newPack": "Новый пак",
+    "importedPackDefaultName": "Импортированный пак"
   },
 
   "importModal": {
@@ -273,7 +269,6 @@
     "summaryAllSuccess": "Успешно импортировано {{count}} {{type}}",
     "summaryPartial": "Импортировано {{success}} из {{total}} {{type}}. {{failed}} с ошибкой, {{warnings}} с предупреждениями.",
     "summaryAllFailed": "Все {{count}} {{type}} не удалось импортировать",
-    "uploadMissingTextures": "Загрузить недостающие текстуры",
     "missingTexturesSection": "Недостающие текстуры (осталось {{remaining}})",
     "missingTexturesAllResolved": "Все недостающие текстуры загружены",
     "missingTexturesHint": "Пресеты с недостающими текстурами будут отображать шум вместо текстуры. Загрузите соответствующие файлы изображений, чтобы это исправить.",

@@ -79,6 +79,7 @@
     "devInfo": "Si no eres el propietario de la app, asegúrate de que hayan agregado tu nombre y correo electrónico asociado a tu cuenta de Spotify en la pestaña de Gestión de usuarios de su app de desarrollador."
   },
   "onboarding": {
+    "title": "Primeros pasos",
     "desktop": {
       "skipPresetsTitle": "Saltar presets",
       "skipPresetsDesc": "Presiona Space o N para saltar al siguiente preset. Cada uno responde a tu música de manera diferente.",

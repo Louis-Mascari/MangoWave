@@ -211,6 +211,39 @@ describe('DeviceSyncService', () => {
     service.destroy();
   });
 
+  it('reports a code, not PeerJS text, when the room cannot be created', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const service = await importAndCreate();
+    const errors: (string | undefined)[] = [];
+    service.onStatusChange = (s, code) => {
+      if (s === 'error') errors.push(code);
+    };
+
+    const createPromise = service.createRoom();
+    createPromise.catch(() => {});
+    // Let the dynamic peerjs import resolve so the Peer exists, then fail it
+    await vi.advanceTimersByTimeAsync(0);
+    MockPeer.instances[0].emit('error', { type: 'network', message: 'Lost connection to server.' });
+
+    expect(errors).toEqual(['connectionFailed']);
+    service.destroy();
+  });
+
+  it('reports roomNotFound when the host peer does not exist', async () => {
+    const service = await importAndCreate();
+    const errors: (string | undefined)[] = [];
+    service.onStatusChange = (s, code) => {
+      if (s === 'error') errors.push(code);
+    };
+
+    service.joinRoom('MANGO-ABCD').catch(() => {});
+    await vi.advanceTimersByTimeAsync(0);
+    MockPeer.instances[0].emit('error', { type: 'peer-unavailable', message: 'Could not connect' });
+
+    expect(errors).toEqual(['roomNotFound']);
+    service.destroy();
+  });
+
   it('cleans up on destroy', async () => {
     const service = await importAndCreate();
 

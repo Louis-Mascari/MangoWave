@@ -1,14 +1,6 @@
 export const THEMATIC_PACKS = ['Ambient', 'Reactive', 'Psychedelic', 'Ethereal'] as const;
 export type ThematicPack = (typeof THEMATIC_PACKS)[number];
 
-/** Tooltip descriptions for each thematic pack (used in PresetBrowser checkboxes). */
-export const PACK_DESCRIPTIONS: Record<string, string> = {
-  Ambient: 'Smooth, time-driven animations \u2014 calm and meditative',
-  Reactive: 'Responds to beats \u2014 audio-driven motion and color',
-  Psychedelic: 'Intense shaders, warping, and visual complexity',
-  Ethereal: 'Trails, echo layers, and soft glowing persistence',
-};
-
 /** Maps every preset name to its thematic pack. */
 export const presetThematicMap: Record<string, ThematicPack> = {
   '_Aderrasi - Wanderer in Curved Space - mash0000 - faclempt kibitzing meshuggana schmaltz (Geiss color mix)':

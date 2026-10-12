@@ -80,8 +80,10 @@ describe('PlaybackControls', () => {
   });
 
   it('shows disabled tooltip on buttons when canControl is false', () => {
-    render(<PlaybackControls adapter={makeAdapter({ tooltip: 'Rate limited' })} />);
-    expect(screen.getByLabelText('Play')).toHaveAttribute('title', 'Rate limited');
+    render(
+      <PlaybackControls adapter={makeAdapter({ tooltipKey: 'playback.spotifyRateLimited' })} />,
+    );
+    expect(screen.getByLabelText('Play')).toHaveAttribute('title', 'Spotify rate limited');
   });
 
   it('shows default disabled tooltip when no tooltip provided', () => {

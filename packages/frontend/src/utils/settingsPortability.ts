@@ -395,7 +395,10 @@ const SANITIZERS: Record<string, (val: unknown) => unknown> = {
       .slice(0, 50)
       .map((p) => ({
         id: typeof p.id === 'string' ? p.id : crypto.randomUUID(),
-        name: typeof p.name === 'string' ? (p.name as string).slice(0, 50) : 'Imported Pack',
+        name:
+          typeof p.name === 'string'
+            ? (p.name as string).slice(0, 50)
+            : i18n.t('customPacks.importedPackDefaultName', { ns: 'messages' }),
         presets: Array.isArray(p.presets)
           ? (p.presets as unknown[]).filter((s): s is string => typeof s === 'string').slice(0, 500)
           : [],
@@ -626,7 +629,9 @@ export function parsePackImportFile(file: File): Promise<PackParseResult> {
         }
 
         const name =
-          typeof parsed.name === 'string' ? (parsed.name as string).slice(0, 50) : 'Imported Pack';
+          typeof parsed.name === 'string'
+            ? (parsed.name as string).slice(0, 50)
+            : t('customPacks.importedPackDefaultName');
         const presets = Array.isArray(parsed.presets)
           ? parsed.presets.filter((s: unknown): s is string => typeof s === 'string').slice(0, 500)
           : [];

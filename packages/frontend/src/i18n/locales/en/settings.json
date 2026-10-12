@@ -123,7 +123,6 @@
   },
 
   "sync": {
-    "title": "Sync",
     "windowSyncTitle": "Window Sync",
     "windowSyncDescription": "Sync presets and settings across multiple browser windows on the same device. Open MangoWave in multiple windows to visualize on multiple monitors. Works best with system audio or microphone. Each window captures the same source. Local file playback is per-window.",
     "enabled": "Window Sync",
@@ -138,14 +137,11 @@
       "title": "Device Sync",
       "description": "Sync presets across different devices (phone, laptop, TV) via peer-to-peer WebRTC. One device creates a room, others join with the room code. The room creator controls autopilot.",
       "createRoom": "Create Room",
-      "joinRoom": "Join Room",
-      "roomCode": "Room Code",
       "enterCode": "Join an existing room",
       "connect": "Connect",
       "leaveRoom": "Leave Room",
       "connecting": "Connecting...",
       "connected": "Connected",
-      "disconnected": "Disconnected",
       "error": "Connection error",
       "tryAgain": "Try Again",
       "peerCount_one": "{{count}} device connected",
@@ -153,16 +149,16 @@
       "hostDisconnected": "The room host disconnected. The room has been closed.",
       "invalidCode": "Invalid room code. Format: MANGO-XXXX (4 letters, no I or O)",
       "roomNotFound": "Room not found. Check the code and try again.",
+      "signalingTimeout": "Connection timed out — could not reach signaling server",
+      "joinTimeout": "Connection timed out — could not connect to room",
+      "connectionLost": "Connection lost",
+      "connectionFailed": "Connection failed. Please try again.",
       "syncSettings": "Sync EQ & rendering settings",
       "syncSettingsHint": "Share EQ, pre-amp, audio analysis, and rendering settings across devices. Uncheck if devices need different performance settings.",
       "copiedToClipboard": "Copied!",
+      "qrAlt": "QR code for room {{code}}",
       "autopilotNote": "Autopilot settings always sync. Any device can toggle autopilot, but only the room creator's timer fires.",
       "audioTip": "Device Sync syncs visuals only. Each device needs its own audio source. For the best experience, set all devices to microphone input in the same room so they react to the same music from a shared speaker. Apps like AmpMe, Easy Jam, and BeatSync can also sync audio playback across multiple phone speakers."
     }
-  },
-
-  "language": {
-    "title": "Language",
-    "tooltip": "Choose the display language for the interface"
   }
 }

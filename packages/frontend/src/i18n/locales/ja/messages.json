@@ -20,13 +20,12 @@
     "noAudioUnknown": "WindowsとChromeOSでは、すべての共有モードで音声がサポートされています。macOS 14.2以降では、Chromeで画面とウィンドウの共有が音声をサポートしています。Linuxでは、タブ共有のみが音声をサポートしています。",
     "webgl2NotSupported": "WebGL 2がサポートされていません",
     "webgl2NotSupportedDesc": "MangoWaveのビジュアライゼーションにはWebGL 2が必要です。Chrome、Firefox、Edgeなどのモダンブラウザをお試しください。",
-    "webgl2GpuCrash": "WebGL 2 Temporarily Unavailable",
-    "webgl2GpuCrashDesc": "Your browser's GPU process may need to recover. Try closing other tabs or restarting your browser.",
+    "webgl2GpuCrash": "WebGL 2が一時的に利用できません",
+    "webgl2GpuCrashDesc": "ブラウザのGPUプロセスの回復が必要な可能性があります。他のタブを閉じるか、ブラウザを再起動してみてください。",
     "webglContextLost": "ビジュアライザーがグラフィックスコンテキストを失いました",
     "webglContextLostDesc": "デバイスのグラフィックスシステムが中断されました。デバイスの負荷が高い場合、GPUが他のアプリケーションと共有されている場合、またはディスプレイ設定が変更された場合に発生することがあります。ページを再読み込みするとビジュアライザーが復元されます。",
     "renderingError": "レンダリングエラーが発生しました。WebGLまたはWeb Audioの問題の可能性があります。",
     "playbackDecodeError": "「{{filename}}」を再生できませんでした。お使いのブラウザがこの形式に対応していない可能性があります。",
-    "playbackBlocked": "ブラウザによって再生がブロックされました。コントロールパネルの再生ボタンをタップしてみてください。",
     "unknownFile": "不明なファイル",
     "fullscreenNotSupported": "申し訳ありませんが、お使いのデバイスはブラウザからのフルスクリーンに対応していません。"
   },
@@ -60,26 +59,28 @@
     "cloudSyncRejected": "設定をクラウドに同期できませんでした。設定はこのデバイスに保存されています。",
     "autopilotOn": "オートパイロット オン",
     "autopilotOff": "オートパイロット オフ",
-    "renderingPaused": "Rendering paused",
-    "renderingResumed": "Rendering resumed",
+    "renderingPaused": "レンダリングを一時停止しました",
+    "renderingResumed": "レンダリングを再開しました",
+    "autoQualityReduced": "自動品質を{{tier}}に下げました",
+    "autoQualityIncreased": "自動品質を{{tier}}に上げました",
     "addedToFavorites": "お気に入りに追加しました",
     "removedFromFavorites": "お気に入りから削除しました",
     "presetBlocked": "プリセットをブロックしました",
     "presetUnblocked": "プリセットのブロックを解除しました",
-    "presetRestoredToPool": "プリセットをプールに復元しました",
-    "presetReturnedToExcluded": "プリセットを除外に戻しました",
     "blockedPresetsCleared": "ブロック済みプリセットをクリアしました",
     "favoritePresetsCleared": "お気に入りプリセットをクリアしました",
     "silenceDetected": "音声が検出されません。共有している画面、ウィンドウ、またはタブで音声が再生されていること、およびブラウザのダイアログで「音声を共有」にチェックが入っていることを確認してください。",
     "silenceDetectedMic": "マイクからの音声が検出されません。マイクがミュートになっていないこと、音を拾っていることを確認してください。",
     "silenceDetectedLocal": "音声が検出されません。ファイルが対応形式であること、デバイスの音量が上がっていることを確認してください。",
     "noPresetsAvailable": "利用可能なプリセットがありません。少なくとも1つのパックが有効で、すべてのプリセットがブロックされていないか確認してください。",
-    "presetNotFound": "このデバイスにプリセットが見つかりません：「{{name}}」"
+    "presetNotFound": "このデバイスにプリセットが見つかりません：「{{name}}」",
+    "joinedRoom": "ルーム {{code}} に参加しました"
   },
   "playback": {
     "addSongsToQueue": "キューに曲を追加",
     "micNoControls": "マイク入力：再生コントロールなし",
     "sharingNoControls": "音声共有中：再生コントロールなし",
+    "spotifyRateLimited": "Spotifyのレート制限中",
     "controlsUnavailable": "再生コントロールは利用できません",
     "previousTrack": "前のトラック",
     "nextTrack": "次のトラック",
@@ -124,8 +125,8 @@
     "removeFromFavorites": "お気に入りから削除 (S)",
     "toggleAutopilot": "オートパイロット切り替え (A)",
     "toggleFullscreen": "フルスクリーン切り替え (F)",
-    "togglePause": "Pause rendering (V)",
-    "resumeRendering": "Resume rendering (V)",
+    "togglePause": "レンダリングを一時停止 (V)",
+    "resumeRendering": "レンダリングを再開 (V)",
     "exitFS": "FS終了"
   },
   "mobile": {
@@ -147,6 +148,12 @@
     "noPacksSelected": "パックが選択されていません",
     "packsActive": "{{active}}/{{total}}パック有効",
     "packsHint": "選択したパックがオートパイロットと次のプリセットの対象になります",
+    "packDescriptions": {
+      "Ambient": "時間とともに変化するなめらかなアニメーション：穏やかで瞑想的",
+      "Reactive": "ビートに反応：音に合わせて動きと色が変化",
+      "Psychedelic": "強烈なシェーダー、ワープ、複雑なビジュアル",
+      "Ethereal": "残像、エコーレイヤー、やわらかく光る余韻"
+    },
     "searchPlaceholder": "プリセットを検索...",
     "clearSearch": "検索をクリア",
     "noPresetsVisible": "表示可能なプリセットがありません",
@@ -163,8 +170,7 @@
     "quarantineContent": "コンテンツ",
     "quarantineMobilePerf": "モバイルパフォーマンス",
     "addToPack": "パックに追加",
-    "addedToPack": "「{{pack}}」に追加しました",
-    "createPackFirst": "まずカスタムパックを作成してください"
+    "addedToPack": "「{{pack}}」に追加しました"
   },
 
   "importedPresets": {
@@ -172,16 +178,11 @@
     "description": "コミュニティのMilkDropプリセット（.milk）と参照するテクスチャを追加します。MilkDropはネイティブデスクトップアプリケーションとして設計されました。シェーダー変換の違いにより、一部のプリセットはブラウザで完全にレンダリングされない場合があります。",
     "emptyState": "インポート済みのプリセットはありません。「Import .milk」でコミュニティのMilkDropプリセットを追加できます。",
     "importMilk": ".milk をインポート",
-    "importingPresets": "プリセットをインポート中...",
-    "importSuccess": "{{count}} 件のプリセットをインポートしました",
-    "importPartial": "{{total}} 件中 {{success}} 件をインポートしました。{{failed}} 件が失敗しました。",
-    "importAllFailed": "{{count}} 件すべてのプリセットのインポートに失敗しました",
     "fileTooLarge": "サイズが大きすぎます（最大 500KB）",
     "invalidFileType": ".milk ファイルではありません",
     "emptyFile": "ファイルが空です",
     "duplicateName": "既に存在します",
     "conversionFailed": "変換に失敗しました",
-    "securityBlocked": "ブロックされたコンテンツが含まれています",
     "nativeNameCollision": "組み込みプリセットに既に存在します",
     "missingTextures": "不足しているテクスチャ（アップロードされるまでノイズとして表示されます）: {{textures}}",
     "deletePreset": "インポートしたプリセットを削除",
@@ -189,17 +190,12 @@
     "clearAll": "すべて削除",
     "clearAllConfirm": "インポートした {{count}} 件のプリセットをすべて削除しますか？.milk ファイルを再インポートする必要があります。",
     "cleared": "インポートしたすべてのプリセットを削除しました",
-    "idbUnavailable": "インポートしたプリセットにはストレージアクセスが必要ですが、プライベートブラウジングモードでは利用できません。",
-    "imported": "インポート済み",
     "importInProgress": "インポート中...{{count}}件のプリセットを処理済み"
   },
 
   "importedTextures": {
     "sectionTitle": "インポート済みテクスチャ",
     "importTextures": "テクスチャをインポート",
-    "importSuccess": "{{count}}個のテクスチャをインポートしました",
-    "importPartial": "{{total}}個中{{success}}個のテクスチャをインポートしました。{{failed}}個失敗。",
-    "importAllFailed": "{{count}}個のテクスチャすべてのインポートに失敗しました",
     "fileTooLarge": "サイズが大きすぎます（最大2MB）",
     "invalidFileType": "サポートされている画像ではありません（JPEG、PNG、またはWebP）",
     "builtinTextureShadow": "ビルトインテクスチャのため置き換えできません",
@@ -211,7 +207,6 @@
     "clearAllConfirm": "{{count}}個のインポートしたテクスチャをすべて削除しますか？画像ファイルを再インポートする必要があります。",
     "cleared": "インポートしたテクスチャをすべて削除しました",
     "gpuNote": "GPUに読み込まれたテクスチャはページをリロードするまで保持されます。",
-    "idbUnavailable": "インポートしたテクスチャにはストレージアクセスが必要ですが、プライベートブラウジングモードでは利用できません。",
     "duplicateName": "既に存在します",
     "emptyStateTextures": "インポートされたテクスチャはありません。「テクスチャをインポート」でカスタムテクスチャ画像を追加できます。",
     "importInProgress": "インポート中...{{count}}件のテクスチャを処理済み"
@@ -254,7 +249,8 @@
     "deactivatePack": "パック停止",
     "packOverridesFilters": "オートパイロットと次のプリセットはアクティブなパックを使用します。フィルターはこのリストにのみ影響します。",
     "favoritesAutoSwitch": "お気に入りモードからすべてモードに切り替えました",
-    "newPack": "新しいパック"
+    "newPack": "新しいパック",
+    "importedPackDefaultName": "インポートしたパック"
   },
 
   "importModal": {
@@ -271,7 +267,6 @@
     "summaryAllSuccess": "{{count}}件の{{type}}を正常にインポートしました",
     "summaryPartial": "{{total}}件の{{type}}中{{success}}件をインポートしました。{{failed}}件が失敗、{{warnings}}件に警告があります。",
     "summaryAllFailed": "{{count}}件の{{type}}すべてのインポートに失敗しました",
-    "uploadMissingTextures": "不足しているテクスチャをアップロード",
     "missingTexturesSection": "不足テクスチャ（残り {{remaining}} 件）",
     "missingTexturesAllResolved": "不足テクスチャをすべてアップロードしました",
     "missingTexturesHint": "テクスチャが不足しているプリセットは、テクスチャの部分にノイズが表示されます。対応する画像ファイルをアップロードすると修正できます。",

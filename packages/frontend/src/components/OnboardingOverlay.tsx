@@ -148,7 +148,7 @@ export function OnboardingOverlay({ onComplete, onClosing }: OnboardingOverlayPr
       <div
         ref={containerRef}
         role="dialog"
-        aria-label={t('onboarding.title', { defaultValue: 'Getting Started' })}
+        aria-label={t('onboarding.title')}
         className="mx-4 w-full max-w-sm rounded-xl bg-gray-900/95 p-6 shadow-2xl"
       >
         {/* Progress dots */}

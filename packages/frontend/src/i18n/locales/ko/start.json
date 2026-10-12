@@ -79,6 +79,7 @@
     "devInfo": "앱 소유자가 아닌 경우, 소유자에게 Spotify 계정에 연결된 이름과 이메일을 개발자 앱의 사용자 관리 탭에 추가해 달라고 요청하세요."
   },
   "onboarding": {
+    "title": "시작하기",
     "desktop": {
       "skipPresetsTitle": "프리셋 넘기기",
       "skipPresetsDesc": "Space 또는 N 키를 눌러 다음 프리셋으로 넘어가세요. 각 프리셋은 음악에 다르게 반응합니다.",

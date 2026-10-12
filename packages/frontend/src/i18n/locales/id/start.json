@@ -79,6 +79,7 @@
     "devInfo": "Jika kamu bukan pemilik aplikasi, pastikan mereka telah menambahkan nama dan email yang terkait dengan akun Spotify kamu ke tab User Management di aplikasi developer mereka."
   },
   "onboarding": {
+    "title": "Memulai",
     "desktop": {
       "skipPresetsTitle": "Lewati Preset",
       "skipPresetsDesc": "Tekan Space atau N untuk melompat ke preset berikutnya. Setiap preset bereaksi berbeda terhadap musikmu.",

@@ -91,9 +91,13 @@ function applyCloudSettings(cloud: CloudSettings): void {
  * a dead session (log out and prompt), a save the server will never accept (tell the
  * user once), and anything else, which is transient and retried on the next change.
  */
-function handleSyncError(err: unknown, rejectionShown: { current: boolean }): void {
+function handleSyncError(
+  err: unknown,
+  sessionId: string,
+  rejectionShown: { current: boolean },
+): void {
   if (err instanceof SessionExpiredError) {
-    useSpotifyStore.getState().expireSession();
+    useSpotifyStore.getState().expireSession(sessionId);
     return;
   }
   if (err instanceof SettingsRejectedError) {
@@ -128,7 +132,12 @@ export function useSettingsSync() {
   // the user once rather than on each attempt
   const rejectionShownRef = useRef(false);
   const lastSavedKeyRef = useRef<string | null>(null);
-  const onSyncError = useCallback((err: unknown) => handleSyncError(err, rejectionShownRef), []);
+  const onSyncError = useCallback(
+    (err: unknown) => {
+      if (sessionId) handleSyncError(err, sessionId, rejectionShownRef);
+    },
+    [sessionId],
+  );
 
   // Load cloud settings on login
   useEffect(() => {
@@ -136,6 +145,9 @@ export function useSettingsSync() {
       hasSyncedRef.current = false;
       return;
     }
+    // A new login starts fresh: it may be a different account with different settings
+    rejectionShownRef.current = false;
+    lastSavedKeyRef.current = null;
 
     if (hasSyncedRef.current) return;
     hasSyncedRef.current = true;
@@ -170,8 +182,18 @@ export function useSettingsSync() {
         const snapshot = getSettingsSnapshot();
         const key = outboundKey(snapshot);
         if (key === lastSavedKeyRef.current) return;
-        lastSavedKeyRef.current = key;
-        saveSettings(sessionId, snapshot).catch(onSyncError);
+        saveSettings(sessionId, snapshot)
+          .then(() => {
+            lastSavedKeyRef.current = key;
+            // Accepted again, so a later rejection is news worth telling
+            rejectionShownRef.current = false;
+          })
+          .catch((err: unknown) => {
+            // A transient failure leaves the key unset so the next change retries. A
+            // rejection is final for these exact settings; sending them again cannot help.
+            if (err instanceof SettingsRejectedError) lastSavedKeyRef.current = key;
+            onSyncError(err);
+          });
       }, DEBOUNCE_MS);
     });
 

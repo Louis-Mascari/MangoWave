@@ -45,6 +45,22 @@ const STEP_UP_DURATION_MS = 15_000; // sustain good FPS for 15s before stepping 
 const COOLDOWN_MS = 5_000; // wait 5s after any tier change before monitoring
 const WINDOW_SIZE = 60; // rolling window of frame times
 
+/** The highest tier whose settings the given configuration meets or exceeds. */
+export function tierForSettings(perf: QualityTier): number {
+  for (let i = QUALITY_TIERS.length - 1; i >= 0; i--) {
+    const t = QUALITY_TIERS[i];
+    if (
+      perf.meshWidth >= t.meshWidth &&
+      perf.meshHeight >= t.meshHeight &&
+      perf.textureRatio >= t.textureRatio &&
+      perf.resolutionScale >= t.resolutionScale
+    ) {
+      return i;
+    }
+  }
+  return 0;
+}
+
 export type QualityChangeCallback = (tier: number, settings: QualityTier) => void;
 
 export class QualityMonitor {

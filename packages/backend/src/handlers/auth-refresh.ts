@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { refreshAccessToken, InvalidGrantError } from '../lib/spotify';
-import { getSession, updateSessionToken, deleteSession } from '../lib/dynamo';
+import { getSession, updateSessionToken, extendSessionTtl, deleteSession } from '../lib/dynamo';
 import { jsonResponse, errorResponse, parseJsonBody } from '../types/api';
 
 export async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
@@ -29,9 +29,9 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
       // Spotify may rotate refresh tokens — store the new one if provided
       await updateSessionToken(sessionId, tokens.refresh_token);
     } else {
-      // No rotation: rewrite the same token so the session TTL slides and an active
-      // user is never logged out by the TTL alone. Not worth failing the refresh over.
-      await updateSessionToken(sessionId, session.refreshToken).catch((e) =>
+      // No rotation: slide the session TTL so an active user is never logged out by
+      // the TTL alone. Not worth failing the refresh over.
+      await extendSessionTtl(sessionId).catch((e) =>
         console.error('Failed to extend session TTL:', e),
       );
     }

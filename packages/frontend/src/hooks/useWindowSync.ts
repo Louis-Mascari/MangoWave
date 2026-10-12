@@ -73,8 +73,9 @@ export function useWindowSync(
       isSyncingRef.current = true;
       applyInboundSettings(settings);
       isSyncingRef.current = false;
-      // Peers have moved on from whatever we last sent, so the next local change must go out
-      lastSentKeyRef.current = null;
+      // Peers now hold this state. Compare the next local change against it, so an auto
+      // step alone stays quiet while a change back to an earlier value still goes out.
+      lastSentKeyRef.current = outboundKey(getSettingsSnapshot());
     };
 
     // Inbound: join request — leader responds with current preset + settings

@@ -35,6 +35,7 @@ interface MediaPlayerState {
   clearPlaylist: () => void;
   setCurrentTrack: (index: number) => void;
   nextTrack: () => void;
+  advanceAfterTrackEnd: () => boolean;
   previousTrack: () => void;
   setIsPlaying: (playing: boolean) => void;
   setCurrentTime: (time: number) => void;
@@ -232,8 +233,9 @@ export const useMediaPlayerStore = create<MediaPlayerState>()((set, get) => ({
     set({ currentTrackIndex: index, currentTime: 0, shuffleHistory: history });
   },
 
+  // The user's Next button: always moves on, wrapping at the end of the queue
   nextTrack: () => {
-    const { tracks, currentTrackIndex, shuffle, shuffleHistory, repeatMode } = get();
+    const { tracks, currentTrackIndex, shuffle, shuffleHistory } = get();
     if (tracks.length === 0) return;
 
     if (shuffle && tracks.length > 1) {
@@ -247,25 +249,14 @@ export const useMediaPlayerStore = create<MediaPlayerState>()((set, get) => ({
         .filter((i) => !history.has(i) && i !== currentTrackIndex);
 
       if (unplayed.length === 0) {
-        // All tracks played
-        if (repeatMode !== 'off') {
-          // Reset history and pick random (not current)
-          const newHistory = new Set<number>();
-          let randomIndex: number;
-          do {
-            randomIndex = Math.floor(Math.random() * tracks.length);
-          } while (randomIndex === currentTrackIndex && tracks.length > 1);
-          newHistory.add(randomIndex);
-          set({ currentTrackIndex: randomIndex, currentTime: 0, shuffleHistory: newHistory });
-        } else {
-          // All played, repeat off — stop playback and reset to first track
-          set({
-            isPlaying: false,
-            currentTrackIndex: 0,
-            currentTime: 0,
-            shuffleHistory: new Set(),
-          });
-        }
+        // All tracks played: start a new round with a random track (not the current one)
+        const newHistory = new Set<number>();
+        let randomIndex: number;
+        do {
+          randomIndex = Math.floor(Math.random() * tracks.length);
+        } while (randomIndex === currentTrackIndex && tracks.length > 1);
+        newHistory.add(randomIndex);
+        set({ currentTrackIndex: randomIndex, currentTime: 0, shuffleHistory: newHistory });
       } else {
         // Pick random from unplayed
         const randomIndex = unplayed[Math.floor(Math.random() * unplayed.length)];
@@ -275,6 +266,26 @@ export const useMediaPlayerStore = create<MediaPlayerState>()((set, get) => ({
     } else {
       set({ currentTrackIndex: (currentTrackIndex + 1) % tracks.length, currentTime: 0 });
     }
+  },
+
+  // A track finished (or failed) on its own. Unlike Next, this honours repeat-off: once
+  // the queue has played through it rewinds to the first track and reports false so the
+  // caller leaves it paused.
+  advanceAfterTrackEnd: () => {
+    const { tracks, currentTrackIndex, shuffle, shuffleHistory, repeatMode } = get();
+    if (tracks.length === 0) return false;
+
+    const playedThrough =
+      shuffle && tracks.length > 1
+        ? tracks.every((_, i) => i === currentTrackIndex || shuffleHistory.has(i))
+        : currentTrackIndex === tracks.length - 1;
+
+    if (repeatMode === 'off' && playedThrough) {
+      set({ isPlaying: false, currentTrackIndex: 0, currentTime: 0, shuffleHistory: new Set() });
+      return false;
+    }
+    get().nextTrack();
+    return true;
   },
 
   previousTrack: () => {

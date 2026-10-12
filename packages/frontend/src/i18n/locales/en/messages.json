@@ -1,5 +1,6 @@
 {
   "errors": {
+    "micDisconnected": "The microphone was disconnected. Reconnect it and start again.",
     "notAllowedSystem": "Screen sharing was cancelled or denied. Please try again and select a screen, window, or tab to share.",
     "notAllowedMic": "Microphone access was denied. Please allow microphone access in your browser settings and try again.",
     "notFoundSystem": "No screen or window was available to share. Please make sure a display is connected and try again.",
@@ -51,6 +52,7 @@
   "spotify": {
     "connectingToSpotify": "Connecting to Spotify...",
     "connectionFailed": "Spotify connection failed. Please try again. If the issue persists, check that your account has been added to the app's authorized users.",
+    "sessionExpired": "Your Spotify session has expired. Reconnect to keep using Spotify features.",
     "premiumRequired": "Spotify Premium is required for playback controls. You can still see now-playing info and use MangoWave with other audio sources.",
     "networkError": "Could not reach Spotify. Please check your connection and try again.",
     "popupBlocked": "Could not open the Spotify login window. Please check that pop-ups are allowed for this site and try again.",
@@ -58,6 +60,8 @@
   },
 
   "toasts": {
+    "cloudSyncTooLarge": "Your settings are too large to sync to the cloud. Remove some custom packs or imported presets to resume syncing.",
+    "cloudSyncRejected": "Your settings could not be synced to the cloud. They are still saved on this device.",
     "autopilotOn": "Autopilot on",
     "autopilotOff": "Autopilot off",
     "renderingPaused": "Rendering paused",

@@ -382,7 +382,11 @@ export function validateSettings(input: unknown): ValidationResult | ValidationE
     valid: true,
     settings: {
       performance: perfResult.value,
-      eqSettings: { preAmpGain, bandGains },
+      eqSettings: {
+        preAmpGain,
+        bandGains,
+        ...(typeof eq.autoGain === 'boolean' && { autoGain: eq.autoGain }),
+      },
       audio: audioResult.value,
       autopilot: autopilotResult.value,
       transitionTime,

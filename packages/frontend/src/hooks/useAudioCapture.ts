@@ -167,43 +167,62 @@ export function useAudioCapture(): UseAudioCaptureReturn {
     }
   }, [cleanup, removeTrackListeners]);
 
-  const startMicCapture = useCallback(async (deviceId?: string): Promise<boolean> => {
-    if (startingRef.current) return false;
-    startingRef.current = true;
-    try {
-      if (engineRef.current) {
-        engineRef.current.destroy();
-        engineRef.current = null;
-      }
+  const startMicCapture = useCallback(
+    async (deviceId?: string): Promise<boolean> => {
+      if (startingRef.current) return false;
+      startingRef.current = true;
+      try {
+        if (engineRef.current) {
+          engineRef.current.destroy();
+          engineRef.current = null;
+        }
 
-      setError(null);
-      const engine = new AudioEngine();
-      await engine.initFromMicrophone(deviceId);
+        setError(null);
+        const engine = new AudioEngine();
+        await engine.initFromMicrophone(deviceId);
 
-      engineRef.current = engine;
-      setAudioEngine(engine);
-      setIsCapturing(true);
-      setCaptureSource('mic');
-      return true;
-    } catch (err) {
-      const isExpected =
-        err instanceof DOMException &&
-        (err.name === 'NotAllowedError' ||
-          err.name === 'AbortError' ||
-          err.name === 'NotSupportedError' ||
-          err.name === 'NotReadableError' ||
-          err.name === 'NotFoundError' ||
-          err.name === 'InvalidStateError');
-      if (!isExpected) {
-        Sentry.captureException(err, { tags: { audioSource: 'mic' } });
+        // An unplugged or revoked microphone ends its track. Without this the session
+        // would keep running on silence with no explanation.
+        removeTrackListeners();
+        const stream = engine.getStream();
+        if (stream) {
+          const onTrackEnded = () => {
+            cleanup();
+            setError(i18n.getFixedT(null, 'messages')('errors.micDisconnected'));
+          };
+          trackEndedRef.current = onTrackEnded;
+          streamRef.current = stream;
+          stream.getTracks().forEach((track) => {
+            track.addEventListener('ended', onTrackEnded);
+          });
+        }
+
+        engineRef.current = engine;
+        setAudioEngine(engine);
+        setIsCapturing(true);
+        setCaptureSource('mic');
+        return true;
+      } catch (err) {
+        const isExpected =
+          err instanceof DOMException &&
+          (err.name === 'NotAllowedError' ||
+            err.name === 'AbortError' ||
+            err.name === 'NotSupportedError' ||
+            err.name === 'NotReadableError' ||
+            err.name === 'NotFoundError' ||
+            err.name === 'InvalidStateError');
+        if (!isExpected) {
+          Sentry.captureException(err, { tags: { audioSource: 'mic' } });
+        }
+        setError(humanizeAudioError(err, 'mic'));
+        setIsCapturing(false);
+        return false;
+      } finally {
+        startingRef.current = false;
       }
-      setError(humanizeAudioError(err, 'mic'));
-      setIsCapturing(false);
-      return false;
-    } finally {
-      startingRef.current = false;
-    }
-  }, []);
+    },
+    [cleanup, removeTrackListeners],
+  );
 
   const stopCapture = useCallback(() => {
     cleanup();

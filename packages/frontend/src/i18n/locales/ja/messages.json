@@ -1,5 +1,6 @@
 {
   "errors": {
+    "micDisconnected": "マイクが切断されました。再接続してからもう一度開始してください。",
     "notAllowedSystem": "画面共有がキャンセルまたは拒否されました。もう一度お試しいただき、共有する画面、ウィンドウ、またはタブを選択してください。",
     "notAllowedMic": "マイクへのアクセスが拒否されました。ブラウザの設定でマイクアクセスを許可してから、もう一度お試しください。",
     "notFoundSystem": "共有できる画面やウィンドウが見つかりませんでした。ディスプレイが接続されていることを確認して、もう一度お試しください。",
@@ -48,12 +49,15 @@
   "spotify": {
     "connectingToSpotify": "Spotifyに接続中...",
     "connectionFailed": "Spotifyへの接続に失敗しました。もう一度お試しください。問題が続く場合は、アカウントがアプリの承認済みユーザーに追加されていることを確認してください。",
+    "sessionExpired": "Spotifyのセッションの有効期限が切れました。Spotify機能を引き続き使用するには再接続してください。",
     "premiumRequired": "再生コントロールにはSpotify Premiumが必要です。再生中の情報は引き続き表示でき、他の音声ソースでMangoWaveを使用できます。",
     "networkError": "Spotifyに接続できませんでした。接続状況を確認して、もう一度お試しください。",
     "popupBlocked": "Spotifyのログインウィンドウを開けませんでした。このサイトのポップアップが許可されていることを確認して、もう一度お試しください。",
     "rateLimited": "Spotifyのレート制限を受けました。{{seconds}}秒後に再試行します"
   },
   "toasts": {
+    "cloudSyncTooLarge": "設定が大きすぎるためクラウドに同期できません。同期を再開するには、カスタムパックまたはインポートしたプリセットをいくつか削除してください。",
+    "cloudSyncRejected": "設定をクラウドに同期できませんでした。設定はこのデバイスに保存されています。",
     "autopilotOn": "オートパイロット オン",
     "autopilotOff": "オートパイロット オフ",
     "renderingPaused": "Rendering paused",

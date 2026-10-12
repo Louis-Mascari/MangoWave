@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { refreshAccessToken, InvalidGrantError } from '../lib/spotify';
-import { getSession, updateSessionToken, deleteSession } from '../lib/dynamo';
+import { getSession, updateSessionToken, extendSessionTtl, deleteSession } from '../lib/dynamo';
 import { jsonResponse, errorResponse, parseJsonBody } from '../types/api';
 
 export async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
@@ -18,14 +18,22 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
   try {
     const session = await getSession(sessionId);
     if (!session) {
-      return errorResponse(404, 'No stored session found. Please re-authenticate.');
+      // 401, not 404: the client treats 401 as "session gone, reconnect", and a 404
+      // is also what API Gateway returns for an unknown route
+      return errorResponse(401, 'Session expired. Please reconnect.');
     }
 
     const tokens = await refreshAccessToken(session.refreshToken);
 
-    // Spotify may rotate refresh tokens — store the new one if provided
     if (tokens.refresh_token) {
+      // Spotify may rotate refresh tokens — store the new one if provided
       await updateSessionToken(sessionId, tokens.refresh_token);
+    } else {
+      // No rotation: slide the session TTL so an active user is never logged out by
+      // the TTL alone. Not worth failing the refresh over.
+      await extendSessionTtl(sessionId).catch((e) =>
+        console.error('Failed to extend session TTL:', e),
+      );
     }
 
     return jsonResponse(200, {

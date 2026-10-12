@@ -1,5 +1,6 @@
 {
   "errors": {
+    "micDisconnected": "O microfone foi desconectado. Reconecte-o e inicie novamente.",
     "notAllowedSystem": "O compartilhamento de tela foi cancelado ou negado. Por favor, tente novamente e selecione uma tela, janela ou aba para compartilhar.",
     "notAllowedMic": "O acesso ao microfone foi negado. Por favor, permita o acesso ao microfone nas configurações do seu navegador e tente novamente.",
     "notFoundSystem": "Nenhuma tela ou janela estava disponível para compartilhar. Por favor, verifique se um monitor está conectado e tente novamente.",
@@ -48,12 +49,15 @@
   "spotify": {
     "connectingToSpotify": "Conectando ao Spotify...",
     "connectionFailed": "A conexão com o Spotify falhou. Por favor, tente novamente. Se o problema persistir, verifique se sua conta foi adicionada aos usuários autorizados do aplicativo.",
+    "sessionExpired": "Sua sessão do Spotify expirou. Reconecte para continuar usando os recursos do Spotify.",
     "premiumRequired": "Spotify Premium é necessário para controles de reprodução. Você ainda pode ver informações da música atual e usar o MangoWave com outras fontes de áudio.",
     "networkError": "Não foi possível conectar ao Spotify. Por favor, verifique sua conexão e tente novamente.",
     "popupBlocked": "Não foi possível abrir a janela de login do Spotify. Por favor, verifique se pop-ups são permitidos para este site e tente novamente.",
     "rateLimited": "Limite de requisições do Spotify atingido. Tentando novamente em {{seconds}}s"
   },
   "toasts": {
+    "cloudSyncTooLarge": "Suas configurações são grandes demais para sincronizar com a nuvem. Remova alguns pacotes personalizados ou presets importados para retomar a sincronização.",
+    "cloudSyncRejected": "Não foi possível sincronizar suas configurações com a nuvem. Elas continuam salvas neste dispositivo.",
     "autopilotOn": "Piloto automático ligado",
     "autopilotOff": "Piloto automático desligado",
     "renderingPaused": "Rendering paused",

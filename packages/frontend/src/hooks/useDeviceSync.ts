@@ -3,7 +3,11 @@ import { useSettingsStore } from '../store/useSettingsStore.ts';
 import { useDeviceSyncStatusStore } from '../store/useDeviceSyncStatusStore.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import type { DeviceSyncService } from '../services/DeviceSyncService.ts';
-import { getDeviceSyncSnapshot, applyDeviceSyncSettings } from '../services/syncUtils.ts';
+import {
+  getDeviceSyncSnapshot,
+  applyDeviceSyncSettings,
+  outboundKey,
+} from '../services/syncUtils.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
 import { mobileBlockedSet } from '../data/excludedPresets.ts';
 import i18n from '../i18n/index.ts';
@@ -70,6 +74,7 @@ export function useDeviceSync(
   const isSyncingRef = useRef(false);
   const isRemotePresetRef = useRef(false);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastSentKeyRef = useRef<string | null>(null);
   const operationInFlightRef = useRef(false);
   const deviceSyncSettingsSyncRef = useRef(deviceSyncSettingsSync);
 
@@ -134,6 +139,9 @@ export function useDeviceSync(
           applyDeviceSyncSettings({ ...settings, autopilot: undefined });
         }
         isSyncingRef.current = false;
+        // Peers now hold this state. Compare the next local change against it, so an auto
+        // step alone stays quiet while a change back to an earlier value still goes out.
+        lastSentKeyRef.current = outboundKey(getDeviceSyncSnapshot());
       };
 
       service.onStatusChange = (newStatus, errorMessage) => {
@@ -192,6 +200,9 @@ export function useDeviceSync(
 
       debounceTimerRef.current = setTimeout(() => {
         const snapshot = getDeviceSyncSnapshot();
+        const key = outboundKey(snapshot);
+        if (key === lastSentKeyRef.current) return;
+        lastSentKeyRef.current = key;
         service.sendSettingsChange(snapshot);
       }, SETTINGS_DEBOUNCE_MS);
     });
@@ -209,6 +220,9 @@ export function useDeviceSync(
   const createRoom = useCallback(async (): Promise<string> => {
     if (operationInFlightRef.current) return '';
     operationInFlightRef.current = true;
+    // Outbound settings sync is gated on this flag. Set it here so every way of entering
+    // a room (settings panel, QR link) syncs in both directions.
+    useSettingsStore.getState().setDeviceSyncEnabled(true);
     try {
       // Destroy any existing service before creating a new one
       if (serviceRef.current) {
@@ -231,6 +245,7 @@ export function useDeviceSync(
     async (code: string): Promise<void> => {
       if (operationInFlightRef.current) return;
       operationInFlightRef.current = true;
+      useSettingsStore.getState().setDeviceSyncEnabled(true);
       try {
         // Destroy any existing service before joining a new room
         if (serviceRef.current) {

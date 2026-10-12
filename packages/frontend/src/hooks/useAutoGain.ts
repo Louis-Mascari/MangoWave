@@ -7,6 +7,7 @@ import type { AudioEngine } from '../engine/AudioEngine.ts';
 // These thresholds define the "good enough" dead zone where no adjustment happens.
 const LOW_THRESHOLD = 0.015; // Below this: signal too weak for reactive visuals, boost gain
 const HIGH_THRESHOLD = 0.25; // Above this: signal very hot, reduce gain
+const SILENCE_RMS = 0.0005; // Below this: nothing is playing, so there is no level to react to
 const GAIN_STEP = 0.1; // Adjustment per tick (matches slider increments)
 const MIN_GAIN = 0.3;
 const MAX_GAIN = 3.0;
@@ -34,30 +35,13 @@ function computeRms(data: Uint8Array): number {
  * stay reactive regardless of source volume. Pre-amp is purely visual — it
  * shapes FFT data butterchurn reads but doesn't change what the user hears.
  *
- * Disables itself when the user manually adjusts the pre-amp slider.
+ * Moving the pre-amp slider by hand turns it off (see setPreAmpGain in the settings store).
  */
 export function useAutoGain(audioEngine: AudioEngine | null, isActive: boolean): void {
-  const autoGainChangeRef = useRef(false);
   const smoothedRmsRef = useRef(0);
   const warmupRef = useRef(0);
   const cooldownRef = useRef(0);
   const autoGain = useSettingsStore((s) => s.eq.autoGain);
-
-  // Detect manual pre-amp changes and disable auto-gain.
-  // Uses Zustand's vanilla subscribe (no subscribeWithSelector middleware).
-  useEffect(() => {
-    let prevGain = useSettingsStore.getState().eq.preAmpGain;
-    const unsub = useSettingsStore.subscribe((state) => {
-      const gain = state.eq.preAmpGain;
-      if (gain !== prevGain) {
-        if (!autoGainChangeRef.current && state.eq.autoGain) {
-          useSettingsStore.getState().setAutoGain(false);
-        }
-        prevGain = gain;
-      }
-    });
-    return unsub;
-  }, []);
 
   // Main auto-gain loop
   useEffect(() => {
@@ -79,6 +63,10 @@ export function useAutoGain(audioEngine: AudioEngine | null, isActive: boolean):
       if (data.length === 0) return;
 
       const rms = computeRms(data);
+      // Digital silence (paused or stopped playback) says nothing about the source's
+      // level. Without this the gain climbs to the maximum and the first seconds after
+      // playback resumes are over-driven.
+      if (rms < SILENCE_RMS) return;
       smoothedRmsRef.current = EMA_ALPHA * rms + (1 - EMA_ALPHA) * smoothedRmsRef.current;
 
       // Wait for EMA to accumulate meaningful data
@@ -102,13 +90,8 @@ export function useAutoGain(audioEngine: AudioEngine | null, isActive: boolean):
       }
 
       if (newGain !== currentGain) {
-        autoGainChangeRef.current = true;
-        useSettingsStore.getState().setPreAmpGain(Math.round(newGain * 10) / 10);
+        useSettingsStore.getState().applyAutoGain(Math.round(newGain * 10) / 10);
         cooldownRef.current = COOLDOWN_TICKS;
-        // Reset flag after React effects run (same macrotask pattern as auto-quality)
-        setTimeout(() => {
-          autoGainChangeRef.current = false;
-        }, 0);
       }
     }, TICK_MS);
 

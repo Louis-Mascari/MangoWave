@@ -1,5 +1,6 @@
 {
   "errors": {
+    "micDisconnected": "마이크 연결이 끊어졌습니다. 다시 연결한 후 다시 시작해 주세요.",
     "notAllowedSystem": "화면 공유가 취소되거나 거부되었습니다. 다시 시도하여 공유할 화면, 창 또는 탭을 선택해 주세요.",
     "notAllowedMic": "마이크 접근이 거부되었습니다. 브라우저 설정에서 마이크 접근을 허용한 후 다시 시도해 주세요.",
     "notFoundSystem": "공유할 수 있는 화면이나 창을 찾을 수 없습니다. 디스플레이가 연결되어 있는지 확인하고 다시 시도해 주세요.",
@@ -48,12 +49,15 @@
   "spotify": {
     "connectingToSpotify": "Spotify에 연결하는 중...",
     "connectionFailed": "Spotify 연결에 실패했습니다. 다시 시도해 주세요. 문제가 계속되면 앱의 승인된 사용자에 계정이 추가되어 있는지 확인하세요.",
+    "sessionExpired": "Spotify 세션이 만료되었습니다. Spotify 기능을 계속 사용하려면 다시 연결해 주세요.",
     "premiumRequired": "재생 컨트롤을 사용하려면 Spotify Premium이 필요합니다. 현재 재생 정보는 계속 확인할 수 있으며 다른 오디오 소스로 MangoWave를 사용할 수 있습니다.",
     "networkError": "Spotify에 연결할 수 없습니다. 네트워크 연결을 확인하고 다시 시도해 주세요.",
     "popupBlocked": "Spotify 로그인 창을 열 수 없습니다. 이 사이트의 팝업이 허용되어 있는지 확인하고 다시 시도해 주세요.",
     "rateLimited": "Spotify 요청 제한에 도달했습니다. {{seconds}}초 후 재시도합니다"
   },
   "toasts": {
+    "cloudSyncTooLarge": "설정이 너무 커서 클라우드에 동기화할 수 없습니다. 동기화를 다시 시작하려면 일부 사용자 지정 팩이나 가져온 프리셋을 삭제해 주세요.",
+    "cloudSyncRejected": "설정을 클라우드에 동기화하지 못했습니다. 설정은 이 기기에 그대로 저장되어 있습니다.",
     "autopilotOn": "자동 전환 켜짐",
     "autopilotOff": "자동 전환 꺼짐",
     "renderingPaused": "Rendering paused",

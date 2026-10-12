@@ -27,6 +27,9 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   // Set when the queue finishes with repeat off, so the next load cues without playing
   const cueOnlyRef = useRef(false);
+  // True while that cued track is sitting unplayed. If it turns out to be unreadable the
+  // queue must stay stopped, not start advancing again.
+  const stoppedAtEndRef = useRef(false);
   const [audioEngine, setAudioEngine] = useState<AudioEngine | null>(null);
   const [isActive, setIsActive] = useState(false);
   const savedVolume = useSettingsStore((s) => s.volume);
@@ -125,7 +128,9 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
     if (cueOnlyRef.current) {
       // The queue finished with repeat off: cue the first track and wait for Play
       cueOnlyRef.current = false;
+      stoppedAtEndRef.current = true;
     } else {
+      stoppedAtEndRef.current = false;
       audio.play().catch(() => {
         // Autoplay may be blocked on mobile — first track handled in startWithFiles
       });
@@ -165,7 +170,10 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
       const now = useMediaPlayerStore.getState();
       if (now.tracks[now.currentTrackIndex]?.id !== endedOn) cueOnlyRef.current = true;
     };
-    const onPlay = () => setIsPlaying(true);
+    const onPlay = () => {
+      stoppedAtEndRef.current = false;
+      setIsPlaying(true);
+    };
     const onPause = () => setIsPlaying(false);
     const onEnded = () => {
       const { repeatMode } = useMediaPlayerStore.getState();
@@ -186,8 +194,9 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
           type: 'error',
         });
       // Auto-advance if there are more tracks in the queue. With repeat off this stops at
-      // the end, so a queue of unreadable files cannot loop error toasts forever.
-      if (tracks.length > 1) {
+      // the end, and an unreadable track that was only cued there leaves the queue stopped,
+      // so a queue of unreadable files cannot loop error toasts forever.
+      if (tracks.length > 1 && !stoppedAtEndRef.current) {
         advanceOrStop();
       }
     };

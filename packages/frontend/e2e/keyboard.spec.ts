@@ -1,5 +1,7 @@
 import { test, expect, clickToolbarButton } from './fixtures/base';
 import type { Page } from '@playwright/test';
+
+type FilePayload = { name: string; mimeType: string; buffer: Buffer };
 import { installAudioMocks } from './fixtures/audio-mock';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -155,22 +157,42 @@ test.describe('Keyboard Shortcuts (mode gating)', () => {
     await expect(addFiles).toHaveCount(0);
   });
 
-  test('local playback stops after the last track with repeat off', async ({ app }) => {
-    await app.getByRole('button', { name: /Play Local Files/ }).click();
+  // Starts a queue of one-second clips (repeat is off by default) and waits for playback
+  // to stop and stay stopped. The play button also shows for an instant between tracks,
+  // so "stopped" means no restart for longer than a whole clip. A queue that wraps around
+  // never goes that long without playing and times out here.
+  const expectQueueToStopForGood = async (app: Page, leadingFiles: FilePayload[]) => {
     const clip = fs.readFileSync(path.resolve(__dirname, 'fixtures/test-silence.mp3'));
-    // Two one-second tracks; repeat is off by default
-    await app.locator('input[type="file"]').setInputFiles([
-      { name: 'one.mp3', mimeType: 'audio/mpeg', buffer: clip },
-      { name: 'two.mp3', mimeType: 'audio/mpeg', buffer: clip },
-    ]);
-    await expect(app.locator('[role="toolbar"]')).toBeVisible({ timeout: 15000 });
+    const clips = Array.from({ length: 3 }, (_, i) => ({
+      name: `clip-${i}.mp3`,
+      mimeType: 'audio/mpeg',
+      buffer: clip,
+    }));
+    await app.getByRole('button', { name: /Play Local Files/ }).click();
+    await app.locator('input[type="file"]').setInputFiles([...leadingFiles, ...clips]);
 
     const play = app.getByRole('button', { name: 'Play', exact: true });
-    await expect(play).toBeVisible({ timeout: 15000 });
-    // Still stopped after longer than a whole track: it did not wrap around and restart
-    await app.waitForTimeout(2500);
-    await expect(play).toBeVisible();
-    await expect(app.getByRole('button', { name: 'Pause', exact: true })).toHaveCount(0);
+    const pause = app.getByRole('button', { name: 'Pause', exact: true });
+    await expect(async () => {
+      await expect(play).toBeVisible({ timeout: 10000 });
+      const restarted = await pause.waitFor({ state: 'visible', timeout: 3500 }).then(
+        () => true,
+        () => false,
+      );
+      expect(restarted).toBe(false);
+    }).toPass({ timeout: 40000 });
+  };
+
+  test('local playback stops after the last track with repeat off', async ({ app }) => {
+    await expectQueueToStopForGood(app, []);
+  });
+
+  test('an unreadable first track does not restart a finished queue', async ({ app }) => {
+    // The broken track is skipped and the rest play; the queue then ends cued on the
+    // broken one, whose load error must not start it again
+    await expectQueueToStopForGood(app, [
+      { name: 'broken.mp3', mimeType: 'audio/mpeg', buffer: Buffer.from('not audio') },
+    ]);
   });
 
   test('A on the start screen does not toggle autopilot', async ({ app }) => {

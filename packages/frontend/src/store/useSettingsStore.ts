@@ -226,6 +226,132 @@ const IMPORTABLE_KEYS: (keyof SettingsState)[] = [
   'syncPerformance',
 ];
 
+/**
+ * Bring settings persisted by any earlier version up to the current shape. Exported so
+ * every step can be tested: a mistake here corrupts returning users' settings on deploy.
+ */
+export function migrateSettings(persisted: unknown, version: number | undefined): SettingsState {
+  const state = persisted as Record<string, unknown>;
+  // v0 → v1: Migrate from favoritesOnly boolean to mode enum
+  if (version === 0 || version === undefined) {
+    const autopilot = state.autopilot as Record<string, unknown> | undefined;
+    if (autopilot && 'favoritesOnly' in autopilot) {
+      autopilot.mode = autopilot.favoritesOnly ? 'favorites' : 'all';
+      autopilot.favoriteWeight = autopilot.favoriteWeight ?? 2;
+      delete autopilot.favoritesOnly;
+      delete autopilot.packId;
+    }
+    // Clean up removed pack fields
+    if (autopilot && 'packId' in autopilot) {
+      delete autopilot.packId;
+      if (autopilot.mode === 'pack') autopilot.mode = 'all';
+    }
+  }
+  // v1 → v2: Backfill butterchurn config defaults
+  if ((version ?? 0) < 2) {
+    const perf = state.performance as Record<string, unknown> | undefined;
+    if (perf) {
+      perf.meshWidth = perf.meshWidth ?? 48;
+      perf.meshHeight = perf.meshHeight ?? 36;
+      perf.textureRatio = perf.textureRatio ?? 1.0;
+      perf.fxaa = perf.fxaa ?? false;
+    }
+  }
+  // v2 → v3: songInfoDisplay no longer supports 'always' — convert to 5s
+  if ((version ?? 0) < 3) {
+    if (state.songInfoDisplay === 'always') {
+      state.songInfoDisplay = 5;
+    }
+  }
+  // v3 → v4: (was: mobile performance defaults — now undone by v5)
+  // v4 → v5: Remove mobile performance popup; reset mobile users to desktop defaults
+  if ((version ?? 0) < 5) {
+    delete state.mobileNoticeShown;
+    const perf = state.performance as Record<string, unknown> | undefined;
+    if (
+      perf &&
+      perf.fpsCap === 30 &&
+      perf.resolutionScale === 0.75 &&
+      perf.meshWidth === 32 &&
+      perf.meshHeight === 24 &&
+      perf.textureRatio === 0.5
+    ) {
+      state.performance = { ...DESKTOP_PERFORMANCE };
+    }
+  }
+  // v5 → v6: Rename quarantineOverrides → excludedOverrides, remove showQuarantined
+  if ((version ?? 0) < 6) {
+    if (Array.isArray(state.quarantineOverrides)) {
+      state.excludedOverrides = state.quarantineOverrides;
+      delete state.quarantineOverrides;
+    }
+    delete state.showQuarantined;
+  }
+  // v6 → v7: Add windowSyncEnabled, syncPerformance
+  if ((version ?? 0) < 7) {
+    state.windowSyncEnabled = state.windowSyncEnabled ?? false;
+    state.syncPerformance = state.syncPerformance ?? true;
+  }
+  // v7 → v8: Add custom packs
+  if ((version ?? 0) < 8) {
+    state.customPacks = state.customPacks ?? [];
+    state.activeCustomPackId = state.activeCustomPackId ?? null;
+  }
+  // v8 → v9: Add imported presets metadata
+  if ((version ?? 0) < 9) {
+    state.importedPresets = state.importedPresets ?? [];
+  }
+  // v9 → v10: Add imported textures metadata
+  if ((version ?? 0) < 10) {
+    state.importedTextures = state.importedTextures ?? [];
+  }
+  // v10 → v11: Add 'MilkDrop' pack to enabledPacks for existing users
+  if ((version ?? 0) < 11) {
+    const packs = (state.enabledPacks as string[]) ?? [];
+    if (packs.length > 0 && !packs.includes('MilkDrop')) {
+      state.enabledPacks = [...packs, 'MilkDrop'];
+    }
+  }
+  // v11 → v12: Remap old source-based enabledPacks to thematic pack names
+  if ((version ?? 0) < 12) {
+    const OLD_PACKS = ['Minimal', 'Non-Minimal', 'Extra', 'Extra 2', 'MD1', 'MilkDrop'];
+    const packs = (state.enabledPacks as string[]) ?? [];
+    if (packs.length > 0 && packs.some((p) => OLD_PACKS.includes(p))) {
+      // Old pack names are non-descriptive — no meaningful 1:1 mapping possible.
+      // Enable all thematic packs; preserve 'Imported' if present.
+      const newPacks: string[] = [...THEMATIC_PACKS];
+      if (packs.includes('Imported')) newPacks.push('Imported');
+      state.enabledPacks = newPacks;
+    }
+  }
+  // v12 → v13: Add brightness setting
+  if ((version ?? 0) < 13) {
+    state.brightness = state.brightness ?? 1.0;
+  }
+  // v13 → v14: Add missingTextures to ImportedPresetMeta (no transform needed —
+  // existing entries without missingTextures treated as no missing textures via ??)
+  // v14 → v15: Add device sync settings
+  if ((version ?? 0) < 15) {
+    state.deviceSyncEnabled = state.deviceSyncEnabled ?? false;
+    state.deviceSyncSettingsSync = state.deviceSyncSettingsSync ?? false;
+  }
+  // v15 → v16: Add autoQuality to performance settings
+  if ((version ?? 0) < 16) {
+    const perf = state.performance as Record<string, unknown> | undefined;
+    if (perf) {
+      perf.autoQuality = perf.autoQuality ?? true;
+    }
+  }
+  // v16 → v17: Add autoGain to EQ settings
+  if ((version ?? 0) < 17) {
+    const eq = state.eq as Record<string, unknown> | undefined;
+    if (eq) {
+      eq.autoGain = eq.autoGain ?? true;
+    }
+  }
+  return state as unknown as SettingsState;
+}
+
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
@@ -577,127 +703,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'mangowave-settings',
-      migrate: (persisted, version) => {
-        const state = persisted as Record<string, unknown>;
-        // v0 → v1: Migrate from favoritesOnly boolean to mode enum
-        if (version === 0 || version === undefined) {
-          const autopilot = state.autopilot as Record<string, unknown> | undefined;
-          if (autopilot && 'favoritesOnly' in autopilot) {
-            autopilot.mode = autopilot.favoritesOnly ? 'favorites' : 'all';
-            autopilot.favoriteWeight = autopilot.favoriteWeight ?? 2;
-            delete autopilot.favoritesOnly;
-            delete autopilot.packId;
-          }
-          // Clean up removed pack fields
-          if (autopilot && 'packId' in autopilot) {
-            delete autopilot.packId;
-            if (autopilot.mode === 'pack') autopilot.mode = 'all';
-          }
-        }
-        // v1 → v2: Backfill butterchurn config defaults
-        if ((version ?? 0) < 2) {
-          const perf = state.performance as Record<string, unknown> | undefined;
-          if (perf) {
-            perf.meshWidth = perf.meshWidth ?? 48;
-            perf.meshHeight = perf.meshHeight ?? 36;
-            perf.textureRatio = perf.textureRatio ?? 1.0;
-            perf.fxaa = perf.fxaa ?? false;
-          }
-        }
-        // v2 → v3: songInfoDisplay no longer supports 'always' — convert to 5s
-        if ((version ?? 0) < 3) {
-          if (state.songInfoDisplay === 'always') {
-            state.songInfoDisplay = 5;
-          }
-        }
-        // v3 → v4: (was: mobile performance defaults — now undone by v5)
-        // v4 → v5: Remove mobile performance popup; reset mobile users to desktop defaults
-        if ((version ?? 0) < 5) {
-          delete state.mobileNoticeShown;
-          const perf = state.performance as Record<string, unknown> | undefined;
-          if (
-            perf &&
-            perf.fpsCap === 30 &&
-            perf.resolutionScale === 0.75 &&
-            perf.meshWidth === 32 &&
-            perf.meshHeight === 24 &&
-            perf.textureRatio === 0.5
-          ) {
-            state.performance = { ...DESKTOP_PERFORMANCE };
-          }
-        }
-        // v5 → v6: Rename quarantineOverrides → excludedOverrides, remove showQuarantined
-        if ((version ?? 0) < 6) {
-          if (Array.isArray(state.quarantineOverrides)) {
-            state.excludedOverrides = state.quarantineOverrides;
-            delete state.quarantineOverrides;
-          }
-          delete state.showQuarantined;
-        }
-        // v6 → v7: Add windowSyncEnabled, syncPerformance
-        if ((version ?? 0) < 7) {
-          state.windowSyncEnabled = state.windowSyncEnabled ?? false;
-          state.syncPerformance = state.syncPerformance ?? true;
-        }
-        // v7 → v8: Add custom packs
-        if ((version ?? 0) < 8) {
-          state.customPacks = state.customPacks ?? [];
-          state.activeCustomPackId = state.activeCustomPackId ?? null;
-        }
-        // v8 → v9: Add imported presets metadata
-        if ((version ?? 0) < 9) {
-          state.importedPresets = state.importedPresets ?? [];
-        }
-        // v9 → v10: Add imported textures metadata
-        if ((version ?? 0) < 10) {
-          state.importedTextures = state.importedTextures ?? [];
-        }
-        // v10 → v11: Add 'MilkDrop' pack to enabledPacks for existing users
-        if ((version ?? 0) < 11) {
-          const packs = (state.enabledPacks as string[]) ?? [];
-          if (packs.length > 0 && !packs.includes('MilkDrop')) {
-            state.enabledPacks = [...packs, 'MilkDrop'];
-          }
-        }
-        // v11 → v12: Remap old source-based enabledPacks to thematic pack names
-        if ((version ?? 0) < 12) {
-          const OLD_PACKS = ['Minimal', 'Non-Minimal', 'Extra', 'Extra 2', 'MD1', 'MilkDrop'];
-          const packs = (state.enabledPacks as string[]) ?? [];
-          if (packs.length > 0 && packs.some((p) => OLD_PACKS.includes(p))) {
-            // Old pack names are non-descriptive — no meaningful 1:1 mapping possible.
-            // Enable all thematic packs; preserve 'Imported' if present.
-            const newPacks: string[] = [...THEMATIC_PACKS];
-            if (packs.includes('Imported')) newPacks.push('Imported');
-            state.enabledPacks = newPacks;
-          }
-        }
-        // v12 → v13: Add brightness setting
-        if ((version ?? 0) < 13) {
-          state.brightness = state.brightness ?? 1.0;
-        }
-        // v13 → v14: Add missingTextures to ImportedPresetMeta (no transform needed —
-        // existing entries without missingTextures treated as no missing textures via ??)
-        // v14 → v15: Add device sync settings
-        if ((version ?? 0) < 15) {
-          state.deviceSyncEnabled = state.deviceSyncEnabled ?? false;
-          state.deviceSyncSettingsSync = state.deviceSyncSettingsSync ?? false;
-        }
-        // v15 → v16: Add autoQuality to performance settings
-        if ((version ?? 0) < 16) {
-          const perf = state.performance as Record<string, unknown> | undefined;
-          if (perf) {
-            perf.autoQuality = perf.autoQuality ?? true;
-          }
-        }
-        // v16 → v17: Add autoGain to EQ settings
-        if ((version ?? 0) < 17) {
-          const eq = state.eq as Record<string, unknown> | undefined;
-          if (eq) {
-            eq.autoGain = eq.autoGain ?? true;
-          }
-        }
-        return state as unknown as SettingsState;
-      },
+      migrate: migrateSettings,
       version: 17,
     },
   ),

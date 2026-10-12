@@ -3,8 +3,9 @@ import i18n from '../i18n/index.ts';
 
 // A tab left open across a deploy runs an old build. Its lazy chunks stay on the CDN for
 // a couple of weeks, so this is a backstop for tabs older than that (or a chunk lost some
-// other way). An outdated tab is reloaded while it is idle on the start screen, and only
-// told about the new version while a session is running, since a reload would end it.
+// other way). An outdated tab is reloaded when the user returns to it with no session
+// running, and only told about the new version during a session, since a reload would
+// end it.
 
 const RECHECK_INTERVAL_MS = 5 * 60 * 1000;
 
@@ -81,10 +82,18 @@ function act(): void {
   });
 }
 
-/** The app reports session start and end. A tab found stale mid-session reloads at the end. */
+/**
+ * The app reports session start and end. Ending a session does not reload by itself:
+ * the start screen may be showing why it ended (microphone unplugged, share cancelled).
+ * The next return to the tab does.
+ */
 export function setSessionActive(active: boolean): void {
   sessionActive = active;
-  if (!active) act();
+}
+
+/** Lets callers avoid blaming something else for a failure this already explains. */
+export function isBuildKnownStale(): boolean {
+  return stale;
 }
 
 /** Starts listening. Returns a function that stops, which only the tests need. */
@@ -99,7 +108,7 @@ export function initStaleBuildRecovery(): () => void {
   // get the chance to reload while idle. Coming back to the tab is the natural moment.
   const onVisibilityChange = () => {
     if (document.visibilityState !== 'visible' || sessionActive) return;
-    if (Date.now() - lastCheck < RECHECK_INTERVAL_MS) return;
+    if (!stale && Date.now() - lastCheck < RECHECK_INTERVAL_MS) return;
     void checkStale().then(act);
   };
 

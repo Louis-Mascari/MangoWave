@@ -77,7 +77,7 @@ describe('stale build recovery', () => {
     expect(reload).not.toHaveBeenCalled();
   });
 
-  it('never reloads a live session: it says so once, then reloads when the session ends', async () => {
+  it('never reloads a live session: it says so once, then reloads on the next return to the tab', async () => {
     const fetchMock = serveIndexWith(NEWER);
     setSessionActive(true);
 
@@ -95,8 +95,30 @@ describe('stale build recovery', () => {
     expect(toastMessage()).toBeNull();
     expect(reload).not.toHaveBeenCalled();
 
+    // Ending the session does not reload: the start screen may be explaining why it ended
     setSessionActive(false);
+    expect(reload).not.toHaveBeenCalled();
+
+    await returnToTab();
     expect(reload).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not check or reload when the user returns to a tab with a session running', async () => {
+    const fetchMock = serveIndexWith(NEWER);
+    setSessionActive(true);
+    await returnToTab();
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it('checks again once the interval has passed', async () => {
+    const fetchMock = serveIndexWith(CURRENT);
+    await returnToTab();
+    const now = Date.now();
+    vi.spyOn(Date, 'now').mockReturnValue(now + 6 * 60 * 1000);
+    await returnToTab();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it('does nothing when the build is current, so a flaky connection cannot trigger a reload', async () => {

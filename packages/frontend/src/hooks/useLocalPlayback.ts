@@ -247,9 +247,12 @@ export function useLocalPlayback(): UseLocalPlaybackReturn {
   }, [clearPlaylist]);
 
   const play = useCallback(() => {
-    // Rejects when the current track cannot be played, which is where a finished queue
-    // lands if its first file is unreadable. Say so; a silent dead button is worse.
-    audioRef.current?.play().catch(showDecodeError);
+    // Rejects with NotSupportedError when the current track cannot be played, which is
+    // where a finished queue lands if its first file is unreadable. Say so; a silent dead
+    // button is worse. Other rejections (a pause or track change interrupting) are normal.
+    audioRef.current?.play().catch((err: unknown) => {
+      if (err instanceof DOMException && err.name === 'NotSupportedError') showDecodeError();
+    });
   }, []);
 
   const pause = useCallback(() => {

@@ -147,4 +147,17 @@ describe('useLocalPlayback end-of-queue behaviour', () => {
 
     expect(useToastStore.getState().message).toContain('broken.mp3');
   });
+
+  it('stays quiet when Play is merely interrupted', async () => {
+    const { hook, audio } = start('a.mp3', 'b.mp3');
+    audio.play.mockImplementationOnce(() =>
+      Promise.reject(new DOMException('interrupted by pause', 'AbortError')),
+    );
+
+    await act(async () => {
+      hook.result.current.play();
+    });
+
+    expect(useToastStore.getState().message).toBeNull();
+  });
 });

@@ -2,6 +2,13 @@ import type { SyncableSettings, SyncMessagePayload } from './syncTypes.ts';
 
 export type DeviceSyncStatus = 'idle' | 'connecting' | 'connected' | 'disconnected' | 'error';
 
+/**
+ * Why the service entered the `error` status. Stable codes rather than text so the UI can
+ * translate them — the service itself stays free of i18n.
+ */
+export type DeviceSyncErrorCode =
+  'roomNotFound' | 'signalingTimeout' | 'joinTimeout' | 'connectionLost' | 'connectionFailed';
+
 type PresetChangeHandler = (presetName: string, transitionTime: number) => void;
 type PresetRedirectHandler = (
   presetName: string,
@@ -9,7 +16,7 @@ type PresetRedirectHandler = (
   originalPreset: string,
 ) => void;
 type SettingsChangeHandler = (settings: SyncableSettings) => void;
-type StatusChangeHandler = (status: DeviceSyncStatus, errorMessage?: string) => void;
+type StatusChangeHandler = (status: DeviceSyncStatus, errorCode?: DeviceSyncErrorCode) => void;
 type PeerCountChangeHandler = (count: number) => void;
 
 /** Characters used in room codes (no I/O to avoid ambiguity). */
@@ -137,7 +144,7 @@ export class DeviceSyncService {
 
       const timeout = setTimeout(() => {
         if (this._destroyed) return;
-        this.setStatus('error', 'Connection timed out — could not reach signaling server');
+        this.setStatus('error', 'signalingTimeout');
         this.peer?.destroy();
         this.peer = null;
         reject(new Error('Connection timeout'));
@@ -167,7 +174,9 @@ export class DeviceSyncService {
           this.peer = null;
           this.createRoom().then(resolve).catch(reject);
         } else {
-          this.setStatus('error', peerError.message);
+          // PeerJS error text is English-only and not written for end users
+          console.warn('[DeviceSync] Could not create room:', peerError.type, peerError.message);
+          this.setStatus('error', 'connectionFailed');
           reject(err);
         }
       });
@@ -199,7 +208,7 @@ export class DeviceSyncService {
 
       const timeout = setTimeout(() => {
         if (this._destroyed) return;
-        this.setStatus('error', 'Connection timed out — could not connect to room');
+        this.setStatus('error', 'joinTimeout');
         this.peer?.destroy();
         this.peer = null;
         reject(new Error('Connection timeout'));
@@ -240,7 +249,7 @@ export class DeviceSyncService {
         if (this._destroyed) return;
         const peerError = err as import('peerjs').PeerError<string>;
         if (peerError.type === 'peer-unavailable') {
-          this.setStatus('error', 'Room not found');
+          this.setStatus('error', 'roomNotFound');
           reject(err);
         } else {
           this.handleConnectionError(err);
@@ -417,7 +426,7 @@ export class DeviceSyncService {
     // Guard against duplicate calls (e.g., both conn and peer error fire)
     if (this._retryTimer) return;
     if (this._retryCount >= MAX_RETRIES) {
-      this.setStatus('error', 'Connection lost');
+      this.setStatus('error', 'connectionLost');
       return;
     }
 
@@ -442,9 +451,9 @@ export class DeviceSyncService {
     }, delay);
   }
 
-  private setStatus(status: DeviceSyncStatus, errorMessage?: string): void {
+  private setStatus(status: DeviceSyncStatus, errorCode?: DeviceSyncErrorCode): void {
     this._status = status;
-    this._onStatusChange?.(status, errorMessage);
+    this._onStatusChange?.(status, errorCode);
   }
 
   private notifyPeerCount(): void {

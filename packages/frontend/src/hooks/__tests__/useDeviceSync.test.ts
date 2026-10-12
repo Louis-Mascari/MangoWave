@@ -8,6 +8,7 @@ import type { VisualizerRenderer } from '../../engine/VisualizerRenderer.ts';
 // Mock callbacks captured during service creation
 let capturedOnPresetChange: ((name: string, time: number) => void) | null = null;
 let capturedOnSettingsChange: ((settings: Record<string, unknown>) => void) | null = null;
+let capturedOnStatusChange: ((status: string, errorCode?: string) => void) | null = null;
 
 const mockSendPresetChange = vi.fn();
 const mockSendPresetRedirect = vi.fn();
@@ -36,7 +37,9 @@ class MockDeviceSyncService {
   set onSettingsChange(fn: ((settings: Record<string, unknown>) => void) | null) {
     capturedOnSettingsChange = fn;
   }
-  set onStatusChange(_fn: unknown) {}
+  set onStatusChange(fn: ((status: string, errorCode?: string) => void) | null) {
+    capturedOnStatusChange = fn;
+  }
   set onPeerCountChange(_fn: unknown) {}
 }
 
@@ -67,6 +70,7 @@ describe('useDeviceSync', () => {
     vi.useFakeTimers();
     capturedOnPresetChange = null;
     capturedOnSettingsChange = null;
+    capturedOnStatusChange = null;
     mockSendPresetChange.mockClear();
     mockSendPresetRedirect.mockClear();
     mockSendSettingsChange.mockClear();
@@ -78,7 +82,7 @@ describe('useDeviceSync', () => {
       peerCount: 0,
       roomCode: '',
       isHost: false,
-      errorMessage: '',
+      errorCode: null,
     });
   });
 
@@ -195,6 +199,23 @@ describe('useDeviceSync', () => {
       await vi.advanceTimersByTimeAsync(1000);
     });
     expect(mockSendSettingsChange).toHaveBeenCalled();
+  });
+
+  it('stores the error code the service reports and clears it on the next status', async () => {
+    const rendererRef = { current: createMockRenderer() as unknown as VisualizerRenderer };
+    const resetAutopilotRef = { current: vi.fn() };
+    const { result } = renderHook(() => useDeviceSync(rendererRef, resetAutopilotRef));
+
+    await act(async () => {
+      await result.current.joinRoom('MANGO-ABCD');
+    });
+
+    act(() => capturedOnStatusChange?.('error', 'roomNotFound'));
+    expect(useDeviceSyncStatusStore.getState().status).toBe('error');
+    expect(useDeviceSyncStatusStore.getState().errorCode).toBe('roomNotFound');
+
+    act(() => capturedOnStatusChange?.('connecting'));
+    expect(useDeviceSyncStatusStore.getState().errorCode).toBeNull();
   });
 
   it('cleans up service on leave', async () => {

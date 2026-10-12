@@ -86,6 +86,7 @@
   },
 
   "onboarding": {
+    "title": "Getting Started",
     "desktop": {
       "skipPresetsTitle": "Skip Presets",
       "skipPresetsDesc": "Press Space or N to skip to the next preset. Each one responds to your music differently.",

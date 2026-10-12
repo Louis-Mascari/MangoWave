@@ -20,13 +20,12 @@
     "noAudioUnknown": "Windows와 ChromeOS에서는 모든 공유 모드가 오디오를 지원합니다. macOS 14.2 이상에서는 Chrome에서 화면 및 창 공유가 오디오를 지원합니다. Linux에서는 탭 공유만 오디오를 지원합니다.",
     "webgl2NotSupported": "WebGL 2 미지원",
     "webgl2NotSupportedDesc": "MangoWave는 시각화 렌더링에 WebGL 2가 필요합니다. Chrome, Firefox 또는 Edge 등의 최신 브라우저를 사용해 주세요.",
-    "webgl2GpuCrash": "WebGL 2 Temporarily Unavailable",
-    "webgl2GpuCrashDesc": "Your browser's GPU process may need to recover. Try closing other tabs or restarting your browser.",
+    "webgl2GpuCrash": "WebGL 2 일시적으로 사용 불가",
+    "webgl2GpuCrashDesc": "브라우저의 GPU 프로세스가 복구되어야 할 수 있습니다. 다른 탭을 닫거나 브라우저를 다시 시작해 보세요.",
     "webglContextLost": "비주얼라이저 그래픽 컨텍스트 손실",
     "webglContextLostDesc": "기기의 그래픽 시스템이 중단되었습니다. 기기에 부하가 많거나, GPU를 다른 애플리케이션과 공유하고 있거나, 디스플레이 설정이 변경되었을 때 발생할 수 있습니다. 페이지를 새로고침하면 비주얼라이저가 복원됩니다.",
     "renderingError": "렌더링 오류가 발생했습니다. WebGL 또는 Web Audio 관련 문제일 수 있습니다.",
     "playbackDecodeError": "\"{{filename}}\"을(를) 재생할 수 없습니다. 브라우저에서 지원하지 않는 형식일 수 있습니다.",
-    "playbackBlocked": "브라우저에서 재생이 차단되었습니다. 컨트롤 패널의 재생 버튼을 눌러 보세요.",
     "unknownFile": "알 수 없는 파일",
     "fullscreenNotSupported": "안타깝게도 이 기기는 브라우저에서 전체 화면을 지원하지 않습니다."
   },
@@ -60,26 +59,28 @@
     "cloudSyncRejected": "설정을 클라우드에 동기화하지 못했습니다. 설정은 이 기기에 그대로 저장되어 있습니다.",
     "autopilotOn": "자동 전환 켜짐",
     "autopilotOff": "자동 전환 꺼짐",
-    "renderingPaused": "Rendering paused",
-    "renderingResumed": "Rendering resumed",
+    "renderingPaused": "렌더링 일시정지됨",
+    "renderingResumed": "렌더링 재개됨",
+    "autoQualityReduced": "자동 품질 낮춤: {{tier}}",
+    "autoQualityIncreased": "자동 품질 높임: {{tier}}",
     "addedToFavorites": "즐겨찾기에 추가됨",
     "removedFromFavorites": "즐겨찾기에서 제거됨",
     "presetBlocked": "프리셋 차단됨",
     "presetUnblocked": "프리셋 차단 해제됨",
-    "presetRestoredToPool": "프리셋이 풀에 복원됨",
-    "presetReturnedToExcluded": "프리셋이 제외 목록으로 복귀됨",
     "blockedPresetsCleared": "차단된 프리셋이 모두 해제됨",
     "favoritePresetsCleared": "즐겨찾기가 모두 해제됨",
     "silenceDetected": "오디오가 감지되지 않습니다. 공유한 화면, 창 또는 탭에서 오디오가 재생 중인지, 그리고 브라우저 대화상자에서 \"오디오 공유\"를 체크했는지 확인하세요.",
     "silenceDetectedMic": "마이크에서 오디오가 감지되지 않습니다. 마이크가 음소거되지 않았는지, 소리를 잘 잡고 있는지 확인하세요.",
     "silenceDetectedLocal": "오디오가 감지되지 않습니다. 파일이 지원되는 형식인지, 기기 볼륨이 켜져 있는지 확인하세요.",
     "noPresetsAvailable": "사용 가능한 프리셋이 없습니다. 팩이 하나 이상 활성화되어 있고 모든 프리셋이 차단되지 않았는지 확인하세요.",
-    "presetNotFound": "이 기기에서 프리셋을 찾을 수 없습니다: \"{{name}}\""
+    "presetNotFound": "이 기기에서 프리셋을 찾을 수 없습니다: \"{{name}}\"",
+    "joinedRoom": "방 {{code}}에 참여했습니다"
   },
   "playback": {
     "addSongsToQueue": "재생 목록에 곡 추가",
     "micNoControls": "마이크 입력 — 재생 컨트롤 없음",
     "sharingNoControls": "오디오 공유 중 — 재생 컨트롤 없음",
+    "spotifyRateLimited": "Spotify 요청 제한에 도달했습니다",
     "controlsUnavailable": "재생 컨트롤을 사용할 수 없음",
     "previousTrack": "이전 트랙",
     "nextTrack": "다음 트랙",
@@ -124,8 +125,8 @@
     "removeFromFavorites": "즐겨찾기에서 제거 (S)",
     "toggleAutopilot": "자동 전환 켜기/끄기 (A)",
     "toggleFullscreen": "전체 화면 전환 (F)",
-    "togglePause": "Pause rendering (V)",
-    "resumeRendering": "Resume rendering (V)",
+    "togglePause": "렌더링 일시정지 (V)",
+    "resumeRendering": "렌더링 재개 (V)",
     "exitFS": "전체 화면 종료"
   },
   "mobile": {
@@ -147,6 +148,12 @@
     "noPacksSelected": "선택된 팩 없음",
     "packsActive": "{{active}}/{{total}} 팩 활성",
     "packsHint": "선택한 팩이 자동 전환 및 다음 프리셋 범위를 결정합니다",
+    "packDescriptions": {
+      "Ambient": "시간에 따라 흐르는 부드러운 애니메이션 — 차분하고 명상적",
+      "Reactive": "비트에 반응 — 오디오에 따라 움직임과 색상이 변화",
+      "Psychedelic": "강렬한 셰이더, 왜곡, 복잡한 비주얼",
+      "Ethereal": "잔상, 에코 레이어, 부드럽게 빛나는 여운"
+    },
     "searchPlaceholder": "프리셋 검색...",
     "clearSearch": "검색 지우기",
     "noPresetsVisible": "표시할 프리셋 없음",
@@ -163,8 +170,7 @@
     "quarantineContent": "콘텐츠",
     "quarantineMobilePerf": "모바일 성능",
     "addToPack": "팩에 추가",
-    "addedToPack": "\"{{pack}}\"에 추가됨",
-    "createPackFirst": "먼저 커스텀 팩을 만드세요"
+    "addedToPack": "\"{{pack}}\"에 추가됨"
   },
 
   "importedPresets": {
@@ -172,16 +178,11 @@
     "description": "커뮤니티 MilkDrop 프리셋(.milk)과 참조하는 텍스처를 추가하세요. MilkDrop은 네이티브 데스크톱 애플리케이션으로 설계되었습니다. 셰이더 변환 차이로 인해 일부 프리셋은 브라우저에서 완벽하게 렌더링되지 않을 수 있습니다.",
     "emptyState": "가져온 프리셋이 없습니다. \"Import .milk\"를 사용하여 커뮤니티 MilkDrop 프리셋을 추가하세요.",
     "importMilk": ".milk 가져오기",
-    "importingPresets": "프리셋 가져오는 중...",
-    "importSuccess": "{{count}}개의 프리셋을 가져왔습니다",
-    "importPartial": "{{total}}개 중 {{success}}개의 프리셋을 가져왔습니다. {{failed}}개 실패.",
-    "importAllFailed": "{{count}}개의 프리셋을 모두 가져오지 못했습니다",
     "fileTooLarge": "너무 큽니다 (최대 500KB)",
     "invalidFileType": ".milk 파일이 아닙니다",
     "emptyFile": "파일이 비어 있습니다",
     "duplicateName": "이미 존재합니다",
     "conversionFailed": "변환 실패",
-    "securityBlocked": "차단된 콘텐츠가 포함되어 있습니다",
     "nativeNameCollision": "기본 제공 프리셋에 이미 존재합니다",
     "missingTextures": "누락된 텍스처 (업로드할 때까지 노이즈로 표시됩니다): {{textures}}",
     "deletePreset": "가져온 프리셋 삭제",
@@ -189,17 +190,12 @@
     "clearAll": "모두 삭제",
     "clearAllConfirm": "가져온 프리셋 {{count}}개를 모두 삭제하시겠습니까? .milk 파일을 다시 가져와야 합니다.",
     "cleared": "가져온 모든 프리셋이 삭제되었습니다",
-    "idbUnavailable": "가져온 프리셋은 저장소 접근이 필요하며, 시크릿 모드에서는 사용할 수 없습니다.",
-    "imported": "가져옴",
     "importInProgress": "가져오는 중... 현재 {{count}}개 프리셋"
   },
 
   "importedTextures": {
     "sectionTitle": "가져온 텍스처",
     "importTextures": "텍스처 가져오기",
-    "importSuccess": "{{count}}개의 텍스처를 가져왔습니다",
-    "importPartial": "{{total}}개 중 {{success}}개의 텍스처를 가져왔습니다. {{failed}}개 실패.",
-    "importAllFailed": "{{count}}개의 텍스처 모두 가져오기 실패",
     "fileTooLarge": "너무 큽니다 (최대 2MB)",
     "invalidFileType": "지원되는 이미지가 아닙니다 (JPEG, PNG 또는 WebP)",
     "builtinTextureShadow": "기본 제공 텍스처이므로 교체할 수 없습니다",
@@ -211,7 +207,6 @@
     "clearAllConfirm": "가져온 텍스처 {{count}}개를 모두 삭제하시겠습니까? 이미지 파일을 다시 가져와야 합니다.",
     "cleared": "가져온 텍스처가 모두 삭제되었습니다",
     "gpuNote": "GPU에 로드된 텍스처는 페이지를 새로고침할 때까지 유지됩니다.",
-    "idbUnavailable": "가져온 텍스처에는 저장소 접근이 필요하며, 시크릿 모드에서는 사용할 수 없습니다.",
     "duplicateName": "이미 존재합니다",
     "emptyStateTextures": "가져온 텍스처가 없습니다. \"텍스처 가져오기\"를 사용하여 사용자 정의 텍스처 이미지를 추가하세요.",
     "importInProgress": "가져오는 중... 현재 {{count}}개 텍스처"
@@ -254,7 +249,8 @@
     "deactivatePack": "팩 중지",
     "packOverridesFilters": "자동 전환 및 다음 프리셋은 활성 팩을 사용합니다. 필터는 이 목록에만 적용됩니다.",
     "favoritesAutoSwitch": "즐겨찾기 모드에서 전체 모드로 전환됨",
-    "newPack": "새 팩"
+    "newPack": "새 팩",
+    "importedPackDefaultName": "가져온 팩"
   },
 
   "importModal": {
@@ -271,7 +267,6 @@
     "summaryAllSuccess": "{{count}}개의 {{type}}을(를) 성공적으로 가져왔습니다",
     "summaryPartial": "{{total}}개의 {{type}} 중 {{success}}개를 가져왔습니다. {{failed}}개 실패, {{warnings}}개 경고.",
     "summaryAllFailed": "{{count}}개의 {{type}} 모두 가져오기 실패",
-    "uploadMissingTextures": "누락된 텍스처 업로드",
     "missingTexturesSection": "누락된 텍스처 ({{remaining}}개 남음)",
     "missingTexturesAllResolved": "누락된 텍스처 모두 업로드 완료",
     "missingTexturesHint": "텍스처가 누락된 프리셋은 텍스처 위치에 노이즈가 표시됩니다. 해당 이미지 파일을 업로드하면 해결됩니다.",

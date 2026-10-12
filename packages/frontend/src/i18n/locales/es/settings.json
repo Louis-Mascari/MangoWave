@@ -37,8 +37,8 @@
     "textureQualityTooltip": "Multiplicador de resolución de renderizado interno. Menor = más rápido, mayor = calidad con sobremuestreo",
     "antiAliasing": "Anti-Aliasing",
     "antiAliasingTooltip": "Suaviza bordes irregulares con FXAA. Pequeño costo de rendimiento (~2-3%)",
-    "brightness": "Visual Brightness: {{value}}%",
-    "brightnessTooltip": "Dims the visualizer. Useful in dark rooms or when you want subtle ambient visuals",
+    "brightness": "Brillo visual: {{value}}%",
+    "brightnessTooltip": "Atenúa el visualizador. Útil en habitaciones oscuras o cuando quieres visuales ambientales sutiles",
     "analysis": "Análisis",
     "audioSmoothing": "Suavizado de audio: {{value}}",
     "audioSmoothingTooltip": "Menor = reacción más rápida a los beats, mayor = movimiento más suave. El efecto es sutil: los presets aplican su propio suavizado interno",
@@ -113,7 +113,7 @@
     "toggleAutopilot": "Alternar autopilot",
     "toggleFavorite": "Alternar favorito",
     "toggleBlock": "Alternar bloqueo",
-    "togglePause": "Pause / resume rendering",
+    "togglePause": "Pausar / reanudar renderizado",
     "toggleQueue": "Alternar cola (archivos locales)",
     "playPause": "Reproducir / pausar",
     "previousTrack": "Pista anterior",
@@ -123,7 +123,6 @@
   },
 
   "sync": {
-    "title": "Sincronización",
     "windowSyncTitle": "Sincronización de ventanas",
     "windowSyncDescription": "Sincroniza presets y configuración entre múltiples ventanas del navegador en el mismo dispositivo. Abre MangoWave en múltiples ventanas para visualizar en múltiples monitores. Funciona mejor con audio del sistema o micrófono — cada ventana captura la misma fuente. La reproducción de archivos locales es por ventana.",
     "enabled": "Sincronización de ventanas",
@@ -138,14 +137,11 @@
       "title": "Sincronización de dispositivos",
       "description": "Sincroniza presets entre distintos dispositivos (teléfono, portátil, TV) mediante WebRTC punto a punto. Un dispositivo crea una sala, los demás se unen con el código. El creador de la sala controla el autopilot.",
       "createRoom": "Crear sala",
-      "joinRoom": "Unirse a sala",
-      "roomCode": "Código de sala",
       "enterCode": "Unirse a una sala existente",
       "connect": "Conectar",
       "leaveRoom": "Salir de la sala",
       "connecting": "Conectando...",
       "connected": "Conectado",
-      "disconnected": "Desconectado",
       "error": "Error de conexión",
       "tryAgain": "Reintentar",
       "peerCount_one": "{{count}} dispositivo conectado",
@@ -153,16 +149,16 @@
       "hostDisconnected": "El anfitrión se desconectó. La sala se ha cerrado.",
       "invalidCode": "Código de sala no válido. Formato: MANGO-XXXX (4 letras, sin I ni O)",
       "roomNotFound": "Sala no encontrada. Verifica el código e inténtalo de nuevo.",
+      "signalingTimeout": "Se agotó el tiempo de conexión: no se pudo contactar con el servidor de señalización",
+      "joinTimeout": "Se agotó el tiempo de conexión: no se pudo conectar a la sala",
+      "connectionLost": "Conexión perdida",
+      "connectionFailed": "Error de conexión. Inténtalo de nuevo.",
       "syncSettings": "Sincronizar EQ y renderizado",
       "syncSettingsHint": "Comparte EQ, pre-amp, análisis de audio y renderizado entre dispositivos. Desmarca si los dispositivos necesitan configuraciones de rendimiento diferentes.",
       "copiedToClipboard": "¡Copiado!",
+      "qrAlt": "Código QR de la sala {{code}}",
       "autopilotNote": "La configuración del autopilot siempre se sincroniza. Cualquier dispositivo puede activarlo, pero solo el temporizador del creador de la sala se ejecuta.",
       "audioTip": "Device Sync solo sincroniza los visuales. Cada dispositivo necesita su propia fuente de audio. Para la mejor experiencia, configura todos los dispositivos con entrada de micrófono en la misma habitación para que reaccionen a la misma música desde un altavoz compartido. Apps como AmpMe, Easy Jam y BeatSync también pueden sincronizar la reproducción de audio entre varios altavoces de teléfono."
     }
-  },
-
-  "language": {
-    "title": "Idioma",
-    "tooltip": "Elige el idioma de la interfaz"
   }
 }

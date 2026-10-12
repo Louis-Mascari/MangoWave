@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { VisualizerRenderer } from '../engine/VisualizerRenderer.ts';
 import type { AudioEngine } from '../engine/AudioEngine.ts';
 import { useSettingsStore } from '../store/useSettingsStore.ts';
-import { QUALITY_TIERS, TIER_LABELS, tierForSettings } from '../engine/QualityMonitor.ts';
+import { QUALITY_TIERS, TIER_LABEL_KEYS, tierForSettings } from '../engine/QualityMonitor.ts';
 import type { QualityTier } from '../engine/QualityMonitor.ts';
 import { useToastStore } from '../store/useToastStore.ts';
 import { useImportedTexturesStore } from '../store/useImportedTexturesStore.ts';
@@ -11,6 +11,7 @@ import mobileBlockedData from '../data/mobile-blocked-presets.json';
 import { quarantinedSet } from '../data/excludedPresets.ts';
 import { BUTTERCHURN_MILKDROP_NAMES } from '../data/presetThematicPacks.ts';
 import { isMobileDevice } from '../utils/isMobileDevice.ts';
+import i18n from '../i18n/index.ts';
 
 interface VisualizerProps {
   audioEngine: AudioEngine;
@@ -229,11 +230,17 @@ export function Visualizer({
 
     // Show info toast on quality tier changes
     if (tier !== prevAutoTierRef.current) {
-      const verb = tier < prevAutoTierRef.current ? 'reduced' : 'increased';
-      useToastStore.getState().show(`Auto Quality ${verb} to ${TIER_LABELS[tier]}`, {
-        type: 'info',
-        durationMs: 3000,
-      });
+      const toastKey =
+        tier < prevAutoTierRef.current
+          ? 'toasts.autoQualityReduced'
+          : 'toasts.autoQualityIncreased';
+      useToastStore.getState().show(
+        i18n.t(toastKey, {
+          ns: 'messages',
+          tier: i18n.t(TIER_LABEL_KEYS[tier], { ns: 'common' }),
+        }),
+        { type: 'info', durationMs: 3000 },
+      );
     }
     prevAutoTierRef.current = tier;
   }, []);

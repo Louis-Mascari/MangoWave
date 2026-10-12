@@ -14,6 +14,8 @@ Classifies MangoWave's 832 presets into 4 thematic packs. Two classification app
 | **Psychedelic** | Intense shaders, warping, and visual complexity      | High warp, complex shaders, solarize/invert, aggressive motion, blur/noise. Visual intensity.                                                            |
 | **Ethereal**    | Trails, echo layers, and soft glowing persistence    | High decay (>0.97), echo alpha >0, blur effects. Ghostly, dreamy, layered persistence.                                                                   |
 
+The Description column is the English tooltip shown on each pack checkbox. The app reads it from the locale files (`messages:presetBrowser.packDescriptions.<pack>`, translated per language), not from the generated TypeScript — neither script emits it.
+
 **Waveform pack (removed):** Only 4 presets (spectrum analyzers/oscilloscopes) qualified — too few to be useful as a filter. Merged into Reactive. Re-add when the preset library grows (e.g., cream-of-the-crop expansion).
 
 ## How to Re-classify All Presets

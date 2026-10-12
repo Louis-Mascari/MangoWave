@@ -37,8 +37,8 @@
     "textureQualityTooltip": "Pengali resolusi render internal. Lebih rendah = lebih cepat, lebih tinggi = kualitas supersampled",
     "antiAliasing": "Anti-Aliasing",
     "antiAliasingTooltip": "Menghaluskan tepian bergerigi dengan FXAA. Biaya performa kecil (~2-3%)",
-    "brightness": "Visual Brightness: {{value}}%",
-    "brightnessTooltip": "Dims the visualizer. Useful in dark rooms or when you want subtle ambient visuals",
+    "brightness": "Kecerahan Visual: {{value}}%",
+    "brightnessTooltip": "Meredupkan visualizer. Berguna di ruangan gelap atau saat Anda menginginkan visual ambient yang halus",
     "analysis": "Analisis",
     "audioSmoothing": "Audio Smoothing: {{value}}",
     "audioSmoothingTooltip": "Lebih rendah = reaksi lebih cepat terhadap ketukan, lebih tinggi = gerakan lebih halus. Efeknya halus: preset menerapkan smoothing internal sendiri",
@@ -113,7 +113,7 @@
     "toggleAutopilot": "Alihkan autopilot",
     "toggleFavorite": "Alihkan favorit",
     "toggleBlock": "Alihkan blokir",
-    "togglePause": "Pause / resume rendering",
+    "togglePause": "Jeda / lanjutkan rendering",
     "toggleQueue": "Alihkan antrean (file lokal)",
     "playPause": "Putar / jeda",
     "previousTrack": "Lagu sebelumnya",
@@ -123,7 +123,6 @@
   },
 
   "sync": {
-    "title": "Sinkronisasi",
     "windowSyncTitle": "Sinkronisasi Jendela",
     "windowSyncDescription": "Sinkronkan preset dan pengaturan di beberapa jendela browser pada perangkat yang sama. Buka MangoWave di beberapa jendela untuk visualisasi di beberapa monitor. Paling cocok dengan audio sistem atau mikrofon — setiap jendela menangkap sumber yang sama. Pemutaran file lokal bersifat per-jendela.",
     "enabled": "Sinkronisasi Jendela",
@@ -138,14 +137,11 @@
       "title": "Sinkronisasi Perangkat",
       "description": "Sinkronkan preset antar perangkat berbeda (ponsel, laptop, TV) melalui WebRTC peer-to-peer. Satu perangkat membuat ruangan, yang lain bergabung dengan kode ruangan. Pembuat ruangan mengontrol autopilot.",
       "createRoom": "Buat Ruangan",
-      "joinRoom": "Gabung Ruangan",
-      "roomCode": "Kode Ruangan",
       "enterCode": "Gabung ke ruangan yang sudah ada",
       "connect": "Hubungkan",
       "leaveRoom": "Tinggalkan Ruangan",
       "connecting": "Menghubungkan...",
       "connected": "Terhubung",
-      "disconnected": "Terputus",
       "error": "Kesalahan koneksi",
       "tryAgain": "Coba Lagi",
       "peerCount_one": "{{count}} perangkat terhubung",
@@ -153,16 +149,16 @@
       "hostDisconnected": "Host ruangan terputus. Ruangan telah ditutup.",
       "invalidCode": "Kode ruangan tidak valid. Format: MANGO-XXXX (4 huruf, tanpa I atau O)",
       "roomNotFound": "Ruangan tidak ditemukan. Periksa kode dan coba lagi.",
+      "signalingTimeout": "Koneksi habis waktu — tidak dapat menjangkau server pensinyalan",
+      "joinTimeout": "Koneksi habis waktu — tidak dapat terhubung ke ruangan",
+      "connectionLost": "Koneksi terputus",
+      "connectionFailed": "Koneksi gagal. Silakan coba lagi.",
       "syncSettings": "Sinkronkan EQ & pengaturan rendering",
       "syncSettingsHint": "Bagikan pengaturan EQ, pre-amp, analisis audio, dan rendering antar perangkat. Hapus centang jika perangkat memerlukan pengaturan performa yang berbeda.",
       "copiedToClipboard": "Tersalin!",
+      "qrAlt": "Kode QR untuk ruangan {{code}}",
       "autopilotNote": "Pengaturan autopilot selalu tersinkronisasi. Perangkat mana pun bisa mengaktifkan autopilot, tapi hanya timer pembuat ruangan yang berjalan.",
       "audioTip": "Device Sync hanya menyinkronkan visual. Setiap perangkat membutuhkan sumber audionya sendiri. Untuk pengalaman terbaik, atur semua perangkat ke input mikrofon di ruangan yang sama agar bereaksi terhadap musik yang sama dari speaker bersama. Aplikasi seperti AmpMe, Easy Jam, dan BeatSync juga bisa menyinkronkan pemutaran audio di beberapa speaker ponsel."
     }
-  },
-
-  "language": {
-    "title": "Bahasa",
-    "tooltip": "Pilih bahasa tampilan untuk antarmuka"
   }
 }

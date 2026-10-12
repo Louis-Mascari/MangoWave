@@ -190,7 +190,10 @@ function MainApp() {
     }
   }
   useEffect(() => {
-    if (!isActive && getFullscreenElement()) exitFullscreen();
+    if (isActive) return;
+    if (getFullscreenElement()) exitFullscreen();
+    // A toast raised during the session (silence warning, quality change) no longer applies
+    useToastStore.getState().clear();
   }, [isActive]);
   const brightness = useSettingsStore((s) => s.brightness);
   const silenceCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);

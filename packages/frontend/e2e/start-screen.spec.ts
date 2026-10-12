@@ -27,6 +27,7 @@ test.describe('StartScreen', () => {
     await app.evaluate(() =>
       window.postMessage({ type: 'spotify-auth-failed' }, window.location.origin),
     );
+    await expect(app.locator('[role="status"] > div')).toBeVisible();
     await expect(app.getByRole('status')).toContainText('Spotify connection failed');
   });
 

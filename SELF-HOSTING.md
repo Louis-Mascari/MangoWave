@@ -103,17 +103,6 @@ export VITE_UNLOCK_HASH=<sha256-of-your-passphrase>
 
 Only visitors who open `https://play.yourdomain.com/?unlock=YOUR_PASSPHRASE` can access Spotify features. The hash is compared client-side.
 
-## Optional: BYOC PKCE (No Backend Needed for Spotify)
-
-A PKCE-based auth flow exists in the frontend code (`services/spotifyPkce.ts`) that handles Spotify OAuth entirely client-side — no Lambda, API Gateway, or DynamoDB needed. The UI for it has been removed from the hosted site but the code is intact.
-
-To re-enable:
-
-1. Create your own Spotify developer app (same 5-user dev mode limit applies)
-2. Modify `useSpotifyAuth` to use the PKCE functions from `spotifyPkce.ts`
-3. Set `VITE_SPOTIFY_CLIENT_ID` and `VITE_SPOTIFY_REDIRECT_URI`
-4. No backend deployment needed — but you also won't have cloud settings sync
-
 ## Secret Architecture
 
 | Secret                     | Where stored                        | When accessed                                      |

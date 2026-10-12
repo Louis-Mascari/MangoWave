@@ -178,7 +178,7 @@ function MainApp() {
   const [webglContextLost, setWebglContextLost] = useState(false);
   const [presetsLoading, setPresetsLoading] = useState(true);
   const [renderPaused, setRenderPaused] = useState(false);
-  // Pause and panel state belong to one session. Reset them on every stop, including
+  // Pause, panel and context-loss state belong to one session. Reset them on every stop, including
   // ones that bypass handleStop (the browser's "Stop sharing" bar, a capture track ending)
   const [wasActive, setWasActive] = useState(isActive);
   if (wasActive !== isActive) {
@@ -186,10 +186,14 @@ function MainApp() {
     if (!isActive) {
       setRenderPaused(false);
       setActivePanel('none');
+      setWebglContextLost(false);
     }
   }
   useEffect(() => {
-    if (!isActive && getFullscreenElement()) exitFullscreen();
+    if (isActive) return;
+    if (getFullscreenElement()) exitFullscreen();
+    // A toast raised during the session (silence warning, quality change) no longer applies
+    useToastStore.getState().clear();
   }, [isActive]);
   const brightness = useSettingsStore((s) => s.brightness);
   const silenceCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -685,7 +689,6 @@ function MainApp() {
               </div>
             </div>
           )}
-          <ActionToast />
           <ConfirmDialog />
           <ImportModal />
           <ShortcutOverlay visible={showShortcutOverlay} onClose={toggleShortcutOverlay} />
@@ -699,6 +702,8 @@ function MainApp() {
           onClearError={capture.clearError}
         />
       )}
+      {/* Outside the session branch: auth and sync toasts also fire on the start screen */}
+      <ActionToast />
     </main>
   );
 }

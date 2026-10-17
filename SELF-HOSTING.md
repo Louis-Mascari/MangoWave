@@ -70,7 +70,7 @@ pnpm exec cdk deploy \
   -c webAclArn=arn:aws:wafv2:us-east-1:ACCOUNT:global/webacl/NAME/ID
 ```
 
-This creates: DynamoDB table, 4 Lambda functions, API Gateway, S3 bucket, CloudFront distribution, CloudWatch alarms, and budget alerts.
+This creates: DynamoDB table, 4 API Lambda functions, API Gateway, S3 bucket, CloudFront distribution, CloudWatch alarms, budget alerts, and a budget kill-switch Lambda (see [infrastructure/README.md](infrastructure/README.md#budget-kill-switch)).
 
 Note the **API Gateway URL** from CDK outputs — you'll need it for the frontend build.
 
